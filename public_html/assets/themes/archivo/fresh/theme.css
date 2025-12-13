@@ -1,0 +1,554 @@
+/**
+ * Fresh Theme - Personalizaciones
+ * Diseño BRILLANTE, COLORIDO y ENERGÉTICO con gradientes vibrantes
+ *
+ * La mayoría de los estilos base están en /themes/_base/pages.css
+ * Este archivo contiene personalizaciones visuales únicas del theme FRESH
+ */
+
+/* ========================================
+   GLOBAL - Fresco y vibrante
+   ======================================== */
+
+body {
+    font-family: var(--font-family);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    background: linear-gradient(135deg, #f8faf8 0%, #e8f5e9 50%, #f8faf8 100%);
+    background-attachment: fixed;
+}
+
+/* ========================================
+   HEADINGS - Coloridos y amigables
+   ======================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-heading);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--spacing-md);
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 50%,
+        var(--color-info) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h1 { font-size: var(--font-size-4xl); }
+h2 { font-size: var(--font-size-3xl); }
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--font-size-xl); }
+h5 { font-size: var(--font-size-lg); }
+h6 { font-size: var(--font-size-base); }
+
+/* ========================================
+   LINKS - Coloridos con efecto bounce
+   ======================================== */
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    font-weight: var(--font-weight-medium);
+}
+
+a:hover {
+    color: var(--color-secondary);
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   HEADER - Glassmorphism colorido
+   ======================================== */
+
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow:
+        0 4px 30px rgba(76, 175, 80, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg,
+        var(--color-primary),
+        var(--color-secondary),
+        var(--color-info)) 1;
+}
+
+.logo h1 {
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-weight-bold);
+    filter: drop-shadow(2px 2px 4px rgba(76, 175, 80, 0.2));
+}
+
+.nav a {
+    position: relative;
+    padding: 8px 16px;
+    border-radius: var(--border-radius-full);
+    transition: all var(--transition-base);
+}
+
+.nav a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--border-radius-full);
+    background: linear-gradient(135deg,
+        var(--color-primary),
+        var(--color-secondary));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    z-index: -1;
+}
+
+.nav a:hover::before {
+    opacity: 1;
+}
+
+.nav a:hover {
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   HERO - Vibrante con patrón
+   ======================================== */
+
+.hero {
+    background:
+        linear-gradient(135deg,
+            rgba(76, 175, 80, 0.1) 0%,
+            rgba(255, 152, 0, 0.1) 50%,
+            rgba(3, 169, 244, 0.1) 100%),
+        repeating-linear-gradient(45deg,
+            transparent,
+            transparent 35px,
+            rgba(76, 175, 80, 0.03) 35px,
+            rgba(76, 175, 80, 0.03) 70px);
+    border-radius: var(--border-radius-xl);
+    box-shadow:
+        0 20px 60px rgba(76, 175, 80, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle,
+        rgba(255, 152, 0, 0.15) 0%,
+        transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-30px, 30px) rotate(180deg); }
+}
+
+.hero-content h2 {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 50%,
+        var(--color-info) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbow 5s ease infinite;
+    background-size: 200% 200%;
+}
+
+@keyframes rainbow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.btn-hero {
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 50%,
+        var(--color-info) 100%);
+    background-size: 200% 200%;
+    border: none;
+    box-shadow:
+        0 8px 24px rgba(76, 175, 80, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: gradientShift 3s ease infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.btn-hero::after {
+    content: '✨';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: sparkle 1.5s ease infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+    50% { opacity: 0.5; transform: translateY(-50%) scale(1.2); }
+}
+
+.btn-hero:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow:
+        0 12px 32px rgba(76, 175, 80, 0.5),
+        0 0 20px rgba(255, 152, 0, 0.3);
+}
+
+/* ========================================
+   PRODUCT CARDS - Vibrantes con arcoíris
+   ======================================== */
+
+.product-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.15);
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: var(--border-radius-lg);
+    background: linear-gradient(135deg,
+        var(--color-primary),
+        var(--color-secondary),
+        var(--color-info),
+        var(--color-warning));
+    background-size: 300% 300%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    animation: gradientRotate 4s ease infinite;
+}
+
+@keyframes gradientRotate {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.product-card:hover::before {
+    opacity: 1;
+}
+
+.product-card:hover {
+    transform: translateY(-8px) rotate(-1deg);
+    box-shadow:
+        0 16px 48px rgba(76, 175, 80, 0.3),
+        0 0 40px rgba(255, 152, 0, 0.2);
+}
+
+.product-image {
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.product-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+        rgba(76, 175, 80, 0.2) 0%,
+        rgba(255, 152, 0, 0.2) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.product-card:hover .product-image::after {
+    opacity: 1;
+}
+
+.product-image img {
+    transition: transform var(--transition-slow);
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.15) rotate(2deg);
+}
+
+.badge-descuento {
+    background: linear-gradient(135deg,
+        var(--color-error) 0%,
+        var(--color-warning) 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+    font-weight: var(--font-weight-bold);
+    animation: bounce 2s ease infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-5px) scale(1.05); }
+}
+
+/* ========================================
+   BUTTONS - Coloridos con efectos
+   ======================================== */
+
+.btn-primary,
+.checkout-btn,
+.place-order-btn {
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 100%);
+    background-size: 200% 200%;
+    border: none;
+    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+    font-weight: var(--font-weight-bold);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before,
+.checkout-btn::before,
+.place-order-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before,
+.checkout-btn:hover::before,
+.place-order-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary:hover,
+.checkout-btn:hover,
+.place-order-btn:hover {
+    background-position: 100% 50%;
+    box-shadow:
+        0 8px 24px rgba(76, 175, 80, 0.5),
+        0 0 20px rgba(255, 152, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-add-cart {
+    background: linear-gradient(135deg,
+        var(--color-success) 0%,
+        var(--color-primary) 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+    font-weight: var(--font-weight-bold);
+}
+
+.btn-add-cart:hover {
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-success) 100%);
+    box-shadow:
+        0 6px 20px rgba(139, 195, 74, 0.6),
+        0 0 15px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* ========================================
+   CURRENCY SELECTOR - Colorido
+   ======================================== */
+
+.currency-section {
+    background: linear-gradient(135deg,
+        rgba(76, 175, 80, 0.05) 0%,
+        rgba(255, 152, 0, 0.05) 100%);
+    border-top: 2px solid var(--color-primary);
+    border-bottom: 2px solid var(--color-secondary);
+}
+
+.currency-selector h3 {
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.currency-btn {
+    background: white;
+    border: 3px solid var(--color-border);
+    border-radius: var(--border-radius-full);
+    transition: all var(--transition-base);
+    font-weight: var(--font-weight-semibold);
+}
+
+.currency-btn:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+    transform: translateY(-2px);
+}
+
+.currency-btn.active {
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 100%);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* ========================================
+   FOOTER - Gradiente suave
+   ======================================== */
+
+.footer {
+    background: linear-gradient(180deg,
+        rgba(76, 175, 80, 0.05) 0%,
+        rgba(255, 152, 0, 0.05) 50%,
+        rgba(3, 169, 244, 0.05) 100%);
+    border-top: 3px solid transparent;
+    border-image: linear-gradient(90deg,
+        var(--color-primary),
+        var(--color-secondary),
+        var(--color-info)) 1;
+}
+
+.footer h3,
+.footer h4 {
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-weight-semibold);
+}
+
+/* ========================================
+   FORMS - Redondeados y coloridos
+   ======================================== */
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-base);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--color-primary);
+    box-shadow:
+        0 0 0 4px rgba(76, 175, 80, 0.1),
+        0 4px 12px rgba(76, 175, 80, 0.2);
+    outline: none;
+    transform: scale(1.02);
+}
+
+/* ========================================
+   CART PANEL - Glassmorphism
+   ======================================== */
+
+.cart-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-left: 3px solid transparent;
+    border-image: linear-gradient(180deg,
+        var(--color-primary),
+        var(--color-secondary),
+        var(--color-info)) 1;
+    box-shadow: -8px 0 32px rgba(76, 175, 80, 0.2);
+}
+
+.cart-header {
+    background: linear-gradient(135deg,
+        rgba(76, 175, 80, 0.1) 0%,
+        rgba(255, 152, 0, 0.1) 100%);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.cart-header h3 {
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   SPECIAL EFFECTS - Confetti y diversión
+   ======================================== */
+
+/* Efecto de pulso en precios */
+.price-final {
+    animation: priceGlow 2s ease infinite;
+}
+
+@keyframes priceGlow {
+    0%, 100% {
+        text-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+    }
+}
+
+/* Scrollbar colorido */
+::-webkit-scrollbar {
+    width: 14px;
+}
+
+::-webkit-scrollbar-track {
+    background: linear-gradient(180deg,
+        rgba(76, 175, 80, 0.05),
+        rgba(255, 152, 0, 0.05));
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg,
+        var(--color-primary),
+        var(--color-secondary));
+    border-radius: var(--border-radius-full);
+    border: 2px solid white;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg,
+        var(--color-secondary),
+        var(--color-info));
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}

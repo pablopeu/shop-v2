@@ -1,0 +1,101 @@
+{
+    "name": "Modern",
+    "slug": "modern",
+    "version": "1.0.0",
+    "description": "Theme moderno con glassmorphism, gradientes vibrantes y animaciones fluidas. Diseño innovador para tarjetas de producto con efectos 3D y sombras profundas.",
+    "author": "Shop Team",
+    "preview_image": "/themes/modern/preview.jpg",
+
+    "features": {
+        "dark_mode": false,
+        "animations": "fluid",
+        "border_style": "rounded",
+        "shadow_style": "deep",
+        "color_scheme": "vibrant",
+        "glassmorphism": true,
+        "gradient_effects": true,
+        "transform_3d": true
+    },
+
+    "colors": {
+        "primary": "#667eea",
+        "primary_dark": "#5568d3",
+        "primary_light": "#7e96ff",
+        "secondary": "#f093fb",
+        "accent": "#4facfe",
+        "success": "#00d2ff",
+        "warning": "#ffaa00",
+        "error": "#ff6b9d",
+        "info": "#667eea",
+        "text": "#2d3748",
+        "background": "#ffffff"
+    },
+
+    "typography": {
+        "font_family": "sans-serif",
+        "font_family_heading": "sans-serif",
+        "heading_weight": "700",
+        "base_size": "16px",
+        "line_height": "1.6"
+    },
+
+    "spacing": {
+        "base_unit": "16px",
+        "scale": "geometric"
+    },
+
+    "components": {
+        "buttons": {
+            "style": "gradient",
+            "rounded": true,
+            "shadow": true,
+            "transform": true
+        },
+        "cards": {
+            "border": true,
+            "shadow": true,
+            "rounded": true,
+            "hover_effect": "lift-3d",
+            "glassmorphism": true
+        },
+        "forms": {
+            "style": "modern",
+            "border_style": "rounded",
+            "focus_ring": true,
+            "glow_effect": true
+        }
+    },
+
+    "layout": {
+        "container_width": "1200px",
+        "grid_gap": "32px",
+        "sidebar_width": "300px"
+    },
+
+    "footer": {
+        "background_color": "#292c2f",
+        "text_color": "#ffffff"
+    },
+
+    "compatibility": {
+        "requires_php": "7.4",
+        "requires_css": "3",
+        "mobile_optimized": true,
+        "rtl_support": false,
+        "accessibility": "wcag-aa"
+    },
+
+    "tags": [
+        "modern",
+        "glassmorphism",
+        "gradient",
+        "vibrant",
+        "3d-effects",
+        "fluid-animations",
+        "rounded",
+        "innovative"
+    ],
+
+    "created_at": "2025-12-10",
+    "updated_at": "2025-12-10"
+}

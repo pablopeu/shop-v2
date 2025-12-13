@@ -1,0 +1,60 @@
+{
+    "enabled": true,
+    "type": "advanced",
+    "background_color": "#292c2f",
+    "text_color": "#ffffff",
+    "left_column": {
+        "logo": {
+            "enabled": true,
+            "path": "/assets/uploads/logos/logo-1764264843.png",
+            "alt": "Logo",
+            "width": 169,
+            "height": 83
+        },
+        "links": [],
+        "email": {
+            "enabled": true,
+            "address": "pablou@gmail.com",
+            "subject": "Hola Pablo, te contacto desde el Mercadito",
+            "body": ""
+        },
+        "whatsapp": {
+            "enabled": true
+        }
+    },
+    "center_column": {
+        "address": {
+            "enabled": true,
+            "street": "Suipacha 834 5to A",
+            "city": "CABA",
+            "country": "Argentina",
+            "map_url": ""
+        },
+        "phones": [],
+        "whatsapp": {
+            "enabled": true
+        },
+        "schedule": {
+            "enabled": true,
+            "days": "Lunes a Viernes",
+            "hours": "12hs a 19hs"
+        }
+    },
+    "right_column": {
+        "about": {
+            "enabled": true,
+            "title": "Sobre el Mercadito",
+            "text": "En este sitio publico cosas que vendo aparte de los cuchillos."
+        },
+        "social": {
+            "enabled": true,
+            "facebook": "https://www.facebook.com/PabloUntroib",
+            "twitter": "https://x.com/PEU_AR",
+            "instagram": "https://www.instagram.com/peu_ar/",
+            "whatsapp": {
+                "enabled": true
+            },
+            "telegram": "https://t.me/pablopeu"
+        }
+    }
+}

@@ -1,0 +1,190 @@
+/**
+ * Utility Classes
+ * Clases de utilidad para reemplazar manipulaciones JS de estilos
+ */
+
+/* === Display Utilities === */
+.hidden {
+    display: none !important;
+}
+
+.block {
+    display: block !important;
+}
+
+.flex {
+    display: flex !important;
+}
+
+.inline-block {
+    display: inline-block !important;
+}
+
+/* === Opacity Utilities === */
+.opacity-0 {
+    opacity: 0;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.opacity-100 {
+    opacity: 1;
+}
+
+/* === Pointer Events === */
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.enabled {
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* === Loading States === */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '...';
+    animation: loading-dots 1.5s infinite;
+}
+
+@keyframes loading-dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
+/* === Visibility Utilities === */
+.visible {
+    visibility: visible;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+/* === Transform Utilities === */
+.scale-0 {
+    transform: scale(0);
+}
+
+.scale-100 {
+    transform: scale(1);
+}
+
+/* === Transition Utilities === */
+.transition {
+    transition: all var(--transition-base, 0.3s ease);
+}
+
+.transition-fast {
+    transition: all var(--transition-fast, 0.2s ease);
+}
+
+.transition-slow {
+    transition: all var(--transition-slow, 0.5s ease);
+}
+
+/* === Color States === */
+.text-muted {
+    color: var(--color-text-muted, #999) !important;
+}
+
+.text-error {
+    color: var(--color-error, #dc3545) !important;
+}
+
+.text-success {
+    color: var(--color-success, #28a745) !important;
+}
+
+.text-warning {
+    color: var(--color-warning, #ffc107) !important;
+}
+
+/* === Background States === */
+.bg-light {
+    background-color: var(--color-bg-light, #f8f9fa) !important;
+}
+
+.bg-dark {
+    background-color: var(--color-bg-dark, #343a40) !important;
+}
+
+.bg-transparent {
+    background-color: transparent !important;
+}
+
+/* === Border Utilities === */
+.border-none {
+    border: none !important;
+}
+
+/* === Cursor Utilities === */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.cursor-not-allowed {
+    cursor: not-allowed;
+}
+
+.cursor-default {
+    cursor: default;
+}
+
+/* === Overflow Utilities === */
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-auto {
+    overflow: auto;
+}
+
+.overflow-scroll {
+    overflow: scroll;
+}
+
+/* === Position Utilities === */
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.fixed {
+    position: fixed;
+}
+
+.sticky {
+    position: sticky;
+}
+
+/* === Z-Index Utilities === */
+.z-10 {
+    z-index: 10;
+}
+
+.z-20 {
+    z-index: 20;
+}
+
+.z-50 {
+    z-index: 50;
+}
+
+.z-100 {
+    z-index: 100;
+}

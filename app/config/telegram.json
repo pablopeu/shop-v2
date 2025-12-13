@@ -1,0 +1,13 @@
+{
+    "enabled": true,
+    "notifications": {
+        "new_order": true,
+        "payment_approved": true,
+        "payment_rejected": true,
+        "chargeback_alert": true,
+        "low_stock_alert": true,
+        "high_value_order": true,
+        "high_value_threshold": 50000
+    },
+    "bot_username": "peushopbot"
+}

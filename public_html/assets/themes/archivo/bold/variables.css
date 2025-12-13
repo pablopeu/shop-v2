@@ -1,0 +1,117 @@
+/**
+ * Bold Theme - Variables
+ * Un diseño OSCURO, VIBRANTE y AUDAZ con efectos neón
+ * Dark mode con colores brillantes y alto contraste
+ */
+
+:root {
+    /* Colores Principales - Neón vibrante */
+    --color-primary: #ff0055;  /* Rosa neón */
+    --color-primary-dark: #cc0044;
+    --color-primary-light: #ff3377;
+    --color-primary-rgb: 255, 0, 85;
+
+    --color-secondary: #00ffff;  /* Cyan neón */
+    --color-secondary-dark: #00cccc;
+    --color-secondary-light: #66ffff;
+    --color-secondary-rgb: 0, 255, 255;
+
+    /* Colores de Estado - Neón */
+    --color-success: #00ff88;
+    --color-warning: #ffdd00;
+    --color-error: #ff0055;
+    --color-info: #0088ff;
+
+    /* Colores Neutros - DARK MODE */
+    --color-text: #ffffff;
+    --color-text-light: #cccccc;
+    --color-text-lighter: #999999;
+    --color-text-dark: #ffffff;
+
+    --color-bg: #0a0a0a;  /* Negro profundo */
+    --color-bg-light: #1a1a1a;
+    --color-bg-dark: #050505;
+    --color-bg-darker: #000000;
+
+    --color-border: #333333;
+    --color-border-light: #222222;
+    --color-border-dark: #444444;
+
+    --color-shadow: rgba(255, 0, 85, 0.5);
+    --color-shadow-dark: rgba(0, 255, 255, 0.5);
+
+    /* Tipografía - Audaz y futurista */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    --font-family-heading: 'Impact', 'Arial Black', 'Helvetica', sans-serif;
+    --font-family-mono: 'Courier New', Courier, monospace;
+
+    --font-size-xs: 13px;
+    --font-size-sm: 15px;
+    --font-size-base: 18px;
+    --font-size-lg: 22px;
+    --font-size-xl: 28px;
+    --font-size-2xl: 38px;
+    --font-size-3xl: 52px;
+    --font-size-4xl: 72px;
+
+    --font-weight-normal: 600;
+    --font-weight-medium: 700;
+    --font-weight-semibold: 800;
+    --font-weight-bold: 900;
+
+    --line-height-tight: 1.1;
+    --line-height-normal: 1.4;
+    --line-height-relaxed: 1.6;
+
+    /* Espaciado - Compacto pero con punch */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 64px;
+
+    /* Bordes - Angulares con glow */
+    --border-radius-none: 0;
+    --border-radius-sm: 0;
+    --border-radius-md: 4px;
+    --border-radius-lg: 6px;
+    --border-radius-xl: 8px;
+    --border-radius-full: 9999px;
+
+    --border-width: 2px;
+    --border-width-thick: 3px;
+
+    /* Sombras - Glow neón */
+    --shadow-sm: 0 0 10px rgba(255, 0, 85, 0.3);
+    --shadow-md: 0 0 20px rgba(255, 0, 85, 0.4);
+    --shadow-lg: 0 0 30px rgba(255, 0, 85, 0.5);
+    --shadow-xl: 0 0 40px rgba(255, 0, 85, 0.6);
+    --shadow-2xl: 0 0 60px rgba(255, 0, 85, 0.7);
+
+    /* Transiciones - Rápidas y snappy */
+    --transition-fast: 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+    --transition-base: 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    --transition-slow: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+    /* Breakpoints */
+    --breakpoint-mobile: 480px;
+    --breakpoint-tablet: 768px;
+    --breakpoint-desktop: 1024px;
+    --breakpoint-wide: 1200px;
+
+    /* Layout */
+    --container-width: 1200px;
+    --header-height: 80px;
+    --footer-height: 200px;
+
+    /* Z-Index */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-tooltip: 700;
+}

@@ -1,0 +1,6 @@
+{
+    "enabled": false,
+    "bypass_code": "",
+    "message": "Sitio en mantenimiento. Volveremos pronto.",
+    "allowed_ips": []
+}

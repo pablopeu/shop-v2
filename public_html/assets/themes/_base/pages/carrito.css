@@ -1,0 +1,51 @@
+/**
+ * Carrito Page Styles
+ * Estilos específicos para la página del carrito
+ */
+
+/* Evitar flash del contenido vacío inicial */
+#cartItemsContainer {
+    min-height: 200px;
+}
+
+#cartItemsContainer.cart-loading .empty-cart {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Transición suave cuando el contenido está listo */
+#cartItemsContainer:not(.cart-loading) .empty-cart,
+#cartItemsContainer:not(.cart-loading) .cart-item {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading indicator opcional */
+#cartItemsContainer.cart-loading::before {
+    content: '🛒';
+    display: block;
+    text-align: center;
+    font-size: 3rem;
+    padding: 2rem;
+    opacity: 0.3;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}

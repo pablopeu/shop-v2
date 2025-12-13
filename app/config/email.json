@@ -1,0 +1,23 @@
+{
+    "enabled": true,
+    "method": "smtp",
+    "from_email": "pablou@gmail.com",
+    "from_name": "El Mercadito de PEU",
+    "admin_email": "pablou@gmail.com",
+    "notifications": {
+        "customer": {
+            "order_created": true,
+            "payment_approved": true,
+            "payment_rejected": true,
+            "payment_pending": true,
+            "order_shipped": true,
+            "chargeback_notice": false
+        },
+        "admin": {
+            "new_order": true,
+            "payment_approved": true,
+            "chargeback_alert": true,
+            "low_stock_alert": true
+        }
+    }
+}

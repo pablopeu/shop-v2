@@ -1,0 +1,68 @@
+name: Deploy to FTP
+
+on:
+  push:  # Deploy automático en cualquier push a cualquier branch
+  workflow_dispatch:  # Permite ejecutar manualmente
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Shop V2 to FTP
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Deploy app/ (código privado)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./app/
+          server-dir: /shop-v2-app/
+          dangerous-clean-slate: false
+          timeout: 300000  # 5 minutos
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/data/passwords/**
+            **/images/products/**
+            **/backup_*.tar.gz
+            **/shop-v2-secrets/**
+
+      - name: 🌐 Deploy public_html/ (código público)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./public_html/
+          server-dir: /public_html/shopv2/
+          dangerous-clean-slate: false
+          timeout: 300000  # 5 minutos
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/assets/uploads/**/*.jpg
+            **/assets/uploads/**/*.webp
+            **/assets/uploads/**/*.png
+            **/backup_*.tar.gz
+            **/scripts/**
+            **/data/orders.json
+
+      - name: ✅ Deployment Summary
+        run: |
+          echo "🚀 Deploy completado exitosamente!"
+          echo ""
+          echo "📁 Estructura en el servidor:"
+          echo "├── /shop-v2-app/ (código privado)"
+          echo "├── /public_html/shopv2/ (código público + instalador)"
+          echo ""
+          echo "🌐 URL del instalador:"
+          echo "http://tu-dominio.com/shopv2/install/installer.php"
+          echo ""
+          echo "⚠️ IMPORTANTE:"
+          echo "1. Ejecutar el instalador una vez"
+          echo "2. El instalador se auto-eliminará después de completar"
+          echo "3. Configurar web server document root a: /public_html/shopv2/"

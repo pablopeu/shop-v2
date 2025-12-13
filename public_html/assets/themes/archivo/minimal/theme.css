@@ -1,0 +1,78 @@
+/**
+ * Minimal Theme - Personalizaciones
+ * Diseño limpio y minimalista
+ *
+ * La mayoría de los estilos están en /themes/_base/pages.css
+ * Este archivo solo contiene personalizaciones específicas del theme minimal
+ */
+
+/* ========================================
+   GLOBAL
+   ======================================== */
+
+body {
+    font-family: var(--font-family);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+}
+
+/* ========================================
+   HEADINGS
+   ======================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-heading);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text-dark);
+    margin-bottom: var(--spacing-md);
+}
+
+h1 { font-size: var(--font-size-4xl); }
+h2 { font-size: var(--font-size-3xl); }
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--font-size-xl); }
+h5 { font-size: var(--font-size-lg); }
+h6 { font-size: var(--font-size-base); }
+
+/* ========================================
+   LINKS
+   ======================================== */
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+/* ========================================
+   PERSONALIZACIONES ESPECÍFICAS
+   ======================================== */
+
+/* Gradientes específicos del theme minimal */
+.btn-primary,
+.checkout-btn,
+.place-order-btn {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+.currency-btn.active {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+/* Sombras personalizadas para hover en botones */
+.btn-primary:hover,
+.checkout-btn:hover,
+.place-order-btn:hover {
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-add-cart:hover {
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}

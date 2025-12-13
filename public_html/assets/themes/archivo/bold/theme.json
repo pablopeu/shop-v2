@@ -1,0 +1,88 @@
+{
+    "name": "Bold",
+    "slug": "bold",
+    "version": "2.0.0",
+    "description": "Diseño OSCURO con efectos neón cyberpunk. Dark mode con rosa y cyan vibrante. Perfecto para gaming, tech y marcas audaces.",
+    "author": "Shop Team",
+    "preview_image": "/themes/bold/preview.jpg",
+
+    "features": {
+        "dark_mode": true,
+        "animations": "fast",
+        "border_style": "sharp",
+        "shadow_style": "neon-glow",
+        "color_scheme": "cyberpunk"
+    },
+
+    "colors": {
+        "primary": "#ff0055",
+        "primary_dark": "#cc0044",
+        "primary_light": "#ff3377",
+        "secondary": "#00ffff",
+        "success": "#00ff88",
+        "warning": "#ffdd00",
+        "error": "#ff0055",
+        "info": "#0088ff",
+        "text": "#ffffff",
+        "background": "#0a0a0a"
+    },
+
+    "typography": {
+        "font_family": "sans-serif",
+        "font_family_heading": "impact",
+        "heading_weight": "900",
+        "base_size": "18px",
+        "line_height": "1.4"
+    },
+
+    "spacing": {
+        "base_unit": "8px",
+        "scale": "linear"
+    },
+
+    "components": {
+        "buttons": {
+            "style": "neon",
+            "rounded": false,
+            "shadow": true
+        },
+        "cards": {
+            "border": true,
+            "shadow": true,
+            "rounded": false,
+            "hover_effect": "glow-3d"
+        },
+        "forms": {
+            "style": "neon",
+            "border_style": "solid-thick",
+            "focus_ring": true
+        }
+    },
+
+    "layout": {
+        "container_width": "1200px",
+        "grid_gap": "24px",
+        "sidebar_width": "280px"
+    },
+
+    "compatibility": {
+        "requires_php": "7.4",
+        "requires_css": "3",
+        "mobile_optimized": true,
+        "rtl_support": false,
+        "accessibility": "wcag-aa"
+    },
+
+    "tags": [
+        "bold",
+        "dark",
+        "neon",
+        "cyberpunk",
+        "gaming",
+        "tech",
+        "futuristic"
+    ],
+
+    "created_at": "2025-11-05",
+    "updated_at": "2025-11-05"
+}

@@ -1,0 +1,72 @@
+{
+    "slides": [
+        {
+            "image": "/shopv2/assets/uploads/products/prod-692b859b18d28-210574f2/692b859b18de5_1764459931.webp",
+            "title": "Corta Pizza Star Wars",
+            "subtitle": "",
+            "link": "/shopv2/producto/corta-pizza-star-wars",
+            "link_type": "product",
+            "product_id": "prod-692b859b18d28-210574f2"
+        },
+        {
+            "image": "/shopv2/assets/uploads/products/prod-692b85f93e7e2-f20d099a/692b85f93e885_1764460025.jpg",
+            "title": "Set de posavasos de cuero",
+            "subtitle": "",
+            "link": "/shopv2/producto/set-de-posavasos-de-cuero",
+            "link_type": "product",
+            "product_id": "prod-692b85f93e7e2-f20d099a"
+        },
+        {
+            "image": "/assets/uploads/carousel/692cc4b7bd793_1764541623.jpg",
+            "title": "X (Twitter)",
+            "subtitle": "",
+            "link": "https://x.com/PEU_AR",
+            "link_type": "custom",
+            "product_id": ""
+        },
+        {
+            "image": "/shopv2/assets/uploads/products/prod-692b8540c15a2-4a6250f6/692b8540c1613_1764459840.png",
+            "title": "Molde Raviolón De Diseño",
+            "subtitle": "",
+            "link": "/shopv2/producto/molde-raviolaon-de-diseano-panzotti-sorrentino-raviolero",
+            "link_type": "product",
+            "product_id": "prod-692b8540c15a2-4a6250f6"
+        },
+        {
+            "image": "/shopv2/assets/uploads/products/prod-69262d7db4fd6-27a45ceb/692634d6be173_1764111574.jpeg",
+            "title": "Llavero Betatester",
+            "subtitle": "",
+            "link": "/shopv2/producto/llavero-betatester",
+            "link_type": "product",
+            "product_id": "prod-69262d7db4fd6-27a45ceb"
+        },
+        {
+            "image": "/assets/uploads/carousel/692cc4b7bbf4e_1764541623.jpg",
+            "title": "Instagram",
+            "subtitle": "",
+            "link": "https://www.instagram.com/peu_ar",
+            "link_type": "custom",
+            "product_id": ""
+        },
+        {
+            "image": "/shopv2/assets/uploads/products/prod-692b84ed89853-adcafd53/692b84ed898fc_1764459757.jpg",
+            "title": "Porta Puros",
+            "subtitle": "",
+            "link": "/shopv2/producto/porta-puros",
+            "link_type": "product",
+            "product_id": "prod-692b84ed89853-adcafd53"
+        },
+        {
+            "image": "/shopv2/assets/uploads/products/prod-692b8459bf6b3-7a64326e/692b8459bfc4e_1764459609.jpeg",
+            "title": "Llavero PEU",
+            "subtitle": "",
+            "link": "/shopv2/producto/llavero-peu",
+            "link_type": "product",
+            "product_id": "prod-692b8459bf6b3-7a64326e"
+        }
+    ],
+    "enabled": true,
+    "alignment": "center",
+    "auto_advance_time": 5000,
+    "background_color": "#f5f5f5"
+}

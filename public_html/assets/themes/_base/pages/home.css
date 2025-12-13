@@ -1,0 +1,83 @@
+/**
+ * Home Page Specific Styles
+ * Estilos específicos para la página principal
+ */
+
+/* Promotion Ribbon - 45 degrees top-left corner */
+.product-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.promotion-ribbon {
+    position: absolute;
+    top: 10px;
+    left: -35px;
+    width: 150px;
+    background: linear-gradient(135deg, var(--color-promo, #ff6b6b) 0%, var(--color-promo-dark, #ee5a52) 100%);
+    color: var(--color-white, white);
+    text-align: center;
+    transform: rotate(-45deg);
+    z-index: 10;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.35rem 0;
+    letter-spacing: 0.5px;
+}
+
+.promotion-ribbon span {
+    display: block;
+    text-transform: uppercase;
+}
+
+/* Favorites Panel Mini Cards */
+.favorite-mini-card {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    padding-right: 90px;
+    border-bottom: 1px solid var(--color-border-light, #eee);
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.favorite-mini-card:hover {
+    background-color: var(--color-bg-light, #f8f9fa);
+}
+
+.favorite-mini-card:last-child {
+    border-bottom: none;
+}
+
+/* Botón eliminar en mini-card */
+.favorite-remove-btn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: var(--color-promo, #ff6b6b);
+    color: var(--color-white, white);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.favorite-remove-btn:hover {
+    background: var(--color-promo-dark, #ee5a52);
+}
+
+/* Ajustar altura del panel de favoritos para aprovechar pantalla */
+#favorites-panel-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Título del panel en blanco */
+#favorites-panel .cart-panel-header h2 {
+    color: var(--color-white, white) !important;
+}

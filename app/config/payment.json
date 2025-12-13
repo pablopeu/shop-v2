@@ -1,0 +1,17 @@
+{
+    "mercadopago": {
+        "enabled": true,
+        "mode": "production",
+        "webhook_url": "",
+        "webhook_security": {
+            "validate_signature": true,
+            "validate_timestamp": true,
+            "validate_ip": true,
+            "max_timestamp_age_minutes": 2
+        }
+    },
+    "presencial": {
+        "enabled": true,
+        "instructions": ""
+    }
+}

@@ -1,0 +1,116 @@
+/**
+ * Fresh Theme - Variables
+ * Un diseño vibrante y energético con colores frescos
+ */
+
+:root {
+    /* Colores Principales */
+    --color-primary: #4caf50;  /* Verde */
+    --color-primary-dark: #388e3c;
+    --color-primary-light: #66bb6a;
+    --color-primary-rgb: 76, 175, 80;
+
+    --color-secondary: #ff9800;  /* Naranja */
+    --color-secondary-dark: #f57c00;
+    --color-secondary-light: #ffb74d;
+    --color-secondary-rgb: 255, 152, 0;
+
+    /* Colores de Estado */
+    --color-success: #8bc34a;
+    --color-warning: #ffc107;
+    --color-error: #f44336;
+    --color-info: #03a9f4;
+
+    /* Colores Neutros */
+    --color-text: #2c3e50;
+    --color-text-light: #546e7a;
+    --color-text-lighter: #90a4ae;
+    --color-text-dark: #1a252f;
+
+    --color-bg: #ffffff;
+    --color-bg-light: #f8faf8;
+    --color-bg-dark: #ecf0f1;
+    --color-bg-darker: #cfd8dc;
+
+    --color-border: #dfe6e9;
+    --color-border-light: #ecf0f1;
+    --color-border-dark: #b2bec3;
+
+    --color-shadow: rgba(76, 175, 80, 0.15);
+    --color-shadow-dark: rgba(76, 175, 80, 0.25);
+
+    /* Tipografía */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family-heading: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family-mono: 'Courier New', Courier, monospace;
+
+    --font-size-xs: 13px;
+    --font-size-sm: 15px;
+    --font-size-base: 17px;
+    --font-size-lg: 19px;
+    --font-size-xl: 22px;
+    --font-size-2xl: 26px;
+    --font-size-3xl: 34px;
+    --font-size-4xl: 50px;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.6;
+    --line-height-relaxed: 1.75;
+
+    /* Espaciado */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 18px;
+    --spacing-lg: 26px;
+    --spacing-xl: 34px;
+    --spacing-2xl: 50px;
+    --spacing-3xl: 66px;
+
+    /* Bordes - Más redondeados */
+    --border-radius-none: 0;
+    --border-radius-sm: 6px;
+    --border-radius-md: 10px;
+    --border-radius-lg: 16px;
+    --border-radius-xl: 20px;
+    --border-radius-full: 9999px;
+
+    --border-width: 2px;
+    --border-width-thick: 3px;
+
+    /* Sombras - Con tinte verde */
+    --shadow-sm: 0 2px 4px rgba(76, 175, 80, 0.1);
+    --shadow-md: 0 4px 8px rgba(76, 175, 80, 0.15);
+    --shadow-lg: 0 8px 16px rgba(76, 175, 80, 0.2);
+    --shadow-xl: 0 16px 32px rgba(76, 175, 80, 0.25);
+    --shadow-2xl: 0 24px 48px rgba(76, 175, 80, 0.3);
+
+    /* Transiciones - Más rápidas y enérgicas */
+    --transition-fast: 0.12s ease-out;
+    --transition-base: 0.25s ease-out;
+    --transition-slow: 0.4s ease-out;
+
+    /* Breakpoints */
+    --breakpoint-mobile: 480px;
+    --breakpoint-tablet: 768px;
+    --breakpoint-desktop: 1024px;
+    --breakpoint-wide: 1200px;
+
+    /* Layout */
+    --container-width: 1200px;
+    --header-height: 75px;
+    --footer-height: 190px;
+
+    /* Z-Index */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-tooltip: 700;
+}

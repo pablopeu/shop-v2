@@ -1,0 +1,127 @@
+/**
+ * Vibrant Theme - Variables
+ * Maximalista energético con colores pop y layout dinámico
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:wght@400;600;700;800&display=swap');
+
+:root {
+    /* Colores Principales - Paleta saturada tipo pop art */
+    --color-primary: #FF006E;  /* Fucsia eléctrico */
+    --color-primary-dark: #D90062;
+    --color-primary-light: #FF3D8E;
+    --color-primary-rgb: 255, 0, 110;
+
+    --color-secondary: #FFBE0B;  /* Amarillo energético */
+    --color-secondary-dark: #F5B700;
+    --color-secondary-light: #FFD35C;
+    --color-secondary-rgb: 255, 190, 11;
+
+    /* Colores Accent - Más colores vibrantes */
+    --color-accent-blue: #3A86FF;
+    --color-accent-green: #8AC926;
+    --color-accent-orange: #FB5607;
+    --color-accent-purple: #8338EC;
+
+    /* Colores de Estado */
+    --color-success: #8AC926;
+    --color-warning: #FB5607;
+    --color-error: #FF006E;
+    --color-info: #3A86FF;
+
+    /* Colores Neutros */
+    --color-text: #1A1A1A;
+    --color-text-light: #4A4A4A;
+    --color-text-lighter: #757575;
+    --color-text-dark: #000000;
+
+    --color-bg: #FFFBF5;  /* Crema cálido */
+    --color-bg-light: #FFFFFF;
+    --color-bg-dark: #FFF5E6;
+    --color-bg-darker: #FFE8CC;
+
+    --color-border: #FF006E;
+    --color-border-light: #FFB3D1;
+    --color-border-dark: #D90062;
+
+    --color-shadow: rgba(255, 0, 110, 0.25);
+    --color-shadow-dark: rgba(255, 0, 110, 0.4);
+    --color-shadow-yellow: rgba(255, 190, 11, 0.3);
+    --color-shadow-blue: rgba(58, 134, 255, 0.3);
+
+    /* Tipografía - Bold sans-serif */
+    --font-family: 'Work Sans', 'Arial', sans-serif;
+    --font-family-heading: 'Archivo Black', 'Arial Black', sans-serif;
+    --font-family-mono: 'Courier New', Courier, monospace;
+
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 22px;
+    --font-size-2xl: 28px;
+    --font-size-3xl: 38px;
+    --font-size-4xl: 52px;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 600;
+    --font-weight-semibold: 700;
+    --font-weight-bold: 800;
+    --font-weight-black: 900;
+
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.6;
+    --line-height-relaxed: 1.8;
+
+    /* Espaciado - Compacto pero dinámico */
+    --spacing-xs: 6px;
+    --spacing-sm: 10px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 64px;
+
+    /* Bordes - Gruesos y audaces */
+    --border-radius-none: 0;
+    --border-radius-sm: 12px;
+    --border-radius-md: 18px;
+    --border-radius-lg: 24px;
+    --border-radius-xl: 32px;
+    --border-radius-full: 9999px;
+
+    --border-width: 3px;
+    --border-width-thick: 5px;
+
+    /* Sombras - Con tintes de color */
+    --shadow-sm: 4px 4px 0px var(--color-shadow);
+    --shadow-md: 6px 6px 0px var(--color-shadow);
+    --shadow-lg: 8px 8px 0px var(--color-shadow);
+    --shadow-xl: 12px 12px 0px var(--color-shadow);
+    --shadow-2xl: 16px 16px 0px var(--color-shadow);
+
+    /* Transiciones - Rápidas y bouncy */
+    --transition-fast: 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-base: 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-slow: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Breakpoints */
+    --breakpoint-mobile: 480px;
+    --breakpoint-tablet: 768px;
+    --breakpoint-desktop: 1024px;
+    --breakpoint-wide: 1200px;
+
+    /* Layout */
+    --container-width: 1300px;
+    --header-height: 80px;
+    --footer-height: 200px;
+
+    /* Z-Index */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-tooltip: 700;
+}

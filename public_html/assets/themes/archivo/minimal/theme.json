@@ -1,0 +1,86 @@
+{
+    "name": "Minimal",
+    "slug": "minimal",
+    "version": "1.0.0",
+    "description": "Un diseño limpio y minimalista con énfasis en la simplicidad. Ideal para e-commerce general y productos premium.",
+    "author": "Shop Team",
+    "preview_image": "/themes/minimal/preview.jpg",
+
+    "features": {
+        "dark_mode": false,
+        "animations": "subtle",
+        "border_style": "rounded",
+        "shadow_style": "soft",
+        "color_scheme": "light"
+    },
+
+    "colors": {
+        "primary": "#667eea",
+        "primary_dark": "#5568d3",
+        "primary_light": "#7c92f0",
+        "secondary": "#764ba2",
+        "success": "#4caf50",
+        "warning": "#ff9800",
+        "error": "#f44336",
+        "info": "#2196f3",
+        "text": "#333333",
+        "background": "#ffffff"
+    },
+
+    "typography": {
+        "font_family": "system-ui",
+        "font_family_heading": "system-ui",
+        "heading_weight": "600",
+        "base_size": "16px",
+        "line_height": "1.6"
+    },
+
+    "spacing": {
+        "base_unit": "8px",
+        "scale": "linear"
+    },
+
+    "components": {
+        "buttons": {
+            "style": "filled",
+            "rounded": true,
+            "shadow": true
+        },
+        "cards": {
+            "border": false,
+            "shadow": true,
+            "rounded": true,
+            "hover_effect": "lift"
+        },
+        "forms": {
+            "style": "modern",
+            "border_style": "solid",
+            "focus_ring": true
+        }
+    },
+
+    "layout": {
+        "container_width": "1200px",
+        "grid_gap": "24px",
+        "sidebar_width": "280px"
+    },
+
+    "compatibility": {
+        "requires_php": "7.4",
+        "requires_css": "3",
+        "mobile_optimized": true,
+        "rtl_support": false,
+        "accessibility": "wcag-aa"
+    },
+
+    "tags": [
+        "minimal",
+        "clean",
+        "modern",
+        "e-commerce",
+        "professional"
+    ],
+
+    "created_at": "2025-11-05",
+    "updated_at": "2025-11-05"
+}

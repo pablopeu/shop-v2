@@ -1,0 +1,40 @@
+# Public .htaccess
+# Routing rules for frontend and admin
+
+# Protect sensitive files
+<FilesMatch "\.(json|md|log)$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Enable rewrite engine
+RewriteEngine On
+RewriteBase /shopv2/
+
+# Don't redirect existing files (CSS, JS, images, etc.)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Don't redirect existing directories
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Don't redirect API endpoints
+RewriteCond %{REQUEST_URI} ^/shopv2/api/ [OR]
+RewriteCond %{REQUEST_URI} ^/shopv2/admin/api/
+RewriteRule ^ - [L]
+
+# Don't redirect webhook
+RewriteCond %{REQUEST_URI} ^/shopv2/webhook\.php$
+RewriteRule ^ - [L]
+
+# Don't redirect crear-preferencia-mp.php
+RewriteCond %{REQUEST_URI} ^/shopv2/crear-preferencia-mp\.php$
+RewriteRule ^ - [L]
+
+# Don't redirect admin PHP files
+RewriteCond %{REQUEST_URI} ^/shopv2/admin/.*\.php$
+RewriteRule ^ - [L]
+
+# Redirect all other requests to index.php
+RewriteRule ^ index.php [L]

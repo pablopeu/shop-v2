@@ -1,0 +1,46 @@
+{
+    "widgets": {
+        "productos_activos": true,
+        "stock_bajo": true,
+        "sin_stock": true,
+        "ordenes_totales": true,
+        "ingreso_neto_ventas": true,
+        "promociones": true,
+        "cupones": true,
+        "reviews_pendientes": true
+    },
+    "widgets_order": [
+        "stock_bajo",
+        "productos_activos",
+        "sin_stock",
+        "ordenes_totales",
+        "ingreso_neto_ventas",
+        "promociones",
+        "cupones",
+        "reviews_pendientes"
+    ],
+    "quick_actions_order": [
+        "productos",
+        "ventas",
+        "cupones",
+        "reviews",
+        "config",
+        "envios",
+        "promociones",
+        "notificaciones",
+        "payment",
+        "analytics"
+    ],
+    "quick_actions": {
+        "productos": true,
+        "ventas": true,
+        "cupones": true,
+        "reviews": true,
+        "config": true,
+        "envios": true,
+        "promociones": true,
+        "notificaciones": true,
+        "payment": true,
+        "analytics": true
+    }
+}

@@ -1,0 +1,56 @@
+# Configuration Files (NEVER commit secrets)
+/app/config/config.php
+/app/config/config.php.backup*
+/app/config/.env
+
+# Credential path files
+/app/.credentials_path
+/app/.payment_credentials_path
+
+# FTP deploy state
+/app/.ftp-deploy-sync-state.json
+
+# Data Files (user data)
+/app/data/*.json
+/app/data/logs/
+/app/data/backups/
+
+# Uploads
+/public_html/uploads/
+/public_html/assets/images/products/
+
+# Vendor
+/app/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Install (should be deleted after installation)
+# /install/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Security assessments and documentation (sensitive information)
+/docs/security-assessment.md
+/security-docs/
+/to-do.txt
+
+# Scripts (local utilities)
+/scripts/
+
+# Screenshots
+/screenshots/

@@ -1,0 +1,87 @@
+{
+    "name": "Luxury",
+    "slug": "luxury",
+    "version": "1.0.0",
+    "description": "Un diseño editorial refinado con mucho espacio en blanco, tipografía serif elegante y estética de boutique de lujo. Perfecto para productos premium, moda de alta gama y joyería.",
+    "author": "Shop Team",
+    "preview_image": "/themes/luxury/preview.jpg",
+
+    "features": {
+        "dark_mode": false,
+        "animations": "subtle",
+        "border_style": "thin",
+        "shadow_style": "soft",
+        "color_scheme": "neutral-elegant"
+    },
+
+    "colors": {
+        "primary": "#2B2B2B",
+        "primary_dark": "#1A1A1A",
+        "primary_light": "#404040",
+        "secondary": "#C9A961",
+        "success": "#7A9D7E",
+        "warning": "#D4A574",
+        "error": "#C17B7B",
+        "info": "#8B9DAF",
+        "text": "#2B2B2B",
+        "background": "#FAF7F2"
+    },
+
+    "typography": {
+        "font_family": "'Crimson Text', 'Georgia', serif",
+        "font_family_heading": "'Playfair Display', 'Georgia', serif",
+        "heading_weight": "600",
+        "base_size": "18px",
+        "line_height": "1.8"
+    },
+
+    "spacing": {
+        "base_unit": "12px",
+        "scale": "generous"
+    },
+
+    "components": {
+        "buttons": {
+            "style": "outlined",
+            "rounded": false,
+            "shadow": false
+        },
+        "cards": {
+            "border": true,
+            "shadow": false,
+            "rounded": false,
+            "hover_effect": "subtle-lift"
+        },
+        "forms": {
+            "style": "minimal",
+            "border_style": "bottom-only",
+            "focus_ring": false
+        }
+    },
+
+    "layout": {
+        "container_width": "1100px",
+        "grid_gap": "48px",
+        "sidebar_width": "320px"
+    },
+
+    "compatibility": {
+        "requires_php": "7.4",
+        "requires_css": "3",
+        "mobile_optimized": true,
+        "rtl_support": false,
+        "accessibility": "wcag-aa"
+    },
+
+    "tags": [
+        "luxury",
+        "elegant",
+        "minimal",
+        "editorial",
+        "refined",
+        "boutique"
+    ],
+
+    "created_at": "2025-11-14",
+    "updated_at": "2025-11-14"
+}

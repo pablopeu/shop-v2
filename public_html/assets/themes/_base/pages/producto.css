@@ -1,0 +1,55 @@
+/**
+ * Producto Page Specific Styles
+ * Estilos específicos para la página de producto
+ */
+
+/* Favorites Panel Mini Cards */
+.favorite-mini-card {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    padding-right: 90px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.favorite-mini-card:hover {
+    background-color: var(--color-bg-light, #f8f9fa);
+}
+
+.favorite-mini-card:last-child {
+    border-bottom: none;
+}
+
+/* Botón eliminar en mini-card */
+.favorite-remove-btn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: var(--color-promo, #ff6b6b);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.favorite-remove-btn:hover {
+    background: var(--color-promo-dark, #ee5a52);
+}
+
+/* Ajustar altura del panel de favoritos para aprovechar pantalla */
+#favorites-panel-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Título del panel en blanco */
+#favorites-panel .cart-panel-header h2 {
+    color: white !important;
+}

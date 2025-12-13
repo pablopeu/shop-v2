@@ -1,0 +1,19 @@
+{
+    "google_analytics": {
+        "enabled": true,
+        "measurement_id": "G-CJ3T4VVY7V",
+        "tracking_code": ""
+    },
+    "facebook_pixel": {
+        "enabled": true,
+        "pixel_id": "555152251688648",
+        "track_page_view": true,
+        "track_add_to_cart": true,
+        "track_purchase": true,
+        "track_initiate_checkout": true
+    },
+    "google_tag_manager": {
+        "enabled": false,
+        "container_id": ""
+    }
+}

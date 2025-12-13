@@ -1,0 +1,424 @@
+/**
+ * Bold Theme - Personalizaciones
+ * Diseño OSCURO, AUDAZ y FUTURISTA con efectos neón
+ *
+ * La mayoría de los estilos base están en /themes/_base/pages.css
+ * Este archivo contiene personalizaciones visuales únicas del theme BOLD
+ */
+
+/* ========================================
+   GLOBAL - Dark Mode Base
+   ======================================== */
+
+body {
+    font-family: var(--font-family);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a0a1a 50%, #0a0a1a 100%);
+    background-attachment: fixed;
+}
+
+/* ========================================
+   HEADINGS - Ultra Bold
+   ======================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-heading);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text-dark);
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
+}
+
+h1 { font-size: var(--font-size-4xl); }
+h2 { font-size: var(--font-size-3xl); }
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--font-size-xl); }
+h5 { font-size: var(--font-size-lg); }
+h6 { font-size: var(--font-size-base); }
+
+/* ========================================
+   LINKS - Neón
+   ======================================== */
+
+a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+a:hover {
+    color: var(--color-secondary-light);
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+    text-decoration: none;
+}
+
+/* ========================================
+   HEADER - Neón con efecto glass
+   ======================================== */
+
+.header {
+    background: rgba(10, 10, 10, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid var(--color-primary);
+    box-shadow: 0 0 30px rgba(255, 0, 85, 0.3);
+}
+
+.logo h1 {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 15px rgba(255, 0, 85, 0.5));
+}
+
+.nav a {
+    position: relative;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    transition: width var(--transition-base);
+    box-shadow: 0 0 10px var(--color-primary);
+}
+
+.nav a:hover::after {
+    width: 100%;
+}
+
+/* ========================================
+   HERO - Cyberpunk vibes
+   ======================================== */
+
+.hero {
+    background: linear-gradient(135deg,
+        rgba(255, 0, 85, 0.1) 0%,
+        rgba(0, 255, 255, 0.1) 100%);
+    border: 2px solid var(--color-primary);
+    box-shadow:
+        0 0 40px rgba(255, 0, 85, 0.3),
+        inset 0 0 60px rgba(255, 0, 85, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 255, 255, 0.05) 2px,
+        rgba(0, 255, 255, 0.05) 4px
+    );
+    animation: scanlines 10s linear infinite;
+}
+
+@keyframes scanlines {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(50px); }
+}
+
+.hero-content h2 {
+    font-size: var(--font-size-4xl);
+    background: linear-gradient(135deg, #fff 0%, var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.btn-hero {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    border: 2px solid var(--color-secondary);
+    box-shadow:
+        0 0 20px rgba(255, 0, 85, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-hero:hover::before {
+    left: 100%;
+}
+
+.btn-hero:hover {
+    box-shadow:
+        0 0 40px rgba(255, 0, 85, 0.8),
+        0 0 60px rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   PRODUCT CARDS - Efecto 3D con glow
+   ======================================== */
+
+.product-card {
+    background: rgba(26, 26, 26, 0.8);
+    border: 2px solid var(--color-border);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 0, 85, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.product-card:hover::before {
+    opacity: 1;
+}
+
+.product-card:hover {
+    border-color: var(--color-primary);
+    box-shadow:
+        0 0 40px rgba(255, 0, 85, 0.6),
+        0 0 60px rgba(0, 255, 255, 0.3);
+    transform: translateY(-8px) scale(1.02);
+}
+
+.product-image {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.product-image img {
+    transition: transform var(--transition-slow);
+    filter: brightness(0.9) contrast(1.1);
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.1);
+    filter: brightness(1.1) contrast(1.2);
+}
+
+.badge-descuento {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-warning) 100%);
+    border: 2px solid var(--color-warning);
+    box-shadow:
+        0 0 15px rgba(255, 221, 0, 0.6),
+        inset 0 0 10px rgba(255, 255, 255, 0.2);
+    font-weight: var(--font-weight-bold);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ========================================
+   BUTTONS - Neón interactivo
+   ======================================== */
+
+.btn-primary,
+.checkout-btn,
+.place-order-btn {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    border: 2px solid var(--color-secondary);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+    text-transform: uppercase;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover,
+.checkout-btn:hover,
+.place-order-btn:hover {
+    box-shadow:
+        0 0 30px rgba(255, 0, 85, 0.8),
+        0 0 50px rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px);
+    border-color: var(--color-primary);
+}
+
+.btn-add-cart {
+    background: linear-gradient(135deg, var(--color-success) 0%, var(--color-info) 100%);
+    border: 2px solid var(--color-success);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+    font-weight: var(--font-weight-bold);
+}
+
+.btn-add-cart:hover {
+    box-shadow:
+        0 0 25px rgba(0, 255, 136, 0.8),
+        0 0 40px rgba(0, 136, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   CURRENCY SELECTOR - Futurista
+   ======================================== */
+
+.currency-section {
+    background: rgba(26, 26, 26, 0.6);
+    border-top: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.currency-btn {
+    background: rgba(26, 26, 26, 0.8);
+    border: 2px solid var(--color-border);
+    transition: all var(--transition-base);
+}
+
+.currency-btn:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+}
+
+.currency-btn.active {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 25px rgba(255, 0, 85, 0.6);
+}
+
+/* ========================================
+   FOOTER - Dark con acentos
+   ======================================== */
+
+.footer {
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, #000 100%);
+    border-top: 2px solid var(--color-primary);
+    box-shadow: 0 -10px 40px rgba(255, 0, 85, 0.2);
+}
+
+.footer h3,
+.footer h4 {
+    color: var(--color-secondary);
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+/* ========================================
+   FORMS - Neón inputs
+   ======================================== */
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+    background: rgba(26, 26, 26, 0.8);
+    border: 2px solid var(--color-border);
+    color: var(--color-text);
+    transition: all var(--transition-base);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    background: rgba(26, 26, 26, 0.95);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+    outline: none;
+}
+
+/* ========================================
+   CART PANEL - Glassmorphism oscuro
+   ======================================== */
+
+.cart-panel {
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    border-left: 2px solid var(--color-primary);
+    box-shadow: -10px 0 40px rgba(255, 0, 85, 0.3);
+}
+
+.cart-header {
+    border-bottom: 2px solid var(--color-border);
+    background: rgba(255, 0, 85, 0.1);
+}
+
+/* ========================================
+   SPECIAL EFFECTS
+   ======================================== */
+
+/* Efecto de partículas en hover para links importantes */
+.btn-primary::after,
+.btn-hero::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:active::after,
+.btn-hero:active::after {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-dark);
+    border-left: 1px solid var(--color-border);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+}

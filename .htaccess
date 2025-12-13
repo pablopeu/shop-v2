@@ -1,0 +1,12 @@
+# Root .htaccess
+# Redirect all requests to public_html/
+
+RewriteEngine On
+RewriteBase /
+
+# Deny access to app/ directory
+RewriteRule ^app/ - [F,L]
+
+# Redirect everything else to public_html
+RewriteCond %{REQUEST_URI} !^/public_html/
+RewriteRule ^(.*)$ public_html/$1 [L]

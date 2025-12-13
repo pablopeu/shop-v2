@@ -1,0 +1,56 @@
+name: Deploy Crítico - Emergencia
+
+on:
+  workflow_dispatch:
+    inputs:
+      files:
+        description: 'Archivos críticos a deploy'
+        required: false
+        default: 'checkout-new.php,OPENCODE-GUIDELINES.md'
+
+jobs:
+  deploy-critical:
+    runs-on: ubuntu-latest
+    name: 🚨 Deploy Crítico - Emergencia
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Deploy archivos críticos solo
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: /
+          dangerous-clean-slate: false
+          timeout: 300000  # 5 minutos
+          retries: 3
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/backup_*.tar.gz
+            **/assets/uploads/**/*.jpg
+            **/assets/uploads/**/*.webp
+            **/assets/uploads/**/*.png
+            **/scripts/**
+            **/data/**
+            **/images/**
+            **/shop-v2-secrets/**
+          file-list: |
+            app/pages/frontend/checkout-new.php
+            OPENCODE-GUIDELINES.md
+
+      - name: ✅ Deploy de Emergencia Completado
+        run: |
+          echo "🚨 DEPLOY DE EMERGENCIA COMPLETADO"
+          echo ""
+          echo "📁 Archivos críticos subidos:"
+          echo "├── app/pages/frontend/checkout-new.php (cambios de Telegram)"
+          echo "└── OPENCODE-GUIDELINES.md (directivas OpenCode)"
+          echo ""
+          echo "⚠️ ESTE ES UN DEPLOY PARCIAL - SOLO ARCHIVOS CRÍTICOS"
+          echo "🔄 Ejecutar deploy completo después para subir todo"

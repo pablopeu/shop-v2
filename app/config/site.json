@@ -1,0 +1,40 @@
+{
+    "site_name": "El Mercadito de PEU",
+    "site_description": "Un sitio que armé para vender cosas",
+    "site_keywords": "ecommerce, tienda, productos, peu, mercadito, cuchillos",
+    "contact_email": "pablou@gmail.com",
+    "contact_phone": "",
+    "footer_text": "© 2025 El Mercadito de PEU. Todos los derechos reservados.",
+    "whatsapp": {
+        "enabled": true,
+        "number": "541154099160",
+        "message": "Hola, te estoy consultando desde el Mercadito,",
+        "custom_link": "",
+        "display_text": "Mensaje Whatsapp"
+    },
+    "telegram": {
+        "enabled": false,
+        "bot_token": "",
+        "chat_id": ""
+    },
+    "logo": {
+        "enabled": true,
+        "path": "/assets/uploads/logos/logo_1764160659.jpg",
+        "alt": "Logo PEU"
+    },
+    "site_owner": "Pablo",
+    "whatsapp_number": "541154099160",
+    "meta_tags": {
+        "og_title": "El Mercadito de PEU",
+        "og_type": "website",
+        "og_url": "/shopv2/",
+        "og_url_secure": "/shopv2/",
+        "og_image": "/shopv2/assets/uploads/og-images/og_image_1764553168.jpg",
+        "og_site_name": "El Mercadito de PEU",
+        "og_description": "Un sitio que armé para vender cosas",
+        "content_type": "text/html; charset=utf-8",
+        "og_image_width": "1280",
+        "og_image_height": "960",
+        "twitter_card": "summary_large_image"
+    }
+}

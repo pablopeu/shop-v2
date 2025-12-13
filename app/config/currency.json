@@ -1,0 +1,16 @@
+{
+    "primary": "ARS",
+    "secondary": "USD",
+    "exchange_rate": 1473.799999999999954525264911353588104248046875,
+    "exchange_rate_source": "api",
+    "dollar_type": "bolsa",
+    "api_enabled": true,
+    "manual_override": false,
+    "last_update": "2025-12-01T19:00:00.000Z",
+    "api_compra": 1472.799999999999954525264911353588104248046875,
+    "api_venta": 1473.799999999999954525264911353588104248046875,
+    "api_casa": "bolsa",
+    "api_nombre": "Bolsa",
+    "_test_timestamp": "2025-11-26 17:01:21",
+    "_test_value": 2131
+}

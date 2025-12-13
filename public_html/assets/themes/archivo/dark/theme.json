@@ -1,0 +1,87 @@
+{
+    "name": "Dark",
+    "slug": "dark",
+    "version": "1.0.0",
+    "description": "Un diseño oscuro futurista con efectos de glow neón, cards flotantes y estética tecnológica premium. Inspirado en interfaces sci-fi y gaming de alta gama. Perfecto para tecnología, gaming, productos digitales y marcas modernas.",
+    "author": "Shop Team",
+    "preview_image": "/themes/dark/preview.jpg",
+
+    "features": {
+        "dark_mode": true,
+        "animations": "smooth-3d",
+        "border_style": "glow",
+        "shadow_style": "neon",
+        "color_scheme": "dark-neon"
+    },
+
+    "colors": {
+        "primary": "#00F0FF",
+        "primary_dark": "#00C4D4",
+        "primary_light": "#5FF4FF",
+        "secondary": "#B24DFF",
+        "success": "#00FF88",
+        "warning": "#FFB800",
+        "error": "#FF3366",
+        "info": "#4D4DFF",
+        "text": "#E8E8F0",
+        "background": "#0A0A0F"
+    },
+
+    "typography": {
+        "font_family": "'Rajdhani', 'Arial', sans-serif",
+        "font_family_heading": "'Rajdhani', 'Arial', sans-serif",
+        "heading_weight": "700",
+        "base_size": "16px",
+        "line_height": "1.7"
+    },
+
+    "spacing": {
+        "base_unit": "10px",
+        "scale": "balanced"
+    },
+
+    "components": {
+        "buttons": {
+            "style": "glow",
+            "rounded": true,
+            "shadow": true
+        },
+        "cards": {
+            "border": true,
+            "shadow": true,
+            "rounded": true,
+            "hover_effect": "float-glow"
+        },
+        "forms": {
+            "style": "futuristic",
+            "border_style": "glow",
+            "focus_ring": true
+        }
+    },
+
+    "layout": {
+        "container_width": "1200px",
+        "grid_gap": "28px",
+        "sidebar_width": "300px"
+    },
+
+    "compatibility": {
+        "requires_php": "7.4",
+        "requires_css": "3",
+        "mobile_optimized": true,
+        "rtl_support": false,
+        "accessibility": "wcag-aa"
+    },
+
+    "tags": [
+        "dark",
+        "futuristic",
+        "tech",
+        "neon",
+        "gaming",
+        "modern"
+    ],
+
+    "created_at": "2025-11-14",
+    "updated_at": "2025-11-14"
+}

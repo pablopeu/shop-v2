@@ -1,0 +1,1101 @@
+/**
+ * Modern Compact Theme - Estilos Personalizados
+ * Diseño MODERNO COMPACTO con glassmorphism, gradientes vibrantes y animaciones fluidas
+ *
+ * Este theme demuestra las capacidades avanzadas del sistema themeable:
+ * - Glassmorphism en tarjetas de producto
+ * - Gradientes vibrantes en múltiples elementos
+ * - Efectos 3D y transform en hover
+ * - Sombras profundas con color
+ * - Animaciones fluidas y suaves
+ * - Bordes redondeados modernos
+ * - Efectos de glow y shine
+ * - Tarjetas de producto completamente clickeables (sin botones)
+ */
+
+/* ========================================
+   GLOBAL - Moderno y vibrante
+   ======================================== */
+
+body {
+    font-family: var(--font-family);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    background: linear-gradient(135deg, #F4F4F4 0%, #fafafa 100%);
+    background-attachment: fixed;
+    letter-spacing: 0.2px;
+}
+
+/* ========================================
+   HEADINGS - Gradientes vibrantes
+   ======================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-heading);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--spacing-lg);
+    letter-spacing: -0.5px;
+}
+
+h1 {
+    font-size: var(--font-size-4xl);
+    position: relative;
+    display: inline-block;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 0;
+    width: 80px;
+    height: 4px;
+    background: var(--gradient-accent);
+    border-radius: var(--border-radius-full);
+    box-shadow: var(--shadow-glow-cyan);
+}
+
+h2 { font-size: var(--font-size-3xl); }
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--font-size-xl); }
+h5 { font-size: var(--font-size-lg); }
+h6 { font-size: var(--font-size-base); }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   LINKS - Suaves con gradiente
+   ======================================== */
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: var(--transition-base);
+    position: relative;
+}
+
+a:hover {
+    color: var(--color-accent);
+}
+
+a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gradient-accent);
+    transition: width var(--transition-base);
+    border-radius: var(--border-radius-full);
+}
+
+a:hover::after {
+    width: 100%;
+}
+
+/* ========================================
+   HEADER - Glassmorphism premium
+   ======================================== */
+
+.header {
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(var(--blur-md));
+    -webkit-backdrop-filter: blur(var(--blur-md));
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-rainbow);
+}
+
+.logo h1 {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-weight-extrabold);
+    position: relative;
+}
+
+.logo h1::after {
+    display: none; /* Remove underline */
+}
+
+.logo h1::before {
+    content: '✨';
+    margin-right: 12px;
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.5));
+}
+
+.nav a {
+    position: relative;
+    padding: 12px 20px;
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.5px;
+    border-radius: var(--border-radius-lg);
+    transition: var(--transition-base);
+}
+
+.nav a:hover {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-sm));
+    box-shadow: var(--shadow-md);
+}
+
+.nav a::after {
+    display: none; /* Remove underline */
+}
+
+.nav a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--border-radius-lg);
+    padding: 2px;
+    background: var(--gradient-primary);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: var(--transition-base);
+}
+
+.nav a:hover::before {
+    opacity: 1;
+}
+
+/* ========================================
+   HERO - Gradientes vibrantes
+   ======================================== */
+
+.hero {
+    background: var(--gradient-ocean);
+    padding: var(--spacing-4xl) var(--spacing-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(240, 147, 251, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(79, 172, 254, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-30px) scale(1.1);
+    }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content h2 {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-extrabold);
+    background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+.hero-content p {
+    font-size: var(--font-size-xl);
+    color: rgba(255, 255, 255, 0.95);
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-2xl);
+}
+
+.btn-hero {
+    background: var(--gradient-secondary);
+    color: white !important;
+    border: none;
+    padding: 18px 48px;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-xl), var(--shadow-glow-secondary);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-base);
+}
+
+.btn-hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-hero:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+.btn-hero:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: var(--shadow-2xl), var(--shadow-glow-secondary);
+}
+
+/* ========================================
+   PRODUCT CARDS - Glassmorphism innovador
+   ======================================== */
+
+.product-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-md));
+    -webkit-backdrop-filter: blur(var(--blur-md));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-base);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Borde gradiente animado */
+.product-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--border-radius-xl);
+    padding: 2px;
+    background: var(--gradient-rainbow);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.product-card:hover::before {
+    opacity: 1;
+}
+
+/* Efecto de brillo en hover */
+.product-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 70%
+    );
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    transition: transform var(--transition-slow);
+    pointer-events: none;
+}
+
+.product-card:hover::after {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+}
+
+.product-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow:
+        var(--shadow-2xl),
+        var(--shadow-glow),
+        0 0 40px rgba(102, 126, 234, 0.3);
+    background: var(--glass-bg-light);
+}
+
+.product-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.product-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-glass);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.product-card:hover .product-image::after {
+    opacity: 1;
+}
+
+.product-image img {
+    transition: transform var(--transition-slow);
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.1) rotate(2deg);
+}
+
+/* Botón de favoritos con efecto glow */
+.favorite-heart-card {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(var(--blur-sm));
+    -webkit-backdrop-filter: blur(var(--blur-sm));
+    border: 2px solid var(--glass-border);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+}
+
+.favorite-heart-card:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(231, 76, 60, 0.5);
+}
+
+.favorite-heart-card i {
+    font-size: 20px;
+    color: var(--color-text-lighter);
+    transition: all var(--transition-base);
+}
+
+.favorite-heart-card.active {
+    background: linear-gradient(135deg, #ff6b9d 0%, #f5576c 100%);
+    border-color: #ff6b9d;
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(231, 76, 60, 0.6);
+}
+
+.favorite-heart-card.active i {
+    color: white;
+}
+
+.favorite-heart-card:hover i {
+    color: #e74c3c;
+    transform: scale(1.2);
+}
+
+.product-info {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.product-buttons {
+    margin-top: auto;
+    display: none; /* Ocultar botones - tarjeta completamente clickeable */
+}
+
+.product-info h3 {
+    font-weight: var(--font-weight-bold);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--spacing-md);
+    letter-spacing: 0;
+    font-size: var(--font-size-lg);
+}
+
+/* Badge de descuento con gradiente */
+.badge-descuento {
+    background: linear-gradient(135deg, var(--color-error) 0%, var(--color-promo-light) 100%);
+    color: white !important;
+    font-weight: var(--font-weight-bold);
+    border: none;
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(230, 57, 70, 0.5);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* ========================================
+   BUTTONS - Gradientes vibrantes
+   ======================================== */
+
+.btn-primary,
+.checkout-btn,
+.place-order-btn {
+    background: var(--gradient-primary);
+    border: none;
+    color: white !important;
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--border-radius-lg);
+    padding: 14px 32px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    transition: all var(--transition-base);
+}
+
+.btn-primary::before,
+.checkout-btn::before,
+.place-order-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before,
+.checkout-btn:hover::before,
+.place-order-btn:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+.btn-primary:hover,
+.checkout-btn:hover,
+.place-order-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--shadow-2xl), var(--shadow-glow);
+}
+
+.btn-add-cart {
+    background: white;
+    border: 2px solid transparent;
+    background-image: linear-gradient(white, white), var(--gradient-accent);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    color: var(--color-primary) !important;
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--border-radius-lg);
+    padding: 14px 32px;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-add-cart::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-accent);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    z-index: -1;
+}
+
+.btn-add-cart:hover::before {
+    opacity: 1;
+}
+
+.btn-add-cart:hover {
+    color: white !important;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--shadow-xl), var(--shadow-glow-cyan);
+}
+
+/* ========================================
+   CURRENCY SELECTOR - Moderno con gradientes
+   ======================================== */
+
+.currency-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-md));
+    -webkit-backdrop-filter: blur(var(--blur-md));
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    padding: var(--spacing-xl) 0;
+}
+
+.currency-selector h3 {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-weight-bold);
+}
+
+.currency-btn {
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: 12px 24px;
+    transition: all var(--transition-base);
+    font-weight: var(--font-weight-semibold);
+    position: relative;
+    overflow: hidden;
+    color: var(--color-text);
+}
+
+.currency-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    z-index: -1;
+}
+
+.currency-btn:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.currency-btn.active {
+    background: var(--gradient-primary);
+    border-color: var(--color-primary);
+    color: white !important;
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.currency-btn.active::before {
+    opacity: 1;
+}
+
+/* ========================================
+   FOOTER - Moderno con glassmorphism
+   ======================================== */
+
+.footer {
+    background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+    border-top: 3px solid;
+    border-image: var(--gradient-rainbow) 1;
+    position: relative;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.footer h3,
+.footer h4 {
+    color: white;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-weight-bold);
+    position: relative;
+    padding-bottom: var(--spacing-sm);
+}
+
+.footer h3::after,
+.footer h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--gradient-accent);
+    border-radius: var(--border-radius-full);
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   FORMS - Modernos con glow
+   ======================================== */
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: 12px 16px;
+    transition: all var(--transition-base);
+    color: var(--color-text) !important;
+    font-size: 16px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(0, 183, 181, 0.15), var(--shadow-glow);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+/* Quantity Selector - Override general input styles */
+.quantity-selector-modern input[type="number"] {
+    border: none !important;
+    border-left: 2px solid var(--color-border) !important;
+    border-right: 2px solid var(--color-border) !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    font-size: var(--font-size-base) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    color: var(--color-text-dark) !important;
+    background: white !important;
+    width: 50px !important;
+    height: 48px !important;
+}
+
+.quantity-selector-modern input[type="number"]:focus {
+    transform: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Remove native spinner arrows (Chrome, Safari, Edge, Opera) */
+.quantity-selector-modern input[type="number"]::-webkit-outer-spin-button,
+.quantity-selector-modern input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Remove native spinner arrows (Firefox) */
+.quantity-selector-modern input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* ========================================
+   CART PANEL - Glassmorphism
+   ======================================== */
+
+.cart-panel {
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(var(--blur-lg));
+    -webkit-backdrop-filter: blur(var(--blur-lg));
+    border-left: 3px solid transparent;
+    border-image: var(--gradient-primary) 1;
+    box-shadow: var(--shadow-2xl);
+}
+
+.cart-header {
+    background: var(--gradient-glass);
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.cart-header h3 {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-weight-bold);
+}
+
+/* ========================================
+   PRODUCT PAGE - Sophisticated Modern
+   ======================================== */
+
+.product-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-md));
+    -webkit-backdrop-filter: blur(var(--blur-md));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-2xl);
+    padding: var(--spacing-2xl);
+    box-shadow: var(--shadow-2xl);
+}
+
+.product-grid {
+    gap: 48px !important;
+}
+
+.main-image-container {
+    border: 2px solid var(--glass-border);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+    background: var(--glass-bg-light);
+}
+
+.main-image-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--border-radius-xl);
+    padding: 2px;
+    background: var(--gradient-rainbow);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.main-image-container:hover::before {
+    opacity: 1;
+}
+
+.thumbnail {
+    border: 3px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-base);
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.thumbnail:hover {
+    opacity: 0.9;
+    border-color: var(--color-primary);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+.thumbnail.active {
+    border-color: var(--color-primary);
+    opacity: 1;
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    transform: scale(1.05);
+}
+
+.product-info h1 {
+    font-family: var(--font-family-heading);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-bottom: 3px solid transparent;
+    border-image: var(--gradient-primary) 1;
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.product-title-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: var(--spacing-lg) !important;
+    margin-bottom: var(--spacing-lg) !important;
+}
+
+.product-title-container h1 {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+    flex: 1 !important;
+}
+
+.favorite-heart {
+    background: var(--glass-bg-light) !important;
+    backdrop-filter: blur(var(--blur-sm)) !important;
+    -webkit-backdrop-filter: blur(var(--blur-sm)) !important;
+    border: 2px solid var(--glass-border) !important;
+    border-radius: 50% !important;
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 22px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all var(--transition-base) !important;
+    flex-shrink: 0 !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.favorite-heart:hover {
+    transform: scale(1.15) rotate(10deg) !important;
+    border-color: #e74c3c !important;
+    background: rgba(231, 76, 60, 0.1) !important;
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(231, 76, 60, 0.5) !important;
+}
+
+.favorite-heart i {
+    color: var(--color-text-lighter) !important;
+    transition: all var(--transition-base) !important;
+}
+
+.favorite-heart.active {
+    background: linear-gradient(135deg, #ff6b9d 0%, #f5576c 100%) !important;
+    border-color: #ff6b9d !important;
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(231, 76, 60, 0.6) !important;
+}
+
+.favorite-heart.active i {
+    color: white !important;
+}
+
+.favorite-heart:hover i {
+    color: #e74c3c !important;
+    transform: scale(1.2) !important;
+}
+
+.price-current {
+    font-size: var(--font-size-3xl);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-weight-bold);
+}
+
+.description {
+    margin-bottom: var(--spacing-xl) !important;
+}
+
+.description-box {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(var(--blur-sm)) !important;
+    -webkit-backdrop-filter: blur(var(--blur-sm)) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.description-box h3 {
+    background: var(--gradient-primary) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    border-bottom-color: var(--color-primary) !important;
+}
+
+.cart-container,
+.checkout-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-md));
+    -webkit-backdrop-filter: blur(var(--blur-md));
+    border: 1px solid var(--glass-border);
+    border-top: 4px solid transparent;
+    border-image: var(--gradient-primary) 1;
+    border-radius: var(--border-radius-2xl);
+    padding: var(--spacing-2xl);
+    box-shadow: var(--shadow-2xl);
+}
+
+.cart-item {
+    border-bottom: 1px solid var(--color-border-light);
+    padding: var(--spacing-lg) 0;
+    transition: all var(--transition-base);
+    border-radius: var(--border-radius-lg);
+}
+
+.cart-item:hover {
+    background: white;
+    box-shadow: var(--shadow-md);
+    transform: translateX(4px);
+}
+
+.checkout-section h2 {
+    font-family: var(--font-family-heading);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-weight-bold);
+    border-bottom: 3px solid transparent;
+    border-image: var(--gradient-primary) 1;
+    padding-bottom: var(--spacing-sm);
+}
+
+.thank-you-container {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(var(--blur-lg));
+    -webkit-backdrop-filter: blur(var(--blur-lg));
+    border: 2px solid var(--glass-border);
+    border-top: 4px solid transparent;
+    border-image: var(--gradient-rainbow) 1;
+    border-radius: var(--border-radius-2xl);
+    padding: var(--spacing-4xl);
+    text-align: center;
+    box-shadow: var(--shadow-2xl);
+}
+
+.modal {
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(var(--blur-xl));
+    -webkit-backdrop-filter: blur(var(--blur-xl));
+    border: 2px solid var(--glass-border);
+    border-radius: var(--border-radius-2xl);
+    box-shadow: var(--shadow-2xl);
+}
+
+.modal-header {
+    background: var(--gradient-glass);
+    border-bottom: 2px solid var(--glass-border);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   CAROUSEL - Altura personalizada
+   ======================================== */
+
+.carousel-v2-container {
+    height: 350px;
+    border-radius: var(--border-radius-2xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-2xl);
+}
+
+@media (max-width: 768px) {
+    .carousel-v2-container {
+        height: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-v2-container {
+        height: 220px;
+    }
+}
+
+/* ========================================
+   LOADING & ANIMATIONS
+   ======================================== */
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.loading-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.6),
+        transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* ========================================
+   SCROLL BEHAVIOR
+   ======================================== */
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: var(--border-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gradient-secondary);
+}
+
+/* ========================================
+   PANEL HEADERS - Fix color blanco en títulos
+   ======================================== */
+
+.cart-panel-header h2 {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: white !important;
+    background-clip: initial !important;
+    color: white !important;
+}

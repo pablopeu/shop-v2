@@ -1,0 +1,8 @@
+# Ignorar todos los archivos de caché
+*.css
+*.min.css
+*.js
+*.min.js
+
+# Permitir este .gitignore
+!.gitignore

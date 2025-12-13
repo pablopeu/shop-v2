@@ -1,0 +1,118 @@
+/**
+ * Luxury Theme - Variables
+ * Editorial refinado con estética de boutique de lujo
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+    /* Colores Principales - Paleta neutra sofisticada */
+    --color-primary: #2B2B2B;  /* Gris carbón */
+    --color-primary-dark: #1A1A1A;
+    --color-primary-light: #404040;
+    --color-primary-rgb: 43, 43, 43;
+
+    --color-secondary: #C9A961;  /* Dorado elegante */
+    --color-secondary-dark: #B08F42;
+    --color-secondary-light: #E5C97F;
+    --color-secondary-rgb: 201, 169, 97;
+
+    /* Colores de Estado */
+    --color-success: #7A9D7E;
+    --color-warning: #D4A574;
+    --color-error: #C17B7B;
+    --color-info: #8B9DAF;
+
+    /* Colores Neutros - Cremas y grises */
+    --color-text: #2B2B2B;
+    --color-text-light: #5A5A5A;
+    --color-text-lighter: #8E8E8E;
+    --color-text-dark: #1A1A1A;
+
+    --color-bg: #FAF7F2;  /* Crema elegante */
+    --color-bg-light: #FFFFFF;
+    --color-bg-dark: #F0EDE6;
+    --color-bg-darker: #E6E0D6;
+
+    --color-border: #D8D2C6;
+    --color-border-light: #E8E4DB;
+    --color-border-dark: #B8B2A6;
+
+    --color-shadow: rgba(43, 43, 43, 0.08);
+    --color-shadow-dark: rgba(43, 43, 43, 0.12);
+
+    /* Tipografía - Serif elegante */
+    --font-family: 'Crimson Text', 'Georgia', serif;
+    --font-family-heading: 'Playfair Display', 'Georgia', serif;
+    --font-family-mono: 'Courier New', Courier, monospace;
+
+    --font-size-xs: 14px;
+    --font-size-sm: 16px;
+    --font-size-base: 18px;
+    --font-size-lg: 20px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 32px;
+    --font-size-3xl: 42px;
+    --font-size-4xl: 56px;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.3;
+    --line-height-normal: 1.8;
+    --line-height-relaxed: 2.0;
+
+    /* Espaciado - Generoso */
+    --spacing-xs: 8px;
+    --spacing-sm: 12px;
+    --spacing-md: 24px;
+    --spacing-lg: 36px;
+    --spacing-xl: 48px;
+    --spacing-2xl: 64px;
+    --spacing-3xl: 96px;
+
+    /* Bordes - Minimalistas */
+    --border-radius-none: 0;
+    --border-radius-sm: 2px;
+    --border-radius-md: 4px;
+    --border-radius-lg: 6px;
+    --border-radius-xl: 8px;
+    --border-radius-full: 9999px;
+
+    --border-width: 1px;
+    --border-width-thick: 2px;
+
+    /* Sombras - Muy sutiles */
+    --shadow-sm: 0 1px 2px rgba(43, 43, 43, 0.06);
+    --shadow-md: 0 2px 4px rgba(43, 43, 43, 0.08);
+    --shadow-lg: 0 4px 8px rgba(43, 43, 43, 0.10);
+    --shadow-xl: 0 8px 16px rgba(43, 43, 43, 0.12);
+    --shadow-2xl: 0 16px 32px rgba(43, 43, 43, 0.14);
+
+    /* Transiciones - Suaves y elegantes */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Breakpoints */
+    --breakpoint-mobile: 480px;
+    --breakpoint-tablet: 768px;
+    --breakpoint-desktop: 1024px;
+    --breakpoint-wide: 1200px;
+
+    /* Layout - Espacioso */
+    --container-width: 1100px;
+    --header-height: 90px;
+    --footer-height: 220px;
+
+    /* Z-Index */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-tooltip: 700;
+}

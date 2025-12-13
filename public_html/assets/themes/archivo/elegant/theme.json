@@ -1,0 +1,86 @@
+{
+    "name": "Elegant",
+    "slug": "elegant",
+    "version": "1.0.0",
+    "description": "Un diseño sofisticado y elegante con toques de lujo. Perfecto para joyería, moda de alta gama y productos premium.",
+    "author": "Shop Team",
+    "preview_image": "/themes/elegant/preview.jpg",
+
+    "features": {
+        "dark_mode": false,
+        "animations": "smooth",
+        "border_style": "minimal",
+        "shadow_style": "subtle",
+        "color_scheme": "luxury"
+    },
+
+    "colors": {
+        "primary": "#000000",
+        "primary_dark": "#1a1a1a",
+        "primary_light": "#333333",
+        "secondary": "#d4af37",
+        "success": "#2e7d32",
+        "warning": "#f57c00",
+        "error": "#c62828",
+        "info": "#1565c0",
+        "text": "#1a1a1a",
+        "background": "#ffffff"
+    },
+
+    "typography": {
+        "font_family": "serif",
+        "font_family_heading": "serif",
+        "heading_weight": "600",
+        "base_size": "16px",
+        "line_height": "1.6"
+    },
+
+    "spacing": {
+        "base_unit": "12px",
+        "scale": "proportional"
+    },
+
+    "components": {
+        "buttons": {
+            "style": "outline",
+            "rounded": false,
+            "shadow": false
+        },
+        "cards": {
+            "border": true,
+            "shadow": true,
+            "rounded": false,
+            "hover_effect": "glow"
+        },
+        "forms": {
+            "style": "elegant",
+            "border_style": "underline",
+            "focus_ring": false
+        }
+    },
+
+    "layout": {
+        "container_width": "1200px",
+        "grid_gap": "28px",
+        "sidebar_width": "300px"
+    },
+
+    "compatibility": {
+        "requires_php": "7.4",
+        "requires_css": "3",
+        "mobile_optimized": true,
+        "rtl_support": false,
+        "accessibility": "wcag-aa"
+    },
+
+    "tags": [
+        "elegant",
+        "luxury",
+        "premium",
+        "sophisticated",
+        "serif"
+    ],
+
+    "created_at": "2025-11-05",
+    "updated_at": "2025-11-05"
+}
