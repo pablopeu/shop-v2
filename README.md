@@ -1,5 +1,7 @@
 # 🛒 Shop E-commerce V2
 
+> ✨ **Fresh Start** - Repositorio reiniciado con historia limpia
+
 Sistema de e-commerce profesional con **arquitectura de seguridad primero** y **sistema de themes modular**.
 
 ## 📑 Tabla de Contenidos
