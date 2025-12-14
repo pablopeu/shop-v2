@@ -1035,6 +1035,9 @@ $user = get_logged_user();
                 cardShadow: document.querySelector('[name="card_shadow"]:checked')?.value || 'subtle',
                 cardRounded: document.querySelector('[name="card_rounded"]')?.checked || false,
                 cardHover: document.querySelector('[name="card_hover"]:checked')?.value || 'glow',
+                cardButtons: document.querySelector('[name="card_buttons"]:checked')?.value || 'show',
+                cardButtonsPosition: document.querySelector('[name="card_buttons_position"]:checked')?.value || 'center',
+                cardButtonsSpacing: document.querySelector('[name="card_buttons_spacing"]:checked')?.value || 'normal',
 
                 // Buttons
                 buttonStyle: document.querySelector('[name="button_style"]:checked')?.value || 'solid',
@@ -1053,6 +1056,62 @@ $user = get_logged_user();
 
             const btnBorderRadius = config.buttonRounded ? '50px' : '4px';
             const btnBoxShadow = config.buttonShadow ? '0 2px 4px rgba(0,0,0,0.15)' : 'none';
+
+            // Helper: Generar card de producto
+            function generateProductCard(config, borderStyle, borderRadius, boxShadow, btnBorderRadius, btnBoxShadow, index) {
+                const gradients = [
+                    `linear-gradient(135deg, ${config.primary}20, ${config.secondary}20)`,
+                    `linear-gradient(135deg, ${config.accent}20, ${config.primary}20)`
+                ];
+                const prices = ['$99.99', '$149.99'];
+
+                // Determinar alineación de botones
+                let buttonsAlign = 'center';
+                if (config.cardButtonsPosition === 'left') buttonsAlign = 'flex-start';
+                else if (config.cardButtonsPosition === 'right') buttonsAlign = 'flex-end';
+
+                // Determinar spacing de botones
+                let buttonsGap = '8px';
+                let buttonPadding = '8px 16px';
+                if (config.cardButtonsSpacing === 'compact') {
+                    buttonsGap = '4px';
+                    buttonPadding = '6px 12px';
+                } else if (config.cardButtonsSpacing === 'spacious') {
+                    buttonsGap = '12px';
+                    buttonPadding = '10px 20px';
+                }
+
+                // Generar botones si están habilitados
+                let buttonsHTML = '';
+                if (config.cardButtons === 'show') {
+                    const btnStyle = config.buttonStyle === 'solid'
+                        ? `background: ${config.primary}; color: white; border: none;`
+                        : `background: transparent; color: ${config.primary}; border: 2px solid ${config.primary};`;
+
+                    buttonsHTML = `
+                        <div style="display: flex; gap: ${buttonsGap}; justify-content: ${buttonsAlign}; margin-top: 10px;">
+                            <button style="padding: ${buttonPadding}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                                🛒 Comprar
+                            </button>
+                            <button style="padding: ${buttonPadding}; background: transparent; color: ${config.secondary}; border: 1px solid ${config.secondary}; border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer;">
+                                ❤️
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="preview-card" style="background: white; border: ${borderStyle}; border-radius: ${borderRadius}; box-shadow: ${boxShadow}; overflow: hidden; transition: all 0.3s; ${config.cardButtons === 'hide' ? 'cursor: pointer;' : ''}">
+                        <div style="width: 100%; height: 150px; background: ${gradients[index - 1]};"></div>
+                        <div style="padding: 12px;">
+                            <h3 style="font-size: 1.05em; margin-bottom: 6px; color: ${config.primary};">Producto Ejemplo</h3>
+                            <p style="font-size: 0.85em; color: ${config.text}80; margin-bottom: 8px;">Descripción corta del producto</p>
+                            <p style="font-size: 1.1em; font-weight: 600; color: ${config.secondary};">${prices[index - 1]}</p>
+                            ${buttonsHTML}
+                        </div>
+                    </div>
+                `;
+            }
 
             // Generar HTML del preview
             const previewHTML = `
@@ -1121,22 +1180,8 @@ $user = get_logged_user();
                     <!-- Cards de Producto -->
                     <h2 style="margin-bottom: 15px; color: ${config.primary}; font-size: 1.3em;">🎴 Cards de Producto</h2>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
-                        <div class="preview-card" style="background: white; border: ${borderStyle}; border-radius: ${borderRadius}; box-shadow: ${boxShadow}; overflow: hidden; transition: all 0.3s;">
-                            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, ${config.primary}20, ${config.secondary}20);"></div>
-                            <div style="padding: 12px;">
-                                <h3 style="font-size: 1.05em; margin-bottom: 6px; color: ${config.primary};">Producto Ejemplo</h3>
-                                <p style="font-size: 0.85em; color: ${config.text}80; margin-bottom: 8px;">Descripción corta del producto</p>
-                                <p style="font-size: 1.1em; font-weight: 600; color: ${config.secondary};">$99.99</p>
-                            </div>
-                        </div>
-                        <div class="preview-card" style="background: white; border: ${borderStyle}; border-radius: ${borderRadius}; box-shadow: ${boxShadow}; overflow: hidden; transition: all 0.3s;">
-                            <div style="width: 100%; height: 150px; background: linear-gradient(135deg, ${config.accent}20, ${config.primary}20);"></div>
-                            <div style="padding: 12px;">
-                                <h3 style="font-size: 1.05em; margin-bottom: 6px; color: ${config.primary};">Producto Ejemplo</h3>
-                                <p style="font-size: 0.85em; color: ${config.text}80; margin-bottom: 8px;">Descripción corta del producto</p>
-                                <p style="font-size: 1.1em; font-weight: 600; color: ${config.secondary};">$149.99</p>
-                            </div>
-                        </div>
+                        ${generateProductCard(config, borderStyle, borderRadius, boxShadow, btnBorderRadius, btnBoxShadow, 1)}
+                        ${generateProductCard(config, borderStyle, borderRadius, boxShadow, btnBorderRadius, btnBoxShadow, 2)}
                     </div>
 
                     <p style="margin-top: 20px; text-align: center; font-size: 0.85em; color: ${config.text}80;">
@@ -1283,6 +1328,16 @@ $user = get_logged_user();
 
                     const cardHover = config.components?.cards?.hover_effect || 'glow';
                     document.querySelector(`[name="card_hover"][value="${cardHover}"]`)?.click();
+
+                    // Poblar card buttons
+                    const cardButtons = config.components?.cards?.buttons || 'show';
+                    document.querySelector(`[name="card_buttons"][value="${cardButtons}"]`)?.click();
+
+                    const cardButtonsPosition = config.components?.cards?.buttons_position || 'center';
+                    document.querySelector(`[name="card_buttons_position"][value="${cardButtonsPosition}"]`)?.click();
+
+                    const cardButtonsSpacing = config.components?.cards?.buttons_spacing || 'normal';
+                    document.querySelector(`[name="card_buttons_spacing"][value="${cardButtonsSpacing}"]`)?.click();
 
                     // Poblar buttons
                     const buttonStyle = config.components?.buttons?.style || 'solid';
