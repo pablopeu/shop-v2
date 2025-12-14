@@ -201,14 +201,10 @@ $user = get_logged_user();
                 grid-template-columns: 1fr;
             }
 
-            /* Radiobox en columna para mobile */
+            /* Radiobox en columna para mobile - ancho natural */
             .radio-group {
                 flex-direction: column;
-                align-items: stretch;
-            }
-
-            .radio-group label {
-                width: 100%;
+                align-items: flex-start;
             }
         }
 
