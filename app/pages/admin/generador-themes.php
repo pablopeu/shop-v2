@@ -104,188 +104,260 @@ $user = get_logged_user();
     <!-- Admin Common Styles -->
     <?php include APP_PATH . '/includes/admin/admin-common-styles.php'; ?>
 
-    <!-- Estilos específicos del generador -->
+    <!-- Estilos específicos del generador (scoped para no afectar admin) -->
     <style nonce="<?= csp_nonce() ?>">
-        .form-section {
+        /* Scope todos los estilos dentro del contenedor del generador */
+        .theme-generator-container {
+            max-width: 1200px;
+        }
+
+        .theme-generator-container .card {
             background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 24px;
+            border-radius: 12px;
+            padding: 28px;
             margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.3s ease;
         }
 
-        .form-section h2 {
-            font-size: 18px;
+        .theme-generator-container .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .theme-generator-container .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .theme-generator-container .card-header .icon {
+            font-size: 24px;
+        }
+
+        .theme-generator-container .card-header h2 {
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 20px;
             color: #333;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 8px;
+            margin: 0;
         }
 
-        .form-group {
+        .theme-generator-container .form-group {
             margin-bottom: 20px;
         }
 
-        .form-group label {
+        .theme-generator-container .form-group label {
             display: block;
             font-weight: 500;
             margin-bottom: 8px;
             color: #555;
+            font-size: 14px;
         }
 
-        .form-group input[type="text"],
-        .form-group input[type="color"],
-        .form-group textarea,
-        .form-group select {
+        .theme-generator-container .form-group input[type="text"],
+        .theme-generator-container .form-group input[type="color"],
+        .theme-generator-container .form-group textarea,
+        .theme-generator-container .form-group select {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+            font-family: inherit;
         }
 
-        .form-group input[type="text"]:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
+        .theme-generator-container .form-group input[type="text"]:focus,
+        .theme-generator-container .form-group textarea:focus,
+        .theme-generator-container .form-group select:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .form-group textarea {
+        .theme-generator-container .form-group textarea {
             min-height: 80px;
             resize: vertical;
         }
 
-        .color-grid {
+        .theme-generator-container .color-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
         }
 
-        .color-input-wrapper {
+        .theme-generator-container .color-input-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .color-input-wrapper input[type="color"] {
+        .theme-generator-container .color-input-wrapper input[type="color"] {
             width: 60px;
             height: 40px;
-            border: none;
+            border: 2px solid #ddd;
+            border-radius: 6px;
             cursor: pointer;
         }
 
-        .color-input-wrapper input[type="text"] {
+        .theme-generator-container .color-input-wrapper input[type="text"] {
             flex: 1;
         }
 
-        .radio-group {
+        .theme-generator-container .radio-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 20px;
         }
 
-        .radio-group label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            font-weight: normal;
-        }
-
-        .radio-group input[type="radio"] {
-            cursor: pointer;
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .checkbox-group label {
+        .theme-generator-container .radio-group label {
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
             font-weight: normal;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            transition: all 0.3s;
         }
 
-        .checkbox-group input[type="checkbox"] {
+        .theme-generator-container .radio-group label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .theme-generator-container .radio-group input[type="radio"] {
             cursor: pointer;
         }
 
-        .btn-generate {
+        .theme-generator-container .radio-group input[type="radio"]:checked + label,
+        .theme-generator-container .radio-group label:has(input[type="radio"]:checked) {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .theme-generator-container .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .theme-generator-container .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: normal;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .theme-generator-container .checkbox-group label:hover {
+            background: #f8f9ff;
+        }
+
+        .theme-generator-container .checkbox-group input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .theme-generator-container .btn-generate {
             background: #667eea;
             color: white;
-            padding: 14px 32px;
+            padding: 16px 40px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .btn-generate:hover {
+        .theme-generator-container .btn-generate:hover {
             background: #5568d3;
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-secondary {
+        .theme-generator-container .btn-secondary {
             background: #f0f0f0;
             color: #333;
             padding: 10px 20px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
 
-        .btn-secondary:hover {
+        .theme-generator-container .btn-secondary:hover {
             background: #e0e0e0;
         }
 
-        .info-box {
+        .theme-generator-container .info-box {
             background: #e3f2fd;
             border-left: 4px solid #2196f3;
             padding: 16px;
             margin-bottom: 24px;
-            border-radius: 4px;
+            border-radius: 6px;
         }
 
-        .info-box p {
+        .theme-generator-container .info-box p {
             margin: 0;
             color: #0d47a1;
+            line-height: 1.6;
         }
 
-        .message {
+        .theme-generator-container .message {
             padding: 16px;
             margin-bottom: 20px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: 500;
         }
 
-        .message.success {
+        .theme-generator-container .message.success {
             background: #d4edda;
             color: #155724;
             border-left: 4px solid #28a745;
         }
 
-        .message.error {
+        .theme-generator-container .message.error {
             background: #f8d7da;
             color: #721c24;
             border-left: 4px solid #dc3545;
         }
 
-        small.helper-text {
+        .theme-generator-container small.helper-text {
             display: block;
-            margin-top: 4px;
+            margin-top: 6px;
             color: #777;
             font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .theme-generator-container details {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 16px;
+        }
+
+        .theme-generator-container summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: #667eea;
+            user-select: none;
+        }
+
+        .theme-generator-container summary:hover {
+            color: #5568d3;
         }
     </style>
 </head>
@@ -295,7 +367,7 @@ $user = get_logged_user();
     <div class="main-content">
         <?php include APP_PATH . '/includes/admin/header.php'; ?>
 
-        <div class="container">
+        <div class="theme-generator-container">
             <h1 style="margin-bottom: 24px;">✨ Generador de Themes</h1>
 
             <!-- Info Box -->
@@ -321,8 +393,11 @@ $user = get_logged_user();
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
                 <!-- Información Básica -->
-                <section class="form-section">
-                    <h2>📋 Información Básica</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">📋</span>
+                        <h2>Información Básica</h2>
+                    </div>
 
                     <div class="form-group">
                         <label for="theme-name">Nombre del Theme *</label>
@@ -350,11 +425,14 @@ $user = get_logged_user();
                         <label for="author">Autor</label>
                         <input type="text" name="author" id="author" value="Shop Team">
                     </div>
-                </section>
+                </div>
 
                 <!-- Colores -->
-                <section class="form-section">
-                    <h2>🎨 Colores</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">🎨</span>
+                        <h2>Colores</h2>
+                    </div>
 
                     <div class="color-grid">
                         <div class="form-group">
@@ -442,11 +520,14 @@ $user = get_logged_user();
                             </div>
                         </div>
                     </details>
-                </section>
+                </div>
 
                 <!-- Tipografía -->
-                <section class="form-section">
-                    <h2>📝 Tipografía</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">📝</span>
+                        <h2>Tipografía</h2>
+                    </div>
 
                     <div class="form-group">
                         <label>Familia de Fuente</label>
@@ -484,11 +565,14 @@ $user = get_logged_user();
                             <option value="1.8">1.8 (Muy Relajado)</option>
                         </select>
                     </div>
-                </section>
+                </div>
 
                 <!-- Componentes: Cards -->
-                <section class="form-section">
-                    <h2>🎴 Componentes: Cards de Productos</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">🎴</span>
+                        <h2>Componentes: Cards de Productos</h2>
+                    </div>
 
                     <div class="form-group">
                         <label>Sombreado</label>
@@ -546,11 +630,14 @@ $user = get_logged_user();
                             </label>
                         </div>
                     </div>
-                </section>
+                </div>
 
                 <!-- Componentes: Buttons -->
-                <section class="form-section">
-                    <h2>🔘 Componentes: Botones</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">🔘</span>
+                        <h2>Componentes: Botones</h2>
+                    </div>
 
                     <div class="form-group">
                         <label>Estilo</label>
@@ -578,7 +665,7 @@ $user = get_logged_user();
                             </label>
                         </div>
                     </div>
-                </section>
+                </div>
 
                 <!-- Botón de generación -->
                 <div style="margin-top: 32px; text-align: center;">
