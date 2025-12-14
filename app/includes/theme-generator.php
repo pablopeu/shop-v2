@@ -206,9 +206,10 @@ function map_colors_intelligently($colors) {
  * @param string $slug Slug del theme
  * @param string $name Nombre del theme
  * @param array $colors Array de colores ['primary' => '#...', ...]
+ * @param string $original_slug Slug original si estamos editando (opcional)
  * @return array ['valid' => bool, 'errors' => []]
  */
-function validate_theme_input($slug, $name, $colors) {
+function validate_theme_input($slug, $name, $colors, $original_slug = '') {
     $errors = [];
 
     // Validar slug
@@ -218,9 +219,14 @@ function validate_theme_input($slug, $name, $colors) {
         $errors[] = 'El slug solo puede contener letras minúsculas, números y guiones';
     } else {
         // Verificar que el slug no esté duplicado
-        $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
-        if (is_dir($theme_dir)) {
-            $errors[] = "Ya existe un theme con el slug: {$slug}";
+        // Si estamos editando y el slug es el mismo que el original, no validar duplicados
+        $is_editing_same_theme = !empty($original_slug) && $original_slug === $slug;
+
+        if (!$is_editing_same_theme) {
+            $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
+            if (is_dir($theme_dir)) {
+                $errors[] = "Ya existe un theme con el slug: {$slug}";
+            }
         }
     }
 

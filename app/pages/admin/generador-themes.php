@@ -57,12 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'button_shadow' => isset($_POST['button_shadow'])
         ];
 
-        // Validar
+        // Validar (pasar original_slug si estamos editando un theme existente)
+        $original_slug = sanitize_input($_POST['original_slug'] ?? '');
         $validation = validate_theme_input($data['slug'], $data['name'], [
             'primary' => $data['color_primary'],
             'secondary' => $data['color_secondary'],
             'background' => $data['color_background']
-        ]);
+        ], $original_slug);
 
         if (!$validation['valid']) {
             $error = implode('<br>', $validation['errors']);
@@ -436,6 +437,7 @@ $user = get_logged_user();
         <!-- Formulario -->
             <form method="POST" action="" id="theme-generator-form">
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                <input type="hidden" name="original_slug" id="original-slug" value="">
 
                 <!-- Método de Creación -->
                 <div class="card card-full" style="margin-bottom: 20px;">
@@ -1500,6 +1502,7 @@ $user = get_logged_user();
                     // Poblar información básica
                     document.getElementById('theme-name').value = config.name || '';
                     document.getElementById('theme-slug').value = config.slug || '';
+                    document.getElementById('original-slug').value = config.slug || ''; // Recordar slug original para edición
                     document.getElementById('description').value = config.description || '';
                     document.getElementById('author').value = config.author || '';
 
