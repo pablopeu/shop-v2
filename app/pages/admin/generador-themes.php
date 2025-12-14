@@ -264,6 +264,12 @@ $user = get_logged_user();
         }
         .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
+        .btn-preview:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
         @media (max-width: 1024px) {
             .main-content { margin-left: 0; }
             .cards-grid { grid-template-columns: 1fr; }
@@ -480,6 +486,13 @@ $user = get_logged_user();
                         <div id="palettes-grid" style="display: none; max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa;">
                             <!-- Las paletas se cargarán aquí dinámicamente -->
                         </div>
+
+                        <!-- Botón de Preview debajo de paletas -->
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button type="button" data-action="showPreview" class="btn-preview" style="background: #667eea; color: white; padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                👁️ Preview del Theme
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Separador -->
@@ -495,23 +508,27 @@ $user = get_logged_user();
                             ✏️ Opción 2: Paleta Personalizada
                         </h3>
 
-                        <div class="info-box" style="margin-bottom: 15px;">
-                            <p style="font-size: 13px;">
-                                <strong>ℹ️ Cómo usar:</strong><br>
-                                1. Ve a <a href="https://colorhunt.co" target="_blank" rel="noopener" style="color: #667eea; text-decoration: underline;">ColorHunt.co</a><br>
-                                2. Elige una paleta que te guste (debe tener 4 colores)<br>
-                                3. Haz click en el ícono de copiar (📋) en la paleta<br>
-                                4. Pega directamente aquí los 4 colores
-                            </p>
-                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                            <!-- Explicación a la izquierda -->
+                            <div class="info-box">
+                                <p style="font-size: 13px;">
+                                    <strong>ℹ️ Cómo usar:</strong><br>
+                                    1. Ve a <a href="https://colorhunt.co" target="_blank" rel="noopener" style="color: #667eea; text-decoration: underline;">ColorHunt.co</a><br>
+                                    2. Elige una paleta que te guste (debe tener 4 colores)<br>
+                                    3. Haz click en el ícono de copiar (📋) en la paleta<br>
+                                    4. Pega directamente aquí los 4 colores
+                                </p>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="palette-colors">Pega los 4 colores aquí (uno por línea o separados por espacios)</label>
-                            <textarea id="palette-colors" rows="5" style="font-family: monospace; font-size: 14px; line-height: 1.8;" placeholder="#005461
+                            <!-- Campo de texto a la derecha -->
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="palette-colors" style="font-size: 13px; margin-bottom: 8px;">Pega los 4 colores aquí</label>
+                                <textarea id="palette-colors" rows="5" style="font-family: monospace; font-size: 14px; line-height: 1.8; width: 100%;" placeholder="#005461
 #018790
 #00B7B5
 #F4F4F4"></textarea>
-                            <small class="helper-text">Copia directamente desde ColorHunt y pégalos aquí. El sistema detectará automáticamente los 4 colores.</small>
+                                <small class="helper-text">El sistema detectará automáticamente los 4 colores.</small>
+                            </div>
                         </div>
                     </div>
 
