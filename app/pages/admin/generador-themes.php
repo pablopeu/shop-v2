@@ -104,52 +104,75 @@ $user = get_logged_user();
     <!-- Admin Common Styles -->
     <?php include APP_PATH . '/includes/admin/admin-common-styles.php'; ?>
 
-    <!-- Estilos específicos del generador (scoped para no afectar admin) -->
+    <!-- Estilos específicos del generador (TOTALMENTE SCOPED) -->
     <style nonce="<?= csp_nonce() ?>">
-        /* Scope todos los estilos dentro del contenedor del generador */
-        .theme-generator-container {
-            max-width: 1200px;
+        /* Contenedor principal - Grid de 2 columnas para aprovechar espacio */
+        #theme-generator-form {
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        .theme-generator-container .card {
+        #theme-generator-form .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        #theme-generator-form .cards-grid.full-width {
+            grid-template-columns: 1fr;
+        }
+
+        @media (max-width: 1200px) {
+            #theme-generator-form .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards individuales */
+        #theme-generator-form .card {
             background: white;
             border: 1px solid #e0e0e0;
             border-radius: 12px;
-            padding: 28px;
-            margin-bottom: 24px;
+            padding: 24px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: box-shadow 0.3s ease;
+            height: fit-content;
         }
 
-        .theme-generator-container .card:hover {
+        #theme-generator-form .card:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
-        .theme-generator-container .card-header {
+        #theme-generator-form .card-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
             border-bottom: 2px solid #f0f0f0;
         }
 
-        .theme-generator-container .card-header .icon {
+        #theme-generator-form .card-header .icon {
             font-size: 24px;
         }
 
-        .theme-generator-container .card-header h2 {
-            font-size: 20px;
+        #theme-generator-form .card-header h2 {
+            font-size: 18px;
             font-weight: 600;
             color: #333;
             margin: 0;
         }
 
-        .theme-generator-container .form-group {
-            margin-bottom: 20px;
+        #theme-generator-form .form-group {
+            margin-bottom: 18px;
         }
 
-        .theme-generator-container .form-group label {
+        #theme-generator-form .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        #theme-generator-form .form-group > label {
             display: block;
             font-weight: 500;
             margin-bottom: 8px;
@@ -157,117 +180,121 @@ $user = get_logged_user();
             font-size: 14px;
         }
 
-        .theme-generator-container .form-group input[type="text"],
-        .theme-generator-container .form-group input[type="color"],
-        .theme-generator-container .form-group textarea,
-        .theme-generator-container .form-group select {
+        #theme-generator-form .form-group input[type="text"],
+        #theme-generator-form .form-group input[type="color"],
+        #theme-generator-form .form-group textarea,
+        #theme-generator-form .form-group select {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
             transition: all 0.3s;
-            font-family: inherit;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        .theme-generator-container .form-group input[type="text"]:focus,
-        .theme-generator-container .form-group textarea:focus,
-        .theme-generator-container .form-group select:focus {
+        #theme-generator-form .form-group input[type="text"]:focus,
+        #theme-generator-form .form-group textarea:focus,
+        #theme-generator-form .form-group select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .theme-generator-container .form-group textarea {
+        #theme-generator-form .form-group textarea {
             min-height: 80px;
             resize: vertical;
         }
 
-        .theme-generator-container .color-grid {
+        #theme-generator-form .color-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
         }
 
-        .theme-generator-container .color-input-wrapper {
+        #theme-generator-form .color-input-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .theme-generator-container .color-input-wrapper input[type="color"] {
-            width: 60px;
-            height: 40px;
+        #theme-generator-form .color-input-wrapper input[type="color"] {
+            width: 50px;
+            height: 38px;
             border: 2px solid #ddd;
             border-radius: 6px;
             cursor: pointer;
         }
 
-        .theme-generator-container .color-input-wrapper input[type="text"] {
+        #theme-generator-form .color-input-wrapper input[type="text"] {
             flex: 1;
         }
 
-        .theme-generator-container .radio-group {
+        #theme-generator-form .radio-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 12px;
         }
 
-        .theme-generator-container .radio-group label {
+        #theme-generator-form .radio-group label {
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            font-weight: normal;
-            padding: 8px 12px;
+            font-weight: 400;
+            padding: 8px 14px;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
             transition: all 0.3s;
+            font-size: 14px;
         }
 
-        .theme-generator-container .radio-group label:hover {
+        #theme-generator-form .radio-group label:hover {
             border-color: #667eea;
             background: #f8f9ff;
         }
 
-        .theme-generator-container .radio-group input[type="radio"] {
+        #theme-generator-form .radio-group input[type="radio"] {
             cursor: pointer;
+            margin: 0;
         }
 
-        .theme-generator-container .radio-group input[type="radio"]:checked + label,
-        .theme-generator-container .radio-group label:has(input[type="radio"]:checked) {
+        #theme-generator-form .radio-group label:has(input[type="radio"]:checked) {
             border-color: #667eea;
             background: #f0f2ff;
+            font-weight: 500;
         }
 
-        .theme-generator-container .checkbox-group {
+        #theme-generator-form .checkbox-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .theme-generator-container .checkbox-group label {
+        #theme-generator-form .checkbox-group label {
             display: flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            font-weight: normal;
-            padding: 10px;
+            font-weight: 400;
+            padding: 8px 10px;
             border-radius: 6px;
             transition: background 0.3s;
+            font-size: 14px;
         }
 
-        .theme-generator-container .checkbox-group label:hover {
+        #theme-generator-form .checkbox-group label:hover {
             background: #f8f9ff;
         }
 
-        .theme-generator-container .checkbox-group input[type="checkbox"] {
+        #theme-generator-form .checkbox-group input[type="checkbox"] {
             cursor: pointer;
             width: 18px;
             height: 18px;
+            margin: 0;
         }
 
-        .theme-generator-container .btn-generate {
+        #theme-generator-form .btn-generate {
             background: #667eea;
             color: white;
             padding: 16px 40px;
@@ -278,27 +305,32 @@ $user = get_logged_user();
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        .theme-generator-container .btn-generate:hover {
+        #theme-generator-form .btn-generate:hover {
             background: #5568d3;
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
         }
 
-        .theme-generator-container .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            padding: 10px 20px;
-            border: 1px solid #ddd;
+        #theme-generator-form details {
+            border: 1px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
+            padding: 12px;
+            margin-top: 16px;
         }
 
-        .theme-generator-container .btn-secondary:hover {
-            background: #e0e0e0;
+        #theme-generator-form summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: #667eea;
+            user-select: none;
+            font-size: 14px;
+        }
+
+        #theme-generator-form summary:hover {
+            color: #5568d3;
         }
 
         .theme-generator-container .info-box {
@@ -313,6 +345,7 @@ $user = get_logged_user();
             margin: 0;
             color: #0d47a1;
             line-height: 1.6;
+            font-size: 14px;
         }
 
         .theme-generator-container .message {
@@ -334,30 +367,12 @@ $user = get_logged_user();
             border-left: 4px solid #dc3545;
         }
 
-        .theme-generator-container small.helper-text {
+        #theme-generator-form small.helper-text {
             display: block;
             margin-top: 6px;
             color: #777;
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.4;
-        }
-
-        .theme-generator-container details {
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 12px;
-            margin-top: 16px;
-        }
-
-        .theme-generator-container summary {
-            cursor: pointer;
-            font-weight: 500;
-            color: #667eea;
-            user-select: none;
-        }
-
-        .theme-generator-container summary:hover {
-            color: #5568d3;
         }
     </style>
 </head>
@@ -392,8 +407,10 @@ $user = get_logged_user();
             <form method="POST" action="" id="theme-generator-form">
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
-                <!-- Información Básica -->
-                <div class="card">
+                <!-- Grid: Información Básica + Tipografía -->
+                <div class="cards-grid">
+                    <!-- Información Básica -->
+                    <div class="card">
                     <div class="card-header">
                         <span class="icon">📋</span>
                         <h2>Información Básica</h2>
@@ -427,8 +444,56 @@ $user = get_logged_user();
                     </div>
                 </div>
 
-                <!-- Colores -->
-                <div class="card">
+                    <!-- Tipografía -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="icon">📝</span>
+                            <h2>Tipografía</h2>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Familia de Fuente</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="font_family" value="sans-serif" checked>
+                                    Sans-serif
+                                </label>
+                                <label>
+                                    <input type="radio" name="font_family" value="serif">
+                                    Serif
+                                </label>
+                                <label>
+                                    <input type="radio" name="font_family" value="monospace">
+                                    Monospace
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="font_size">Tamaño Base</label>
+                            <select name="font_size" id="font_size">
+                                <option value="14px">14px</option>
+                                <option value="16px" selected>16px</option>
+                                <option value="18px">18px</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="line_height">Altura de Línea</label>
+                            <select name="line_height" id="line_height">
+                                <option value="1.4">1.4</option>
+                                <option value="1.5" selected>1.5</option>
+                                <option value="1.6">1.6</option>
+                                <option value="1.8">1.8</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid: Colores (ancho completo) -->
+                <div class="cards-grid full-width">
+                    <!-- Colores -->
+                    <div class="card">
                     <div class="card-header">
                         <span class="icon">🎨</span>
                         <h2>Colores</h2>
@@ -521,54 +586,12 @@ $user = get_logged_user();
                         </div>
                     </details>
                 </div>
-
-                <!-- Tipografía -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="icon">📝</span>
-                        <h2>Tipografía</h2>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Familia de Fuente</label>
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="font_family" value="sans-serif" checked>
-                                Sans-serif (Moderna)
-                            </label>
-                            <label>
-                                <input type="radio" name="font_family" value="serif">
-                                Serif (Clásica)
-                            </label>
-                            <label>
-                                <input type="radio" name="font_family" value="monospace">
-                                Monospace (Técnica)
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="font_size">Tamaño Base</label>
-                        <select name="font_size" id="font_size">
-                            <option value="14px">14px (Pequeño)</option>
-                            <option value="16px" selected>16px (Normal)</option>
-                            <option value="18px">18px (Grande)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="line_height">Altura de Línea</label>
-                        <select name="line_height" id="line_height">
-                            <option value="1.4">1.4 (Compacto)</option>
-                            <option value="1.5" selected>1.5 (Normal)</option>
-                            <option value="1.6">1.6 (Relajado)</option>
-                            <option value="1.8">1.8 (Muy Relajado)</option>
-                        </select>
-                    </div>
                 </div>
 
-                <!-- Componentes: Cards -->
-                <div class="card">
+                <!-- Grid: Cards + Buttons -->
+                <div class="cards-grid">
+                    <!-- Componentes: Cards -->
+                    <div class="card">
                     <div class="card-header">
                         <span class="icon">🎴</span>
                         <h2>Componentes: Cards de Productos</h2>
@@ -632,8 +655,8 @@ $user = get_logged_user();
                     </div>
                 </div>
 
-                <!-- Componentes: Buttons -->
-                <div class="card">
+                    <!-- Componentes: Buttons -->
+                    <div class="card">
                     <div class="card-header">
                         <span class="icon">🔘</span>
                         <h2>Componentes: Botones</h2>
@@ -665,6 +688,7 @@ $user = get_logged_user();
                             </label>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <!-- Botón de generación -->
