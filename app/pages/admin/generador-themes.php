@@ -200,12 +200,6 @@ $user = get_logged_user();
             .color-grid {
                 grid-template-columns: 1fr;
             }
-
-            /* Radiobox en columna para mobile - ancho natural */
-            .radio-group {
-                flex-direction: column;
-                align-items: flex-start;
-            }
         }
 
         /* ============================================
