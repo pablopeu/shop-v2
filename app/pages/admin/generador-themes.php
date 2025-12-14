@@ -83,6 +83,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
     }
 }
 
+// ============================================================================
+// AJAX ENDPOINTS
+// ============================================================================
+
+// AJAX: Mapear Paleta Inteligentemente
+if (isset($_GET['action']) && $_GET['action'] === 'map_palette') {
+    header('Content-Type: application/json');
+
+    $json_input = json_decode(file_get_contents('php://input'), true);
+    $colors_array = $json_input['colors'] ?? [];
+
+    // Validar que sean 4 colores válidos
+    if (count($colors_array) !== 4) {
+        echo json_encode(['success' => false, 'message' => 'Debes proporcionar exactamente 4 colores']);
+        exit;
+    }
+
+    // Validar formato hex
+    foreach ($colors_array as $color) {
+        if (!preg_match('/^#[a-f0-9]{6}$/i', $color)) {
+            echo json_encode(['success' => false, 'message' => 'Formato de color inválido: ' . $color]);
+            exit;
+        }
+    }
+
+    $mapped = map_colors_intelligently($colors_array);
+
+    if (!$mapped) {
+        echo json_encode(['success' => false, 'message' => 'Error al mapear los colores']);
+        exit;
+    }
+
+    echo json_encode([
+        'success' => true,
+        'colors' => $mapped,
+        'raw_colors' => $colors_array
+    ]);
+    exit;
+}
+
+// ============================================================================
+// PÁGINA PRINCIPAL
+// ============================================================================
+
 // Cargar themes disponibles (para clonar en fase 3)
 $available_themes = get_available_themes();
 
@@ -348,6 +392,72 @@ $user = get_logged_user();
         <!-- Formulario -->
             <form method="POST" action="" id="theme-generator-form">
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+
+                <!-- Método de Creación -->
+                <div class="card card-full" style="margin-bottom: 20px;">
+                    <div class="card-title">
+                        🎨 Método de Creación
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="display: block; margin-bottom: 12px; font-weight: 500; color: #555;">Elige cómo crear tu theme:</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="creation_method" value="new" checked data-onchange="toggleCreationMethod">
+                                Nuevo desde cero
+                            </label>
+                            <label>
+                                <input type="radio" name="creation_method" value="palette" data-onchange="toggleCreationMethod">
+                                Importar paleta de ColorHunt
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Importar Paleta de ColorHunt -->
+                <div class="card card-full" id="palette-import" style="display: none; margin-bottom: 20px;">
+                    <div class="card-title">
+                        🎨 Importar Paleta de ColorHunt
+                    </div>
+
+                    <div class="info-box" style="margin-bottom: 20px;">
+                        <p>
+                            <strong>ℹ️ Cómo usar:</strong><br>
+                            1. Ve a <a href="https://colorhunt.co" target="_blank" rel="noopener" style="color: #667eea; text-decoration: underline;">ColorHunt.co</a><br>
+                            2. Elige una paleta que te guste (debe tener 4 colores)<br>
+                            3. Copia los 4 colores y pégalos aquí en formato #RRGGBB
+                        </p>
+                    </div>
+
+                    <div class="compact-grid-2">
+                        <div class="form-group">
+                            <label for="palette-color-1">Color 1 (Más oscuro)</label>
+                            <input type="text" id="palette-color-1" placeholder="#213448" pattern="^#[a-fA-F0-9]{6}$">
+                        </div>
+                        <div class="form-group">
+                            <label for="palette-color-2">Color 2</label>
+                            <input type="text" id="palette-color-2" placeholder="#547792" pattern="^#[a-fA-F0-9]{6}$">
+                        </div>
+                        <div class="form-group">
+                            <label for="palette-color-3">Color 3</label>
+                            <input type="text" id="palette-color-3" placeholder="#94b4c1" pattern="^#[a-fA-F0-9]{6}$">
+                        </div>
+                        <div class="form-group">
+                            <label for="palette-color-4">Color 4 (Más claro)</label>
+                            <input type="text" id="palette-color-4" placeholder="#eae0cf" pattern="^#[a-fA-F0-9]{6}$">
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 16px;">
+                        <button type="button" data-action="mapPalette" class="btn-save">
+                            🎨 Aplicar Mapeo Inteligente
+                        </button>
+                    </div>
+
+                    <small class="helper-text" style="display: block; text-align: center; margin-top: 12px;">
+                        El sistema mapeará automáticamente los colores a primary, secondary, accent, background y text con validación de contraste WCAG.
+                    </small>
+                </div>
 
                 <!-- Grid: Información Básica + Tipografía -->
                 <div class="cards-grid">
@@ -651,6 +761,115 @@ $user = get_logged_user();
             document.getElementById('theme-slug').value = slug;
         }
 
+        // Toggle método de creación
+        function toggleCreationMethod(event, element, params) {
+            const value = element.value;
+            const paletteDiv = document.getElementById('palette-import');
+
+            if (value === 'palette') {
+                paletteDiv.style.display = 'block';
+            } else {
+                paletteDiv.style.display = 'none';
+            }
+        }
+
+        // Mapear paleta de ColorHunt
+        function mapPalette(event, element, params) {
+            event.preventDefault();
+
+            // Obtener los 4 colores
+            const colors = [
+                document.getElementById('palette-color-1').value.trim(),
+                document.getElementById('palette-color-2').value.trim(),
+                document.getElementById('palette-color-3').value.trim(),
+                document.getElementById('palette-color-4').value.trim()
+            ];
+
+            // Validar que no estén vacíos
+            if (colors.some(c => !c)) {
+                showModal({
+                    title: 'Error',
+                    message: 'Por favor completa los 4 colores',
+                    icon: '⚠️',
+                    confirmType: 'danger'
+                });
+                return;
+            }
+
+            // Validar formato hex
+            const hexPattern = /^#[a-fA-F0-9]{6}$/;
+            if (!colors.every(c => hexPattern.test(c))) {
+                showModal({
+                    title: 'Error de Formato',
+                    message: 'Formato inválido. Usa #RRGGBB (ejemplo: #213448)',
+                    icon: '⚠️',
+                    confirmType: 'danger'
+                });
+                return;
+            }
+
+            // Mostrar loading en el botón
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Mapeando...';
+            btn.disabled = true;
+
+            // Enviar petición AJAX
+            fetch('<?php echo url('/admin/?page=generador-themes&action=map_palette'); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ colors: colors })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+
+                if (data.success) {
+                    // Poblar inputs de color
+                    document.getElementById('color-primary').value = data.colors.primary;
+                    document.getElementById('color-secondary').value = data.colors.secondary;
+                    document.getElementById('color-accent').value = data.colors.accent;
+                    document.getElementById('color-background').value = data.colors.background;
+                    document.getElementById('color-text').value = data.colors.text;
+
+                    // Sincronizar text inputs
+                    document.querySelector('#color-primary').parentElement.querySelector('input[type="text"]').value = data.colors.primary;
+                    document.querySelector('#color-secondary').parentElement.querySelector('input[type="text"]').value = data.colors.secondary;
+                    document.querySelector('#color-accent').parentElement.querySelector('input[type="text"]').value = data.colors.accent;
+                    document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = data.colors.background;
+                    document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = data.colors.text;
+
+                    showModal({
+                        title: 'Éxito',
+                        message: '✅ Paleta mapeada exitosamente con contraste WCAG validado',
+                        icon: '🎨',
+                        confirmType: 'success'
+                    });
+                } else {
+                    showModal({
+                        title: 'Error',
+                        message: data.message,
+                        icon: '⚠️',
+                        confirmType: 'danger'
+                    });
+                }
+            })
+            .catch(error => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+
+                showModal({
+                    title: 'Error de Red',
+                    message: 'Error al conectar con el servidor: ' + error,
+                    icon: '⚠️',
+                    confirmType: 'danger'
+                });
+            });
+        }
+
         // Sincronizar color picker con text input
         document.querySelectorAll('.color-input-wrapper').forEach(wrapper => {
             const colorInput = wrapper.querySelector('input[type="color"]');
@@ -669,8 +888,10 @@ $user = get_logged_user();
             }
         });
 
-        // Exportar función para event delegation
+        // Exportar funciones para event delegation
         window.generateSlug = generateSlug;
+        window.toggleCreationMethod = toggleCreationMethod;
+        window.mapPalette = mapPalette;
     </script>
 
     <!-- Modal Component -->
