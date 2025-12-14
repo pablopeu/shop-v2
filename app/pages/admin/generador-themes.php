@@ -729,8 +729,11 @@ $user = get_logged_user();
                 </div>
                 </div>
 
-                <!-- Botón de generación -->
-                <div style="margin-top: 32px; text-align: center;">
+                <!-- Botones de acción -->
+                <div style="margin-top: 32px; text-align: center; display: flex; gap: 16px; justify-content: center;">
+                    <button type="button" data-action="showPreview" style="padding: 14px 40px; background: #6c757d; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        👁️ Preview
+                    </button>
                     <button type="submit" name="generate_theme" class="btn-save">
                         💾 Generar Theme
                     </button>
@@ -876,10 +879,170 @@ $user = get_logged_user();
             }
         });
 
+        // Preview del theme
+        function showPreview(event, element, params) {
+            event.preventDefault();
+
+            // Leer valores del formulario
+            const config = {
+                // Colores
+                primary: document.getElementById('color-primary').value || '#000000',
+                secondary: document.getElementById('color-secondary').value || '#d4af37',
+                accent: document.getElementById('color-accent').value || '#4facfe',
+                text: document.getElementById('color-text').value || '#1a1a1a',
+                background: document.getElementById('color-background').value || '#ffffff',
+
+                // Tipografía
+                fontFamily: document.querySelector('[name="font_family"]:checked')?.value || 'sans-serif',
+                fontSize: document.querySelector('[name="font_size"]').value || '16px',
+                lineHeight: document.querySelector('[name="line_height"]').value || '1.5',
+
+                // Cards
+                cardBorder: document.querySelector('[name="card_border"]')?.checked || false,
+                cardShadow: document.querySelector('[name="card_shadow"]:checked')?.value || 'subtle',
+                cardRounded: document.querySelector('[name="card_rounded"]')?.checked || false,
+                cardHover: document.querySelector('[name="card_hover"]:checked')?.value || 'glow',
+
+                // Buttons
+                buttonStyle: document.querySelector('[name="button_style"]:checked')?.value || 'solid',
+                buttonRounded: document.querySelector('[name="button_rounded"]')?.checked || false,
+                buttonShadow: document.querySelector('[name="button_shadow"]')?.checked || false
+            };
+
+            // Generar estilos CSS
+            const borderRadius = config.cardRounded ? '8px' : '0';
+            const borderStyle = config.cardBorder ? `1px solid ${config.primary}20` : 'none';
+
+            let boxShadow = 'none';
+            if (config.cardShadow === 'subtle') boxShadow = '0 2px 4px rgba(0,0,0,0.08)';
+            else if (config.cardShadow === 'medium') boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            else if (config.cardShadow === 'deep') boxShadow = '0 8px 20px rgba(0,0,0,0.18)';
+
+            const btnBorderRadius = config.buttonRounded ? '50px' : '4px';
+            const btnBoxShadow = config.buttonShadow ? '0 2px 4px rgba(0,0,0,0.15)' : 'none';
+
+            // Generar HTML del preview
+            const previewHTML = `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, ${config.fontFamily}; font-size: ${config.fontSize}; line-height: ${config.lineHeight}; background: ${config.background}; color: ${config.text}; padding: 30px; max-height: 80vh; overflow-y: auto;">
+
+                    <!-- Paleta de Colores -->
+                    <h2 style="margin-bottom: 20px; color: ${config.primary};">🎨 Paleta de Colores</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 40px;">
+                        <div style="text-align: center;">
+                            <div style="width: 100%; height: 80px; background: ${config.primary}; border-radius: ${borderRadius}; margin-bottom: 8px;"></div>
+                            <small style="font-size: 12px;">Primary</small><br>
+                            <code style="font-size: 11px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">${config.primary}</code>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="width: 100%; height: 80px; background: ${config.secondary}; border-radius: ${borderRadius}; margin-bottom: 8px;"></div>
+                            <small style="font-size: 12px;">Secondary</small><br>
+                            <code style="font-size: 11px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">${config.secondary}</code>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="width: 100%; height: 80px; background: ${config.accent}; border-radius: ${borderRadius}; margin-bottom: 8px;"></div>
+                            <small style="font-size: 12px;">Accent</small><br>
+                            <code style="font-size: 11px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">${config.accent}</code>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="width: 100%; height: 80px; background: ${config.background}; border: 1px solid #ddd; border-radius: ${borderRadius}; margin-bottom: 8px;"></div>
+                            <small style="font-size: 12px;">Background</small><br>
+                            <code style="font-size: 11px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">${config.background}</code>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="width: 100%; height: 80px; background: ${config.text}; border-radius: ${borderRadius}; margin-bottom: 8px;"></div>
+                            <small style="font-size: 12px;">Text</small><br>
+                            <code style="font-size: 11px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">${config.text}</code>
+                        </div>
+                    </div>
+
+                    <!-- Tipografía -->
+                    <h2 style="margin-bottom: 20px; color: ${config.primary};">📝 Tipografía</h2>
+                    <div style="margin-bottom: 40px; padding: 20px; background: white; border-radius: ${borderRadius}; border: ${borderStyle};">
+                        <h1 style="font-size: 2em; margin-bottom: 10px; color: ${config.primary};">Heading 1</h1>
+                        <h2 style="font-size: 1.5em; margin-bottom: 10px; color: ${config.primary};">Heading 2</h2>
+                        <h3 style="font-size: 1.2em; margin-bottom: 10px; color: ${config.primary};">Heading 3</h3>
+                        <p style="margin-bottom: 10px; color: ${config.text};">Este es un párrafo de ejemplo con el tamaño de fuente base (${config.fontSize}) y altura de línea ${config.lineHeight}. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <small style="color: ${config.text}80;">Texto pequeño con opacidad</small>
+                    </div>
+
+                    <!-- Botones -->
+                    <h2 style="margin-bottom: 20px; color: ${config.primary};">🔘 Botones</h2>
+                    <div style="display: flex; gap: 15px; margin-bottom: 40px; flex-wrap: wrap;">
+                        ${config.buttonStyle === 'solid' ? `
+                            <button style="padding: 12px 28px; background: ${config.primary}; color: white; border: none; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                                Primary Button
+                            </button>
+                            <button style="padding: 12px 28px; background: ${config.secondary}; color: white; border: none; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                                Secondary Button
+                            </button>
+                        ` : `
+                            <button style="padding: 12px 28px; background: transparent; color: ${config.primary}; border: 2px solid ${config.primary}; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                                Primary Button
+                            </button>
+                            <button style="padding: 12px 28px; background: transparent; color: ${config.secondary}; border: 2px solid ${config.secondary}; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                                Secondary Button
+                            </button>
+                        `}
+                    </div>
+
+                    <!-- Cards de Producto -->
+                    <h2 style="margin-bottom: 20px; color: ${config.primary};">🎴 Cards de Producto</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div class="preview-card" style="background: white; border: ${borderStyle}; border-radius: ${borderRadius}; box-shadow: ${boxShadow}; overflow: hidden; transition: all 0.3s;">
+                            <div style="width: 100%; height: 180px; background: linear-gradient(135deg, ${config.primary}20, ${config.secondary}20);"></div>
+                            <div style="padding: 16px;">
+                                <h3 style="font-size: 1.1em; margin-bottom: 8px; color: ${config.primary};">Producto Ejemplo</h3>
+                                <p style="font-size: 0.9em; color: ${config.text}80; margin-bottom: 12px;">Descripción corta del producto</p>
+                                <p style="font-size: 1.2em; font-weight: 600; color: ${config.secondary};">$99.99</p>
+                            </div>
+                        </div>
+                        <div class="preview-card" style="background: white; border: ${borderStyle}; border-radius: ${borderRadius}; box-shadow: ${boxShadow}; overflow: hidden; transition: all 0.3s;">
+                            <div style="width: 100%; height: 180px; background: linear-gradient(135deg, ${config.accent}20, ${config.primary}20);"></div>
+                            <div style="padding: 16px;">
+                                <h3 style="font-size: 1.1em; margin-bottom: 8px; color: ${config.primary};">Producto Ejemplo</h3>
+                                <p style="font-size: 0.9em; color: ${config.text}80; margin-bottom: 12px;">Descripción corta del producto</p>
+                                <p style="font-size: 1.2em; font-weight: 600; color: ${config.secondary};">$149.99</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 30px; text-align: center; font-size: 0.9em; color: ${config.text}80;">
+                        ℹ️ Este es un preview aproximado. El theme generado incluirá más variaciones y estados.
+                    </p>
+                </div>
+            `;
+
+            // Agregar CSS para hover effect de cards
+            let hoverCSS = '';
+            if (config.cardHover === 'lift') {
+                hoverCSS = '.preview-card:hover { transform: translateY(-8px); box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important; }';
+            } else if (config.cardHover === 'glow') {
+                hoverCSS = `.preview-card:hover { box-shadow: 0 0 0 3px ${config.primary}33, ${boxShadow} !important; }`;
+            } else if (config.cardHover === 'lift-3d') {
+                hoverCSS = '.preview-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 16px 32px rgba(0,0,0,0.22) !important; }';
+            }
+
+            const styleTag = document.createElement('style');
+            styleTag.innerHTML = hoverCSS;
+            document.head.appendChild(styleTag);
+
+            // Mostrar modal con el preview
+            showModal({
+                title: '👁️ Preview del Theme',
+                message: previewHTML,
+                confirmText: 'Cerrar',
+                showCancel: false,
+                onConfirm: function() {
+                    document.head.removeChild(styleTag);
+                }
+            });
+        }
+
         // Exportar funciones para event delegation
         window.generateSlug = generateSlug;
         window.toggleCreationMethod = toggleCreationMethod;
         window.mapPalette = mapPalette;
+        window.showPreview = showPreview;
     </script>
 
     <!-- Modal Component -->
