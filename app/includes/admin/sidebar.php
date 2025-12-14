@@ -357,7 +357,7 @@ $current_page = $_GET['page'] ?? 'index';
                 <span>⚙️ Configuracion</span>
                 <span class="menu-arrow" id="arrow-configuraciones">▶</span>
             </div>
-            <ul class="submenu config-container <?php echo in_array($current_page, ['config-sistema', 'config-rutas-sistema', 'config-backup', 'config-sitio', 'config-dashboard', 'config-themes', 'config-hero', 'config-carrusel', 'config-footer', 'config-payment', 'config-moneda', 'reprocesar-pago-mp', 'notificaciones', 'config-analytics']) ? 'open' : ''; ?>" id="submenu-configuraciones">
+            <ul class="submenu config-container <?php echo in_array($current_page, ['config-sistema', 'config-rutas-sistema', 'config-backup', 'config-sitio', 'config-dashboard', 'config-themes', 'generador-themes', 'config-hero', 'config-carrusel', 'config-footer', 'config-payment', 'config-moneda', 'reprocesar-pago-mp', 'notificaciones', 'config-analytics']) ? 'open' : ''; ?>" id="submenu-configuraciones">
                 <!-- Sistema -->
                 <li>
                     <div class="menu-item" data-action="toggleSubmenu" data-menu-id="config-sistema-group">

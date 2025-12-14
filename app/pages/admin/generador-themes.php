@@ -1349,13 +1349,6 @@ $user = get_logged_user();
                     const buttonShadow = document.querySelector('[name="button_shadow"]');
                     if (buttonShadow) buttonShadow.checked = config.components?.buttons?.shadow || false;
 
-                    showModal({
-                        title: 'Éxito',
-                        message: `✅ Theme "${config.name}" cargado exitosamente.\n\nModifica lo que necesites y presiona "Generar Theme" para sobrescribir el theme original.`,
-                        icon: '✏️',
-                        confirmType: 'success'
-                    });
-
                     // Scroll al inicio del formulario
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
