@@ -185,11 +185,31 @@ $user = get_logged_user();
         @media (max-width: 1024px) {
             .main-content { margin-left: 0; }
             .cards-grid { grid-template-columns: 1fr; }
+
+            /* Color grid en tablet - 2 columnas */
+            .color-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
             .compact-grid-2 { grid-template-columns: 1fr; }
             .cards-grid { grid-template-columns: 1fr; }
+
+            /* Color grid en mobile - 1 columna */
+            .color-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Radiobox en columna para mobile */
+            .radio-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .radio-group label {
+                width: 100%;
+            }
         }
 
         /* ============================================
