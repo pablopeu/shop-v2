@@ -123,6 +123,41 @@ if (isset($_GET['action']) && $_GET['action'] === 'map_palette') {
     exit;
 }
 
+// AJAX: Obtener Configuración de Theme
+if (isset($_GET['action']) && $_GET['action'] === 'get_theme_config') {
+    header('Content-Type: application/json');
+
+    $json_input = json_decode(file_get_contents('php://input'), true);
+    $slug = sanitize_input($json_input['slug'] ?? '');
+
+    if (empty($slug)) {
+        echo json_encode(['success' => false, 'message' => 'Slug no proporcionado']);
+        exit;
+    }
+
+    // Obtener config del theme
+    $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
+    $config_file = $theme_dir . '/theme.json';
+
+    if (!file_exists($config_file)) {
+        echo json_encode(['success' => false, 'message' => 'Theme no encontrado']);
+        exit;
+    }
+
+    $config = read_json($config_file);
+
+    if (!$config) {
+        echo json_encode(['success' => false, 'message' => 'Error al leer configuración del theme']);
+        exit;
+    }
+
+    echo json_encode([
+        'success' => true,
+        'config' => $config
+    ]);
+    exit;
+}
+
 // ============================================================================
 // PÁGINA PRINCIPAL
 // ============================================================================
@@ -410,6 +445,10 @@ $user = get_logged_user();
                                 <input type="radio" name="creation_method" value="palette" data-onchange="toggleCreationMethod">
                                 Importar paleta de ColorHunt
                             </label>
+                            <label>
+                                <input type="radio" name="creation_method" value="edit" data-onchange="toggleCreationMethod">
+                                Editar theme existente
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -448,6 +487,40 @@ $user = get_logged_user();
                     <small class="helper-text" style="display: block; text-align: center; margin-top: 12px;">
                         El sistema mapeará automáticamente los colores a primary, secondary, accent, background y text con validación de contraste WCAG.
                     </small>
+                </div>
+
+                <!-- Editar Theme Existente -->
+                <div class="card card-full" id="edit-theme" style="display: none; margin-bottom: 20px;">
+                    <div class="card-title">
+                        ✏️ Editar Theme Existente
+                    </div>
+
+                    <div class="info-box" style="margin-bottom: 20px;">
+                        <p>
+                            <strong>ℹ️ Cómo funciona:</strong><br>
+                            Selecciona un theme existente para cargarlo en el formulario.<br>
+                            Modifica lo que necesites y regenera el theme (se sobrescribirá el original).
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-theme-select">Selecciona el theme a editar</label>
+                        <select id="edit-theme-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+                            <option value="">-- Selecciona un theme --</option>
+                            <?php foreach ($available_themes as $slug => $theme): ?>
+                                <option value="<?php echo htmlspecialchars($slug); ?>">
+                                    <?php echo htmlspecialchars($theme['name']); ?> (<?php echo htmlspecialchars($slug); ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small class="helper-text">El theme seleccionado se cargará en el formulario para editarlo</small>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 16px;">
+                        <button type="button" data-action="loadThemeForEdit" class="btn-save">
+                            📥 Cargar Theme
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Grid: Información Básica + Tipografía -->
@@ -759,11 +832,17 @@ $user = get_logged_user();
         function toggleCreationMethod(event, element, params) {
             const value = element.value;
             const paletteDiv = document.getElementById('palette-import');
+            const editDiv = document.getElementById('edit-theme');
 
+            // Ocultar todos
+            paletteDiv.style.display = 'none';
+            editDiv.style.display = 'none';
+
+            // Mostrar el seleccionado
             if (value === 'palette') {
                 paletteDiv.style.display = 'block';
-            } else {
-                paletteDiv.style.display = 'none';
+            } else if (value === 'edit') {
+                editDiv.style.display = 'block';
             }
         }
 
@@ -1064,10 +1143,131 @@ $user = get_logged_user();
             }
         }
 
+        // Cargar theme para editar
+        function loadThemeForEdit(event, element, params) {
+            event.preventDefault();
+
+            const select = document.getElementById('edit-theme-select');
+            const slug = select.value;
+
+            if (!slug) {
+                showModal({
+                    title: 'Error',
+                    message: 'Por favor selecciona un theme',
+                    icon: '⚠️',
+                    confirmType: 'danger'
+                });
+                return;
+            }
+
+            // Mostrar loading en el botón
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Cargando...';
+            btn.disabled = true;
+
+            // Obtener config del theme
+            fetch('<?php echo url('/admin/?page=generador-themes&action=get_theme_config'); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ slug: slug })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+
+                if (data.success) {
+                    const config = data.config;
+
+                    // Poblar información básica
+                    document.getElementById('theme-name').value = config.name || '';
+                    document.getElementById('theme-slug').value = config.slug || '';
+                    document.getElementById('description').value = config.description || '';
+                    document.getElementById('author').value = config.author || '';
+
+                    // Poblar colores
+                    document.getElementById('color-primary').value = config.colors.primary || '#000000';
+                    document.getElementById('color-secondary').value = config.colors.secondary || '#d4af37';
+                    document.getElementById('color-accent').value = config.colors.accent || '#4facfe';
+                    document.getElementById('color-text').value = config.colors.text || '#1a1a1a';
+                    document.getElementById('color-background').value = config.colors.background || '#ffffff';
+
+                    // Sincronizar text inputs de colores
+                    document.querySelector('#color-primary').parentElement.querySelector('input[type="text"]').value = config.colors.primary;
+                    document.querySelector('#color-secondary').parentElement.querySelector('input[type="text"]').value = config.colors.secondary;
+                    document.querySelector('#color-accent').parentElement.querySelector('input[type="text"]').value = config.colors.accent;
+                    document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = config.colors.background;
+                    document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = config.colors.text;
+
+                    // Poblar tipografía
+                    const fontFamily = config.typography?.font_family || 'sans-serif';
+                    document.querySelector(`[name="font_family"][value="${fontFamily}"]`)?.click();
+
+                    document.querySelector('[name="font_size"]').value = config.typography?.base_size || '16px';
+                    document.querySelector('[name="line_height"]').value = config.typography?.line_height || '1.5';
+
+                    // Poblar cards
+                    const cardBorder = document.querySelector('[name="card_border"]');
+                    if (cardBorder) cardBorder.checked = config.components?.cards?.border || false;
+
+                    const cardShadow = config.components?.cards?.shadow || 'subtle';
+                    document.querySelector(`[name="card_shadow"][value="${cardShadow}"]`)?.click();
+
+                    const cardRounded = document.querySelector('[name="card_rounded"]');
+                    if (cardRounded) cardRounded.checked = config.components?.cards?.rounded || false;
+
+                    const cardHover = config.components?.cards?.hover_effect || 'glow';
+                    document.querySelector(`[name="card_hover"][value="${cardHover}"]`)?.click();
+
+                    // Poblar buttons
+                    const buttonStyle = config.components?.buttons?.style || 'solid';
+                    document.querySelector(`[name="button_style"][value="${buttonStyle}"]`)?.click();
+
+                    const buttonRounded = document.querySelector('[name="button_rounded"]');
+                    if (buttonRounded) buttonRounded.checked = config.components?.buttons?.rounded || false;
+
+                    const buttonShadow = document.querySelector('[name="button_shadow"]');
+                    if (buttonShadow) buttonShadow.checked = config.components?.buttons?.shadow || false;
+
+                    showModal({
+                        title: 'Éxito',
+                        message: `✅ Theme "${config.name}" cargado exitosamente.\n\nModifica lo que necesites y presiona "Generar Theme" para sobrescribir el theme original.`,
+                        icon: '✏️',
+                        confirmType: 'success'
+                    });
+
+                    // Scroll al inicio del formulario
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    showModal({
+                        title: 'Error',
+                        message: data.message,
+                        icon: '⚠️',
+                        confirmType: 'danger'
+                    });
+                }
+            })
+            .catch(error => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+
+                showModal({
+                    title: 'Error de Red',
+                    message: 'Error al conectar con el servidor: ' + error,
+                    icon: '⚠️',
+                    confirmType: 'danger'
+                });
+            });
+        }
+
         // Exportar funciones para event delegation
         window.generateSlug = generateSlug;
         window.toggleCreationMethod = toggleCreationMethod;
         window.mapPalette = mapPalette;
+        window.loadThemeForEdit = loadThemeForEdit;
         window.showPreview = showPreview;
     </script>
 
