@@ -266,27 +266,20 @@ $user = get_logged_user();
             gap: 8px;
             cursor: pointer;
             font-weight: 400;
-            padding: 8px 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            transition: all 0.3s;
             font-size: 14px;
-        }
-
-        .radio-group label:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
+            padding: 4px 0;
         }
 
         .radio-group input[type="radio"] {
             cursor: pointer;
             margin: 0;
+            width: 18px;
+            height: 18px;
         }
 
         .radio-group label:has(input[type="radio"]:checked) {
-            border-color: #667eea;
-            background: #f0f2ff;
             font-weight: 500;
+            color: #667eea;
         }
 
         /* Checkbox groups */
