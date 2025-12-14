@@ -101,124 +101,131 @@ $user = get_logged_user();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title); ?> - Admin</title>
 
-    <!-- Admin Common Styles -->
-    <?php include APP_PATH . '/includes/admin/admin-common-styles.php'; ?>
-
-    <!-- Estilos específicos del generador (TOTALMENTE SCOPED) -->
+    <!-- ESTILOS BASE DEL ADMIN (igual que todas las páginas) -->
     <style nonce="<?= csp_nonce() ?>">
-        /* Contenedor principal - Grid de 2 columnas para aprovechar espacio */
-        #theme-generator-form {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .main-content { margin-left: 260px; padding: 20px; max-width: 1400px; }
+        .message { padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
+        .message.success { background: #d4edda; border-left: 4px solid #28a745; color: #155724; }
+        .message.error { background: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; }
 
-        #theme-generator-form .cards-grid {
+        /* Cards Grid System */
+        .cards-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        #theme-generator-form .cards-grid.full-width {
-            grid-template-columns: 1fr;
-        }
-
-        @media (max-width: 1200px) {
-            #theme-generator-form .cards-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Cards individuales */
-        #theme-generator-form .card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: box-shadow 0.3s ease;
-            height: fit-content;
-        }
-
-        #theme-generator-form .card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        #theme-generator-form .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
             margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #f0f0f0;
         }
 
-        #theme-generator-form .card-header .icon {
-            font-size: 24px;
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: box-shadow 0.3s;
         }
 
-        #theme-generator-form .card-header h2 {
-            font-size: 18px;
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .card-full {
+            grid-column: 1 / -1;
+        }
+
+        .card-title {
+            font-size: 16px;
             font-weight: 600;
             color: #333;
-            margin: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e0e0e0;
         }
 
-        #theme-generator-form .form-group {
-            margin-bottom: 18px;
+        .card-description {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+            line-height: 1.5;
         }
 
-        #theme-generator-form .form-group:last-child {
-            margin-bottom: 0;
+        .form-group { margin-bottom: 15px; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #555; font-size: 14px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .form-group textarea { min-height: 80px; resize: vertical; font-family: inherit; }
+
+        .compact-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .btn-save-container {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
         }
 
-        #theme-generator-form .form-group > label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #555;
-            font-size: 14px;
-        }
-
-        #theme-generator-form .form-group input[type="text"],
-        #theme-generator-form .form-group input[type="color"],
-        #theme-generator-form .form-group textarea,
-        #theme-generator-form .form-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
+        .btn-save {
+            padding: 14px 40px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
             transition: all 0.3s;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+        @media (max-width: 1024px) {
+            .main-content { margin-left: 0; }
+            .cards-grid { grid-template-columns: 1fr; }
         }
 
-        #theme-generator-form .form-group input[type="text"]:focus,
-        #theme-generator-form .form-group textarea:focus,
-        #theme-generator-form .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        @media (max-width: 768px) {
+            .compact-grid-2 { grid-template-columns: 1fr; }
+            .cards-grid { grid-template-columns: 1fr; }
         }
 
-        #theme-generator-form .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
+        /* ============================================
+           ESTILOS ESPECÍFICOS DEL GENERADOR SOLAMENTE
+           ============================================ */
+
+        /* Info box */
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 6px;
         }
 
-        #theme-generator-form .color-grid {
+        .info-box p {
+            margin: 0;
+            color: #0d47a1;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* Color picker con preview */
+        .color-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
         }
 
-        #theme-generator-form .color-input-wrapper {
+        .color-input-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        #theme-generator-form .color-input-wrapper input[type="color"] {
+        .color-input-wrapper input[type="color"] {
             width: 50px;
             height: 38px;
             border: 2px solid #ddd;
@@ -226,17 +233,18 @@ $user = get_logged_user();
             cursor: pointer;
         }
 
-        #theme-generator-form .color-input-wrapper input[type="text"] {
+        .color-input-wrapper input[type="text"] {
             flex: 1;
         }
 
-        #theme-generator-form .radio-group {
+        /* Radio groups horizontales */
+        .radio-group {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
         }
 
-        #theme-generator-form .radio-group label {
+        .radio-group label {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -249,29 +257,30 @@ $user = get_logged_user();
             font-size: 14px;
         }
 
-        #theme-generator-form .radio-group label:hover {
+        .radio-group label:hover {
             border-color: #667eea;
             background: #f8f9ff;
         }
 
-        #theme-generator-form .radio-group input[type="radio"] {
+        .radio-group input[type="radio"] {
             cursor: pointer;
             margin: 0;
         }
 
-        #theme-generator-form .radio-group label:has(input[type="radio"]:checked) {
+        .radio-group label:has(input[type="radio"]:checked) {
             border-color: #667eea;
             background: #f0f2ff;
             font-weight: 500;
         }
 
-        #theme-generator-form .checkbox-group {
+        /* Checkbox groups */
+        .checkbox-group {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        #theme-generator-form .checkbox-group label {
+        .checkbox-group label {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -283,91 +292,19 @@ $user = get_logged_user();
             font-size: 14px;
         }
 
-        #theme-generator-form .checkbox-group label:hover {
+        .checkbox-group label:hover {
             background: #f8f9ff;
         }
 
-        #theme-generator-form .checkbox-group input[type="checkbox"] {
+        .checkbox-group input[type="checkbox"] {
             cursor: pointer;
             width: 18px;
             height: 18px;
             margin: 0;
         }
 
-        #theme-generator-form .btn-generate {
-            background: #667eea;
-            color: white;
-            padding: 16px 40px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        #theme-generator-form .btn-generate:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-        }
-
-        #theme-generator-form details {
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 12px;
-            margin-top: 16px;
-        }
-
-        #theme-generator-form summary {
-            cursor: pointer;
-            font-weight: 500;
-            color: #667eea;
-            user-select: none;
-            font-size: 14px;
-        }
-
-        #theme-generator-form summary:hover {
-            color: #5568d3;
-        }
-
-        .theme-generator-container .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 16px;
-            margin-bottom: 24px;
-            border-radius: 6px;
-        }
-
-        .theme-generator-container .info-box p {
-            margin: 0;
-            color: #0d47a1;
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        .theme-generator-container .message {
-            padding: 16px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-
-        .theme-generator-container .message.success {
-            background: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
-        }
-
-        .theme-generator-container .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-        }
-
-        #theme-generator-form small.helper-text {
+        /* Helper text */
+        small.helper-text {
             display: block;
             margin-top: 6px;
             color: #777;
@@ -375,6 +312,9 @@ $user = get_logged_user();
             line-height: 1.4;
         }
     </style>
+
+    <!-- Admin Common Responsive Styles -->
+    <?php include APP_PATH . '/includes/admin/admin-common-styles.php'; ?>
 </head>
 <body>
     <?php include APP_PATH . '/includes/admin/sidebar.php'; ?>
@@ -382,28 +322,27 @@ $user = get_logged_user();
     <div class="main-content">
         <?php include APP_PATH . '/includes/admin/header.php'; ?>
 
-        <div class="theme-generator-container">
-            <h1 style="margin-bottom: 24px;">✨ Generador de Themes</h1>
+        <h1 style="margin-bottom: 24px;">✨ Generador de Themes</h1>
 
-            <!-- Info Box -->
-            <div class="info-box">
-                <p>
-                    <strong>ℹ️ Crea themes personalizados para tu tienda</strong><br>
-                    Define colores, tipografía y estilos de componentes. El sistema generará automáticamente
-                    todos los archivos CSS necesarios con más de 150 variables personalizadas.
-                </p>
-            </div>
+        <!-- Info Box -->
+        <div class="info-box">
+            <p>
+                <strong>ℹ️ Crea themes personalizados para tu tienda</strong><br>
+                Define colores, tipografía y estilos de componentes. El sistema generará automáticamente
+                todos los archivos CSS necesarios con más de 150 variables personalizadas.
+            </p>
+        </div>
 
-            <!-- Mensajes -->
-            <?php if ($message): ?>
-                <div class="message success"><?php echo $message; ?></div>
-            <?php endif; ?>
+        <!-- Mensajes -->
+        <?php if ($message): ?>
+            <div class="message success"><?php echo $message; ?></div>
+        <?php endif; ?>
 
-            <?php if ($error): ?>
-                <div class="message error"><?php echo nl2br(htmlspecialchars($error)); ?></div>
-            <?php endif; ?>
+        <?php if ($error): ?>
+            <div class="message error"><?php echo nl2br(htmlspecialchars($error)); ?></div>
+        <?php endif; ?>
 
-            <!-- Formulario -->
+        <!-- Formulario -->
             <form method="POST" action="" id="theme-generator-form">
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
@@ -411,9 +350,8 @@ $user = get_logged_user();
                 <div class="cards-grid">
                     <!-- Información Básica -->
                     <div class="card">
-                    <div class="card-header">
-                        <span class="icon">📋</span>
-                        <h2>Información Básica</h2>
+                    <div class="card-title">
+                        📋 Información Básica
                     </div>
 
                     <div class="form-group">
@@ -446,9 +384,8 @@ $user = get_logged_user();
 
                     <!-- Tipografía -->
                     <div class="card">
-                        <div class="card-header">
-                            <span class="icon">📝</span>
-                            <h2>Tipografía</h2>
+                        <div class="card-title">
+                            📝 Tipografía
                         </div>
 
                         <div class="form-group">
@@ -491,12 +428,11 @@ $user = get_logged_user();
                 </div>
 
                 <!-- Grid: Colores (ancho completo) -->
-                <div class="cards-grid full-width">
+                <div class="cards-grid">
                     <!-- Colores -->
-                    <div class="card">
-                    <div class="card-header">
-                        <span class="icon">🎨</span>
-                        <h2>Colores</h2>
+                    <div class="card card-full">
+                    <div class="card-title">
+                        🎨 Colores
                     </div>
 
                     <div class="color-grid">
@@ -592,9 +528,8 @@ $user = get_logged_user();
                 <div class="cards-grid">
                     <!-- Componentes: Cards -->
                     <div class="card">
-                    <div class="card-header">
-                        <span class="icon">🎴</span>
-                        <h2>Componentes: Cards de Productos</h2>
+                    <div class="card-title">
+                        🎴 Componentes: Cards de Productos
                     </div>
 
                     <div class="form-group">
@@ -657,9 +592,8 @@ $user = get_logged_user();
 
                     <!-- Componentes: Buttons -->
                     <div class="card">
-                    <div class="card-header">
-                        <span class="icon">🔘</span>
-                        <h2>Componentes: Botones</h2>
+                    <div class="card-title">
+                        🔘 Componentes: Botones
                     </div>
 
                     <div class="form-group">
@@ -698,7 +632,6 @@ $user = get_logged_user();
                     </button>
                 </div>
             </form>
-        </div>
     </div>
 
     <!-- JavaScript -->
