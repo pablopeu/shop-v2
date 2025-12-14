@@ -1029,13 +1029,39 @@ $user = get_logged_user();
             // Mostrar modal con el preview
             showModal({
                 title: '👁️ Preview del Theme',
-                message: previewHTML,
+                message: '',
+                details: previewHTML,
                 confirmText: 'Cerrar',
                 showCancel: false,
                 onConfirm: function() {
+                    // Limpiar estilos temporales
                     document.head.removeChild(styleTag);
+
+                    // Restaurar estilos del modal
+                    const modalContainer = document.querySelector('.modal-container');
+                    const cancelBtn = document.getElementById('modalCancelBtn');
+
+                    if (modalContainer) {
+                        modalContainer.style.maxWidth = '500px';
+                    }
+
+                    if (cancelBtn) {
+                        cancelBtn.style.display = '';
+                    }
                 }
             });
+
+            // Ajustar ancho del modal para preview
+            const modalContainer = document.querySelector('.modal-container');
+            const cancelBtn = document.getElementById('modalCancelBtn');
+
+            if (modalContainer) {
+                modalContainer.style.maxWidth = '900px';
+            }
+
+            if (cancelBtn) {
+                cancelBtn.style.display = 'none';
+            }
         }
 
         // Exportar funciones para event delegation
