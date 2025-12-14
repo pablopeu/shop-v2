@@ -47,6 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'card_shadow' => sanitize_input($_POST['card_shadow'] ?? 'subtle'),
             'card_rounded' => isset($_POST['card_rounded']),
             'card_hover' => sanitize_input($_POST['card_hover'] ?? 'glow'),
+            'card_buttons' => sanitize_input($_POST['card_buttons'] ?? 'show'),
+            'card_buttons_position' => sanitize_input($_POST['card_buttons_position'] ?? 'center'),
+            'card_buttons_spacing' => sanitize_input($_POST['card_buttons_spacing'] ?? 'normal'),
 
             // Componentes: Buttons
             'button_style' => sanitize_input($_POST['button_style'] ?? 'solid'),
@@ -765,6 +768,57 @@ $user = get_logged_user();
                             </label>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label>Botones en Cards</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="card_buttons" value="show" checked>
+                                Mostrar botones
+                            </label>
+                            <label>
+                                <input type="radio" name="card_buttons" value="hide">
+                                Ocultar (card clickeable)
+                            </label>
+                        </div>
+                        <small class="helper-text">Si se ocultan, toda la card será clickeable</small>
+                    </div>
+
+                    <div class="form-group" id="card-buttons-position-group">
+                        <label>Posición de Botones</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="card_buttons_position" value="center" checked>
+                                Centrado
+                            </label>
+                            <label>
+                                <input type="radio" name="card_buttons_position" value="left">
+                                Izquierda
+                            </label>
+                            <label>
+                                <input type="radio" name="card_buttons_position" value="right">
+                                Derecha
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="card-buttons-spacing-group">
+                        <label>Espaciado de Botones</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="card_buttons_spacing" value="normal" checked>
+                                Normal
+                            </label>
+                            <label>
+                                <input type="radio" name="card_buttons_spacing" value="compact">
+                                Compacto
+                            </label>
+                            <label>
+                                <input type="radio" name="card_buttons_spacing" value="spacious">
+                                Amplio
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                     <!-- Componentes: Buttons -->
@@ -1270,6 +1324,32 @@ $user = get_logged_user();
                 });
             });
         }
+
+        // Toggle opciones de botones en cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cardButtonsRadios = document.querySelectorAll('[name="card_buttons"]');
+            const positionGroup = document.getElementById('card-buttons-position-group');
+            const spacingGroup = document.getElementById('card-buttons-spacing-group');
+
+            function toggleCardButtonsOptions() {
+                const selected = document.querySelector('[name="card_buttons"]:checked')?.value;
+
+                if (selected === 'hide') {
+                    positionGroup.style.display = 'none';
+                    spacingGroup.style.display = 'none';
+                } else {
+                    positionGroup.style.display = 'block';
+                    spacingGroup.style.display = 'block';
+                }
+            }
+
+            cardButtonsRadios.forEach(radio => {
+                radio.addEventListener('change', toggleCardButtonsOptions);
+            });
+
+            // Ejecutar al cargar
+            toggleCardButtonsOptions();
+        });
 
         // Exportar funciones para event delegation
         window.generateSlug = generateSlug;

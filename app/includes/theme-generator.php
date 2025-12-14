@@ -735,7 +735,10 @@ function generate_theme($data) {
                 'border' => $data['card_border'] ?? true,
                 'shadow' => $data['card_shadow'] ?? 'subtle',
                 'rounded' => $data['card_rounded'] ?? false,
-                'hover_effect' => $data['card_hover'] ?? 'glow'
+                'hover_effect' => $data['card_hover'] ?? 'glow',
+                'buttons' => $data['card_buttons'] ?? 'show',
+                'buttons_position' => $data['card_buttons_position'] ?? 'center',
+                'buttons_spacing' => $data['card_buttons_spacing'] ?? 'normal'
             ],
             'forms' => [
                 'style' => 'modern',
