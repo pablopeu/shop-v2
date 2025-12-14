@@ -462,23 +462,57 @@ $user = get_logged_user();
                         🎨 Importar Paleta de ColorHunt
                     </div>
 
-                    <div class="info-box" style="margin-bottom: 20px;">
-                        <p>
-                            <strong>ℹ️ Cómo usar:</strong><br>
-                            1. Ve a <a href="https://colorhunt.co" target="_blank" rel="noopener" style="color: #667eea; text-decoration: underline;">ColorHunt.co</a><br>
-                            2. Elige una paleta que te guste (debe tener 4 colores)<br>
-                            3. Haz click en el ícono de copiar (📋) en la paleta<br>
-                            4. Pega directamente aquí los 4 colores
+                    <!-- Opción 1: Paletas Populares -->
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
+                            ⭐ Opción 1: Paletas Populares
+                        </h3>
+                        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                            Selecciona una de las 114 paletas más populares de ColorHunt:
                         </p>
+
+                        <!-- Loading state -->
+                        <div id="palettes-loading" style="text-align: center; padding: 20px; color: #999;">
+                            ⏳ Cargando paletas populares...
+                        </div>
+
+                        <!-- Grid de paletas -->
+                        <div id="palettes-grid" style="display: none; max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa;">
+                            <!-- Las paletas se cargarán aquí dinámicamente -->
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="palette-colors">Pega los 4 colores aquí (uno por línea o separados por espacios)</label>
-                        <textarea id="palette-colors" rows="5" style="font-family: monospace; font-size: 14px; line-height: 1.8;" placeholder="#005461
+                    <!-- Separador -->
+                    <div style="border-top: 2px dashed #e0e0e0; margin: 30px 0; position: relative;">
+                        <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: #999; font-size: 13px;">
+                            O
+                        </span>
+                    </div>
+
+                    <!-- Opción 2: Paleta Personalizada -->
+                    <div>
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
+                            ✏️ Opción 2: Paleta Personalizada
+                        </h3>
+
+                        <div class="info-box" style="margin-bottom: 15px;">
+                            <p style="font-size: 13px;">
+                                <strong>ℹ️ Cómo usar:</strong><br>
+                                1. Ve a <a href="https://colorhunt.co" target="_blank" rel="noopener" style="color: #667eea; text-decoration: underline;">ColorHunt.co</a><br>
+                                2. Elige una paleta que te guste (debe tener 4 colores)<br>
+                                3. Haz click en el ícono de copiar (📋) en la paleta<br>
+                                4. Pega directamente aquí los 4 colores
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="palette-colors">Pega los 4 colores aquí (uno por línea o separados por espacios)</label>
+                            <textarea id="palette-colors" rows="5" style="font-family: monospace; font-size: 14px; line-height: 1.8;" placeholder="#005461
 #018790
 #00B7B5
 #F4F4F4"></textarea>
-                        <small class="helper-text">Copia directamente desde ColorHunt y pégalos aquí. El sistema detectará automáticamente los 4 colores.</small>
+                            <small class="helper-text">Copia directamente desde ColorHunt y pégalos aquí. El sistema detectará automáticamente los 4 colores.</small>
+                        </div>
                     </div>
 
                     <div style="text-align: center; margin-top: 16px;">
@@ -994,6 +1028,146 @@ $user = get_logged_user();
             });
         }
 
+        // Cargar paletas populares
+        let popularPalettes = [];
+
+        function loadPopularPalettes() {
+            const loadingDiv = document.getElementById('palettes-loading');
+            const gridDiv = document.getElementById('palettes-grid');
+
+            fetch('<?php echo url('/assets/data/paletas-populares.json'); ?>')
+                .then(res => res.json())
+                .then(data => {
+                    popularPalettes = data;
+
+                    // Ocultar loading, mostrar grid
+                    loadingDiv.style.display = 'none';
+                    gridDiv.style.display = 'grid';
+
+                    // Renderizar paletas
+                    renderPalettesGrid(data);
+                })
+                .catch(error => {
+                    loadingDiv.innerHTML = '❌ Error al cargar paletas populares';
+                    console.error('Error loading palettes:', error);
+                });
+        }
+
+        function renderPalettesGrid(palettes) {
+            const gridDiv = document.getElementById('palettes-grid');
+
+            // Crear grid responsivo
+            gridDiv.style.display = 'grid';
+            gridDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+            gridDiv.style.gap = '12px';
+
+            // Renderizar cada paleta
+            palettes.forEach(palette => {
+                const paletteCard = document.createElement('div');
+                paletteCard.className = 'palette-card';
+                paletteCard.setAttribute('data-action', 'selectPopularPalette');
+                paletteCard.setAttribute('data-palette-id', palette.id);
+                paletteCard.style.cursor = 'pointer';
+                paletteCard.style.borderRadius = '8px';
+                paletteCard.style.overflow = 'hidden';
+                paletteCard.style.border = '2px solid transparent';
+                paletteCard.style.transition = 'all 0.2s';
+                paletteCard.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+
+                // Crear los 4 cuadros de colores
+                paletteCard.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; height: 80px;">
+                        <div style="background: ${palette.colors[0]};"></div>
+                        <div style="background: ${palette.colors[1]};"></div>
+                        <div style="background: ${palette.colors[2]};"></div>
+                        <div style="background: ${palette.colors[3]};"></div>
+                    </div>
+                    <div style="background: white; padding: 6px; text-align: center; font-size: 11px; color: #666;">
+                        #${palette.id}
+                    </div>
+                `;
+
+                // Hover effect
+                paletteCard.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#667eea';
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                });
+
+                paletteCard.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.borderColor = 'transparent';
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    }
+                });
+
+                gridDiv.appendChild(paletteCard);
+            });
+        }
+
+        function selectPopularPalette(event, element, params) {
+            const paletteId = parseInt(params?.paletteId);
+            if (!paletteId) return;
+
+            // Encontrar la paleta
+            const palette = popularPalettes.find(p => p.id === paletteId);
+            if (!palette) return;
+
+            // Remover selección anterior
+            document.querySelectorAll('.palette-card').forEach(card => {
+                card.classList.remove('selected');
+                card.style.borderColor = 'transparent';
+                card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            });
+
+            // Marcar como seleccionada
+            element.classList.add('selected');
+            element.style.borderColor = '#667eea';
+            element.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.5)';
+
+            // Aplicar colores mapeados directamente (ya vienen procesados del JSON)
+            const mapped = palette.mapped;
+
+            document.getElementById('color-primary').value = mapped.primary;
+            document.getElementById('color-secondary').value = mapped.secondary;
+            document.getElementById('color-accent').value = mapped.accent;
+            document.getElementById('color-background').value = mapped.background;
+            document.getElementById('color-text').value = mapped.text;
+
+            // Sincronizar text inputs
+            document.querySelector('#color-primary').parentElement.querySelector('input[type="text"]').value = mapped.primary;
+            document.querySelector('#color-secondary').parentElement.querySelector('input[type="text"]').value = mapped.secondary;
+            document.querySelector('#color-accent').parentElement.querySelector('input[type="text"]').value = mapped.accent;
+            document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = mapped.background;
+            document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = mapped.text;
+
+            // Scroll al formulario de colores para que el usuario vea los cambios
+            document.getElementById('colors-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Cargar paletas cuando se muestra la sección
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar paletas al inicio si la sección de palette está visible
+            const paletteImport = document.getElementById('palette-import');
+            if (paletteImport && paletteImport.style.display !== 'none') {
+                loadPopularPalettes();
+            }
+        });
+
+        // También cargar cuando se cambia a método de creación "palette"
+        const creationMethodRadios = document.querySelectorAll('[name="creation_method"]');
+        creationMethodRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'palette') {
+                    // Solo cargar si aún no se han cargado
+                    if (popularPalettes.length === 0) {
+                        loadPopularPalettes();
+                    }
+                }
+            });
+        });
+
         // Sincronizar color picker con text input
         document.querySelectorAll('.color-input-wrapper').forEach(wrapper => {
             const colorInput = wrapper.querySelector('input[type="color"]');
@@ -1403,6 +1577,7 @@ $user = get_logged_user();
         window.generateSlug = generateSlug;
         window.toggleCreationMethod = toggleCreationMethod;
         window.mapPalette = mapPalette;
+        window.selectPopularPalette = selectPopularPalette;
         window.loadThemeForEdit = loadThemeForEdit;
         window.showPreview = showPreview;
     </script>
