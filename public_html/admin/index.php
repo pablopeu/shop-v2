@@ -91,6 +91,7 @@ $pages_map = [
     'config-moneda' => 'pages/admin/config-moneda.php',
     'config-backup' => 'pages/admin/config-backup.php',
     'config-themes' => 'pages/admin/config-themes.php',
+    'generador-themes' => 'pages/admin/generador-themes.php',
     'config-hero' => 'pages/admin/config-hero.php',
     'config-carrusel' => 'pages/admin/config-carrusel.php',
     'config-footer' => 'pages/admin/config-footer.php',

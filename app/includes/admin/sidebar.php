@@ -414,12 +414,18 @@ $current_page = $_GET['page'] ?? 'index';
                         <span>🎨 Apariencia</span>
                         <span class="menu-arrow" id="arrow-config-visuales">▶</span>
                     </div>
-                    <ul class="submenu <?php echo in_array($current_page, ['config-themes', 'config-hero', 'config-carrusel', 'config-footer']) ? 'open' : ''; ?>"
+                    <ul class="submenu <?php echo in_array($current_page, ['config-themes', 'generador-themes', 'config-hero', 'config-carrusel', 'config-footer']) ? 'open' : ''; ?>"
                         id="submenu-config-visuales">
                         <li>
                             <a href="<?php echo url('/admin/?page=config-themes'); ?>"
                                class="<?php echo $current_page === 'config-themes' ? 'active' : ''; ?>">
                                 🎨 Themes
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo url('/admin/?page=generador-themes'); ?>"
+                               class="<?php echo $current_page === 'generador-themes' ? 'active' : ''; ?>">
+                                ✨ Generador de Themes
                             </a>
                         </li>
                         <li>
