@@ -660,10 +660,55 @@ $user = get_logged_user();
                     </div>
                 </div>
 
+                <!-- Actualizar Paleta (solo visible al editar theme) -->
+                <div class="card card-full" id="edit-palette-section" style="display: none; margin-bottom: 20px;">
+                    <div class="card-title">
+                        🎨 Actualizar Paleta de Colores (Opcional)
+                    </div>
+
+                    <div class="info-box" style="margin-bottom: 20px;">
+                        <p style="font-size: 14px;">
+                            <strong>💡 Puedes:</strong><br>
+                            • Seleccionar una paleta popular de ColorHunt para actualizar los colores<br>
+                            • O saltar esta sección y editar los colores manualmente más abajo
+                        </p>
+                    </div>
+
+                    <!-- Selector de paletas populares -->
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
+                            ⭐ Paletas Populares de ColorHunt
+                        </h3>
+
+                        <!-- Loading state -->
+                        <div id="edit-palettes-loading" style="text-align: center; padding: 20px; color: #999; display: none;">
+                            ⏳ Cargando paletas...
+                        </div>
+
+                        <!-- Grid de paletas -->
+                        <div id="edit-palettes-grid" style="display: none; max-height: 350px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa;">
+                            <!-- Las paletas se cargarán aquí dinámicamente -->
+                        </div>
+
+                        <!-- Botón de Preview -->
+                        <div style="text-align: center; margin-top: 15px; display: none;" id="edit-preview-btn-container">
+                            <button type="button" data-action="showPreview" class="btn-preview" style="background: #667eea; color: white; padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                👁️ Preview del Theme
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 2px dashed #dee2e6;">
+                        <p style="font-size: 13px; color: #666; margin: 0;">
+                            💡 <strong>Tip:</strong> Si no quieres usar presets, simplemente edita los colores manualmente en la sección de abajo
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Grid: Colores (ancho completo) -->
                 <div class="cards-grid">
                     <!-- Colores -->
-                    <div class="card card-full">
+                    <div class="card card-full" id="colors-section">
                     <div class="card-title">
                         🎨 Colores
                     </div>
@@ -1137,8 +1182,8 @@ $user = get_logged_user();
             const palette = popularPalettes.find(p => p.id === paletteId);
             if (!palette) return;
 
-            // Remover selección anterior
-            document.querySelectorAll('.palette-card').forEach(card => {
+            // Remover selección anterior (en ambos grids)
+            document.querySelectorAll('.palette-card, .palette-card-edit').forEach(card => {
                 card.classList.remove('selected');
                 card.style.borderColor = 'transparent';
                 card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
@@ -1167,6 +1212,100 @@ $user = get_logged_user();
 
             // Scroll al formulario de colores para que el usuario vea los cambios
             document.getElementById('colors-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Cargar paletas en sección de edición
+        function loadEditPalettes() {
+            const loadingDiv = document.getElementById('edit-palettes-loading');
+            const gridDiv = document.getElementById('edit-palettes-grid');
+            const previewBtnContainer = document.getElementById('edit-preview-btn-container');
+
+            // Mostrar loading
+            loadingDiv.style.display = 'block';
+
+            // Si ya tenemos las paletas cargadas, reutilizarlas
+            if (popularPalettes.length > 0) {
+                loadingDiv.style.display = 'none';
+                gridDiv.style.display = 'grid';
+                previewBtnContainer.style.display = 'block';
+                renderEditPalettesGrid(popularPalettes);
+                return;
+            }
+
+            // Cargar paletas
+            fetch('<?php echo url('/assets/data/paletas-populares.json'); ?>')
+                .then(res => res.json())
+                .then(data => {
+                    popularPalettes = data;
+
+                    // Ocultar loading, mostrar grid y botón preview
+                    loadingDiv.style.display = 'none';
+                    gridDiv.style.display = 'grid';
+                    previewBtnContainer.style.display = 'block';
+
+                    // Renderizar paletas
+                    renderEditPalettesGrid(data);
+                })
+                .catch(error => {
+                    loadingDiv.innerHTML = '❌ Error al cargar paletas';
+                    console.error('Error loading edit palettes:', error);
+                });
+        }
+
+        function renderEditPalettesGrid(palettes) {
+            const gridDiv = document.getElementById('edit-palettes-grid');
+
+            // Limpiar grid
+            gridDiv.innerHTML = '';
+
+            // Configurar grid
+            gridDiv.style.display = 'grid';
+            gridDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+            gridDiv.style.gap = '12px';
+
+            // Renderizar cada paleta
+            palettes.forEach(palette => {
+                const paletteCard = document.createElement('div');
+                paletteCard.className = 'palette-card-edit';
+                paletteCard.setAttribute('data-action', 'selectPopularPalette');
+                paletteCard.setAttribute('data-palette-id', palette.id);
+                paletteCard.style.cursor = 'pointer';
+                paletteCard.style.borderRadius = '8px';
+                paletteCard.style.overflow = 'hidden';
+                paletteCard.style.border = '2px solid transparent';
+                paletteCard.style.transition = 'all 0.2s';
+                paletteCard.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+
+                // Crear los 4 cuadros de colores
+                paletteCard.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; height: 80px;">
+                        <div style="background: ${palette.colors[0]};"></div>
+                        <div style="background: ${palette.colors[1]};"></div>
+                        <div style="background: ${palette.colors[2]};"></div>
+                        <div style="background: ${palette.colors[3]};"></div>
+                    </div>
+                    <div style="background: white; padding: 6px; text-align: center; font-size: 11px; color: #666;">
+                        #${palette.id}
+                    </div>
+                `;
+
+                // Hover effect
+                paletteCard.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#667eea';
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                });
+
+                paletteCard.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.borderColor = 'transparent';
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    }
+                });
+
+                gridDiv.appendChild(paletteCard);
+            });
         }
 
         // Cargar paletas cuando se muestra la sección
@@ -1559,6 +1698,15 @@ $user = get_logged_user();
 
                     const buttonShadow = document.querySelector('[name="button_shadow"]');
                     if (buttonShadow) buttonShadow.checked = config.components?.buttons?.shadow || false;
+
+                    // Mostrar sección de actualizar paleta
+                    const editPaletteSection = document.getElementById('edit-palette-section');
+                    if (editPaletteSection) {
+                        editPaletteSection.style.display = 'block';
+
+                        // Cargar paletas populares en esta sección
+                        loadEditPalettes();
+                    }
 
                     // Scroll al inicio del formulario
                     window.scrollTo({ top: 0, behavior: 'smooth' });
