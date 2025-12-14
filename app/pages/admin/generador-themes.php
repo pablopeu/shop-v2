@@ -825,14 +825,18 @@ $user = get_logged_user();
                         <div class="radio-group">
                             <label>
                                 <input type="radio" name="card_buttons" value="show" checked>
-                                Mostrar botones
+                                Mostrar todos los botones
+                            </label>
+                            <label>
+                                <input type="radio" name="card_buttons" value="cart_only">
+                                Solo botón de carrito
                             </label>
                             <label>
                                 <input type="radio" name="card_buttons" value="hide">
                                 Ocultar (card clickeable)
                             </label>
                         </div>
-                        <small class="helper-text">Si se ocultan, toda la card será clickeable</small>
+                        <small class="helper-text">Con "Solo botón de carrito" la card será clickeable y mostrará un botón de agregar al carrito</small>
                     </div>
 
                     <div class="form-group" id="card-buttons-position-group">
@@ -1274,11 +1278,12 @@ $user = get_logged_user();
 
                 // Generar botones si están habilitados
                 let buttonsHTML = '';
-                if (config.cardButtons === 'show') {
-                    const btnStyle = config.buttonStyle === 'solid'
-                        ? `background: ${config.primary}; color: white; border: none;`
-                        : `background: transparent; color: ${config.primary}; border: 2px solid ${config.primary};`;
+                const btnStyle = config.buttonStyle === 'solid'
+                    ? `background: ${config.primary}; color: white; border: none;`
+                    : `background: transparent; color: ${config.primary}; border: 2px solid ${config.primary};`;
 
+                if (config.cardButtons === 'show') {
+                    // Mostrar todos los botones
                     buttonsHTML = `
                         <div style="display: flex; gap: ${buttonsGap}; justify-content: ${buttonsAlign}; margin-top: 10px;">
                             <button style="padding: ${buttonPadding}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
@@ -1289,10 +1294,22 @@ $user = get_logged_user();
                             </button>
                         </div>
                     `;
+                } else if (config.cardButtons === 'cart_only') {
+                    // Solo mostrar botón de carrito
+                    buttonsHTML = `
+                        <div style="display: flex; justify-content: ${buttonsAlign}; margin-top: 10px;">
+                            <button style="padding: ${buttonPadding}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                                🛒 Agregar al Carrito
+                            </button>
+                        </div>
+                    `;
                 }
 
+                // Card clickeable cuando buttons están ocultos o es cart_only
+                const isClickable = config.cardButtons === 'hide' || config.cardButtons === 'cart_only';
+
                 return `
-                    <div class="preview-card" style="background: white; border: ${borderStyle}; border-radius: ${borderRadius}; box-shadow: ${boxShadow}; overflow: hidden; transition: all 0.3s; ${config.cardButtons === 'hide' ? 'cursor: pointer;' : ''}">
+                    <div class="preview-card" style="background: white; border: ${borderStyle}; border-radius: ${borderRadius}; box-shadow: ${boxShadow}; overflow: hidden; transition: all 0.3s; ${isClickable ? 'cursor: pointer;' : ''}">
                         <div style="width: 100%; height: 150px; background: ${gradients[index - 1]};"></div>
                         <div style="padding: 12px;">
                             <h3 style="font-size: 1.05em; margin-bottom: 6px; color: ${config.primary};">Producto Ejemplo</h3>
