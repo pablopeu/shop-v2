@@ -425,27 +425,18 @@ $user = get_logged_user();
                             <strong>ℹ️ Cómo usar:</strong><br>
                             1. Ve a <a href="https://colorhunt.co" target="_blank" rel="noopener" style="color: #667eea; text-decoration: underline;">ColorHunt.co</a><br>
                             2. Elige una paleta que te guste (debe tener 4 colores)<br>
-                            3. Copia los 4 colores y pégalos aquí en formato #RRGGBB
+                            3. Haz click en el ícono de copiar (📋) en la paleta<br>
+                            4. Pega directamente aquí los 4 colores
                         </p>
                     </div>
 
-                    <div class="compact-grid-2">
-                        <div class="form-group">
-                            <label for="palette-color-1">Color 1 (Más oscuro)</label>
-                            <input type="text" id="palette-color-1" placeholder="#213448" pattern="^#[a-fA-F0-9]{6}$">
-                        </div>
-                        <div class="form-group">
-                            <label for="palette-color-2">Color 2</label>
-                            <input type="text" id="palette-color-2" placeholder="#547792" pattern="^#[a-fA-F0-9]{6}$">
-                        </div>
-                        <div class="form-group">
-                            <label for="palette-color-3">Color 3</label>
-                            <input type="text" id="palette-color-3" placeholder="#94b4c1" pattern="^#[a-fA-F0-9]{6}$">
-                        </div>
-                        <div class="form-group">
-                            <label for="palette-color-4">Color 4 (Más claro)</label>
-                            <input type="text" id="palette-color-4" placeholder="#eae0cf" pattern="^#[a-fA-F0-9]{6}$">
-                        </div>
+                    <div class="form-group">
+                        <label for="palette-colors">Pega los 4 colores aquí (uno por línea o separados por espacios)</label>
+                        <textarea id="palette-colors" rows="5" style="font-family: monospace; font-size: 14px; line-height: 1.8;" placeholder="#005461
+#018790
+#00B7B5
+#F4F4F4"></textarea>
+                        <small class="helper-text">Copia directamente desde ColorHunt y pégalos aquí. El sistema detectará automáticamente los 4 colores.</small>
                     </div>
 
                     <div style="text-align: center; margin-top: 16px;">
@@ -740,7 +731,7 @@ $user = get_logged_user();
 
                 <!-- Botón de generación -->
                 <div style="margin-top: 32px; text-align: center;">
-                    <button type="submit" name="generate_theme" class="btn-generate">
+                    <button type="submit" name="generate_theme" class="btn-save">
                         💾 Generar Theme
                     </button>
                 </div>
@@ -777,31 +768,28 @@ $user = get_logged_user();
         function mapPalette(event, element, params) {
             event.preventDefault();
 
-            // Obtener los 4 colores
-            const colors = [
-                document.getElementById('palette-color-1').value.trim(),
-                document.getElementById('palette-color-2').value.trim(),
-                document.getElementById('palette-color-3').value.trim(),
-                document.getElementById('palette-color-4').value.trim()
-            ];
+            // Obtener el texto del textarea
+            const paletteText = document.getElementById('palette-colors').value.trim();
 
-            // Validar que no estén vacíos
-            if (colors.some(c => !c)) {
+            if (!paletteText) {
                 showModal({
                     title: 'Error',
-                    message: 'Por favor completa los 4 colores',
+                    message: 'Por favor pega los 4 colores de ColorHunt',
                     icon: '⚠️',
                     confirmType: 'danger'
                 });
                 return;
             }
 
-            // Validar formato hex
-            const hexPattern = /^#[a-fA-F0-9]{6}$/;
-            if (!colors.every(c => hexPattern.test(c))) {
+            // Extraer todos los colores hex del texto (formato #RRGGBB)
+            const hexPattern = /#[a-fA-F0-9]{6}/g;
+            const colors = paletteText.match(hexPattern);
+
+            // Validar que sean exactamente 4 colores
+            if (!colors || colors.length !== 4) {
                 showModal({
                     title: 'Error de Formato',
-                    message: 'Formato inválido. Usa #RRGGBB (ejemplo: #213448)',
+                    message: `Se encontraron ${colors ? colors.length : 0} colores. Necesitas exactamente 4 colores en formato #RRGGBB`,
                     icon: '⚠️',
                     confirmType: 'danger'
                 });
