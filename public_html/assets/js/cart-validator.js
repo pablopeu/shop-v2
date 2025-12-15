@@ -22,7 +22,7 @@ async function validateCartAndUpdateCount() {
 
     try {
         // Use global API_GET_PRODUCTS if available, otherwise fallback to relative path
-        const apiUrl = typeof API_GET_PRODUCTS !== 'undefined' ? API_GET_PRODUCTS : '/api/get_products.php';
+        const apiUrl = typeof API_GET_PRODUCTS !== 'undefined' ? API_GET_PRODUCTS : '/api/?endpoint=get-products';
         console.log('[CART VALIDATOR] Calling API:', apiUrl);
 
         const response = await fetch(apiUrl, {

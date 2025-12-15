@@ -922,7 +922,7 @@ $user = get_logged_user();
          */
         function viewOrder(orderId) {
             // Fetch order details from archived orders
-            fetch('<?php echo url('/api/get-archived-order.php'); ?>?id=' + orderId)
+            fetch('<?php echo url('/api/?endpoint=get-archived-order'); ?>&id=' + orderId)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

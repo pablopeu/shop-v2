@@ -352,7 +352,7 @@ write_json($visits_file, $visits_data);
     <script nonce="<?= csp_nonce() ?>">
         // Base path for subdirectory support
         const basePath = '<?php echo $config['base_path'] ?? ''; ?>';
-        const API_GET_PRODUCTS = '<?php echo url('/api/get_products.php'); ?>';
+        const API_GET_PRODUCTS = '<?php echo url('/api/?endpoint=get-products'); ?>';
 
         // Current product data
         const productData = <?php
@@ -559,7 +559,7 @@ write_json($visits_file, $visits_data);
             }
 
             // Get all products from API (POST request with product_ids)
-            fetch('<?php echo url('/api/get_products.php'); ?>', {
+            fetch('<?php echo url('/api/?endpoint=get-products'); ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -739,7 +739,7 @@ write_json($visits_file, $visits_data);
             // Fetch promotions for all products in cart
             const promotionsPromises = cart.map(async item => {
                 try {
-                    const response = await fetch(`<?php echo url('/api/get_promotion.php'); ?>?product_id=${item.product_id}`);
+                    const response = await fetch(`<?php echo url('/api/?endpoint=get-promotion'); ?>&product_id=${item.product_id}`);
                     const data = await response.json();
                     return { productId: item.product_id, promotion: data.promotion };
                 } catch (error) {

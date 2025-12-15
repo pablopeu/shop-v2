@@ -1084,7 +1084,7 @@ $user = get_logged_user();
                         const productOrder = Array.from(rows).map(row => row.getAttribute('data-id'));
 
                         // Save the new order via AJAX
-                        fetch('<?php echo url('/api/update-products-order.php'); ?>', {
+                        fetch('<?php echo url('/api/?endpoint=update-products-order'); ?>', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

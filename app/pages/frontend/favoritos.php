@@ -75,7 +75,7 @@ $selected_currency = $_SESSION['currency'] ?? $currency_config['primary'];
     <script nonce="<?= csp_nonce() ?>">
         const CURRENCY = '<?php echo $selected_currency; ?>';
         const EXCHANGE_RATE = <?php echo $currency_config['exchange_rate']; ?>;
-        const API_GET_PRODUCTS = '<?php echo url('/api/get_products.php'); ?>';
+        const API_GET_PRODUCTS = '<?php echo url('/api/?endpoint=get-products'); ?>';
 
         // Cookie helpers
 
@@ -245,7 +245,7 @@ $selected_currency = $_SESSION['currency'] ?? $currency_config['primary'];
 
             try {
                 // Llamar al API para generar código corto
-                const response = await fetch('<?php echo url('/api/create_short_link.php'); ?>', {
+                const response = await fetch('<?php echo url('/api/?endpoint=create-short-link'); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -306,7 +306,7 @@ $selected_currency = $_SESSION['currency'] ?? $currency_config['primary'];
 
         if (shortCode) {
             // Load wishlist from short code
-            fetch('<?php echo url('/api/get_shared_wishlist.php'); ?>?code=' + encodeURIComponent(shortCode))
+            fetch('<?php echo url('/api/?endpoint=get-shared-wishlist'); ?>&code=' + encodeURIComponent(shortCode))
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.product_ids) {
