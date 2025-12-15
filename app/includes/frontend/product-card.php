@@ -49,8 +49,9 @@ function render_product_card($product, $options = []) {
 
     // Obtener configuración de botones en cards
     $card_buttons = 'show'; // Default
-    if (file_exists(PUBLIC_PATH . "/assets/themes/archivo/{$active_theme}/theme.json")) {
-        $theme_json = read_json(PUBLIC_PATH . "/assets/themes/archivo/{$active_theme}/theme.json");
+    $theme_json_path = PUBLIC_PATH . "/assets/themes/{$active_theme}/theme.json";
+    if (file_exists($theme_json_path)) {
+        $theme_json = read_json($theme_json_path);
         $card_buttons = $theme_json['components']['cards']['buttons'] ?? 'show';
     }
 
