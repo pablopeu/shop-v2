@@ -583,8 +583,12 @@ function generate_theme_css_basic($config) {
     $css .= "}\n\n";
 
     // Product Info (flexbox container)
+    // Padding solo en top, left, right (NO en bottom para que margin-bottom de botones controle todo)
     $css .= ".product-info {\n";
-    $css .= "    padding: var(--spacing-lg);\n";
+    $css .= "    padding-top: var(--spacing-lg);\n";
+    $css .= "    padding-left: var(--spacing-lg);\n";
+    $css .= "    padding-right: var(--spacing-lg);\n";
+    $css .= "    padding-bottom: 0;\n";
     $css .= "    display: flex;\n";
     $css .= "    flex-direction: column;\n";
     $css .= "    flex: 1;\n";
@@ -595,9 +599,9 @@ function generate_theme_css_basic($config) {
     $vertical_spacing = $config['components']['cards']['buttons_vertical_spacing'] ?? 'normal';
     $margin_bottom_value = '12px'; // normal
     if ($vertical_spacing === 'compact') {
-        $margin_bottom_value = '6px';
+        $margin_bottom_value = '4px';
     } elseif ($vertical_spacing === 'spacious') {
-        $margin_bottom_value = '24px';
+        $margin_bottom_value = '20px';
     }
 
     $css .= ".product-buttons {\n";
