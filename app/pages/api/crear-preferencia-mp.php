@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Rate limiting específico para creación de preferencias (más restrictivo)
-$mp_identifier = 'mp_create_' . get_client_ip();
+$client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$mp_identifier = 'mp_create_' . $client_ip;
 if (!check_rate_limit($mp_identifier, 20, 60)) {
     http_response_code(429);
     echo json_encode([
@@ -95,7 +96,7 @@ if (!$order) {
 
 // Validar tracking token (CRÍTICO para seguridad)
 if ($order['tracking_token'] !== $tracking_token) {
-    error_log("API MP: Token inválido para orden: $order_id desde IP: " . get_client_ip());
+    error_log("API MP: Token inválido para orden: $order_id desde IP: " . $client_ip);
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Token inválido']);
     exit;

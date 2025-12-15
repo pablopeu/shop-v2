@@ -31,7 +31,8 @@ if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
 header('Content-Type: application/json');
 
 // Rate limiting global para API
-$api_identifier = 'api_' . get_client_ip();
+$client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$api_identifier = 'api_' . $client_ip;
 if (!check_rate_limit($api_identifier, 100, 60)) {
     http_response_code(429);
     echo json_encode([
