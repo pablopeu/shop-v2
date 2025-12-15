@@ -1,18 +1,12 @@
 <?php
-define('APP_ENTRY_POINT', true);
-// Bootstrap de la aplicación - detectar entorno
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
-} else {
-    require_once __DIR__ . '/../../app/bootstrap.php';
-}
-
 /**
  * Send Test Email API
  * Sends a test email to validate customer email address during checkout
  */
+
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
 // Apply rate limiting: 5 emails per 10 minutes per IP
 api_rate_limit(5, 600);
@@ -154,14 +148,12 @@ Si no solicitaste este email, puedes ignorarlo de manera segura.
 $result = send_email($email, $subject, $html_body, $plain_body);
 
 if ($result) {
-    header('Content-Type: application/json');
     echo json_encode([
         'success' => true,
         'message' => 'Email de prueba enviado correctamente'
     ]);
 } else {
     http_response_code(500);
-    header('Content-Type: application/json');
     echo json_encode([
         'success' => false,
         'error' => 'No se pudo enviar el email. Por favor verifica tu configuración de email.'

@@ -1,26 +1,18 @@
 <?php
-define('APP_ENTRY_POINT', true);
-// Bootstrap de la aplicación - detectar entorno
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
-} else {
-    require_once __DIR__ . '/../../app/bootstrap.php';
-}
-
 /**
  * API: Validate Coupon Code
  * Checks if a coupon code is valid and returns coupon details
  */
+
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
 // Apply rate limiting: 20 requests per minute per IP
 api_rate_limit(20, 60);
 
 // Require JSON Content-Type
 require_json_content_type();
-
-header('Content-Type: application/json');
 
 // Get POST data
 $input = file_get_contents('php://input');

@@ -1,25 +1,17 @@
 <?php
-define('APP_ENTRY_POINT', true);
-// Bootstrap de la aplicación - detectar entorno
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
-} else {
-    require_once __DIR__ . '/../../app/bootstrap.php';
-}
-
 /**
  * Sync Cart API - Sincroniza carrito de localStorage a sesión PHP
  */
+
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
 // Apply rate limiting: 30 requests per minute per IP
 api_rate_limit(30, 60);
 
 // Require JSON Content-Type
 require_json_content_type();
-
-header('Content-Type: application/json');
 
 // Set security headers
 set_security_headers();
@@ -72,10 +64,19 @@ if (empty($cart)) {
 // Also save coupon if present (for checkout to use)
 if (isset($data['coupon_code']) && !empty($data['coupon_code'])) {
     $coupon_code = sanitize_input($data['coupon_code']);
-    
+
+    // Calculate subtotal from cart
+    $subtotal = 0;
+    foreach ($cart as $item) {
+        $product = get_product_by_id($item['product_id']);
+        if ($product) {
+            $subtotal += $product['price'] * $item['quantity'];
+        }
+    }
+
     // Validate coupon before saving to session
-    $coupon_validation = validate_coupon($coupon_code, $cart);
-    
+    $coupon_validation = validate_coupon($coupon_code, $subtotal);
+
     if ($coupon_validation['valid']) {
         $_SESSION['applied_coupon'] = $coupon_code;
     } else {
@@ -84,7 +85,7 @@ if (isset($data['coupon_code']) && !empty($data['coupon_code'])) {
         echo json_encode([
             'success' => false,
             'error' => 'coupon_expired',
-            'message' => 'El cupón "' . $coupon_code . '" ha expirado o ya no es válido: ' . $coupon_validation['message']
+            'message' => 'El cupón "' . $coupon_code . '" ha expirado o ya no es válido: ' . ($coupon_validation['error'] ?? 'Error desconocido')
         ]);
         exit;
     }

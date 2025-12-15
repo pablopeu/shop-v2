@@ -1,23 +1,15 @@
 <?php
-define('APP_ENTRY_POINT', true);
-// Bootstrap de la aplicación - detectar entorno
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
-} else {
-    require_once __DIR__ . '/../../app/bootstrap.php';
-}
-
 /**
  * API: Obtener Wishlist Compartida
  * Obtiene los IDs de productos de una wishlist compartida por su código
  */
 
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
+
 // Apply rate limiting: 60 requests per minute per IP
 api_rate_limit(60, 60);
-
-header('Content-Type: application/json');
 
 // Get code from GET parameter
 $code = $_GET['code'] ?? '';

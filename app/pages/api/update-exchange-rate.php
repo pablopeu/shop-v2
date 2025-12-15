@@ -1,23 +1,15 @@
 <?php
-define('APP_ENTRY_POINT', true);
-// Bootstrap de la aplicación - detectar entorno
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
-} else {
-    require_once __DIR__ . '/../../app/bootstrap.php';
-}
-
 /**
  * API Endpoint: Update Exchange Rate
  * Auto-updates exchange rate from DolarAPI if more than 30 minutes have passed
  */
 
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
+
 // Apply rate limiting: 5 requests per minute per IP
 api_rate_limit(5, 60);
-
-header('Content-Type: application/json');
 
 // FORCE clear file stat cache before reading config
 clearstatcache(true, APP_PATH . '/config/currency.json');

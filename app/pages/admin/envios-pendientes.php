@@ -972,7 +972,7 @@ $user = get_logged_user();
         function viewOrder(orderId) {
             console.log('viewOrder (función interna) ejecutada con ID:', orderId);
             // Fetch order details and show in modal
-            const apiUrl = '<?php echo url('/api/get-order.php'); ?>?id=' + orderId;
+            const apiUrl = '<?php echo url('/api/?endpoint=get-order'); ?>&id=' + orderId;
             console.log('Fetching desde:', apiUrl);
             fetch(apiUrl)
                 .then(response => {

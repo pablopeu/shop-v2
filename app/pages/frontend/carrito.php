@@ -247,7 +247,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             console.log('Fetching products for IDs:', productIds);
 
             try {
-                const response = await fetch('<?php echo url('/api/get_products.php'); ?>', {
+                const response = await fetch('<?php echo url('/api/?endpoint=get-products'); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -361,7 +361,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             const promotionsPromises = cartData.items.map(async item => {
                 const productId = item.product_id || item.id;
                 try {
-                    const response = await fetch(`<?php echo url('/api/get_promotion.php'); ?>?product_id=${productId}`);
+                    const response = await fetch(`<?php echo url('/api/?endpoint=get-promotion'); ?>&product_id=${productId}`);
                     const data = await response.json();
                     return { productId, promotion: data.promotion };
                 } catch (error) {
@@ -566,7 +566,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             const promotionsPromises = cartData.items.map(async item => {
                 const productId = item.product_id || item.id;
                 try {
-                    const response = await fetch(`<?php echo url('/api/get_promotion.php'); ?>?product_id=${productId}`);
+                    const response = await fetch(`<?php echo url('/api/?endpoint=get-promotion'); ?>&product_id=${productId}`);
                     const data = await response.json();
                     return { productId, promotion: data.promotion };
                 } catch (error) {
@@ -704,7 +704,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             for (const item of cartData.items) {
                 const productId = item.product_id || item.id;
                 try {
-                    const response = await fetch(`<?php echo url('/api/get_promotion.php'); ?>?product_id=${productId}`);
+                    const response = await fetch(`<?php echo url('/api/?endpoint=get-promotion'); ?>&product_id=${productId}`);
                     const data = await response.json();
                     if (data.promotion) {
                         return true; // Found at least one item with promotion
@@ -726,7 +726,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             const promotionsPromises = cartData.items.map(async item => {
                 const productId = item.product_id || item.id;
                 try {
-                    const response = await fetch(`<?php echo url('/api/get_promotion.php'); ?>?product_id=${productId}`);
+                    const response = await fetch(`<?php echo url('/api/?endpoint=get-promotion'); ?>&product_id=${productId}`);
                     const data = await response.json();
                     return { productId, promotion: data.promotion };
                 } catch (error) {
@@ -770,7 +770,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
                 if (product) {
                     // Check if product has promotion
                     try {
-                        const promoResponse = await fetch(`<?php echo url('/api/get_promotion.php'); ?>?product_id=${productId}`);
+                        const promoResponse = await fetch(`<?php echo url('/api/?endpoint=get-promotion'); ?>&product_id=${productId}`);
                         const promoData = await promoResponse.json();
 
                         if (!promoData.promotion) {
@@ -788,7 +788,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             }
 
             try {
-                const response = await fetch('<?php echo url('/api/validate_coupon.php'); ?>', {
+                const response = await fetch('<?php echo url('/api/?endpoint=validate-coupon'); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -849,7 +849,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
         async function showReapplyButton(coupon) {
             // First validate if coupon is still valid (not expired)
             try {
-                const response = await fetch('/api/validate_coupon.php', {
+                const response = await fetch('/api/?endpoint=validate-coupon', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1016,7 +1016,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
                 };
 
                 // Sync to session
-                const response = await fetch('<?php echo url('/api/sync_cart.php'); ?>', {
+                const response = await fetch('<?php echo url('/api/?endpoint=sync-cart'); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

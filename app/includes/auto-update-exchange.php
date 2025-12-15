@@ -19,7 +19,7 @@ if ($currency_config['api_enabled'] ?? false):
 
     // Auto-update exchange rate if needed
     function autoUpdateExchangeRate() {
-        fetch('<?= url('/api/update-exchange-rate.php') ?>', {
+        fetch('<?= url('/api/?endpoint=update-exchange-rate') ?>', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'

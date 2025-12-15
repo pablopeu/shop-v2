@@ -191,7 +191,7 @@ $absolute_max = !empty($prices) ? max($prices) : 10000;
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shared/cart.js'); ?>"></script>
 
 <script nonce="<?= csp_nonce() ?>">
-        const API_GET_PRODUCTS = '<?php echo url('/api/get_products.php'); ?>';
+        const API_GET_PRODUCTS = '<?php echo url('/api/?endpoint=get-products'); ?>';
 
         // Cookie helpers for favorites
 

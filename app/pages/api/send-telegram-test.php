@@ -1,18 +1,12 @@
 <?php
-define('APP_ENTRY_POINT', true);
-// Bootstrap de la aplicación - detectar entorno
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
-} else {
-    require_once __DIR__ . '/../../app/bootstrap.php';
-}
-
 /**
  * API Endpoint - Send Telegram Test Message
  * Sends a test message to validate customer's Telegram
  */
+
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
 // Apply rate limiting: 5 messages per 10 minutes per IP
 api_rate_limit(5, 600);
@@ -25,7 +19,6 @@ session_start();
 
 // Set CORS headers
 header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

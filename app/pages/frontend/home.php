@@ -201,7 +201,7 @@ $selected_currency = $_SESSION['currency'] ?? $currency_config['primary'];
             echo json_encode($products_for_js);
         ?>;
         const exchangeRate = <?php echo $currency_config['exchange_rate']; ?>;
-        const API_GET_PRODUCTS = '<?php echo url('/api/get_products.php'); ?>';
+        const API_GET_PRODUCTS = '<?php echo url('/api/?endpoint=get-products'); ?>';
 
 
         async function renderCartPanel() {
@@ -222,7 +222,7 @@ $selected_currency = $_SESSION['currency'] ?? $currency_config['primary'];
             // Fetch promotions for all products in cart
             const promotionsPromises = cart.map(async item => {
                 try {
-                    const response = await fetch(`<?php echo url('/api/get_promotion.php'); ?>?product_id=${item.product_id}`);
+                    const response = await fetch(`<?php echo url('/api/?endpoint=get-promotion'); ?>&product_id=${item.product_id}`);
                     const data = await response.json();
                     return { productId: item.product_id, promotion: data.promotion };
                 } catch (error) {
@@ -410,7 +410,7 @@ $selected_currency = $_SESSION['currency'] ?? $currency_config['primary'];
                 }
 
                 // Sync to session
-                const response = await fetch('<?php echo url('/api/sync_cart.php'); ?>', {
+                const response = await fetch('<?php echo url('/api/?endpoint=sync-cart'); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
