@@ -100,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
 
                 // Mantener valores del formulario para seguir editando
                 $form_values = $data;
+                $form_values['original_slug'] = $result['slug']; // Permitir edición continua
 
                 // Opcionalmente redirigir a config-themes
                 // redirect(url('/admin/?page=config-themes&msg=theme_created'));

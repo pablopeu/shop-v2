@@ -744,7 +744,8 @@ function generate_theme($data) {
                 'hover_effect' => $data['card_hover'] ?? 'glow',
                 'buttons' => $data['card_buttons'] ?? 'show',
                 'buttons_position' => $data['card_buttons_position'] ?? 'center',
-                'buttons_spacing' => $data['card_buttons_spacing'] ?? 'normal'
+                'buttons_spacing' => $data['card_buttons_spacing'] ?? 'normal',
+                'buttons_vertical_spacing' => $data['card_buttons_vertical_spacing'] ?? 'normal'
             ],
             'forms' => [
                 'style' => 'modern',

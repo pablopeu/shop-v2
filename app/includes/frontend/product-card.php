@@ -56,7 +56,7 @@ function render_product_card($product, $options = []) {
     $theme_json_path = PUBLIC_PATH . "/assets/themes/{$active_theme}/theme.json";
     if (file_exists($theme_json_path)) {
         $theme_json = read_json($theme_json_path);
-        $card_buttons = $theme_json['components']['cards']['buttons'] ?? 'show';
+        $card_buttons = $theme_json['components']['cards']['buttons'] ?? ($active_theme === 'modern-compact' ? 'hide' : 'show');
         $card_buttons_position = $theme_json['components']['cards']['buttons_position'] ?? 'center';
         $card_buttons_spacing = $theme_json['components']['cards']['buttons_spacing'] ?? 'normal';
         $card_buttons_vertical_spacing = $theme_json['components']['cards']['buttons_vertical_spacing'] ?? 'normal';
