@@ -537,7 +537,7 @@ $user = get_logged_user();
         <!-- Formulario -->
             <form method="POST" action="" id="theme-generator-form">
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-                <input type="hidden" name="original_slug" id="original-slug" value="">
+                <input type="hidden" name="original_slug" id="original-slug" value="<?php echo htmlspecialchars($form_values['original_slug'] ?? ''); ?>">
 
                 <!-- Método de Creación -->
                 <div class="card card-full" style="margin-bottom: 20px;">
