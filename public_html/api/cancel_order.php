@@ -19,7 +19,6 @@ api_rate_limit(10, 60);
 
 header('Content-Type: application/json');
 
-
 // Set security headers
 set_security_headers();
 
@@ -33,6 +32,35 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Validar Origin header para prevenir CSRF
+$allowed_origins = [
+    'https://peu.net',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000'
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? '';
+
+// Extraer dominio del referer si no hay origin
+if (empty($origin) && !empty($_SERVER['HTTP_REFERER'])) {
+    $parsed = parse_url($_SERVER['HTTP_REFERER']);
+    $origin = ($parsed['scheme'] ?? 'http') . '://' . ($parsed['host'] ?? '');
+}
+
+$origin_valid = false;
+foreach ($allowed_origins as $allowed) {
+    if (strpos($origin, $allowed) === 0) {
+        $origin_valid = true;
+        break;
+    }
+}
+
+if (!$origin_valid && !empty($origin)) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Invalid origin']);
+    error_log("Cancel Order: Origen no permitido: $origin desde IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    exit;
+}
+
 // Get JSON input
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
@@ -41,6 +69,16 @@ if (!isset($data['order_id']) || !isset($data['token'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing order_id or token']);
     exit;
+}
+
+// Validar CSRF token si está presente (opcional pero recomendado)
+if (isset($data['csrf_token'])) {
+    if (!validate_csrf_token($data['csrf_token'])) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Invalid CSRF token']);
+        error_log("Cancel Order: CSRF token inválido para orden: {$data['order_id']}");
+        exit;
+    }
 }
 
 $order_id = sanitize_input($data['order_id']);
