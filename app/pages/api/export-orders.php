@@ -1,69 +1,137 @@
 <?php
-define('APP_ENTRY_POINT', true);
-// Bootstrap de la aplicación - detectar entorno
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
-} else {
-    require_once __DIR__ . '/../../app/bootstrap.php';
-}
-
 /**
- * API - Export Orders
- * Exports orders in CSV or JSON format
+ * API Endpoint: Export Orders
+ * Exporta órdenes activas en formato CSV o JSON
+ *
+ * SEGURIDAD:
+ * - Requiere autenticación de admin
+ * - Rate limiting estricto (1 export cada 5 minutos)
+ * - Logging obligatorio de todas las exportaciones
+ * - Validación CSRF
  */
 
+// Security check - REQUIRED
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
-// Check admin authentication
+// Verificar autenticación de admin
 if (!is_admin_logged_in()) {
     http_response_code(403);
-    echo 'Unauthorized';
+    echo json_encode(['error' => 'No autorizado']);
     exit;
 }
 
-// Check if order IDs are provided
+// Rate limiting MUY estricto para exportaciones (1 cada 5 minutos por admin)
+$export_identifier = 'export_orders_' . ($_SESSION['user_id'] ?? 'unknown');
+$client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+if (!check_rate_limit($export_identifier, 1, 300)) { // 1 export cada 5 min
+    http_response_code(429);
+    error_log("SECURITY: Export rate limit excedido - User: {$_SESSION['username']}, IP: $client_ip");
+    echo json_encode([
+        'error' => 'Demasiadas exportaciones. Por favor espera 5 minutos antes de exportar nuevamente.'
+    ]);
+    exit;
+}
+
+// Solo aceptar POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Método no permitido']);
+    exit;
+}
+
+// Validar CSRF token
+if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+    http_response_code(403);
+    error_log("SECURITY: CSRF token inválido en export - User: {$_SESSION['username']}, IP: $client_ip");
+    echo json_encode(['error' => 'Token de seguridad inválido']);
+    exit;
+}
+
+// Validar que order_ids sea un array
 if (!isset($_POST['order_ids']) || !is_array($_POST['order_ids'])) {
     http_response_code(400);
-    echo 'Order IDs are required';
+    echo json_encode(['error' => 'IDs de órdenes requeridos']);
+    exit;
+}
+
+// Validar que no se exporten más de 1000 órdenes a la vez
+if (count($_POST['order_ids']) > 1000) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Máximo 1000 órdenes por exportación']);
     exit;
 }
 
 $order_ids = $_POST['order_ids'];
-$format = $_POST['format'] ?? 'json';
-$prefix = $_POST['prefix'] ?? 'ordenes'; // Default prefix if not specified
+$format = sanitize_input($_POST['format'] ?? 'json');
+$prefix = sanitize_input($_POST['prefix'] ?? 'ordenes');
 
-// Get all orders
+// Validar formato
+if (!in_array($format, ['csv', 'json'])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Formato inválido. Use: csv o json']);
+    exit;
+}
+
+// Obtener todas las órdenes
 $all_orders = get_all_orders();
 
-// Filter selected orders
+// Filtrar órdenes seleccionadas
 $selected_orders = array_filter($all_orders, function($order) use ($order_ids) {
     return in_array($order['id'], $order_ids);
 });
 
 if (empty($selected_orders)) {
     http_response_code(404);
-    echo 'No orders found';
+    echo json_encode(['error' => 'No se encontraron órdenes']);
     exit;
 }
 
-// Sort orders by order number (ascending)
+// LOG DE SEGURIDAD: Registrar la exportación
+$export_log = [
+    'timestamp' => date('Y-m-d H:i:s'),
+    'user_id' => $_SESSION['user_id'] ?? 'unknown',
+    'username' => $_SESSION['username'] ?? 'unknown',
+    'ip' => $client_ip,
+    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+    'action' => 'export_orders',
+    'format' => $format,
+    'order_count' => count($selected_orders),
+    'order_ids' => array_slice($order_ids, 0, 10) // Solo primeros 10 IDs para no llenar log
+];
+
+error_log("AUDIT: Export realizado - " . json_encode($export_log));
+
+// Guardar en archivo de auditoría
+$audit_file = APP_PATH . '/data/logs/exports.log';
+$audit_dir = dirname($audit_file);
+if (!is_dir($audit_dir)) {
+    mkdir($audit_dir, 0755, true);
+}
+file_put_contents($audit_file, json_encode($export_log) . "\n", FILE_APPEND | LOCK_EX);
+
+// Ordenar órdenes por número de orden (ascendente)
 usort($selected_orders, function($a, $b) {
     return strcmp($a['order_number'], $b['order_number']);
 });
 
-// Export based on format
+// Exportar según formato
 if ($format === 'csv') {
-    // Set headers for CSV download
+    // Headers para descarga CSV
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="' . $prefix . '_' . date('Y-m-d_His') . '.csv"');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 
     $output = fopen('php://output', 'w');
 
-    // Add BOM for Excel UTF-8 support
+    // BOM para soporte UTF-8 en Excel
     fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
-    // CSV Headers
+    // Headers CSV
     fputcsv($output, [
         'Nº Orden',
         'Fecha',
@@ -85,16 +153,16 @@ if ($format === 'csv') {
         'Notas'
     ]);
 
-    // Add data rows
+    // Filas de datos
     foreach ($selected_orders as $order) {
-        // Build products string
+        // Construir string de productos
         $products_str = '';
         foreach ($order['items'] as $item) {
             $products_str .= $item['name'] . ' (x' . $item['quantity'] . '), ';
         }
         $products_str = rtrim($products_str, ', ');
 
-        // Calculate amounts in ARS and USD
+        // Calcular montos en ARS y USD
         $exchange_rate = $order['exchange_rate'] ?? 1000;
         $total = $order['total'];
         $currency = $order['currency'];
@@ -103,7 +171,6 @@ if ($format === 'csv') {
             $total_usd = $total;
             $total_ars = $total * $exchange_rate;
         } else {
-            // ARS
             $total_ars = $total;
             $total_usd = $total / $exchange_rate;
         }
@@ -134,14 +201,17 @@ if ($format === 'csv') {
     exit;
 
 } else {
-    // JSON format
+    // Formato JSON
     header('Content-Type: application/json; charset=utf-8');
     header('Content-Disposition: attachment; filename="' . $prefix . '_' . date('Y-m-d_His') . '.json"');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 
-    // Format orders for JSON
+    // Formatear órdenes para JSON
     $export_data = [];
     foreach ($selected_orders as $order) {
-        // Calculate amounts in ARS and USD
+        // Calcular montos en ARS y USD
         $exchange_rate = $order['exchange_rate'] ?? 1000;
         $total = $order['total'];
         $currency = $order['currency'];

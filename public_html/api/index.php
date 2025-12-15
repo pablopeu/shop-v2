@@ -58,6 +58,8 @@ if (empty($endpoint)) {
 // Mapa de endpoints disponibles
 $endpoints_map = [
     'crear-preferencia-mp' => APP_PATH . '/pages/api/crear-preferencia-mp.php',
+    'export-orders' => APP_PATH . '/pages/api/export-orders.php',
+    'export-archived-orders' => APP_PATH . '/pages/api/export-archived-orders.php',
 ];
 
 // Verificar que el endpoint existe
