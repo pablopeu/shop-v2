@@ -1852,24 +1852,29 @@ $user = get_logged_user();
                 btn.disabled = false;
 
                 if (data.success) {
-                    showModal({
-                        title: '✅ Theme Activado',
-                        message: data.message,
-                        details: `El theme está ahora activo en el frontend. Puedes verlo en acción visitando la tienda.`,
-                        icon: '✅',
-                        confirmType: 'success'
-                    });
-
                     // Actualizar el botón para indicar que ya está activo
                     btn.textContent = '✅ Theme Activo';
                     btn.style.background = '#4caf50';
                     btn.disabled = true;
+
+                    // Mostrar mensaje temporal en lugar de modal
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'message success';
+                    successMsg.style.marginTop = '10px';
+                    successMsg.textContent = '✅ Theme activado exitosamente. Ya está visible en el frontend.';
+                    btn.parentElement.appendChild(successMsg);
+
+                    // Remover mensaje después de 5 segundos
+                    setTimeout(() => {
+                        successMsg.remove();
+                    }, 5000);
                 } else {
-                    showModal({
-                        title: 'Error',
-                        message: data.message || 'Error al activar el theme',
-                        icon: '❌'
-                    });
+                    // Solo mostrar error si falla
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'message error';
+                    errorMsg.style.marginTop = '10px';
+                    errorMsg.textContent = '❌ ' + (data.message || 'Error al activar el theme');
+                    btn.parentElement.appendChild(errorMsg);
                 }
             })
             .catch(err => {
