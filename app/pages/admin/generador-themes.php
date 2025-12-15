@@ -13,6 +13,23 @@ require_once APP_PATH . '/includes/theme-generator.php';
 
 $message = '';
 $error = '';
+$saved_theme_slug = '';
+
+// Valores del formulario (mantener después de guardar)
+$form_values = [
+    'name' => '',
+    'slug' => '',
+    'description' => '',
+    'author' => 'Shop Team',
+    'color_primary' => '#000000',
+    'color_secondary' => '#d4af37',
+    'color_accent' => '#4facfe',
+    'color_text' => '#1a1a1a',
+    'color_background' => '#ffffff',
+    'card_buttons' => 'show',
+    'card_buttons_position' => 'center',
+    'card_buttons_spacing' => 'normal',
+];
 
 // Procesamiento POST - Generar Theme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
@@ -73,16 +90,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
 
             if ($result['success']) {
                 $message = $result['message'];
+                $saved_theme_slug = $result['slug'];
                 log_admin_action('theme_generated', $_SESSION['username'], [
                     'slug' => $result['slug'],
                     'name' => $data['name']
                 ]);
+
+                // Mantener valores del formulario para seguir editando
+                $form_values = $data;
 
                 // Opcionalmente redirigir a config-themes
                 // redirect(url('/admin/?page=config-themes&msg=theme_created'));
             } else {
                 $error = $result['message'];
             }
+        }
+
+        // Si hubo error de validación, mantener los valores ingresados
+        if (!empty($error)) {
+            $form_values = $data;
         }
     }
 }
@@ -159,6 +185,38 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_theme_config') {
         'success' => true,
         'config' => $config
     ]);
+    exit;
+}
+
+// AJAX: Activar Theme
+if (isset($_GET['action']) && $_GET['action'] === 'activate_theme') {
+    header('Content-Type: application/json');
+
+    $json_input = json_decode(file_get_contents('php://input'), true);
+    $slug = sanitize_input($json_input['slug'] ?? '');
+
+    if (empty($slug)) {
+        echo json_encode(['success' => false, 'message' => 'Slug no proporcionado']);
+        exit;
+    }
+
+    // Verificar que el theme exista
+    $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
+    if (!is_dir($theme_dir)) {
+        echo json_encode(['success' => false, 'message' => 'Theme no encontrado']);
+        exit;
+    }
+
+    // Actualizar theme activo
+    $theme_config = read_json(APP_PATH . '/config/theme.json');
+    $theme_config['active_theme'] = $slug;
+
+    if (write_json(APP_PATH . '/config/theme.json', $theme_config)) {
+        log_admin_action('theme_activated', $_SESSION['username'], ['slug' => $slug]);
+        echo json_encode(['success' => true, 'message' => "Theme '{$slug}' activado exitosamente"]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Error al activar el theme']);
+    }
     exit;
 }
 
@@ -427,7 +485,18 @@ $user = get_logged_user();
 
         <!-- Mensajes -->
         <?php if ($message): ?>
-            <div class="message success"><?php echo $message; ?></div>
+            <div class="message success">
+                <?php echo $message; ?>
+                <?php if ($saved_theme_slug): ?>
+                    <br><br>
+                    <button data-action="activateTheme" data-slug="<?php echo htmlspecialchars($saved_theme_slug); ?>" class="btn-activate-theme" style="background: #2e7d32; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                        ✅ Activar Theme Ahora
+                    </button>
+                    <small style="display: block; margin-top: 8px; color: #666;">
+                        El theme se guardó exitosamente. Para ver los cambios en el frontend, actívalo haciendo clic en el botón de arriba.
+                    </small>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
 
         <?php if ($error): ?>
@@ -591,6 +660,7 @@ $user = get_logged_user();
                         <label for="theme-name">Nombre del Theme *</label>
                         <input type="text" name="name" id="theme-name" required
                                placeholder="Ej: Mi Theme Personalizado"
+                               value="<?php echo htmlspecialchars($form_values['name']); ?>"
                                data-onchange="generateSlug">
                         <small class="helper-text">Nombre descriptivo del theme</small>
                     </div>
@@ -599,19 +669,20 @@ $user = get_logged_user();
                         <label for="theme-slug">Slug *</label>
                         <input type="text" name="slug" id="theme-slug" required
                                pattern="[a-z0-9-]+"
-                               placeholder="mi-theme-personalizado">
+                               placeholder="mi-theme-personalizado"
+                               value="<?php echo htmlspecialchars($form_values['slug']); ?>">
                         <small class="helper-text">Identificador único (solo minúsculas, números y guiones). Se genera automáticamente.</small>
                     </div>
 
                     <div class="form-group">
                         <label for="description">Descripción</label>
                         <textarea name="description" id="description"
-                                  placeholder="Describe las características de tu theme..."></textarea>
+                                  placeholder="Describe las características de tu theme..."><?php echo htmlspecialchars($form_values['description']); ?></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="author">Autor</label>
-                        <input type="text" name="author" id="author" value="Shop Team">
+                        <input type="text" name="author" id="author" value="<?php echo htmlspecialchars($form_values['author']); ?>">
                     </div>
                 </div>
 
@@ -717,8 +788,8 @@ $user = get_logged_user();
                         <div class="form-group">
                             <label>Primary *</label>
                             <div class="color-input-wrapper">
-                                <input type="color" name="color_primary" value="#000000" id="color-primary">
-                                <input type="text" value="#000000" readonly>
+                                <input type="color" name="color_primary" value="<?php echo htmlspecialchars($form_values['color_primary']); ?>" id="color-primary">
+                                <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary']); ?>" readonly>
                             </div>
                             <small class="helper-text">Color principal del theme</small>
                         </div>
@@ -726,8 +797,8 @@ $user = get_logged_user();
                         <div class="form-group">
                             <label>Secondary *</label>
                             <div class="color-input-wrapper">
-                                <input type="color" name="color_secondary" value="#d4af37" id="color-secondary">
-                                <input type="text" value="#d4af37" readonly>
+                                <input type="color" name="color_secondary" value="<?php echo htmlspecialchars($form_values['color_secondary']); ?>" id="color-secondary">
+                                <input type="text" value="<?php echo htmlspecialchars($form_values['color_secondary']); ?>" readonly>
                             </div>
                             <small class="helper-text">Color secundario (acentos)</small>
                         </div>
@@ -735,8 +806,8 @@ $user = get_logged_user();
                         <div class="form-group">
                             <label>Accent</label>
                             <div class="color-input-wrapper">
-                                <input type="color" name="color_accent" value="#4facfe" id="color-accent">
-                                <input type="text" value="#4facfe" readonly>
+                                <input type="color" name="color_accent" value="<?php echo htmlspecialchars($form_values['color_accent']); ?>" id="color-accent">
+                                <input type="text" value="<?php echo htmlspecialchars($form_values['color_accent']); ?>" readonly>
                             </div>
                             <small class="helper-text">Color de acento adicional</small>
                         </div>
@@ -744,8 +815,8 @@ $user = get_logged_user();
                         <div class="form-group">
                             <label>Text *</label>
                             <div class="color-input-wrapper">
-                                <input type="color" name="color_text" value="#1a1a1a" id="color-text">
-                                <input type="text" value="#1a1a1a" readonly>
+                                <input type="color" name="color_text" value="<?php echo htmlspecialchars($form_values['color_text']); ?>" id="color-text">
+                                <input type="text" value="<?php echo htmlspecialchars($form_values['color_text']); ?>" readonly>
                             </div>
                             <small class="helper-text">Color del texto principal</small>
                         </div>
@@ -753,8 +824,8 @@ $user = get_logged_user();
                         <div class="form-group">
                             <label>Background *</label>
                             <div class="color-input-wrapper">
-                                <input type="color" name="color_background" value="#ffffff" id="color-background">
-                                <input type="text" value="#ffffff" readonly>
+                                <input type="color" name="color_background" value="<?php echo htmlspecialchars($form_values['color_background']); ?>" id="color-background">
+                                <input type="text" value="<?php echo htmlspecialchars($form_values['color_background']); ?>" readonly>
                             </div>
                             <small class="helper-text">Color de fondo</small>
                         </div>
@@ -871,15 +942,15 @@ $user = get_logged_user();
                         <label>Botones en Cards</label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="card_buttons" value="show" checked>
+                                <input type="radio" name="card_buttons" value="show" <?php echo ($form_values['card_buttons'] === 'show') ? 'checked' : ''; ?>>
                                 Mostrar todos los botones
                             </label>
                             <label>
-                                <input type="radio" name="card_buttons" value="cart_only">
+                                <input type="radio" name="card_buttons" value="cart_only" <?php echo ($form_values['card_buttons'] === 'cart_only') ? 'checked' : ''; ?>>
                                 Solo botón de carrito
                             </label>
                             <label>
-                                <input type="radio" name="card_buttons" value="hide">
+                                <input type="radio" name="card_buttons" value="hide" <?php echo ($form_values['card_buttons'] === 'hide') ? 'checked' : ''; ?>>
                                 Ocultar (card clickeable)
                             </label>
                         </div>
@@ -890,15 +961,15 @@ $user = get_logged_user();
                         <label>Posición de Botones</label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="card_buttons_position" value="center" checked>
+                                <input type="radio" name="card_buttons_position" value="center" <?php echo ($form_values['card_buttons_position'] === 'center') ? 'checked' : ''; ?>>
                                 Centrado
                             </label>
                             <label>
-                                <input type="radio" name="card_buttons_position" value="left">
+                                <input type="radio" name="card_buttons_position" value="left" <?php echo ($form_values['card_buttons_position'] === 'left') ? 'checked' : ''; ?>>
                                 Izquierda
                             </label>
                             <label>
-                                <input type="radio" name="card_buttons_position" value="right">
+                                <input type="radio" name="card_buttons_position" value="right" <?php echo ($form_values['card_buttons_position'] === 'right') ? 'checked' : ''; ?>>
                                 Derecha
                             </label>
                         </div>
@@ -908,15 +979,15 @@ $user = get_logged_user();
                         <label>Espaciado de Botones</label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="card_buttons_spacing" value="normal" checked>
+                                <input type="radio" name="card_buttons_spacing" value="normal" <?php echo ($form_values['card_buttons_spacing'] === 'normal') ? 'checked' : ''; ?>>
                                 Normal
                             </label>
                             <label>
-                                <input type="radio" name="card_buttons_spacing" value="compact">
+                                <input type="radio" name="card_buttons_spacing" value="compact" <?php echo ($form_values['card_buttons_spacing'] === 'compact') ? 'checked' : ''; ?>>
                                 Compacto
                             </label>
                             <label>
-                                <input type="radio" name="card_buttons_spacing" value="spacious">
+                                <input type="radio" name="card_buttons_spacing" value="spacious" <?php echo ($form_values['card_buttons_spacing'] === 'spacious') ? 'checked' : ''; ?>>
                                 Amplio
                             </label>
                         </div>
@@ -1758,6 +1829,60 @@ $user = get_logged_user();
             toggleCardButtonsOptions();
         });
 
+        // Función para activar theme
+        function activateTheme(event, element, params) {
+            const slug = params?.slug;
+            if (!slug) return;
+
+            const btn = element;
+            const originalText = btn.textContent;
+            btn.textContent = 'Activando...';
+            btn.disabled = true;
+
+            fetch('<?php echo url('/admin/?page=generador-themes&action=activate_theme'); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ slug: slug })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+
+                if (data.success) {
+                    showModal({
+                        title: '✅ Theme Activado',
+                        message: data.message,
+                        details: `El theme está ahora activo en el frontend. Puedes verlo en acción visitando la tienda.`,
+                        icon: '✅',
+                        confirmType: 'success'
+                    });
+
+                    // Actualizar el botón para indicar que ya está activo
+                    btn.textContent = '✅ Theme Activo';
+                    btn.style.background = '#4caf50';
+                    btn.disabled = true;
+                } else {
+                    showModal({
+                        title: 'Error',
+                        message: data.message || 'Error al activar el theme',
+                        icon: '❌'
+                    });
+                }
+            })
+            .catch(err => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                showModal({
+                    title: 'Error',
+                    message: 'Error de conexión al activar el theme',
+                    icon: '❌'
+                });
+            });
+        }
+
         // Exportar funciones para event delegation
         window.generateSlug = generateSlug;
         window.toggleCreationMethod = toggleCreationMethod;
@@ -1765,6 +1890,7 @@ $user = get_logged_user();
         window.selectPopularPalette = selectPopularPalette;
         window.loadThemeForEdit = loadThemeForEdit;
         window.showPreview = showPreview;
+        window.activateTheme = activateTheme;
     </script>
 
     <!-- Modal Component -->
