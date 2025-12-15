@@ -55,6 +55,9 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'card_buttons_position' => $edit_config['components']['cards']['buttons_position'] ?? 'center',
             'card_buttons_spacing' => $edit_config['components']['cards']['buttons_spacing'] ?? 'normal',
             'card_buttons_vertical_spacing' => $edit_config['components']['cards']['buttons_vertical_spacing'] ?? 'normal',
+            'button_style' => $edit_config['components']['buttons']['style'] ?? 'solid',
+            'button_rounded' => $edit_config['components']['buttons']['rounded'] ?? false,
+            'button_shadow' => $edit_config['components']['buttons']['shadow'] ?? false,
             'original_slug' => $edit_config['slug'] ?? '',
         ];
 
@@ -1055,11 +1058,11 @@ $user = get_logged_user();
                             <label>Estilo</label>
                             <div class="radio-group">
                                 <label>
-                                    <input type="radio" name="button_style" value="solid" checked>
+                                    <input type="radio" name="button_style" value="solid" <?php echo ($form_values['button_style'] ?? 'solid') === 'solid' ? 'checked' : ''; ?>>
                                     Sólido
                                 </label>
                                 <label>
-                                    <input type="radio" name="button_style" value="outline">
+                                    <input type="radio" name="button_style" value="outline" <?php echo ($form_values['button_style'] ?? 'solid') === 'outline' ? 'checked' : ''; ?>>
                                     Outline
                                 </label>
                             </div>
@@ -1068,11 +1071,11 @@ $user = get_logged_user();
                         <div class="form-group" style="margin-bottom: 0;">
                             <div class="checkbox-group">
                                 <label>
-                                    <input type="checkbox" name="button_rounded">
+                                    <input type="checkbox" name="button_rounded" <?php echo ($form_values['button_rounded'] ?? false) ? 'checked' : ''; ?>>
                                     Botones redondeados
                                 </label>
                                 <label>
-                                    <input type="checkbox" name="button_shadow">
+                                    <input type="checkbox" name="button_shadow" <?php echo ($form_values['button_shadow'] ?? false) ? 'checked' : ''; ?>>
                                     Con sombra
                                 </label>
                             </div>

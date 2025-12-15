@@ -603,6 +603,7 @@ function generate_theme_css_basic($config) {
     $btn_rounded = $config['components']['buttons']['rounded'] ?? false;
     $btn_shadow = $config['components']['buttons']['shadow'] ?? false;
 
+    // Estilos base para todos los botones
     $css .= ".btn, .btn-primary, .btn-secondary, .btn-add-cart {\n";
     $css .= "    padding: var(--spacing-sm) var(--spacing-lg);\n";
     $css .= "    font-weight: var(--font-weight-medium);\n";
@@ -610,25 +611,26 @@ function generate_theme_css_basic($config) {
     $css .= "    cursor: pointer;\n";
     $css .= "    display: inline-block;\n";
     $css .= "    text-align: center;\n";
-    $css .= "    border: none;\n";
 
+    // Border radius según configuración
     if ($btn_rounded) {
         $css .= "    border-radius: var(--border-radius-full);\n";
     } else {
         $css .= "    border-radius: var(--border-radius-sm);\n";
     }
 
-    if ($btn_shadow) {
-        $css .= "    box-shadow: var(--shadow-sm);\n";
-    }
-
     $css .= "}\n\n";
 
-    // Button styles
+    // Estilos específicos según el tipo (solid/outline)
     if ($btn_style === 'solid') {
+        // Estilo sólido
         $css .= ".btn-primary, .btn-add-cart {\n";
         $css .= "    background: var(--color-primary);\n";
         $css .= "    color: var(--color-white);\n";
+        $css .= "    border: none;\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-sm);\n";
+        }
         $css .= "}\n\n";
 
         $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
@@ -641,6 +643,10 @@ function generate_theme_css_basic($config) {
         $css .= ".btn-secondary {\n";
         $css .= "    background: var(--color-secondary);\n";
         $css .= "    color: var(--color-white);\n";
+        $css .= "    border: none;\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-sm);\n";
+        }
         $css .= "}\n\n";
 
         $css .= ".btn-secondary:hover {\n";
@@ -650,26 +656,39 @@ function generate_theme_css_basic($config) {
         }
         $css .= "}\n\n";
     } elseif ($btn_style === 'outline') {
+        // Estilo outline
         $css .= ".btn-primary, .btn-add-cart {\n";
         $css .= "    background: transparent;\n";
         $css .= "    color: var(--color-primary);\n";
         $css .= "    border: var(--border-width-thick) solid var(--color-primary);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-sm);\n";
+        }
         $css .= "}\n\n";
 
         $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
         $css .= "    background: var(--color-primary);\n";
         $css .= "    color: var(--color-white);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-md);\n";
+        }
         $css .= "}\n\n";
 
         $css .= ".btn-secondary {\n";
         $css .= "    background: transparent;\n";
         $css .= "    color: var(--color-secondary);\n";
         $css .= "    border: var(--border-width-thick) solid var(--color-secondary);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-sm);\n";
+        }
         $css .= "}\n\n";
 
         $css .= ".btn-secondary:hover {\n";
         $css .= "    background: var(--color-secondary);\n";
         $css .= "    color: var(--color-white);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-md);\n";
+        }
         $css .= "}\n\n";
     }
 
