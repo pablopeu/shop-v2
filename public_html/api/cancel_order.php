@@ -14,6 +14,9 @@ if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
  * Permite cancelar pedidos en estado pending
  */
 
+// Apply rate limiting: 10 requests per minute per IP
+api_rate_limit(10, 60);
+
 header('Content-Type: application/json');
 
 

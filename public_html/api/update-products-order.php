@@ -13,6 +13,9 @@ if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
  * API Endpoint - Update Products Display Order
  */
 
+// Apply rate limiting: 10 requests per minute per IP
+api_rate_limit(10, 60);
+
 // Error handling - catch all errors and return JSON
 try {
     // Functions already loaded by bootstrap
