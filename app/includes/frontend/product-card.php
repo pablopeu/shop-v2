@@ -43,10 +43,22 @@ function render_product_card($product, $options = []) {
 
     $is_out_of_stock = $product['stock'] === 0;
 
-    // Determinar si la tarjeta completa debe ser clickeable (theme Modern Compact)
+    // Leer configuración del theme
     $theme_config = read_json(APP_PATH . '/config/theme.json');
     $active_theme = $theme_config['active_theme'] ?? 'minimal';
-    $card_clickeable = ($active_theme === 'modern-compact');
+
+    // Obtener configuración de botones en cards
+    $card_buttons = 'show'; // Default
+    if (file_exists(PUBLIC_PATH . "/assets/themes/archivo/{$active_theme}/theme.json")) {
+        $theme_json = read_json(PUBLIC_PATH . "/assets/themes/archivo/{$active_theme}/theme.json");
+        $card_buttons = $theme_json['components']['cards']['buttons'] ?? 'show';
+    }
+
+    // Determinar si la tarjeta completa debe ser clickeable
+    // Clickeable si el theme es 'modern-compact' o si buttons está en 'hide' o 'cart_only'
+    $card_clickeable = ($active_theme === 'modern-compact') ||
+                       ($card_buttons === 'hide') ||
+                       ($card_buttons === 'cart_only');
     ?>
 
     <div class="product-card" <?php if ($card_clickeable): ?>data-action="goToProduct" data-url="<?php echo url('/producto/' . urlencode($product['slug'])); ?>"<?php endif; ?>>
@@ -103,23 +115,28 @@ function render_product_card($product, $options = []) {
             </div>
             <?php endif; ?>
 
+            <?php if ($card_buttons !== 'hide'): ?>
             <div class="product-buttons">
+                <?php if ($card_buttons === 'show'): ?>
+                <!-- Mostrar ambos botones -->
                 <button class="btn btn-secondary"
                         data-action="goToProduct"
                         data-url="<?php echo url('/producto/' . urlencode($product['slug'])); ?>"
                         <?php echo $is_out_of_stock ? 'disabled' : ''; ?>>
                     Ver detalle
                 </button>
+                <?php endif; ?>
 
-                <?php if ($options['show_add_to_cart']): ?>
+                <?php if ($options['show_add_to_cart'] && ($card_buttons === 'show' || $card_buttons === 'cart_only')): ?>
                 <button class="btn btn-add-cart"
                         data-action="addToCart"
                         data-product-id="<?php echo htmlspecialchars($product['id']); ?>"
                         <?php echo $is_out_of_stock ? 'disabled' : ''; ?>>
-                    🛒 Agregar
+                    <?php echo ($card_buttons === 'cart_only') ? '🛒 Agregar al Carrito' : '🛒 Agregar'; ?>
                 </button>
                 <?php endif; ?>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 

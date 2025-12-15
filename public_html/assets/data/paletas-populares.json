@@ -24,7 +24,7 @@
             "#00b8a9"
         ],
         "mapped": {
-            "primary": "#00b8a9",
+            "primary": "#00776d",
             "secondary": "#ffde7d",
             "accent": "#f6416c",
             "text": "#000000",
@@ -56,7 +56,7 @@
             "#08d9d6"
         ],
         "mapped": {
-            "primary": "#ff2e63",
+            "primary": "#b92048",
             "secondary": "#08d9d6",
             "accent": "#08d9d6",
             "text": "#252a34",
@@ -104,7 +104,7 @@
             "#164863"
         ],
         "mapped": {
-            "primary": "#427d9d",
+            "primary": "#3b708d",
             "secondary": "#9bbec8",
             "accent": "#9bbec8",
             "text": "#164863",
@@ -120,7 +120,7 @@
             "#1a374d"
         ],
         "mapped": {
-            "primary": "#406882",
+            "primary": "#335369",
             "secondary": "#6998ab",
             "accent": "#6998ab",
             "text": "#1a374d",
@@ -152,7 +152,7 @@
             "#1fab89"
         ],
         "mapped": {
-            "primary": "#62d2a2",
+            "primary": "#387b5e",
             "secondary": "#9df3c4",
             "accent": "#1fab89",
             "text": "#000000",
@@ -216,7 +216,7 @@
             "#27374d"
         ],
         "mapped": {
-            "primary": "#526d82",
+            "primary": "#496275",
             "secondary": "#9db2bf",
             "accent": "#9db2bf",
             "text": "#27374d",
@@ -280,7 +280,7 @@
             "#2d4059"
         ],
         "mapped": {
-            "primary": "#ea5455",
+            "primary": "#993636",
             "secondary": "#f07b3f",
             "accent": "#f07b3f",
             "text": "#2d4059",
@@ -296,7 +296,7 @@
             "#364f6b"
         ],
         "mapped": {
-            "primary": "#fc5185",
+            "primary": "#b63960",
             "secondary": "#3fc1c9",
             "accent": "#3fc1c9",
             "text": "#364f6b",
@@ -312,7 +312,7 @@
             "#3c6255"
         ],
         "mapped": {
-            "primary": "#61876e",
+            "primary": "#4e6c59",
             "secondary": "#a6bb8d",
             "accent": "#a6bb8d",
             "text": "#3c6255",
@@ -328,7 +328,7 @@
             "#48466d"
         ],
         "mapped": {
-            "primary": "#3d84a8",
+            "primary": "#2b5f79",
             "secondary": "#46cdcf",
             "accent": "#46cdcf",
             "text": "#48466d",
@@ -344,7 +344,7 @@
             "#5f6f52"
         ],
         "mapped": {
-            "primary": "#b99470",
+            "primary": "#866b51",
             "secondary": "#a9b388",
             "accent": "#a9b388",
             "text": "#5f6f52",
@@ -360,7 +360,7 @@
             "#5f7161"
         ],
         "mapped": {
-            "primary": "#6d8b74",
+            "primary": "#4f6453",
             "secondary": "#d0c9c0",
             "accent": "#5f7161",
             "text": "#000000",
@@ -376,7 +376,7 @@
             "#6096b4"
         ],
         "mapped": {
-            "primary": "#93bfcf",
+            "primary": "#4c636c",
             "secondary": "#bdcdd6",
             "accent": "#6096b4",
             "text": "#000000",
@@ -392,7 +392,7 @@
             "#7d5a50"
         ],
         "mapped": {
-            "primary": "#b4846c",
+            "primary": "#755546",
             "secondary": "#e5b299",
             "accent": "#e5b299",
             "text": "#7d5a50",
@@ -408,7 +408,7 @@
             "#8294c4"
         ],
         "mapped": {
-            "primary": "#acb1d6",
+            "primary": "#63677c",
             "secondary": "#dbdfea",
             "accent": "#8294c4",
             "text": "#000000",
@@ -424,7 +424,7 @@
             "#867070"
         ],
         "mapped": {
-            "primary": "#d5b4b4",
+            "primary": "#6e5e5e",
             "secondary": "#e4d0d0",
             "accent": "#867070",
             "text": "#000000",
@@ -440,7 +440,7 @@
             "#8d7b68"
         ],
         "mapped": {
-            "primary": "#a4907c",
+            "primary": "#6a5d50",
             "secondary": "#c8b6a6",
             "accent": "#8d7b68",
             "text": "#000000",
@@ -456,7 +456,7 @@
             "#92c7cf"
         ],
         "mapped": {
-            "primary": "#aad7d9",
+            "primary": "#597071",
             "secondary": "#e5e1da",
             "accent": "#92c7cf",
             "text": "#000000",
@@ -472,7 +472,7 @@
             "#93b5c6"
         ],
         "mapped": {
-            "primary": "#c9ccd5",
+            "primary": "#5e5f63",
             "secondary": "#e4d8dc",
             "accent": "#93b5c6",
             "text": "#000000",
@@ -488,7 +488,7 @@
             "#96b6c5"
         ],
         "mapped": {
-            "primary": "#adc4ce",
+            "primary": "#5a666c",
             "secondary": "#eee0c9",
             "accent": "#96b6c5",
             "text": "#000000",
@@ -504,7 +504,7 @@
             "#9babb8"
         ],
         "mapped": {
-            "primary": "#9babb8",
+            "primary": "#5a636b",
             "secondary": "#d7c0ae",
             "accent": "#967e76",
             "text": "#000000",
@@ -520,7 +520,7 @@
             "#a0937d"
         ],
         "mapped": {
-            "primary": "#e3cdc1",
+            "primary": "#6a605a",
             "secondary": "#e7d4b5",
             "accent": "#a0937d",
             "text": "#000000",
@@ -536,7 +536,7 @@
             "#a75d5d"
         ],
         "mapped": {
-            "primary": "#d3756b",
+            "primary": "#7b433e",
             "secondary": "#f0997d",
             "accent": "#a75d5d",
             "text": "#000000",
@@ -552,7 +552,7 @@
             "#a75d5d"
         ],
         "mapped": {
-            "primary": "#d3756b",
+            "primary": "#7b433e",
             "secondary": "#f0997d",
             "accent": "#a75d5d",
             "text": "#000000",
@@ -568,7 +568,7 @@
             "#a8d8ea"
         ],
         "mapped": {
-            "primary": "#fcbad3",
+            "primary": "#83616e",
             "secondary": "#a8d8ea",
             "accent": "#aa96da",
             "text": "#000000",
@@ -584,7 +584,7 @@
             "#a9907e"
         ],
         "mapped": {
-            "primary": "#a9907e",
+            "primary": "#6d5d51",
             "secondary": "#abc4aa",
             "accent": "#abc4aa",
             "text": "#675d50",
@@ -600,7 +600,7 @@
             "#ad8b73"
         ],
         "mapped": {
-            "primary": "#ceab93",
+            "primary": "#866e5f",
             "secondary": "#e3caa5",
             "accent": "#ad8b73",
             "text": "#000000",
@@ -616,7 +616,7 @@
             "#b1b2ff"
         ],
         "mapped": {
-            "primary": "#aac4ff",
+            "primary": "#596686",
             "secondary": "#d2daff",
             "accent": "#b1b2ff",
             "text": "#000000",
@@ -632,7 +632,7 @@
             "#b3c8cf"
         ],
         "mapped": {
-            "primary": "#bed7dc",
+            "primary": "#596468",
             "secondary": "#e5ddc5",
             "accent": "#b3c8cf",
             "text": "#000000",
@@ -648,7 +648,7 @@
             "#b4b4b8"
         ],
         "mapped": {
-            "primary": "#c7c8cc",
+            "primary": "#68696a",
             "secondary": "#e3e1d9",
             "accent": "#b4b4b8",
             "text": "#000000",
@@ -664,7 +664,7 @@
             "#b5c0d0"
         ],
         "mapped": {
-            "primary": "#ccd3ca",
+            "primary": "#5f635e",
             "secondary": "#eed3d9",
             "accent": "#b5c0d0",
             "text": "#000000",
@@ -680,7 +680,7 @@
             "#b5eaea"
         ],
         "mapped": {
-            "primary": "#ffbcbc",
+            "primary": "#866262",
             "secondary": "#b5eaea",
             "accent": "#f38ba0",
             "text": "#000000",
@@ -696,7 +696,7 @@
             "#b7c4cf"
         ],
         "mapped": {
-            "primary": "#b7c4cf",
+            "primary": "#5f666c",
             "secondary": "#d7c0ae",
             "accent": "#967e76",
             "text": "#000000",
@@ -712,7 +712,7 @@
             "#bad7df"
         ],
         "mapped": {
-            "primary": "#bad7df",
+            "primary": "#617075",
             "secondary": "#ffe2e2",
             "accent": "#99ddcc",
             "text": "#000000",
@@ -728,7 +728,7 @@
             "#be9fe1"
         ],
         "mapped": {
-            "primary": "#c9b6e4",
+            "primary": "#756985",
             "secondary": "#e1ccec",
             "accent": "#be9fe1",
             "text": "#000000",
@@ -744,7 +744,7 @@
             "#c4dfdf"
         ],
         "mapped": {
-            "primary": "#d2e9e9",
+            "primary": "#636d6d",
             "secondary": "#e3f4f4",
             "accent": "#c4dfdf",
             "text": "#000000",
@@ -760,7 +760,7 @@
             "#ccd5ae"
         ],
         "mapped": {
-            "primary": "#e9edc9",
+            "primary": "#6d6e5e",
             "secondary": "#faedcd",
             "accent": "#ccd5ae",
             "text": "#000000",
@@ -808,7 +808,7 @@
             "#def5e5"
         ],
         "mapped": {
-            "primary": "#9ed5c5",
+            "primary": "#516e67",
             "secondary": "#bcead5",
             "accent": "#8ec3b0",
             "text": "#000000",
@@ -824,7 +824,7 @@
             "#defcf9"
         ],
         "mapped": {
-            "primary": "#c3bef0",
+            "primary": "#65637e",
             "secondary": "#cadefc",
             "accent": "#cca8e9",
             "text": "#000000",
@@ -840,7 +840,7 @@
             "#e1f0da"
         ],
         "mapped": {
-            "primary": "#bfd8af",
+            "primary": "#596551",
             "secondary": "#d4e7c5",
             "accent": "#99bc85",
             "text": "#000000",
@@ -888,7 +888,7 @@
             "#e3fdfd"
         ],
         "mapped": {
-            "primary": "#a6e3e9",
+            "primary": "#57767a",
             "secondary": "#cbf1f5",
             "accent": "#71c9ce",
             "text": "#000000",
@@ -904,7 +904,7 @@
             "#e4f9f5"
         ],
         "mapped": {
-            "primary": "#11999e",
+            "primary": "#0d7b7f",
             "secondary": "#30e3ca",
             "accent": "#30e3ca",
             "text": "#40514e",
@@ -920,7 +920,7 @@
             "#e5d9b6"
         ],
         "mapped": {
-            "primary": "#5f8d4e",
+            "primary": "#446538",
             "secondary": "#a4be7b",
             "accent": "#a4be7b",
             "text": "#285430",
@@ -936,7 +936,7 @@
             "#eac7c7"
         ],
         "mapped": {
-            "primary": "#eac7c7",
+            "primary": "#7b6868",
             "secondary": "#eae0da",
             "accent": "#a0c3d2",
             "text": "#000000",
@@ -952,7 +952,7 @@
             "#edf1d6"
         ],
         "mapped": {
-            "primary": "#609966",
+            "primary": "#456e48",
             "secondary": "#9dc08b",
             "accent": "#9dc08b",
             "text": "#40513b",
@@ -984,7 +984,7 @@
             "#f0e5cf"
         ],
         "mapped": {
-            "primary": "#c8c6c6",
+            "primary": "#696868",
             "secondary": "#f0e5cf",
             "accent": "#f0e5cf",
             "text": "#4b6587",
@@ -1000,7 +1000,7 @@
             "#f0ebe3"
         ],
         "mapped": {
-            "primary": "#7d9d9c",
+            "primary": "#516565",
             "secondary": "#e4dccf",
             "accent": "#e4dccf",
             "text": "#576f72",
@@ -1016,7 +1016,7 @@
             "#f0ece3"
         ],
         "mapped": {
-            "primary": "#c7b198",
+            "primary": "#746758",
             "secondary": "#dfd3c3",
             "accent": "#dfd3c3",
             "text": "#596e79",
@@ -1080,7 +1080,7 @@
             "#f2d7d9"
         ],
         "mapped": {
-            "primary": "#9cb4cc",
+            "primary": "#515e6a",
             "secondary": "#d3cedf",
             "accent": "#748da6",
             "text": "#000000",
@@ -1096,7 +1096,7 @@
             "#f38181"
         ],
         "mapped": {
-            "primary": "#95e1d3",
+            "primary": "#4e756e",
             "secondary": "#fce38a",
             "accent": "#f38181",
             "text": "#000000",
@@ -1112,7 +1112,7 @@
             "#f3eeea"
         ],
         "mapped": {
-            "primary": "#b0a695",
+            "primary": "#726c61",
             "secondary": "#ebe3d5",
             "accent": "#ebe3d5",
             "text": "#776b5d",
@@ -1128,7 +1128,7 @@
             "#f4eeff"
         ],
         "mapped": {
-            "primary": "#a6b1e1",
+            "primary": "#616782",
             "secondary": "#dcd6f7",
             "accent": "#dcd6f7",
             "text": "#424874",
@@ -1144,7 +1144,7 @@
             "#f4eeff"
         ],
         "mapped": {
-            "primary": "#a6b1e1",
+            "primary": "#616782",
             "secondary": "#dcd6f7",
             "accent": "#dcd6f7",
             "text": "#424874",
@@ -1160,7 +1160,7 @@
             "#f4f4f2"
         ],
         "mapped": {
-            "primary": "#bbbfca",
+            "primary": "#6c6e75",
             "secondary": "#e8e8e8",
             "accent": "#e8e8e8",
             "text": "#495464",
@@ -1176,7 +1176,7 @@
             "#f5eee6"
         ],
         "mapped": {
-            "primary": "#f3d7ca",
+            "primary": "#72645e",
             "secondary": "#f5eee6",
             "accent": "#e6a4b4",
             "text": "#000000",
@@ -1192,7 +1192,7 @@
             "#f5efe6"
         ],
         "mapped": {
-            "primary": "#aebdca",
+            "primary": "#656e75",
             "secondary": "#e8dfca",
             "accent": "#7895b2",
             "text": "#000000",
@@ -1208,7 +1208,7 @@
             "#f5efe7"
         ],
         "mapped": {
-            "primary": "#4f709c",
+            "primary": "#47648c",
             "secondary": "#d8c4b6",
             "accent": "#d8c4b6",
             "text": "#213555",
@@ -1256,7 +1256,7 @@
             "#f6f1f1"
         ],
         "mapped": {
-            "primary": "#19a7ce",
+            "primary": "#0f6c86",
             "secondary": "#afd3e2",
             "accent": "#afd3e2",
             "text": "#146c94",
@@ -1272,7 +1272,7 @@
             "#f6f4eb"
         ],
         "mapped": {
-            "primary": "#749bc2",
+            "primary": "#53708c",
             "secondary": "#91c8e4",
             "accent": "#4682a9",
             "text": "#000000",
@@ -1288,7 +1288,7 @@
             "#f6f5f2"
         ],
         "mapped": {
-            "primary": "#f0ebe3",
+            "primary": "#716e6a",
             "secondary": "#ffefef",
             "accent": "#f3d0d7",
             "text": "#000000",
@@ -1304,7 +1304,7 @@
             "#f6f5f5"
         ],
         "mapped": {
-            "primary": "#1687a7",
+            "primary": "#137996",
             "secondary": "#d3e0ea",
             "accent": "#d3e0ea",
             "text": "#276678",
@@ -1320,7 +1320,7 @@
             "#f6f6f6"
         ],
         "mapped": {
-            "primary": "#ffc7c7",
+            "primary": "#866868",
             "secondary": "#ffe2e2",
             "accent": "#aaaaaa",
             "text": "#000000",
@@ -1336,7 +1336,7 @@
             "#f7fbfc"
         ],
         "mapped": {
-            "primary": "#b9d7ea",
+            "primary": "#61707b",
             "secondary": "#d6e6f2",
             "accent": "#769fcd",
             "text": "#000000",
@@ -1352,7 +1352,7 @@
             "#f8ede3"
         ],
         "mapped": {
-            "primary": "#a2b29f",
+            "primary": "#5e685c",
             "secondary": "#bdd2b6",
             "accent": "#798777",
             "text": "#000000",
@@ -1368,7 +1368,7 @@
             "#f8ede3"
         ],
         "mapped": {
-            "primary": "#d0b8a8",
+            "primary": "#6c6057",
             "secondary": "#dfd3c3",
             "accent": "#7d6e83",
             "text": "#000000",
@@ -1384,7 +1384,7 @@
             "#f8ede3"
         ],
         "mapped": {
-            "primary": "#d0b8a8",
+            "primary": "#6c6057",
             "secondary": "#dfd3c3",
             "accent": "#dfd3c3",
             "text": "#85586f",
@@ -1416,7 +1416,7 @@
             "#f9f5f6"
         ],
         "mapped": {
-            "primary": "#fdcedf",
+            "primary": "#766169",
             "secondary": "#f8e8ee",
             "accent": "#f2bed1",
             "text": "#000000",
@@ -1448,7 +1448,7 @@
             "#faf1e4"
         ],
         "mapped": {
-            "primary": "#9eb384",
+            "primary": "#5b684c",
             "secondary": "#cedebd",
             "accent": "#cedebd",
             "text": "#435334",
@@ -1464,7 +1464,7 @@
             "#faf3e0"
         ],
         "mapped": {
-            "primary": "#b68973",
+            "primary": "#836352",
             "secondary": "#eabf9f",
             "accent": "#eabf9f",
             "text": "#1e212d",
@@ -1480,7 +1480,7 @@
             "#faf8f1"
         ],
         "mapped": {
-            "primary": "#e5ba73",
+            "primary": "#866c41",
             "secondary": "#faeab1",
             "accent": "#c58940",
             "text": "#000000",
@@ -1496,7 +1496,7 @@
             "#fcd1d1"
         ],
         "mapped": {
-            "primary": "#fcd1d1",
+            "primary": "#695858",
             "secondary": "#d3e0dc",
             "accent": "#aee1e1",
             "text": "#000000",
@@ -1512,7 +1512,7 @@
             "#fcd8d4"
         ],
         "mapped": {
-            "primary": "#fcd8d4",
+            "primary": "#756563",
             "secondary": "#f8e2cf",
             "accent": "#f5c6aa",
             "text": "#000000",
@@ -1528,7 +1528,7 @@
             "#fcf8e8"
         ],
         "mapped": {
-            "primary": "#ecb390",
+            "primary": "#896853",
             "secondary": "#d4e2d4",
             "accent": "#df7861",
             "text": "#000000",
@@ -1544,7 +1544,7 @@
             "#fdefef"
         ],
         "mapped": {
-            "primary": "#dad0c2",
+            "primary": "#726c65",
             "secondary": "#f4dfd0",
             "accent": "#cdbba7",
             "text": "#000000",
@@ -1560,7 +1560,7 @@
             "#fef5ed"
         ],
         "mapped": {
-            "primary": "#adc2a9",
+            "primary": "#647162",
             "secondary": "#d3e4cd",
             "accent": "#99a799",
             "text": "#000000",
@@ -1576,7 +1576,7 @@
             "#fefcf3"
         ],
         "mapped": {
-            "primary": "#f0dbdb",
+            "primary": "#716767",
             "secondary": "#f5ebe0",
             "accent": "#dba39a",
             "text": "#000000",
@@ -1592,7 +1592,7 @@
             "#feffde"
         ],
         "mapped": {
-            "primary": "#91c788",
+            "primary": "#54744f",
             "secondary": "#ddffbc",
             "accent": "#ddffbc",
             "text": "#52734d",
@@ -1608,7 +1608,7 @@
             "#ff9292"
         ],
         "mapped": {
-            "primary": "#ffb4b4",
+            "primary": "#865e5e",
             "secondary": "#ffdcdc",
             "accent": "#ff9292",
             "text": "#000000",
@@ -1624,7 +1624,7 @@
             "#ffb6b9"
         ],
         "mapped": {
-            "primary": "#ffb6b9",
+            "primary": "#865e61",
             "secondary": "#bbded6",
             "accent": "#61c0bf",
             "text": "#000000",
@@ -1640,7 +1640,7 @@
             "#ffb9b9"
         ],
         "mapped": {
-            "primary": "#ffacc7",
+            "primary": "#865968",
             "secondary": "#ffb9b9",
             "accent": "#ff8dc7",
             "text": "#000000",
@@ -1656,7 +1656,7 @@
             "#ffc7c7"
         ],
         "mapped": {
-            "primary": "#ffc7c7",
+            "primary": "#866868",
             "secondary": "#ffe2e2",
             "accent": "#8785a2",
             "text": "#000000",
@@ -1672,7 +1672,7 @@
             "#ffcfdf"
         ],
         "mapped": {
-            "primary": "#ffcfdf",
+            "primary": "#866c75",
             "secondary": "#e0f9b5",
             "accent": "#a5dee5",
             "text": "#000000",
@@ -1688,7 +1688,7 @@
             "#ffd4d4"
         ],
         "mapped": {
-            "primary": "#ffd4d4",
+            "primary": "#866e6e",
             "secondary": "#cde990",
             "accent": "#aacb73",
             "text": "#000000",
@@ -1704,7 +1704,7 @@
             "#ffd5cd"
         ],
         "mapped": {
-            "primary": "#c3aed6",
+            "primary": "#655a6f",
             "secondary": "#efbbcf",
             "accent": "#8675a9",
             "text": "#000000",
@@ -1720,7 +1720,7 @@
             "#ffe6e6"
         ],
         "mapped": {
-            "primary": "#f2d1d1",
+            "primary": "#716262",
             "secondary": "#daeaf1",
             "accent": "#c6dce4",
             "text": "#000000",
@@ -1736,7 +1736,7 @@
             "#ffeddb"
         ],
         "mapped": {
-            "primary": "#e3b7a0",
+            "primary": "#765f53",
             "secondary": "#edcdbb",
             "accent": "#bf9270",
             "text": "#000000",
@@ -1752,7 +1752,7 @@
             "#ffeecc"
         ],
         "mapped": {
-            "primary": "#ffcccc",
+            "primary": "#785f5f",
             "secondary": "#ffddcc",
             "accent": "#febbcc",
             "text": "#000000",
@@ -1768,7 +1768,7 @@
             "#fff5e4"
         ],
         "mapped": {
-            "primary": "#ee6983",
+            "primary": "#ac4b5e",
             "secondary": "#ffc4c4",
             "accent": "#ffc4c4",
             "text": "#850e35",
@@ -1784,7 +1784,7 @@
             "#fff5e4"
         ],
         "mapped": {
-            "primary": "#ffd1d1",
+            "primary": "#786262",
             "secondary": "#ffe3e1",
             "accent": "#ff9494",
             "text": "#000000",
@@ -1800,7 +1800,7 @@
             "#fff5eb"
         ],
         "mapped": {
-            "primary": "#f4c7ab",
+            "primary": "#806859",
             "secondary": "#deedf0",
             "accent": "#b2b8a3",
             "text": "#000000",
