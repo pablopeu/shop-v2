@@ -65,8 +65,17 @@ if (empty($cart)) {
 if (isset($data['coupon_code']) && !empty($data['coupon_code'])) {
     $coupon_code = sanitize_input($data['coupon_code']);
 
+    // Calculate subtotal from cart
+    $subtotal = 0;
+    foreach ($cart as $item) {
+        $product = get_product_by_id($item['product_id']);
+        if ($product) {
+            $subtotal += $product['price'] * $item['quantity'];
+        }
+    }
+
     // Validate coupon before saving to session
-    $coupon_validation = validate_coupon($coupon_code, $cart);
+    $coupon_validation = validate_coupon($coupon_code, $subtotal);
 
     if ($coupon_validation['valid']) {
         $_SESSION['applied_coupon'] = $coupon_code;
@@ -76,7 +85,7 @@ if (isset($data['coupon_code']) && !empty($data['coupon_code'])) {
         echo json_encode([
             'success' => false,
             'error' => 'coupon_expired',
-            'message' => 'El cupón "' . $coupon_code . '" ha expirado o ya no es válido: ' . $coupon_validation['message']
+            'message' => 'El cupón "' . $coupon_code . '" ha expirado o ya no es válido: ' . ($coupon_validation['error'] ?? 'Error desconocido')
         ]);
         exit;
     }
