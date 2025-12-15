@@ -68,9 +68,9 @@ function render_product_card($product, $options = []) {
     elseif ($card_buttons_position === 'right') $buttons_justify = 'flex-end';
 
     // Convertir spacing a CSS
-    $buttons_gap = '8px';
-    if ($card_buttons_spacing === 'compact') $buttons_gap = '4px';
-    elseif ($card_buttons_spacing === 'spacious') $buttons_gap = '12px';
+    $buttons_gap = '20px';
+    if ($card_buttons_spacing === 'compact') $buttons_gap = '10px';
+    elseif ($card_buttons_spacing === 'spacious') $buttons_gap = '30px';
 
     // Convertir vertical spacing a CSS
     $buttons_margin_top = '10px';
