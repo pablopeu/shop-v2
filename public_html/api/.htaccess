@@ -1,0 +1,17 @@
+# API Directory .htaccess
+# Redirect all requests to index.php (API router)
+
+# Enable rewrite engine
+RewriteEngine On
+RewriteBase /shopv2/api/
+
+# Don't redirect if it's index.php itself
+RewriteCond %{REQUEST_URI} index\.php$
+RewriteRule ^ - [L]
+
+# Don't redirect existing physical files (for legacy endpoints)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Redirect everything else to index.php
+RewriteRule ^ index.php [L]

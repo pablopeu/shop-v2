@@ -28,10 +28,6 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} ^/shopv2/webhook\.php$
 RewriteRule ^ - [L]
 
-# Don't redirect crear-preferencia-mp.php
-RewriteCond %{REQUEST_URI} ^/shopv2/crear-preferencia-mp\.php$
-RewriteRule ^ - [L]
-
 # Don't redirect admin PHP files
 RewriteCond %{REQUEST_URI} ^/shopv2/admin/.*\.php$
 RewriteRule ^ - [L]

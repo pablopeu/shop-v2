@@ -1,34 +1,32 @@
 <?php
 /**
- * Crear Preferencia de MercadoPago
- * API endpoint para crear preferencias de pago
+ * API Endpoint: Crear Preferencia de MercadoPago
+ * Crea una preferencia de pago en MercadoPago para una orden específica
+ *
+ * Este archivo NO es un entry point, debe ser accedido vía /api/?endpoint=crear-preferencia-mp
  */
 
-define('APP_ENTRY_POINT', true);
-
-// Detectar entorno y cargar bootstrap
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    // Producción
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} else {
-    // Desarrollo
-    $bootstrap_path = __DIR__ . '/../app/bootstrap.php';
-    if (!file_exists($bootstrap_path)) {
-        http_response_code(500);
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => 'Bootstrap not found']);
-        exit;
-    }
-    require_once $bootstrap_path;
+// Security check - REQUIRED
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
 }
-
-// Establecer header JSON
-header('Content-Type: application/json');
 
 // Solo aceptar POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+    exit;
+}
+
+// Rate limiting específico para creación de preferencias (más restrictivo)
+$client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$mp_identifier = 'mp_create_' . $client_ip;
+if (!check_rate_limit($mp_identifier, 20, 60)) {
+    http_response_code(429);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Demasiados intentos de crear preferencias. Espera un momento.'
+    ]);
     exit;
 }
 
@@ -42,12 +40,26 @@ if (!$data) {
     exit;
 }
 
+// Validar parámetros requeridos
 $order_id = $data['order_id'] ?? null;
 $tracking_token = $data['tracking_token'] ?? null;
 
 if (!$order_id || !$tracking_token) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'order_id y tracking_token son requeridos']);
+    echo json_encode([
+        'success' => false,
+        'error' => 'order_id y tracking_token son requeridos'
+    ]);
+    exit;
+}
+
+// Validar formato de order_id (debe ser alfanumérico)
+if (!preg_match('/^[a-zA-Z0-9_-]+$/', $order_id)) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Formato de order_id inválido'
+    ]);
     exit;
 }
 
@@ -64,8 +76,11 @@ $access_token = $sandbox_mode ?
     ($payment_credentials['mercadopago']['access_token_prod'] ?? '');
 
 if (empty($access_token)) {
-    error_log("crear-preferencia-mp: Access token vacío");
-    echo json_encode(['success' => false, 'error' => 'Configuración de MercadoPago incompleta']);
+    error_log("API MP: Access token vacío (modo: $mp_mode)");
+    echo json_encode([
+        'success' => false,
+        'error' => 'Configuración de MercadoPago incompleta'
+    ]);
     exit;
 }
 
@@ -73,22 +88,33 @@ if (empty($access_token)) {
 $order = get_order_by_id($order_id);
 
 if (!$order) {
-    error_log("crear-preferencia-mp: Orden no encontrada: $order_id");
+    error_log("API MP: Orden no encontrada: $order_id");
+    http_response_code(404);
     echo json_encode(['success' => false, 'error' => 'Orden no encontrada']);
     exit;
 }
 
-// Validar tracking token
+// Validar tracking token (CRÍTICO para seguridad)
 if ($order['tracking_token'] !== $tracking_token) {
-    error_log("crear-preferencia-mp: Token inválido para orden: $order_id");
+    error_log("API MP: Token inválido para orden: $order_id desde IP: " . $client_ip);
+    http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Token inválido']);
     exit;
 }
 
 // Verificar que la orden aún no esté pagada
 if ($order['status'] === 'cobrada' || $order['status'] === 'entregada') {
-    error_log("crear-preferencia-mp: Orden ya pagada: $order_id");
+    error_log("API MP: Intento de pagar orden ya cobrada: $order_id");
+    http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Esta orden ya fue pagada']);
+    exit;
+}
+
+// Verificar que la orden tenga items
+if (empty($order['items'])) {
+    error_log("API MP: Orden sin items: $order_id");
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'La orden no tiene productos']);
     exit;
 }
 
@@ -99,12 +125,25 @@ try {
     // Preparar items para la preferencia
     $items = [];
     foreach ($order['items'] as $item) {
+        // Validar que cada item tenga los datos necesarios
+        if (!isset($item['name']) || !isset($item['quantity'])) {
+            error_log("API MP: Item inválido en orden $order_id: " . json_encode($item));
+            continue;
+        }
+
         $items[] = [
             'title' => $item['name'],
             'quantity' => (int) $item['quantity'],
             'unit_price' => (float) ($item['final_price'] ?? $item['price']),
             'currency_id' => $order['currency'] === 'USD' ? 'USD' : 'ARS'
         ];
+    }
+
+    if (empty($items)) {
+        error_log("API MP: No se pudieron procesar items de orden $order_id");
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Error al procesar los productos']);
+        exit;
     }
 
     // URLs de retorno - usar URL absoluta con dominio
@@ -131,24 +170,34 @@ try {
         ]
     ];
 
-    error_log("crear-preferencia-mp: Creando preferencia para orden $order_id");
+    error_log("API MP: Creando preferencia para orden $order_id (items: " . count($items) . ")");
 
     // Crear preferencia
     $preference = $mp->createPreference($preference_data);
 
     if (isset($preference['id'])) {
-        error_log("crear-preferencia-mp: Preferencia creada: " . $preference['id']);
+        error_log("API MP: Preferencia creada exitosamente: " . $preference['id'] . " para orden $order_id");
+
+        http_response_code(200);
         echo json_encode([
             'success' => true,
             'preference_id' => $preference['id'],
             'init_point' => $mp->getInitPoint($preference)
         ]);
     } else {
-        error_log("crear-preferencia-mp: Error - respuesta sin ID: " . json_encode($preference));
-        echo json_encode(['success' => false, 'error' => 'Error al crear preferencia']);
+        error_log("API MP: Respuesta sin ID de preferencia: " . json_encode($preference));
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Error al crear preferencia de pago'
+        ]);
     }
 
 } catch (Exception $e) {
-    error_log("crear-preferencia-mp: Exception: " . $e->getMessage());
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    error_log("API MP: Exception al crear preferencia para orden $order_id: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Error al procesar el pago. Por favor, intenta nuevamente.'
+    ]);
 }
