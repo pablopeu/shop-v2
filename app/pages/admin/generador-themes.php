@@ -29,6 +29,7 @@ $form_values = [
     'card_buttons' => 'show',
     'card_buttons_position' => 'center',
     'card_buttons_spacing' => 'normal',
+    'card_buttons_vertical_spacing' => 'normal',
 ];
 
 // Procesamiento POST - Generar Theme
@@ -67,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'card_buttons' => sanitize_input($_POST['card_buttons'] ?? 'show'),
             'card_buttons_position' => sanitize_input($_POST['card_buttons_position'] ?? 'center'),
             'card_buttons_spacing' => sanitize_input($_POST['card_buttons_spacing'] ?? 'normal'),
+            'card_buttons_vertical_spacing' => sanitize_input($_POST['card_buttons_vertical_spacing'] ?? 'normal'),
 
             // Componentes: Buttons
             'button_style' => sanitize_input($_POST['button_style'] ?? 'solid'),
@@ -991,6 +993,26 @@ $user = get_logged_user();
                                 Amplio
                             </label>
                         </div>
+                        <small class="helper-text">Espacio horizontal entre botones (solo visible con 2+ botones)</small>
+                    </div>
+
+                    <div class="form-group" id="card-buttons-vertical-spacing-group">
+                        <label>Separación Vertical</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="card_buttons_vertical_spacing" value="normal" <?php echo ($form_values['card_buttons_vertical_spacing'] ?? 'normal') === 'normal' ? 'checked' : ''; ?>>
+                                Normal
+                            </label>
+                            <label>
+                                <input type="radio" name="card_buttons_vertical_spacing" value="compact" <?php echo ($form_values['card_buttons_vertical_spacing'] ?? 'normal') === 'compact' ? 'checked' : ''; ?>>
+                                Compacto
+                            </label>
+                            <label>
+                                <input type="radio" name="card_buttons_vertical_spacing" value="spacious" <?php echo ($form_values['card_buttons_vertical_spacing'] ?? 'normal') === 'spacious' ? 'checked' : ''; ?>>
+                                Amplio
+                            </label>
+                        </div>
+                        <small class="helper-text">Espacio vertical entre el contenido y los botones</small>
                     </div>
                 </div>
 
@@ -1445,6 +1467,7 @@ $user = get_logged_user();
                 cardButtons: document.querySelector('[name="card_buttons"]:checked')?.value || 'show',
                 cardButtonsPosition: document.querySelector('[name="card_buttons_position"]:checked')?.value || 'center',
                 cardButtonsSpacing: document.querySelector('[name="card_buttons_spacing"]:checked')?.value || 'normal',
+                cardButtonsVerticalSpacing: document.querySelector('[name="card_buttons_vertical_spacing"]:checked')?.value || 'normal',
 
                 // Buttons
                 buttonStyle: document.querySelector('[name="button_style"]:checked')?.value || 'solid',
@@ -1488,6 +1511,14 @@ $user = get_logged_user();
                     buttonPadding = '10px 20px';
                 }
 
+                // Determinar separación vertical de botones
+                let buttonsMarginTop = '10px';
+                if (config.cardButtonsVerticalSpacing === 'compact') {
+                    buttonsMarginTop = '5px';
+                } else if (config.cardButtonsVerticalSpacing === 'spacious') {
+                    buttonsMarginTop = '20px';
+                }
+
                 // Generar botones si están habilitados
                 let buttonsHTML = '';
                 const btnStyle = config.buttonStyle === 'solid'
@@ -1497,7 +1528,7 @@ $user = get_logged_user();
                 if (config.cardButtons === 'show') {
                     // Mostrar todos los botones
                     buttonsHTML = `
-                        <div style="display: flex; gap: ${buttonsGap}; justify-content: ${buttonsAlign}; margin-top: 10px;">
+                        <div style="display: flex; gap: ${buttonsGap}; justify-content: ${buttonsAlign}; margin-top: ${buttonsMarginTop};">
                             <button style="padding: ${buttonPadding}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
                                 🛒 Comprar
                             </button>
@@ -1509,7 +1540,7 @@ $user = get_logged_user();
                 } else if (config.cardButtons === 'cart_only') {
                     // Solo mostrar botón de carrito
                     buttonsHTML = `
-                        <div style="display: flex; justify-content: ${buttonsAlign}; margin-top: 10px;">
+                        <div style="display: flex; justify-content: ${buttonsAlign}; margin-top: ${buttonsMarginTop};">
                             <button style="padding: ${buttonPadding}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
                                 🛒 Agregar al Carrito
                             </button>
@@ -1760,6 +1791,9 @@ $user = get_logged_user();
                     const cardButtonsSpacing = config.components?.cards?.buttons_spacing || 'normal';
                     document.querySelector(`[name="card_buttons_spacing"][value="${cardButtonsSpacing}"]`)?.click();
 
+                    const cardButtonsVerticalSpacing = config.components?.cards?.buttons_vertical_spacing || 'normal';
+                    document.querySelector(`[name="card_buttons_vertical_spacing"][value="${cardButtonsVerticalSpacing}"]`)?.click();
+
                     // Poblar buttons
                     const buttonStyle = config.components?.buttons?.style || 'solid';
                     document.querySelector(`[name="button_style"][value="${buttonStyle}"]`)?.click();
@@ -1808,6 +1842,7 @@ $user = get_logged_user();
             const cardButtonsRadios = document.querySelectorAll('[name="card_buttons"]');
             const positionGroup = document.getElementById('card-buttons-position-group');
             const spacingGroup = document.getElementById('card-buttons-spacing-group');
+            const verticalSpacingGroup = document.getElementById('card-buttons-vertical-spacing-group');
 
             function toggleCardButtonsOptions() {
                 const selected = document.querySelector('[name="card_buttons"]:checked')?.value;
@@ -1815,9 +1850,11 @@ $user = get_logged_user();
                 if (selected === 'hide') {
                     positionGroup.style.display = 'none';
                     spacingGroup.style.display = 'none';
+                    verticalSpacingGroup.style.display = 'none';
                 } else {
                     positionGroup.style.display = 'block';
                     spacingGroup.style.display = 'block';
+                    verticalSpacingGroup.style.display = 'block';
                 }
             }
 

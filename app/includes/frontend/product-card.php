@@ -51,6 +51,7 @@ function render_product_card($product, $options = []) {
     $card_buttons = 'show'; // Default
     $card_buttons_position = 'center';
     $card_buttons_spacing = 'normal';
+    $card_buttons_vertical_spacing = 'normal';
 
     $theme_json_path = PUBLIC_PATH . "/assets/themes/{$active_theme}/theme.json";
     if (file_exists($theme_json_path)) {
@@ -58,6 +59,7 @@ function render_product_card($product, $options = []) {
         $card_buttons = $theme_json['components']['cards']['buttons'] ?? 'show';
         $card_buttons_position = $theme_json['components']['cards']['buttons_position'] ?? 'center';
         $card_buttons_spacing = $theme_json['components']['cards']['buttons_spacing'] ?? 'normal';
+        $card_buttons_vertical_spacing = $theme_json['components']['cards']['buttons_vertical_spacing'] ?? 'normal';
     }
 
     // Convertir position a CSS
@@ -69,6 +71,11 @@ function render_product_card($product, $options = []) {
     $buttons_gap = '8px';
     if ($card_buttons_spacing === 'compact') $buttons_gap = '4px';
     elseif ($card_buttons_spacing === 'spacious') $buttons_gap = '12px';
+
+    // Convertir vertical spacing a CSS
+    $buttons_margin_top = '10px';
+    if ($card_buttons_vertical_spacing === 'compact') $buttons_margin_top = '5px';
+    elseif ($card_buttons_vertical_spacing === 'spacious') $buttons_margin_top = '20px';
 
     // Determinar si la tarjeta completa debe ser clickeable
     // Clickeable si el theme es 'modern-compact' o si buttons está en 'hide' o 'cart_only'
@@ -132,7 +139,7 @@ function render_product_card($product, $options = []) {
             <?php endif; ?>
 
             <?php if ($card_buttons !== 'hide'): ?>
-            <div class="product-buttons" style="display: flex; gap: <?php echo $buttons_gap; ?>; justify-content: <?php echo $buttons_justify; ?>; margin-top: 10px;">
+            <div class="product-buttons" style="display: flex; gap: <?php echo $buttons_gap; ?>; justify-content: <?php echo $buttons_justify; ?>; margin-top: <?php echo $buttons_margin_top; ?>;">
                 <?php if ($card_buttons === 'show'): ?>
                 <!-- Mostrar ambos botones -->
                 <button class="btn btn-secondary"
