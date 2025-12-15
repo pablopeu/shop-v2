@@ -206,9 +206,10 @@ function map_colors_intelligently($colors) {
  * @param string $slug Slug del theme
  * @param string $name Nombre del theme
  * @param array $colors Array de colores ['primary' => '#...', ...]
+ * @param string $original_slug Slug original si estamos editando (opcional)
  * @return array ['valid' => bool, 'errors' => []]
  */
-function validate_theme_input($slug, $name, $colors) {
+function validate_theme_input($slug, $name, $colors, $original_slug = '') {
     $errors = [];
 
     // Validar slug
@@ -218,9 +219,14 @@ function validate_theme_input($slug, $name, $colors) {
         $errors[] = 'El slug solo puede contener letras minúsculas, números y guiones';
     } else {
         // Verificar que el slug no esté duplicado
-        $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
-        if (is_dir($theme_dir)) {
-            $errors[] = "Ya existe un theme con el slug: {$slug}";
+        // Si estamos editando y el slug es el mismo que el original, no validar duplicados
+        $is_editing_same_theme = !empty($original_slug) && $original_slug === $slug;
+
+        if (!$is_editing_same_theme) {
+            $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
+            if (is_dir($theme_dir)) {
+                $errors[] = "Ya existe un theme con el slug: {$slug}";
+            }
         }
     }
 
@@ -397,8 +403,12 @@ function generate_variables_css($config) {
 
     // === BORDES ===
     $css .= "    /* Bordes */\n";
-    $rounded = $config['components']['cards']['rounded'] ?? false;
-    if ($rounded) {
+    // Activar border-radius si CUALQUIERA de cards o buttons lo requiere
+    $cards_rounded = $config['components']['cards']['rounded'] ?? false;
+    $buttons_rounded = $config['components']['buttons']['rounded'] ?? false;
+    $any_rounded = $cards_rounded || $buttons_rounded;
+
+    if ($any_rounded) {
         $css .= "    --border-radius-none: 0;\n";
         $css .= "    --border-radius-sm: 2px;\n";
         $css .= "    --border-radius-md: 4px;\n";
@@ -572,6 +582,35 @@ function generate_theme_css_basic($config) {
 
     $css .= "}\n\n";
 
+    // Product Info (flexbox container)
+    // Padding solo en top, left, right (NO en bottom para que margin-bottom de botones controle todo)
+    $css .= ".product-info {\n";
+    $css .= "    padding-top: var(--spacing-lg);\n";
+    $css .= "    padding-left: var(--spacing-lg);\n";
+    $css .= "    padding-right: var(--spacing-lg);\n";
+    $css .= "    padding-bottom: 0;\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: column;\n";
+    $css .= "    flex: 1;\n";
+    $css .= "}\n\n";
+
+    // Product Buttons Container
+    // La separación vertical controla el espacio DESPUÉS de los botones (hacia el borde inferior del card)
+    $vertical_spacing = $config['components']['cards']['buttons_vertical_spacing'] ?? 'normal';
+    $margin_bottom_value = '12px'; // normal
+    if ($vertical_spacing === 'compact') {
+        $margin_bottom_value = '4px';
+    } elseif ($vertical_spacing === 'spacious') {
+        $margin_bottom_value = '20px';
+    }
+
+    $css .= ".product-buttons {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    gap: var(--spacing-sm);\n";
+    $css .= "    margin-top: 10px;\n";
+    $css .= "    margin-bottom: {$margin_bottom_value} !important;\n";
+    $css .= "}\n\n";
+
     // === BUTTONS ===
     $css .= "/* =================================\n";
     $css .= "   BUTTONS\n";
@@ -581,7 +620,8 @@ function generate_theme_css_basic($config) {
     $btn_rounded = $config['components']['buttons']['rounded'] ?? false;
     $btn_shadow = $config['components']['buttons']['shadow'] ?? false;
 
-    $css .= ".btn, .btn-primary, .btn-secondary {\n";
+    // Estilos base para todos los botones
+    $css .= ".btn, .btn-primary, .btn-secondary, .btn-add-cart {\n";
     $css .= "    padding: var(--spacing-sm) var(--spacing-lg);\n";
     $css .= "    font-weight: var(--font-weight-medium);\n";
     $css .= "    transition: var(--transition-base);\n";
@@ -589,27 +629,28 @@ function generate_theme_css_basic($config) {
     $css .= "    display: inline-block;\n";
     $css .= "    text-align: center;\n";
 
+    // Border radius según configuración
     if ($btn_rounded) {
         $css .= "    border-radius: var(--border-radius-full);\n";
     } else {
         $css .= "    border-radius: var(--border-radius-sm);\n";
     }
 
-    if ($btn_shadow) {
-        $css .= "    box-shadow: var(--shadow-sm);\n";
-    }
-
     $css .= "}\n\n";
 
-    // Button styles
+    // Estilos específicos según el tipo (solid/outline)
     if ($btn_style === 'solid') {
-        $css .= ".btn-primary {\n";
+        // Estilo sólido
+        $css .= ".btn-primary, .btn-add-cart {\n";
         $css .= "    background: var(--color-primary);\n";
         $css .= "    color: var(--color-white);\n";
         $css .= "    border: none;\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-sm);\n";
+        }
         $css .= "}\n\n";
 
-        $css .= ".btn-primary:hover {\n";
+        $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
         $css .= "    background: var(--color-primary-dark);\n";
         if ($btn_shadow) {
             $css .= "    box-shadow: var(--shadow-md);\n";
@@ -620,23 +661,51 @@ function generate_theme_css_basic($config) {
         $css .= "    background: var(--color-secondary);\n";
         $css .= "    color: var(--color-white);\n";
         $css .= "    border: none;\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-sm);\n";
+        }
+        $css .= "}\n\n";
+
+        $css .= ".btn-secondary:hover {\n";
+        $css .= "    background: var(--color-secondary-dark);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-md);\n";
+        }
         $css .= "}\n\n";
     } elseif ($btn_style === 'outline') {
-        $css .= ".btn-primary {\n";
+        // Estilo outline
+        $css .= ".btn-primary, .btn-add-cart {\n";
         $css .= "    background: transparent;\n";
         $css .= "    color: var(--color-primary);\n";
         $css .= "    border: var(--border-width-thick) solid var(--color-primary);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-sm);\n";
+        }
         $css .= "}\n\n";
 
-        $css .= ".btn-primary:hover {\n";
+        $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
         $css .= "    background: var(--color-primary);\n";
         $css .= "    color: var(--color-white);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-md);\n";
+        }
         $css .= "}\n\n";
 
         $css .= ".btn-secondary {\n";
         $css .= "    background: transparent;\n";
         $css .= "    color: var(--color-secondary);\n";
         $css .= "    border: var(--border-width-thick) solid var(--color-secondary);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-sm);\n";
+        }
+        $css .= "}\n\n";
+
+        $css .= ".btn-secondary:hover {\n";
+        $css .= "    background: var(--color-secondary);\n";
+        $css .= "    color: var(--color-white);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-md);\n";
+        }
         $css .= "}\n\n";
     }
 
@@ -735,7 +804,11 @@ function generate_theme($data) {
                 'border' => $data['card_border'] ?? true,
                 'shadow' => $data['card_shadow'] ?? 'subtle',
                 'rounded' => $data['card_rounded'] ?? false,
-                'hover_effect' => $data['card_hover'] ?? 'glow'
+                'hover_effect' => $data['card_hover'] ?? 'glow',
+                'buttons' => $data['card_buttons'] ?? 'show',
+                'buttons_position' => $data['card_buttons_position'] ?? 'center',
+                'buttons_spacing' => $data['card_buttons_spacing'] ?? 'normal',
+                'buttons_vertical_spacing' => $data['card_buttons_vertical_spacing'] ?? 'normal'
             ],
             'forms' => [
                 'style' => 'modern',

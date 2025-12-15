@@ -9,7 +9,7 @@
     margin: 0 auto;
     padding: 0;
     position: relative;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 /* Alignment options */
@@ -35,7 +35,7 @@
 .carousel-v2-container {
     position: relative;
     width: 100%;
-    /* height managed by theme */
+    height: 350px;
     overflow: hidden;
     border-radius: 12px;
     background: var(--carousel-bg, var(--color-bg-dark));
@@ -151,7 +151,7 @@
 /* Responsive */
 @media (max-width: 768px) {
     .carousel-v2-container {
-        /* height managed by theme */
+        height: 280px;
         border-radius: 8px;
     }
 
@@ -191,7 +191,7 @@
 
 @media (max-width: 480px) {
     .carousel-v2-container {
-        /* height managed by theme */
+        height: 220px;
     }
 
     .carousel-v2-title {

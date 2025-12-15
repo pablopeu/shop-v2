@@ -43,10 +43,45 @@ function render_product_card($product, $options = []) {
 
     $is_out_of_stock = $product['stock'] === 0;
 
-    // Determinar si la tarjeta completa debe ser clickeable (theme Modern Compact)
+    // Leer configuración del theme
     $theme_config = read_json(APP_PATH . '/config/theme.json');
     $active_theme = $theme_config['active_theme'] ?? 'minimal';
-    $card_clickeable = ($active_theme === 'modern-compact');
+
+    // Obtener configuración de botones en cards
+    $card_buttons = 'show'; // Default
+    $card_buttons_position = 'center';
+    $card_buttons_spacing = 'normal';
+    $card_buttons_vertical_spacing = 'normal';
+
+    $theme_json_path = PUBLIC_PATH . "/assets/themes/{$active_theme}/theme.json";
+    if (file_exists($theme_json_path)) {
+        $theme_json = read_json($theme_json_path);
+        $card_buttons = $theme_json['components']['cards']['buttons'] ?? ($active_theme === 'modern-compact' ? 'hide' : 'show');
+        $card_buttons_position = $theme_json['components']['cards']['buttons_position'] ?? 'center';
+        $card_buttons_spacing = $theme_json['components']['cards']['buttons_spacing'] ?? 'normal';
+        $card_buttons_vertical_spacing = $theme_json['components']['cards']['buttons_vertical_spacing'] ?? 'normal';
+    }
+
+    // Convertir position a CSS
+    $buttons_justify = 'center';
+    if ($card_buttons_position === 'left') $buttons_justify = 'flex-start';
+    elseif ($card_buttons_position === 'right') $buttons_justify = 'flex-end';
+
+    // Convertir spacing a CSS
+    $buttons_gap = '20px';
+    if ($card_buttons_spacing === 'compact') $buttons_gap = '10px';
+    elseif ($card_buttons_spacing === 'spacious') $buttons_gap = '30px';
+
+    // Convertir vertical spacing a CSS
+    $buttons_margin_top = '10px';
+    if ($card_buttons_vertical_spacing === 'compact') $buttons_margin_top = '5px';
+    elseif ($card_buttons_vertical_spacing === 'spacious') $buttons_margin_top = '20px';
+
+    // Determinar si la tarjeta completa debe ser clickeable
+    // Clickeable si el theme es 'modern-compact' o si buttons está en 'hide' o 'cart_only'
+    $card_clickeable = ($active_theme === 'modern-compact') ||
+                       ($card_buttons === 'hide') ||
+                       ($card_buttons === 'cart_only');
     ?>
 
     <div class="product-card" <?php if ($card_clickeable): ?>data-action="goToProduct" data-url="<?php echo url('/producto/' . urlencode($product['slug'])); ?>"<?php endif; ?>>
@@ -103,23 +138,28 @@ function render_product_card($product, $options = []) {
             </div>
             <?php endif; ?>
 
-            <div class="product-buttons">
+            <?php if ($card_buttons !== 'hide'): ?>
+            <div class="product-buttons" style="display: flex; gap: <?php echo $buttons_gap; ?>; justify-content: <?php echo $buttons_justify; ?>; margin-top: <?php echo $buttons_margin_top; ?>;">
+                <?php if ($card_buttons === 'show'): ?>
+                <!-- Mostrar ambos botones -->
                 <button class="btn btn-secondary"
                         data-action="goToProduct"
                         data-url="<?php echo url('/producto/' . urlencode($product['slug'])); ?>"
                         <?php echo $is_out_of_stock ? 'disabled' : ''; ?>>
                     Ver detalle
                 </button>
+                <?php endif; ?>
 
-                <?php if ($options['show_add_to_cart']): ?>
+                <?php if ($options['show_add_to_cart'] && ($card_buttons === 'show' || $card_buttons === 'cart_only')): ?>
                 <button class="btn btn-add-cart"
                         data-action="addToCart"
                         data-product-id="<?php echo htmlspecialchars($product['id']); ?>"
                         <?php echo $is_out_of_stock ? 'disabled' : ''; ?>>
-                    🛒 Agregar
+                    <?php echo ($card_buttons === 'cart_only') ? '🛒 Agregar al Carrito' : '🛒 Agregar'; ?>
                 </button>
                 <?php endif; ?>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
