@@ -2041,7 +2041,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     localStorage.removeItem('applied_coupon');
 
                     // Ahora crear la preferencia de MercadoPago
-                    return fetch('<?php echo url('/crear-preferencia-mp.php'); ?>', {
+                    return fetch('<?php echo url('/api/?endpoint=crear-preferencia-mp'); ?>', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2170,7 +2170,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             loading.classList.remove('hidden');
             errorMessage.classList.remove('active');
 
-            fetch('<?php echo url('/crear-preferencia-mp.php'); ?>', {
+            fetch('<?php echo url('/api/?endpoint=crear-preferencia-mp'); ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

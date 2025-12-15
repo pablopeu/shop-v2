@@ -319,7 +319,7 @@ $mp_public_key = $mp_mode === 'sandbox' ?
             document.getElementById('mercadopago-modal').classList.add('active');
 
             // Create new preference for this order
-            fetch('<?php echo url('/crear-preferencia-mp.php'); ?>', {
+            fetch('<?php echo url('/api/?endpoint=crear-preferencia-mp'); ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
