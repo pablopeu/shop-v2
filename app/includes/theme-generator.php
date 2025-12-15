@@ -403,8 +403,12 @@ function generate_variables_css($config) {
 
     // === BORDES ===
     $css .= "    /* Bordes */\n";
-    $rounded = $config['components']['cards']['rounded'] ?? false;
-    if ($rounded) {
+    // Activar border-radius si CUALQUIERA de cards o buttons lo requiere
+    $cards_rounded = $config['components']['cards']['rounded'] ?? false;
+    $buttons_rounded = $config['components']['buttons']['rounded'] ?? false;
+    $any_rounded = $cards_rounded || $buttons_rounded;
+
+    if ($any_rounded) {
         $css .= "    --border-radius-none: 0;\n";
         $css .= "    --border-radius-sm: 2px;\n";
         $css .= "    --border-radius-md: 4px;\n";
@@ -588,10 +592,19 @@ function generate_theme_css_basic($config) {
 
     // Product Buttons Container
     // IMPORTANTE: NO usar margin-top: auto para permitir que el inline style funcione
+    // Generar regla CSS específica según la configuración de separación vertical
+    $vertical_spacing = $config['components']['cards']['buttons_vertical_spacing'] ?? 'normal';
+    $margin_top_value = '10px'; // normal
+    if ($vertical_spacing === 'compact') {
+        $margin_top_value = '5px';
+    } elseif ($vertical_spacing === 'spacious') {
+        $margin_top_value = '20px';
+    }
+
     $css .= ".product-buttons {\n";
     $css .= "    display: flex;\n";
     $css .= "    gap: var(--spacing-sm);\n";
-    $css .= "    /* margin-top se controla via inline style según configuración del theme */\n";
+    $css .= "    margin-top: {$margin_top_value} !important;\n";
     $css .= "}\n\n";
 
     // === BUTTONS ===
