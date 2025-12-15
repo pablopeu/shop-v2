@@ -1893,6 +1893,38 @@ $user = get_logged_user();
 
             // Ejecutar al cargar
             toggleCardButtonsOptions();
+
+            // Si estamos en modo edición (parámetro ?edit= en URL), configurar interfaz
+            const urlParams = new URLSearchParams(window.location.search);
+            const editSlug = urlParams.get('edit');
+            const originalSlug = document.getElementById('original-slug').value;
+
+            if (editSlug && originalSlug) {
+                // Cambiar el radio a "Editar theme existente"
+                const editRadio = document.querySelector('[name="creation_method"][value="edit"]');
+                if (editRadio) {
+                    editRadio.checked = true;
+
+                    // Ocultar secciones de otros métodos
+                    document.getElementById('palette-import').style.display = 'none';
+                    document.getElementById('edit-theme').style.display = 'block';
+                }
+
+                // Mostrar sección de actualizar paleta
+                const editPaletteSection = document.getElementById('edit-palette-section');
+                if (editPaletteSection) {
+                    editPaletteSection.style.display = 'block';
+
+                    // Cargar paletas populares automáticamente
+                    loadEditPalettes();
+                }
+
+                // Pre-seleccionar el theme en el dropdown
+                const editSelect = document.getElementById('edit-theme-select');
+                if (editSelect) {
+                    editSelect.value = editSlug;
+                }
+            }
         });
 
         // Función para activar theme
