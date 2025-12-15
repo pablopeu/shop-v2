@@ -116,3 +116,133 @@ function hash_password($password) {
 function verify_password($password, $hash) {
     return password_verify($password, $hash);
 }
+
+/**
+ * Validar fortaleza de contraseña
+ * Implementa política de contraseñas segura según mejores prácticas
+ *
+ * Requisitos:
+ * - Mínimo 12 caracteres
+ * - Al menos una mayúscula
+ * - Al menos una minúscula
+ * - Al menos un número
+ * - Al menos un símbolo especial
+ *
+ * @param string $password Contraseña a validar
+ * @return array ['valid' => bool, 'errors' => array]
+ */
+function validate_password_strength($password) {
+    $errors = [];
+
+    // Longitud mínima
+    if (strlen($password) < 12) {
+        $errors[] = 'La contraseña debe tener al menos 12 caracteres';
+    }
+
+    // Longitud máxima (prevenir DoS)
+    if (strlen($password) > 128) {
+        $errors[] = 'La contraseña no puede exceder 128 caracteres';
+    }
+
+    // Al menos una mayúscula
+    if (!preg_match('/[A-Z]/', $password)) {
+        $errors[] = 'Debe contener al menos una letra mayúscula';
+    }
+
+    // Al menos una minúscula
+    if (!preg_match('/[a-z]/', $password)) {
+        $errors[] = 'Debe contener al menos una letra minúscula';
+    }
+
+    // Al menos un número
+    if (!preg_match('/[0-9]/', $password)) {
+        $errors[] = 'Debe contener al menos un número';
+    }
+
+    // Al menos un símbolo especial
+    if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+        $errors[] = 'Debe contener al menos un símbolo especial (!@#$%^&*()_+-=[]{}|;:,.<>?)';
+    }
+
+    // Verificar que no sea una contraseña común
+    $common_passwords = [
+        'password123', 'admin123456', 'qwerty123456', '123456789012',
+        'password1234', 'Administrator1', 'Welcome@123', 'Password@123'
+    ];
+
+    if (in_array(strtolower($password), array_map('strtolower', $common_passwords))) {
+        $errors[] = 'Esta contraseña es demasiado común. Elige una contraseña más segura';
+    }
+
+    return [
+        'valid' => empty($errors),
+        'errors' => $errors,
+        'strength_score' => calculate_password_strength_score($password)
+    ];
+}
+
+/**
+ * Calcular score de fortaleza de contraseña (0-100)
+ *
+ * @param string $password
+ * @return int Score de 0 a 100
+ */
+function calculate_password_strength_score($password) {
+    $score = 0;
+    $length = strlen($password);
+
+    // Puntos por longitud (máximo 40 puntos)
+    $score += min(40, $length * 2);
+
+    // Puntos por variedad de caracteres (15 puntos cada uno, máximo 60)
+    if (preg_match('/[a-z]/', $password)) $score += 15;
+    if (preg_match('/[A-Z]/', $password)) $score += 15;
+    if (preg_match('/[0-9]/', $password)) $score += 15;
+    if (preg_match('/[^A-Za-z0-9]/', $password)) $score += 15;
+
+    // Bonus por complejidad (variedad de símbolos)
+    $unique_chars = count(array_unique(str_split($password)));
+    if ($unique_chars > 10) $score += 10;
+
+    return min(100, $score);
+}
+
+/**
+ * Obtener mensaje descriptivo del nivel de fortaleza
+ *
+ * @param int $score Score de 0 a 100
+ * @return array ['level' => string, 'message' => string, 'color' => string]
+ */
+function get_password_strength_level($score) {
+    if ($score < 30) {
+        return [
+            'level' => 'Muy débil',
+            'message' => 'Esta contraseña es muy fácil de adivinar',
+            'color' => '#dc3545' // rojo
+        ];
+    } elseif ($score < 50) {
+        return [
+            'level' => 'Débil',
+            'message' => 'Esta contraseña podría ser más segura',
+            'color' => '#fd7e14' // naranja
+        ];
+    } elseif ($score < 70) {
+        return [
+            'level' => 'Aceptable',
+            'message' => 'Contraseña de seguridad media',
+            'color' => '#ffc107' // amarillo
+        ];
+    } elseif ($score < 85) {
+        return [
+            'level' => 'Fuerte',
+            'message' => 'Buena contraseña',
+            'color' => '#28a745' // verde
+        ];
+    } else {
+        return [
+            'level' => 'Muy fuerte',
+            'message' => 'Excelente contraseña',
+            'color' => '#20c997' // verde brillante
+        ];
+    }
+}

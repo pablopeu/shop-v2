@@ -45,7 +45,7 @@ Thumbs.db
 *.cache
 
 # Security assessments and documentation (sensitive information)
-/docs/security-assessment.md
+/docs/
 /security-docs/
 /to-do.txt
 

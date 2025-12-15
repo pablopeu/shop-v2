@@ -14,6 +14,8 @@ if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
  * Returns archived order details by ID
  */
 
+// Apply rate limiting: 10 requests per minute per IP
+api_rate_limit(10, 60);
 
 // Start session
 session_start();

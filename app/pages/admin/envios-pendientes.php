@@ -13,6 +13,7 @@ require_admin();
 $site_config = read_json(APP_PATH . '/config/site.json');
 $page_title = 'Envíos Pendientes';
 $currency_config = read_json(APP_PATH . '/config/currency.json');
+$csrf_token = generate_csrf_token();
 
 // Handle actions
 $message = '';
@@ -962,6 +963,9 @@ $user = get_logged_user();
     <?php include APP_PATH . '/includes/admin/modal.php'; ?>
 
     <script nonce="<?= csp_nonce() ?>">
+        // CSRF Token for API requests
+        const token = '<?php echo $csrf_token; ?>';
+
         /**
          * Ver detalles de orden en modal
          */
@@ -1199,8 +1203,14 @@ $user = get_logged_user();
             // Create form and submit
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '<?php echo url('/api/export-orders.php'); ?>';
+            form.action = '<?php echo url('/api/?endpoint=export-orders'); ?>';
             form.target = '_blank';
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = token;
+            form.appendChild(csrfInput);
 
             const formatInput = document.createElement('input');
             formatInput.type = 'hidden';
@@ -1233,8 +1243,14 @@ $user = get_logged_user();
         function exportSingleOrder(orderId, format) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '<?php echo url('/api/export-orders.php'); ?>';
+            form.action = '<?php echo url('/api/?endpoint=export-orders'); ?>';
             form.target = '_blank';
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = token;
+            form.appendChild(csrfInput);
 
             const formatInput = document.createElement('input');
             formatInput.type = 'hidden';

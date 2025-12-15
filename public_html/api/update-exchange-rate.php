@@ -14,6 +14,8 @@ if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
  * Auto-updates exchange rate from DolarAPI if more than 30 minutes have passed
  */
 
+// Apply rate limiting: 5 requests per minute per IP
+api_rate_limit(5, 60);
 
 header('Content-Type: application/json');
 

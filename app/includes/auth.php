@@ -209,6 +209,16 @@ function check_session_timeout($lifetime = 3600) {
  * @return array ['success' => bool, 'message' => string]
  */
 function create_admin_user($username, $password, $email) {
+    // Validar fortaleza de contraseña
+    $password_validation = validate_password_strength($password);
+    if (!$password_validation['valid']) {
+        return [
+            'success' => false,
+            'message' => 'Contraseña no cumple con los requisitos de seguridad',
+            'errors' => $password_validation['errors']
+        ];
+    }
+
     $users_file = get_users_file_path();
     $users_data = read_json($users_file);
 
@@ -262,6 +272,16 @@ function create_admin_user($username, $password, $email) {
  * @return array ['success' => bool, 'message' => string]
  */
 function change_admin_password($user_id, $old_password, $new_password) {
+    // Validar fortaleza de la nueva contraseña
+    $password_validation = validate_password_strength($new_password);
+    if (!$password_validation['valid']) {
+        return [
+            'success' => false,
+            'message' => 'La nueva contraseña no cumple con los requisitos de seguridad',
+            'errors' => $password_validation['errors']
+        ];
+    }
+
     $users_file = get_users_file_path();
     $users_data = read_json($users_file);
 
@@ -293,6 +313,14 @@ function change_admin_password($user_id, $old_password, $new_password) {
         return [
             'success' => false,
             'message' => 'Contraseña actual incorrecta.'
+        ];
+    }
+
+    // Verificar que la nueva contraseña no sea igual a la actual
+    if (password_verify($new_password, $users_data['users'][$user_index]['password'])) {
+        return [
+            'success' => false,
+            'message' => 'La nueva contraseña debe ser diferente a la actual.'
         ];
     }
 

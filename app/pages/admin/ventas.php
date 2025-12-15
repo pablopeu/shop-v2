@@ -294,8 +294,14 @@ $status_labels = [
             // Create form and submit to export API
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '<?php echo url('/api/export-orders.php'); ?>';
+            form.action = '<?php echo url('/api/?endpoint=export-orders'); ?>';
             form.target = '_blank';
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = token;
+            form.appendChild(csrfInput);
 
             const formatInput = document.createElement('input');
             formatInput.type = 'hidden';
