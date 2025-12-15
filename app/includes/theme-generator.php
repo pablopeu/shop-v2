@@ -578,6 +578,22 @@ function generate_theme_css_basic($config) {
 
     $css .= "}\n\n";
 
+    // Product Info (flexbox container)
+    $css .= ".product-info {\n";
+    $css .= "    padding: var(--spacing-lg);\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: column;\n";
+    $css .= "    flex: 1;\n";
+    $css .= "}\n\n";
+
+    // Product Buttons Container
+    // IMPORTANTE: NO usar margin-top: auto para permitir que el inline style funcione
+    $css .= ".product-buttons {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    gap: var(--spacing-sm);\n";
+    $css .= "    /* margin-top se controla via inline style según configuración del theme */\n";
+    $css .= "}\n\n";
+
     // === BUTTONS ===
     $css .= "/* =================================\n";
     $css .= "   BUTTONS\n";
@@ -587,13 +603,14 @@ function generate_theme_css_basic($config) {
     $btn_rounded = $config['components']['buttons']['rounded'] ?? false;
     $btn_shadow = $config['components']['buttons']['shadow'] ?? false;
 
-    $css .= ".btn, .btn-primary, .btn-secondary {\n";
+    $css .= ".btn, .btn-primary, .btn-secondary, .btn-add-cart {\n";
     $css .= "    padding: var(--spacing-sm) var(--spacing-lg);\n";
     $css .= "    font-weight: var(--font-weight-medium);\n";
     $css .= "    transition: var(--transition-base);\n";
     $css .= "    cursor: pointer;\n";
     $css .= "    display: inline-block;\n";
     $css .= "    text-align: center;\n";
+    $css .= "    border: none;\n";
 
     if ($btn_rounded) {
         $css .= "    border-radius: var(--border-radius-full);\n";
@@ -609,13 +626,12 @@ function generate_theme_css_basic($config) {
 
     // Button styles
     if ($btn_style === 'solid') {
-        $css .= ".btn-primary {\n";
+        $css .= ".btn-primary, .btn-add-cart {\n";
         $css .= "    background: var(--color-primary);\n";
         $css .= "    color: var(--color-white);\n";
-        $css .= "    border: none;\n";
         $css .= "}\n\n";
 
-        $css .= ".btn-primary:hover {\n";
+        $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
         $css .= "    background: var(--color-primary-dark);\n";
         if ($btn_shadow) {
             $css .= "    box-shadow: var(--shadow-md);\n";
@@ -625,16 +641,22 @@ function generate_theme_css_basic($config) {
         $css .= ".btn-secondary {\n";
         $css .= "    background: var(--color-secondary);\n";
         $css .= "    color: var(--color-white);\n";
-        $css .= "    border: none;\n";
+        $css .= "}\n\n";
+
+        $css .= ".btn-secondary:hover {\n";
+        $css .= "    background: var(--color-secondary-dark);\n";
+        if ($btn_shadow) {
+            $css .= "    box-shadow: var(--shadow-md);\n";
+        }
         $css .= "}\n\n";
     } elseif ($btn_style === 'outline') {
-        $css .= ".btn-primary {\n";
+        $css .= ".btn-primary, .btn-add-cart {\n";
         $css .= "    background: transparent;\n";
         $css .= "    color: var(--color-primary);\n";
         $css .= "    border: var(--border-width-thick) solid var(--color-primary);\n";
         $css .= "}\n\n";
 
-        $css .= ".btn-primary:hover {\n";
+        $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
         $css .= "    background: var(--color-primary);\n";
         $css .= "    color: var(--color-white);\n";
         $css .= "}\n\n";
@@ -643,6 +665,11 @@ function generate_theme_css_basic($config) {
         $css .= "    background: transparent;\n";
         $css .= "    color: var(--color-secondary);\n";
         $css .= "    border: var(--border-width-thick) solid var(--color-secondary);\n";
+        $css .= "}\n\n";
+
+        $css .= ".btn-secondary:hover {\n";
+        $css .= "    background: var(--color-secondary);\n";
+        $css .= "    color: var(--color-white);\n";
         $css .= "}\n\n";
     }
 

@@ -1047,37 +1047,37 @@ $user = get_logged_user();
 
                     <!-- Componentes: Buttons -->
                     <div class="card">
-                    <div class="card-title">
-                        🔘 Componentes: Botones
-                    </div>
+                        <div class="card-title">
+                            🔘 Componentes: Botones
+                        </div>
 
-                    <div class="form-group">
-                        <label>Estilo</label>
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="button_style" value="solid" checked>
-                                Sólido
-                            </label>
-                            <label>
-                                <input type="radio" name="button_style" value="outline">
-                                Outline
-                            </label>
+                        <div class="form-group">
+                            <label>Estilo</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="button_style" value="solid" checked>
+                                    Sólido
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_style" value="outline">
+                                    Outline
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" name="button_rounded">
+                                    Botones redondeados
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="button_shadow">
+                                    Con sombra
+                                </label>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" name="button_rounded">
-                                Botones redondeados
-                            </label>
-                            <label>
-                                <input type="checkbox" name="button_shadow">
-                                Con sombra
-                            </label>
-                        </div>
-                    </div>
-                </div>
                 </div>
 
                 <!-- Botones de acción -->
