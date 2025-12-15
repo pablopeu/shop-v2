@@ -32,6 +32,38 @@ $form_values = [
     'card_buttons_vertical_spacing' => 'normal',
 ];
 
+// Si viene de redirect después de guardar, cargar el theme
+if (isset($_GET['edit']) && !empty($_GET['edit'])) {
+    $edit_slug = sanitize_input($_GET['edit']);
+    $edit_theme_path = PUBLIC_PATH . "/assets/themes/{$edit_slug}/theme.json";
+
+    if (file_exists($edit_theme_path)) {
+        $edit_config = read_json($edit_theme_path);
+
+        // Poblar form_values con los datos del theme
+        $form_values = [
+            'name' => $edit_config['name'] ?? '',
+            'slug' => $edit_config['slug'] ?? '',
+            'description' => $edit_config['description'] ?? '',
+            'author' => $edit_config['author'] ?? 'Shop Team',
+            'color_primary' => $edit_config['colors']['primary'] ?? '#000000',
+            'color_secondary' => $edit_config['colors']['secondary'] ?? '#d4af37',
+            'color_accent' => $edit_config['colors']['accent'] ?? '#4facfe',
+            'color_text' => $edit_config['colors']['text'] ?? '#1a1a1a',
+            'color_background' => $edit_config['colors']['background'] ?? '#ffffff',
+            'card_buttons' => $edit_config['components']['cards']['buttons'] ?? 'show',
+            'card_buttons_position' => $edit_config['components']['cards']['buttons_position'] ?? 'center',
+            'card_buttons_spacing' => $edit_config['components']['cards']['buttons_spacing'] ?? 'normal',
+            'card_buttons_vertical_spacing' => $edit_config['components']['cards']['buttons_vertical_spacing'] ?? 'normal',
+            'original_slug' => $edit_config['slug'] ?? '',
+        ];
+
+        if (isset($_GET['msg']) && $_GET['msg'] === 'saved') {
+            $message = 'Theme guardado exitosamente. Puedes seguir editando o activarlo.';
+        }
+    }
+}
+
 // Procesamiento POST - Generar Theme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -98,12 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
                     'name' => $data['name']
                 ]);
 
-                // Mantener valores del formulario para seguir editando
-                $form_values = $data;
-                $form_values['original_slug'] = $result['slug']; // Permitir edición continua
-
-                // Opcionalmente redirigir a config-themes
-                // redirect(url('/admin/?page=config-themes&msg=theme_created'));
+                // Redirigir al modo edición del theme recién guardado
+                redirect(url('/admin/?page=generador-themes&edit=' . urlencode($result['slug']) . '&msg=saved'));
             } else {
                 $error = $result['message'];
             }
@@ -490,13 +518,13 @@ $user = get_logged_user();
         <?php if ($message): ?>
             <div class="message success">
                 <?php echo $message; ?>
-                <?php if ($saved_theme_slug): ?>
+                <?php if (isset($_GET['edit']) && isset($_GET['msg']) && $_GET['msg'] === 'saved'): ?>
                     <br><br>
-                    <button data-action="activateTheme" data-slug="<?php echo htmlspecialchars($saved_theme_slug); ?>" class="btn-activate-theme" style="background: #2e7d32; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                    <button data-action="activateTheme" data-slug="<?php echo htmlspecialchars($_GET['edit']); ?>" class="btn-activate-theme" style="background: #2e7d32; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
                         ✅ Activar Theme Ahora
                     </button>
                     <small style="display: block; margin-top: 8px; color: #666;">
-                        El theme se guardó exitosamente. Para ver los cambios en el frontend, actívalo haciendo clic en el botón de arriba.
+                        Puedes seguir editando este theme o activarlo para verlo en el frontend.
                     </small>
                 <?php endif; ?>
             </div>
