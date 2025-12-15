@@ -57,9 +57,37 @@ if (empty($endpoint)) {
 
 // Mapa de endpoints disponibles
 $endpoints_map = [
+    // Pagos y Preferencias
     'crear-preferencia-mp' => APP_PATH . '/pages/api/crear-preferencia-mp.php',
+
+    // Exportación (Admin only)
     'export-orders' => APP_PATH . '/pages/api/export-orders.php',
     'export-archived-orders' => APP_PATH . '/pages/api/export-archived-orders.php',
+
+    // Validación y Carrito
+    'validate-coupon' => APP_PATH . '/pages/api/validate-coupon.php',
+    'sync-cart' => APP_PATH . '/pages/api/sync-cart.php',
+
+    // Órdenes
+    'get-order' => APP_PATH . '/pages/api/get-order.php',
+    'get-archived-order' => APP_PATH . '/pages/api/get-archived-order.php',
+    'cancel-order' => APP_PATH . '/pages/api/cancel-order.php',
+
+    // Productos y Promociones
+    'get-products' => APP_PATH . '/pages/api/get-products.php',
+    'get-promotion' => APP_PATH . '/pages/api/get-promotion.php',
+
+    // Wishlist
+    'create-short-link' => APP_PATH . '/pages/api/create-short-link.php',
+    'get-shared-wishlist' => APP_PATH . '/pages/api/get-shared-wishlist.php',
+
+    // Testing (Checkout)
+    'send-test-email' => APP_PATH . '/pages/api/send-test-email.php',
+    'send-telegram-test' => APP_PATH . '/pages/api/send-telegram-test.php',
+
+    // Admin Operations
+    'update-exchange-rate' => APP_PATH . '/pages/api/update-exchange-rate.php',
+    'update-products-order' => APP_PATH . '/pages/api/update-products-order.php',
 ];
 
 // Verificar que el endpoint existe
