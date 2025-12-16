@@ -348,6 +348,48 @@ $user = get_logged_user();
             background: #c82333;
         }
 
+        .filter-tab {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-tab:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .archived-theme {
+            opacity: 0.7;
+        }
+
+        .archived-theme .theme-info {
+            position: relative;
+        }
+
+        .archived-theme .theme-info::before {
+            content: '🗃️ ARCHIVADO';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ffc107;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
         /* Theme-specific preview colors */
         .theme-card[data-theme="minimal"] .theme-preview {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -434,13 +476,32 @@ $user = get_logged_user();
                 </p>
             </div>
 
+            <!-- Filtros de Themes -->
+            <div style="margin: 20px 0; display: flex; gap: 10px;">
+                <button type="button" class="filter-tab active" data-action="filterThemes" data-filter="active">
+                    📁 Activos (<?php echo count(array_filter($available_themes, function($t) { return !($t['archived'] ?? false); })); ?>)
+                </button>
+                <button type="button" class="filter-tab" data-action="filterThemes" data-filter="archived">
+                    🗃️ Archivados (<?php echo count(array_filter($available_themes, function($t) { return ($t['archived'] ?? false); })); ?>)
+                </button>
+                <button type="button" class="filter-tab" data-action="filterThemes" data-filter="all">
+                    📂 Todos (<?php echo count($available_themes); ?>)
+                </button>
+            </div>
+
             <form method="POST" action="">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
 
                 <div class="themes-grid">
                     <?php foreach ($available_themes as $theme_slug => $theme_info): ?>
-                        <div class="theme-card <?php echo $active_theme === $theme_slug ? 'active' : ''; ?>"
-                             data-theme="<?php echo htmlspecialchars($theme_slug); ?>">
+                        <?php
+                        $is_archived = $theme_info['archived'] ?? false;
+                        $archive_class = $is_archived ? 'archived-theme' : 'active-theme';
+                        ?>
+                        <div class="theme-card <?php echo $active_theme === $theme_slug ? 'active' : ''; ?> <?php echo $archive_class; ?>"
+                             data-theme="<?php echo htmlspecialchars($theme_slug); ?>"
+                             data-archived="<?php echo $is_archived ? 'true' : 'false'; ?>"
+                             style="<?php echo $is_archived ? 'display: none;' : ''; ?>">
 
                             <div class="theme-preview">
                                 <?php echo strtoupper(substr($theme_slug, 0, 1)); ?>
@@ -634,6 +695,30 @@ $user = get_logged_user();
             });
         }
 
+        // Filtrar themes
+        function filterThemes(event, element, params) {
+            const filter = params?.filter || 'active';
+            const allCards = document.querySelectorAll('.theme-card');
+            const allTabs = document.querySelectorAll('.filter-tab');
+
+            // Actualizar tabs activos
+            allTabs.forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+
+            // Filtrar cards
+            allCards.forEach(card => {
+                const isArchived = card.dataset.archived === 'true';
+
+                if (filter === 'all') {
+                    card.style.display = '';
+                } else if (filter === 'active') {
+                    card.style.display = isArchived ? 'none' : '';
+                } else if (filter === 'archived') {
+                    card.style.display = isArchived ? '' : 'none';
+                }
+            });
+        }
+
         // Eliminar theme
         function deleteTheme(event, element, params) {
             const slug = params?.slug;
@@ -671,7 +756,11 @@ $user = get_logged_user();
         window.archiveTheme = archiveTheme;
         window.unarchiveTheme = unarchiveTheme;
         window.deleteTheme = deleteTheme;
+        window.filterThemes = filterThemes;
     </script>
+
+    <!-- Modal Component -->
+    <?php include APP_PATH . '/includes/admin/modal.php'; ?>
 
     <!-- Event Delegation System for CSP -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
