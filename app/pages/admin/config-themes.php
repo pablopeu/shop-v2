@@ -13,6 +13,12 @@ require_admin();
 $message = '';
 $error = '';
 
+// Check for success message from redirect
+if (isset($_SESSION['success_message'])) {
+    $message = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+}
+
 // Archivar theme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['archive_theme'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -22,8 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['archive_theme'])) {
         $result = archive_theme($slug);
 
         if ($result['success']) {
-            $message = $result['message'];
             log_admin_action('theme_archived', $_SESSION['username'], ['slug' => $slug]);
+            $_SESSION['success_message'] = $result['message'];
+            redirect(url('/admin/?page=config-themes'));
+            exit;
         } else {
             $error = $result['message'];
         }
@@ -39,8 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['unarchive_theme'])) {
         $result = unarchive_theme($slug);
 
         if ($result['success']) {
-            $message = $result['message'];
             log_admin_action('theme_unarchived', $_SESSION['username'], ['slug' => $slug]);
+            $_SESSION['success_message'] = $result['message'];
+            redirect(url('/admin/?page=config-themes'));
+            exit;
         } else {
             $error = $result['message'];
         }
@@ -56,8 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_theme'])) {
         $result = delete_theme($slug);
 
         if ($result['success']) {
-            $message = $result['message'];
             log_admin_action('theme_deleted', $_SESSION['username'], ['slug' => $slug]);
+            $_SESSION['success_message'] = $result['message'];
+            redirect(url('/admin/?page=config-themes'));
+            exit;
         } else {
             $error = $result['message'];
         }
@@ -81,8 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_theme'])) {
             $config['active_theme'] = $selected_theme;
 
             if (write_json($config_file, $config)) {
-                $message = 'Theme cambiado exitosamente a: ' . ucfirst($selected_theme);
                 log_admin_action('theme_changed', $_SESSION['username'], ['theme' => $selected_theme]);
+                // Redirect to regenerate page with new CSRF token
+                $_SESSION['success_message'] = 'Theme cambiado exitosamente a: ' . ucfirst($selected_theme);
+                redirect(url('/admin/?page=config-themes'));
+                exit;
             } else {
                 $error = 'Error al guardar la configuración';
             }

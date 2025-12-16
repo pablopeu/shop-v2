@@ -1048,16 +1048,13 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         }
 
         .order-summary-column h2 {
-
-
             font-size: 1.75rem;
-
             font-weight: 700;
             margin: 0 0 1.5rem 0;
             letter-spacing: -0.02em;
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            color: var(--checkout-bg-secondary);
+            color: #ffffff;
         }
 
         .currency-toggle {
