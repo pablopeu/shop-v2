@@ -619,10 +619,33 @@ function generate_theme_css_basic($config) {
     $btn_style = $config['components']['buttons']['style'] ?? 'solid';
     $btn_rounded = $config['components']['buttons']['rounded'] ?? false;
     $btn_shadow = $config['components']['buttons']['shadow'] ?? false;
+    $btn_height = $config['components']['buttons']['height'] ?? 'normal';
+    $btn_width = $config['components']['buttons']['width'] ?? 'auto';
+    $btn_icon = $config['components']['buttons']['icon'] ?? 'show';
+    $btn_hover = $config['components']['buttons']['hover'] ?? 'lift';
+
+    // Determinar padding según altura
+    $padding_value = 'var(--spacing-sm) var(--spacing-lg)'; // normal
+    if ($btn_height === 'compact') {
+        $padding_value = 'var(--spacing-xs) var(--spacing-md)';
+    } elseif ($btn_height === 'large') {
+        $padding_value = 'var(--spacing-md) var(--spacing-xl)';
+    }
+
+    // Determinar ancho
+    $width_value = 'auto'; // auto (por defecto)
+    if ($btn_width === 'full') {
+        $width_value = '100%';
+    } elseif ($btn_width === 'fixed') {
+        $width_value = '200px';
+    }
 
     // Estilos base para todos los botones
     $css .= ".btn, .btn-primary, .btn-secondary, .btn-add-cart {\n";
-    $css .= "    padding: var(--spacing-sm) var(--spacing-lg);\n";
+    $css .= "    padding: {$padding_value};\n";
+    if ($btn_width !== 'auto') {
+        $css .= "    width: {$width_value};\n";
+    }
     $css .= "    font-weight: var(--font-weight-medium);\n";
     $css .= "    transition: var(--transition-base);\n";
     $css .= "    cursor: pointer;\n";
@@ -638,6 +661,16 @@ function generate_theme_css_basic($config) {
 
     $css .= "}\n\n";
 
+    // Ocultar iconos si está configurado
+    if ($btn_icon === 'hide') {
+        $css .= "/* Ocultar iconos en botones */\n";
+        $css .= ".btn-buy::before, .btn-fav::before,\n";
+        $css .= ".btn-add-cart .cart-icon,\n";
+        $css .= "button[data-action=\"addToCart\"]::before {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
     // Estilos específicos según el tipo (solid/outline)
     if ($btn_style === 'solid') {
         // Estilo sólido
@@ -651,9 +684,21 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
 
         $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
-        $css .= "    background: var(--color-primary-dark);\n";
-        if ($btn_shadow) {
-            $css .= "    box-shadow: var(--shadow-md);\n";
+        // Aplicar efecto hover según configuración
+        if ($btn_hover === 'lift') {
+            $css .= "    transform: translateY(-2px);\n";
+            $css .= "    background: var(--color-primary-dark);\n";
+            if ($btn_shadow) {
+                $css .= "    box-shadow: var(--shadow-lg);\n";
+            }
+        } elseif ($btn_hover === 'glow') {
+            $css .= "    background: var(--color-primary-dark);\n";
+            $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.3);\n";
+        } elseif ($btn_hover === 'darken') {
+            $css .= "    background: var(--color-primary-dark);\n";
+            $css .= "    opacity: 0.9;\n";
+        } elseif ($btn_hover === 'none') {
+            $css .= "    background: var(--color-primary);\n";
         }
         $css .= "}\n\n";
 
@@ -667,9 +712,21 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
 
         $css .= ".btn-secondary:hover {\n";
-        $css .= "    background: var(--color-secondary-dark);\n";
-        if ($btn_shadow) {
-            $css .= "    box-shadow: var(--shadow-md);\n";
+        // Aplicar efecto hover según configuración
+        if ($btn_hover === 'lift') {
+            $css .= "    transform: translateY(-2px);\n";
+            $css .= "    background: var(--color-secondary-dark);\n";
+            if ($btn_shadow) {
+                $css .= "    box-shadow: var(--shadow-lg);\n";
+            }
+        } elseif ($btn_hover === 'glow') {
+            $css .= "    background: var(--color-secondary-dark);\n";
+            $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-secondary-rgb), 0.3);\n";
+        } elseif ($btn_hover === 'darken') {
+            $css .= "    background: var(--color-secondary-dark);\n";
+            $css .= "    opacity: 0.9;\n";
+        } elseif ($btn_hover === 'none') {
+            $css .= "    background: var(--color-secondary);\n";
         }
         $css .= "}\n\n";
     } elseif ($btn_style === 'outline') {
@@ -684,10 +741,25 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
 
         $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
-        $css .= "    background: var(--color-primary);\n";
-        $css .= "    color: var(--color-white);\n";
-        if ($btn_shadow) {
-            $css .= "    box-shadow: var(--shadow-md);\n";
+        // Aplicar efecto hover según configuración (outline)
+        if ($btn_hover === 'lift') {
+            $css .= "    transform: translateY(-2px);\n";
+            $css .= "    background: var(--color-primary);\n";
+            $css .= "    color: var(--color-white);\n";
+            if ($btn_shadow) {
+                $css .= "    box-shadow: var(--shadow-lg);\n";
+            }
+        } elseif ($btn_hover === 'glow') {
+            $css .= "    background: var(--color-primary);\n";
+            $css .= "    color: var(--color-white);\n";
+            $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.3);\n";
+        } elseif ($btn_hover === 'darken') {
+            $css .= "    background: var(--color-primary);\n";
+            $css .= "    color: var(--color-white);\n";
+            $css .= "    opacity: 0.9;\n";
+        } elseif ($btn_hover === 'none') {
+            $css .= "    background: transparent;\n";
+            $css .= "    color: var(--color-primary);\n";
         }
         $css .= "}\n\n";
 
@@ -701,10 +773,25 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
 
         $css .= ".btn-secondary:hover {\n";
-        $css .= "    background: var(--color-secondary);\n";
-        $css .= "    color: var(--color-white);\n";
-        if ($btn_shadow) {
-            $css .= "    box-shadow: var(--shadow-md);\n";
+        // Aplicar efecto hover según configuración (outline)
+        if ($btn_hover === 'lift') {
+            $css .= "    transform: translateY(-2px);\n";
+            $css .= "    background: var(--color-secondary);\n";
+            $css .= "    color: var(--color-white);\n";
+            if ($btn_shadow) {
+                $css .= "    box-shadow: var(--shadow-lg);\n";
+            }
+        } elseif ($btn_hover === 'glow') {
+            $css .= "    background: var(--color-secondary);\n";
+            $css .= "    color: var(--color-white);\n";
+            $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-secondary-rgb), 0.3);\n";
+        } elseif ($btn_hover === 'darken') {
+            $css .= "    background: var(--color-secondary);\n";
+            $css .= "    color: var(--color-white);\n";
+            $css .= "    opacity: 0.9;\n";
+        } elseif ($btn_hover === 'none') {
+            $css .= "    background: transparent;\n";
+            $css .= "    color: var(--color-secondary);\n";
         }
         $css .= "}\n\n";
     }
@@ -798,7 +885,11 @@ function generate_theme($data) {
             'buttons' => [
                 'style' => $data['button_style'] ?? 'solid',
                 'rounded' => $data['button_rounded'] ?? false,
-                'shadow' => $data['button_shadow'] ?? false
+                'shadow' => $data['button_shadow'] ?? false,
+                'height' => $data['button_height'] ?? 'normal',
+                'width' => $data['button_width'] ?? 'auto',
+                'icon' => $data['button_icon'] ?? 'show',
+                'hover' => $data['button_hover'] ?? 'lift'
             ],
             'cards' => [
                 'border' => $data['card_border'] ?? true,
