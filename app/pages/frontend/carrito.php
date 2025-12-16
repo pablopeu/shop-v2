@@ -884,7 +884,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
                     reapplyBtn.id = 'reapplyBtn';
                     reapplyBtn.className = 'btn-reapply';
                     reapplyBtn.textContent = `🔄 Reaplicar "${coupon.code}"`;
-                    reapplyBtn.onclick = reapplyCoupon;
+                    reapplyBtn.setAttribute('data-action', 'reapplyCoupon');
                     couponInputDiv.parentElement.insertBefore(reapplyBtn, couponInputDiv.nextSibling);
                 }
             }
