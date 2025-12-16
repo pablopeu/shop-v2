@@ -6,11 +6,63 @@
 
 
 require_once APP_PATH . '/includes/theme-loader.php';
+require_once APP_PATH . '/includes/theme-generator.php';
 
 require_admin();
 
 $message = '';
 $error = '';
+
+// Archivar theme
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['archive_theme'])) {
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $error = 'Token de seguridad inválido';
+    } else {
+        $slug = sanitize_input($_POST['theme_slug'] ?? '');
+        $result = archive_theme($slug);
+
+        if ($result['success']) {
+            $message = $result['message'];
+            log_admin_action('theme_archived', $_SESSION['username'], ['slug' => $slug]);
+        } else {
+            $error = $result['message'];
+        }
+    }
+}
+
+// Desarchivar theme
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['unarchive_theme'])) {
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $error = 'Token de seguridad inválido';
+    } else {
+        $slug = sanitize_input($_POST['theme_slug'] ?? '');
+        $result = unarchive_theme($slug);
+
+        if ($result['success']) {
+            $message = $result['message'];
+            log_admin_action('theme_unarchived', $_SESSION['username'], ['slug' => $slug]);
+        } else {
+            $error = $result['message'];
+        }
+    }
+}
+
+// Borrar theme
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_theme'])) {
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $error = 'Token de seguridad inválido';
+    } else {
+        $slug = sanitize_input($_POST['theme_slug'] ?? '');
+        $result = delete_theme($slug);
+
+        if ($result['success']) {
+            $message = $result['message'];
+            log_admin_action('theme_deleted', $_SESSION['username'], ['slug' => $slug]);
+        } else {
+            $error = $result['message'];
+        }
+    }
+}
 
 // Update theme configuration
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_theme'])) {
@@ -258,6 +310,44 @@ $user = get_logged_user();
             color: #667eea;
         }
 
+        .action-button {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .archive-button {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .archive-button:hover {
+            background: #e0a800;
+        }
+
+        .unarchive-button {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .unarchive-button:hover {
+            background: #138496;
+        }
+
+        .delete-button {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-button:hover {
+            background: #c82333;
+        }
+
         /* Theme-specific preview colors */
         .theme-card[data-theme="minimal"] .theme-preview {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -393,6 +483,38 @@ $user = get_logged_user();
                                         Activar Theme
                                     </button>
                                 <?php endif; ?>
+
+                                <!-- Botones de Gestión -->
+                                <div class="theme-actions" style="margin-top: 10px; display: flex; gap: 8px;">
+                                    <?php
+                                    $is_archived = $theme_info['archived'] ?? false;
+                                    $protected_themes = ['minimal', 'classic', 'elegant', 'bold'];
+                                    $is_protected = in_array($theme_slug, $protected_themes);
+                                    ?>
+
+                                    <?php if ($is_archived): ?>
+                                        <button type="button" class="action-button unarchive-button"
+                                                data-action="unarchiveTheme"
+                                                data-slug="<?php echo htmlspecialchars($theme_slug); ?>">
+                                            📂 Desarchivar
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="action-button archive-button"
+                                                data-action="archiveTheme"
+                                                data-slug="<?php echo htmlspecialchars($theme_slug); ?>">
+                                            📁 Archivar
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <?php if (!$is_protected && $active_theme !== $theme_slug): ?>
+                                        <button type="button" class="action-button delete-button"
+                                                data-action="deleteTheme"
+                                                data-slug="<?php echo htmlspecialchars($theme_slug); ?>"
+                                                data-name="<?php echo htmlspecialchars($theme_info['name'] ?? $theme_slug); ?>">
+                                            🗑️ Eliminar
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -456,11 +578,99 @@ $user = get_logged_user();
             }
         }
 
+        // Archivar theme
+        function archiveTheme(event, element, params) {
+            const slug = params?.slug;
+
+            if (!slug) {
+                console.error('No slug provided');
+                return;
+            }
+
+            showModal({
+                title: 'Confirmar Archivado',
+                message: '¿Archivar este theme? Podrás desarchivarlo después.',
+                icon: '📁',
+                confirmType: 'warning',
+                onConfirm: function() {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.innerHTML = `
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                        <input type="hidden" name="archive_theme" value="1">
+                        <input type="hidden" name="theme_slug" value="${slug}">
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        // Desarchivar theme
+        function unarchiveTheme(event, element, params) {
+            const slug = params?.slug;
+
+            if (!slug) {
+                console.error('No slug provided');
+                return;
+            }
+
+            showModal({
+                title: 'Confirmar Desarchivado',
+                message: '¿Desarchivar este theme?',
+                icon: '📂',
+                confirmType: 'primary',
+                onConfirm: function() {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.innerHTML = `
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                        <input type="hidden" name="unarchive_theme" value="1">
+                        <input type="hidden" name="theme_slug" value="${slug}">
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        // Eliminar theme
+        function deleteTheme(event, element, params) {
+            const slug = params?.slug;
+            const name = params?.name || slug;
+
+            if (!slug) {
+                console.error('No slug provided');
+                return;
+            }
+
+            showModal({
+                title: 'Confirmar Eliminación',
+                message: `¿Eliminar permanentemente el theme "${name}"? Esta acción no se puede deshacer.`,
+                icon: '🗑️',
+                confirmType: 'danger',
+                onConfirm: function() {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.innerHTML = `
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                        <input type="hidden" name="delete_theme" value="1">
+                        <input type="hidden" name="theme_slug" value="${slug}">
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
         // ============================================================================
         // WRAPPERS FOR EVENT DELEGATION COMPATIBILITY
         // ============================================================================
         window.previewTheme = previewTheme;
         window.selectTheme = selectTheme;
+        window.archiveTheme = archiveTheme;
+        window.unarchiveTheme = unarchiveTheme;
+        window.deleteTheme = deleteTheme;
     </script>
 
     <!-- Event Delegation System for CSP -->

@@ -809,7 +809,258 @@ function generate_theme_css_basic($config) {
     }
     $css .= "}\n\n";
 
+    // === PRODUCT VIEW ===
+    $css .= "/* =================================\n";
+    $css .= "   PRODUCT VIEW\n";
+    $css .= "   ================================= */\n\n";
+
+    // Gallery Layout
+    $gallery_layout = $config['components']['product_view']['gallery_layout'] ?? 'thumbnails-bottom';
+
+    if ($gallery_layout === 'thumbnails-bottom') {
+        $css .= ".product-gallery {\n";
+        $css .= "    display: flex;\n";
+        $css .= "    flex-direction: column;\n";
+        $css .= "}\n\n";
+
+        $css .= ".product-thumbnails {\n";
+        $css .= "    display: flex;\n";
+        $css .= "    flex-direction: row;\n";
+        $css .= "    gap: var(--spacing-sm);\n";
+        $css .= "    margin-top: var(--spacing-md);\n";
+        $css .= "    justify-content: center;\n";
+        $css .= "}\n\n";
+    } elseif ($gallery_layout === 'thumbnails-left') {
+        $css .= ".product-gallery {\n";
+        $css .= "    display: flex;\n";
+        $css .= "    flex-direction: row-reverse;\n";
+        $css .= "}\n\n";
+
+        $css .= ".product-thumbnails {\n";
+        $css .= "    display: flex;\n";
+        $css .= "    flex-direction: column;\n";
+        $css .= "    gap: var(--spacing-sm);\n";
+        $css .= "    margin-right: var(--spacing-md);\n";
+        $css .= "}\n\n";
+    } elseif ($gallery_layout === 'thumbnails-right') {
+        $css .= ".product-gallery {\n";
+        $css .= "    display: flex;\n";
+        $css .= "    flex-direction: row;\n";
+        $css .= "}\n\n";
+
+        $css .= ".product-thumbnails {\n";
+        $css .= "    display: flex;\n";
+        $css .= "    flex-direction: column;\n";
+        $css .= "    gap: var(--spacing-sm);\n";
+        $css .= "    margin-left: var(--spacing-md);\n";
+        $css .= "}\n\n";
+    }
+
+    // Main Image Size
+    $image_size = $config['components']['product_view']['image_size'] ?? 'medium';
+    $max_width = '500px'; // medium
+    if ($image_size === 'small') {
+        $max_width = '400px';
+    } elseif ($image_size === 'large') {
+        $max_width = '600px';
+    }
+
+    $css .= ".product-main-image {\n";
+    $css .= "    max-width: {$max_width};\n";
+    $css .= "    width: 100%;\n";
+    $css .= "    height: auto;\n";
+    $css .= "}\n\n";
+
+    // Thumbnail Size
+    $thumbnail_size = $config['components']['product_view']['thumbnail_size'] ?? 'medium';
+    $thumb_size = '80px'; // medium
+    if ($thumbnail_size === 'small') {
+        $thumb_size = '60px';
+    } elseif ($thumbnail_size === 'large') {
+        $thumb_size = '100px';
+    }
+
+    $css .= ".product-thumbnail {\n";
+    $css .= "    width: {$thumb_size};\n";
+    $css .= "    height: {$thumb_size};\n";
+    $css .= "    object-fit: cover;\n";
+    $css .= "    cursor: pointer;\n";
+    $css .= "    border: 2px solid transparent;\n";
+    $css .= "    transition: var(--transition-base);\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-thumbnail:hover,\n";
+    $css .= ".product-thumbnail.active {\n";
+    $css .= "    border-color: var(--color-primary);\n";
+    $css .= "}\n\n";
+
+    // Visibility of sections
+    $show_breadcrumb = $config['components']['product_view']['show_breadcrumb'] ?? true;
+    $show_share = $config['components']['product_view']['show_share'] ?? true;
+    $show_sku = $config['components']['product_view']['show_sku'] ?? true;
+    $show_stock = $config['components']['product_view']['show_stock'] ?? true;
+
+    if (!$show_breadcrumb) {
+        $css .= ".product-breadcrumb {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
+    if (!$show_share) {
+        $css .= ".product-share,\n";
+        $css .= ".share-buttons {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
+    if (!$show_sku) {
+        $css .= ".product-sku {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
+    if (!$show_stock) {
+        $css .= ".product-stock,\n";
+        $css .= ".stock-indicator {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
     return $css;
+}
+
+// =============================================================================
+// FUNCIONES DE GESTIÓN DE THEMES
+// =============================================================================
+
+/**
+ * Archiva un theme (lo marca como archivado en theme.json)
+ *
+ * @param string $slug Slug del theme a archivar
+ * @return array ['success' => bool, 'message' => string]
+ */
+function archive_theme($slug) {
+    $theme_file = PUBLIC_PATH . "/assets/themes/{$slug}/theme.json";
+
+    if (!file_exists($theme_file)) {
+        return [
+            'success' => false,
+            'message' => 'Theme no encontrado'
+        ];
+    }
+
+    $config = read_json($theme_file);
+    $config['archived'] = true;
+    $config['updated_at'] = date('Y-m-d');
+
+    if (write_json($theme_file, $config)) {
+        return [
+            'success' => true,
+            'message' => 'Theme archivado exitosamente'
+        ];
+    }
+
+    return [
+        'success' => false,
+        'message' => 'Error al archivar el theme'
+    ];
+}
+
+/**
+ * Desarchi un theme
+ *
+ * @param string $slug Slug del theme a desarchivar
+ * @return array ['success' => bool, 'message' => string]
+ */
+function unarchive_theme($slug) {
+    $theme_file = PUBLIC_PATH . "/assets/themes/{$slug}/theme.json";
+
+    if (!file_exists($theme_file)) {
+        return [
+            'success' => false,
+            'message' => 'Theme no encontrado'
+        ];
+    }
+
+    $config = read_json($theme_file);
+    $config['archived'] = false;
+    $config['updated_at'] = date('Y-m-d');
+
+    if (write_json($theme_file, $config)) {
+        return [
+            'success' => true,
+            'message' => 'Theme desarchivado exitosamente'
+        ];
+    }
+
+    return [
+        'success' => false,
+        'message' => 'Error al desarchivar el theme'
+    ];
+}
+
+/**
+ * Elimina un theme completamente
+ *
+ * @param string $slug Slug del theme a eliminar
+ * @return array ['success' => bool, 'message' => string]
+ */
+function delete_theme($slug) {
+    // No permitir borrar themes del sistema
+    $protected_themes = ['minimal', 'classic', 'elegant', 'bold'];
+
+    if (in_array($slug, $protected_themes)) {
+        return [
+            'success' => false,
+            'message' => 'No se pueden eliminar los themes del sistema'
+        ];
+    }
+
+    // Verificar que no sea el theme activo
+    $theme_config = read_json(APP_PATH . '/config/theme.json');
+    if ($theme_config['active_theme'] === $slug) {
+        return [
+            'success' => false,
+            'message' => 'No se puede eliminar el theme activo. Activa otro theme primero.'
+        ];
+    }
+
+    $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
+
+    if (!is_dir($theme_dir)) {
+        return [
+            'success' => false,
+            'message' => 'Theme no encontrado'
+        ];
+    }
+
+    // Eliminar archivos recursivamente
+    function delete_directory($dir) {
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        $files = array_diff(scandir($dir), ['.', '..']);
+
+        foreach ($files as $file) {
+            $path = $dir . '/' . $file;
+            is_dir($path) ? delete_directory($path) : unlink($path);
+        }
+
+        return rmdir($dir);
+    }
+
+    if (delete_directory($theme_dir)) {
+        return [
+            'success' => true,
+            'message' => 'Theme eliminado exitosamente'
+        ];
+    }
+
+    return [
+        'success' => false,
+        'message' => 'Error al eliminar el theme'
+    ];
 }
 
 // =============================================================================
@@ -905,6 +1156,15 @@ function generate_theme($data) {
                 'style' => 'modern',
                 'border_style' => 'solid',
                 'focus_ring' => true
+            ],
+            'product_view' => [
+                'gallery_layout' => $data['product_gallery_layout'] ?? 'thumbnails-bottom',
+                'image_size' => $data['product_image_size'] ?? 'medium',
+                'thumbnail_size' => $data['product_thumbnail_size'] ?? 'medium',
+                'show_breadcrumb' => $data['product_show_breadcrumb'] ?? true,
+                'show_share' => $data['product_show_share'] ?? true,
+                'show_sku' => $data['product_show_sku'] ?? true,
+                'show_stock' => $data['product_show_stock'] ?? true
             ]
         ],
 

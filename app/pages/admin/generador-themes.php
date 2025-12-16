@@ -37,6 +37,13 @@ $form_values = [
     'button_width' => 'auto',
     'button_icon' => 'show',
     'button_hover' => 'lift',
+    'product_gallery_layout' => 'thumbnails-bottom',
+    'product_image_size' => 'medium',
+    'product_thumbnail_size' => 'medium',
+    'product_show_breadcrumb' => true,
+    'product_show_share' => true,
+    'product_show_sku' => true,
+    'product_show_stock' => true,
 ];
 
 // Si viene de redirect después de guardar, cargar el theme
@@ -69,6 +76,13 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'button_width' => $edit_config['components']['buttons']['width'] ?? 'auto',
             'button_icon' => $edit_config['components']['buttons']['icon'] ?? 'show',
             'button_hover' => $edit_config['components']['buttons']['hover'] ?? 'lift',
+            'product_gallery_layout' => $edit_config['components']['product_view']['gallery_layout'] ?? 'thumbnails-bottom',
+            'product_image_size' => $edit_config['components']['product_view']['image_size'] ?? 'medium',
+            'product_thumbnail_size' => $edit_config['components']['product_view']['thumbnail_size'] ?? 'medium',
+            'product_show_breadcrumb' => $edit_config['components']['product_view']['show_breadcrumb'] ?? true,
+            'product_show_share' => $edit_config['components']['product_view']['show_share'] ?? true,
+            'product_show_sku' => $edit_config['components']['product_view']['show_sku'] ?? true,
+            'product_show_stock' => $edit_config['components']['product_view']['show_stock'] ?? true,
             'original_slug' => $edit_config['slug'] ?? '',
         ];
 
@@ -123,7 +137,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'button_height' => sanitize_input($_POST['button_height'] ?? 'normal'),
             'button_width' => sanitize_input($_POST['button_width'] ?? 'auto'),
             'button_icon' => sanitize_input($_POST['button_icon'] ?? 'show'),
-            'button_hover' => sanitize_input($_POST['button_hover'] ?? 'lift')
+            'button_hover' => sanitize_input($_POST['button_hover'] ?? 'lift'),
+
+            // Componentes: Vista Producto
+            'product_gallery_layout' => sanitize_input($_POST['product_gallery_layout'] ?? 'thumbnails-bottom'),
+            'product_image_size' => sanitize_input($_POST['product_image_size'] ?? 'medium'),
+            'product_thumbnail_size' => sanitize_input($_POST['product_thumbnail_size'] ?? 'medium'),
+            'product_show_breadcrumb' => isset($_POST['product_show_breadcrumb']),
+            'product_show_share' => isset($_POST['product_show_share']),
+            'product_show_sku' => isset($_POST['product_show_sku']),
+            'product_show_stock' => isset($_POST['product_show_stock'])
         ];
 
         // Validar (pasar original_slug si estamos editando un theme existente)
@@ -1170,6 +1193,92 @@ $user = get_logged_user();
                                     Con sombra
                                 </label>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Componentes: Vista Producto -->
+                    <div class="card">
+                        <div class="card-title">
+                            🖼️ Vista de Producto
+                        </div>
+
+                        <div class="form-group">
+                            <label>Layout de Galería</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_gallery_layout" value="thumbnails-bottom" <?php echo ($form_values['product_gallery_layout'] ?? 'thumbnails-bottom') === 'thumbnails-bottom' ? 'checked' : ''; ?>>
+                                    Miniaturas abajo
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_gallery_layout" value="thumbnails-left" <?php echo ($form_values['product_gallery_layout'] ?? 'thumbnails-bottom') === 'thumbnails-left' ? 'checked' : ''; ?>>
+                                    Miniaturas a la izquierda
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_gallery_layout" value="thumbnails-right" <?php echo ($form_values['product_gallery_layout'] ?? 'thumbnails-bottom') === 'thumbnails-right' ? 'checked' : ''; ?>>
+                                    Miniaturas a la derecha
+                                </label>
+                            </div>
+                            <small class="helper-text">Posición de las miniaturas en la galería del producto</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tamaño de Imagen Principal</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_image_size" value="small" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'small' ? 'checked' : ''; ?>>
+                                    Pequeña (400px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_image_size" value="medium" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'medium' ? 'checked' : ''; ?>>
+                                    Mediana (500px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_image_size" value="large" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'large' ? 'checked' : ''; ?>>
+                                    Grande (600px)
+                                </label>
+                            </div>
+                            <small class="helper-text">Tamaño máximo de la imagen principal del producto</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Secciones Visibles</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" name="product_show_breadcrumb" <?php echo ($form_values['product_show_breadcrumb'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostrar breadcrumb (Inicio > Categoría > Producto)
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="product_show_share" <?php echo ($form_values['product_show_share'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostrar botones de compartir en redes
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="product_show_sku" <?php echo ($form_values['product_show_sku'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostrar SKU del producto
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="product_show_stock" <?php echo ($form_values['product_show_stock'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostrar disponibilidad en stock
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Tamaño de Miniaturas</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_size" value="small" <?php echo ($form_values['product_thumbnail_size'] ?? 'medium') === 'small' ? 'checked' : ''; ?>>
+                                    Pequeñas (60px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_size" value="medium" <?php echo ($form_values['product_thumbnail_size'] ?? 'medium') === 'medium' ? 'checked' : ''; ?>>
+                                    Medianas (80px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_size" value="large" <?php echo ($form_values['product_thumbnail_size'] ?? 'medium') === 'large' ? 'checked' : ''; ?>>
+                                    Grandes (100px)
+                                </label>
+                            </div>
+                            <small class="helper-text">Tamaño de las miniaturas en la galería</small>
                         </div>
                     </div>
                 </div>
