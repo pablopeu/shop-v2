@@ -629,15 +629,14 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         }
 
         .checkout-form-column h1 {
-            
-            
             font-size: 2.5rem;
-            
             font-weight: 700;
             margin: 0 0 0.5rem 0;
             color: var(--checkout-text-primary);
             letter-spacing: -0.03em;
             line-height: 1.1;
+            text-decoration: none;
+            position: relative;
         }
 
         .checkout-form-column h1::after {
@@ -648,6 +647,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             background: var(--checkout-accent);
             margin-top: 0.75rem;
             margin-bottom: 2rem;
+            clear: both;
         }
 
         /* Paso (accordion style) */

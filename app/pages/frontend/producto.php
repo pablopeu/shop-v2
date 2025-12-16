@@ -902,7 +902,7 @@ write_json($visits_file, $visits_data);
         }
 
         // Buy Now function
-        function buyNow(productId) {
+        async function buyNow(productId) {
             const input = document.getElementById('quantity-input');
             const quantity = parseInt(input.value);
 
@@ -923,8 +923,31 @@ write_json($visits_file, $visits_data);
 
             ShopUtils.saveCart(cart);
 
-            // Redirect directly to cart
-            window.location.href = '<?php echo url('/carrito'); ?>';
+            // Sync cart to session before redirecting to checkout
+            try {
+                const response = await fetch('<?php echo url('/api/?endpoint=sync-cart'); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        cart: cart,
+                        coupon_code: null
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to sync cart');
+                }
+
+                // Redirect directly to checkout
+                window.location.href = '<?php echo url('/checkout'); ?>';
+            } catch (error) {
+                console.error('Error syncing cart:', error);
+                // Fallback: redirect anyway
+                window.location.href = '<?php echo url('/checkout'); ?>';
+            }
         }
 
         // === Wrappers for Event Delegation System ===
