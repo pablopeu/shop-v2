@@ -60,6 +60,16 @@ $site_config = read_json(APP_PATH . '/config/site.json');
 $currency_config = read_json(APP_PATH . '/config/currency.json');
 $telegram_config = read_json(APP_PATH . '/config/telegram.json');
 $payment_config = read_json(APP_PATH . '/config/payment.json');
+$theme_config = read_json(APP_PATH . '/config/theme.json');
+
+// Load active theme colors
+$active_theme = $theme_config['active_theme'] ?? 'minimal';
+$theme_json_path = PUBLIC_PATH . "/assets/themes/{$active_theme}/theme.json";
+$theme_colors = [];
+if (file_exists($theme_json_path)) {
+    $theme_data = json_decode(file_get_contents($theme_json_path), true);
+    $theme_colors = $theme_data['colors'] ?? [];
+}
 
 // Get exchange rate for USD to ARS conversion (use selling rate)
 $exchange_rate = 0;
@@ -527,27 +537,28 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
     <style nonce="<?= csp_nonce() ?>">
         :root {
-            --checkout-bg-primary: #fafaf8;
+            /* Theme colors - dynamically loaded from active theme */
+            --checkout-bg-primary: <?php echo $theme_colors['background'] ?? '#fafaf8'; ?>;
             --checkout-bg-secondary: #ffffff;
-            --checkout-text-primary: #1a1a1a;
+            --checkout-text-primary: <?php echo $theme_colors['text'] ?? '#1a1a1a'; ?>;
             --checkout-text-secondary: #6b6b6b;
-            --checkout-accent: #b8860b;
-            --checkout-accent-hover: #8b6914;
+            --checkout-accent: <?php echo $theme_colors['primary'] ?? '#b8860b'; ?>;
+            --checkout-accent-hover: <?php echo $theme_colors['primary_dark'] ?? '#8b6914'; ?>;
             --checkout-border: #e5e5e0;
-            --checkout-success: #2d5016;
+            --checkout-success: <?php echo $theme_colors['success'] ?? '#2d5016'; ?>;
             --checkout-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
             --checkout-shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 
             /* Efectos y sombras */
-            --checkout-accent-shadow: rgba(184, 134, 11, 0.1);
-            --checkout-accent-bg-light: rgba(184, 134, 11, 0.03);
+            --checkout-accent-shadow: rgba(102, 126, 234, 0.1);
+            --checkout-accent-bg-light: rgba(102, 126, 234, 0.03);
             --checkout-payment-hover-bg: #f8f9fa;
 
             /* Estados de alerta y error */
-            --checkout-warning: #ffc107;
+            --checkout-warning: <?php echo $theme_colors['warning'] ?? '#ffc107'; ?>;
             --checkout-warning-text: #856404;
             --checkout-warning-bg: rgba(255, 193, 7, 0.1);
-            --checkout-error: #dc3545;
+            --checkout-error: <?php echo $theme_colors['error'] ?? '#dc3545'; ?>;
             --checkout-error-text: #721c24;
             --checkout-error-bg: rgba(220, 53, 69, 0.05);
 
@@ -646,7 +657,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             height: 3px;
             background: var(--checkout-accent);
             margin-top: 1.5rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             clear: both;
         }
 
