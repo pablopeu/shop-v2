@@ -645,7 +645,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             width: 60px;
             height: 3px;
             background: var(--checkout-accent);
-            margin-top: 0.75rem;
+            margin-top: 1.5rem;
             margin-bottom: 1rem;
             clear: both;
         }
