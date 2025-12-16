@@ -1055,6 +1055,11 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             color: var(--checkout-bg-primary) !important;
+            /* Override theme gradient styles */
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            -webkit-text-fill-color: var(--checkout-bg-primary) !important;
+            background-clip: unset !important;
         }
 
         .currency-toggle {
