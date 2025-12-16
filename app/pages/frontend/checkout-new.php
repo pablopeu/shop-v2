@@ -631,7 +631,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         .checkout-form-column h1 {
             font-size: 2.5rem;
             font-weight: 700;
-            margin: 0 0 3rem 0;
+            margin: 0;
             color: var(--checkout-text-primary);
             letter-spacing: -0.03em;
             line-height: 1.1;
@@ -646,6 +646,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             height: 3px;
             background: var(--checkout-accent);
             margin-top: 0.75rem;
+            margin-bottom: 1rem;
             clear: both;
         }
 
@@ -1299,7 +1300,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             background: linear-gradient(135deg, var(--checkout-timer-bg-start) 0%, var(--checkout-timer-bg-end) 100%);
             border: 1px solid var(--checkout-timer-border);
             border-radius: 8px;
-            margin-top: 1.5rem;
+            margin-top: 0.5rem;
             margin-bottom: 1.5rem;
             overflow: hidden;
             box-shadow: 0 2px 8px var(--checkout-timer-shadow);
