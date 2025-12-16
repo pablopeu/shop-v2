@@ -1054,7 +1054,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             letter-spacing: -0.02em;
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffffff;
+            color: var(--checkout-bg-primary) !important;
         }
 
         .currency-toggle {
