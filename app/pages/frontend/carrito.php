@@ -1123,6 +1123,19 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             console.error('Fetch API not supported');
         }
     </script>
+
+    <!-- Cart Panel Component -->
+    <?php
+    require_once APP_PATH . '/includes/frontend/cart-panel.php';
+    render_cart_panel();
+    ?>
+
+    <!-- Favorites Panel Component -->
+    <?php
+    require_once APP_PATH . '/includes/frontend/favorites-panel.php';
+    render_favorites_panel();
+    ?>
+
     <!-- Mobile Menu -->
     <?php include APP_PATH . '/includes/mobile-menu.php'; ?>
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/mobile-menu.js'); ?>"></script>
