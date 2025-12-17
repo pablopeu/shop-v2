@@ -30,6 +30,20 @@ $form_values = [
     'card_buttons_position' => 'center',
     'card_buttons_spacing' => 'normal',
     'card_buttons_vertical_spacing' => 'normal',
+    'button_style' => 'solid',
+    'button_rounded' => false,
+    'button_shadow' => false,
+    'button_height' => 'normal',
+    'button_width' => 'auto',
+    'button_icon' => 'show',
+    'button_hover' => 'lift',
+    'product_gallery_layout' => 'thumbnails-bottom',
+    'product_image_size' => 'medium',
+    'product_thumbnail_size' => 'medium',
+    'product_show_breadcrumb' => true,
+    'product_show_share' => true,
+    'product_show_sku' => true,
+    'product_show_stock' => true,
 ];
 
 // Si viene de redirect después de guardar, cargar el theme
@@ -58,6 +72,17 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'button_style' => $edit_config['components']['buttons']['style'] ?? 'solid',
             'button_rounded' => $edit_config['components']['buttons']['rounded'] ?? false,
             'button_shadow' => $edit_config['components']['buttons']['shadow'] ?? false,
+            'button_height' => $edit_config['components']['buttons']['height'] ?? 'normal',
+            'button_width' => $edit_config['components']['buttons']['width'] ?? 'auto',
+            'button_icon' => $edit_config['components']['buttons']['icon'] ?? 'show',
+            'button_hover' => $edit_config['components']['buttons']['hover'] ?? 'lift',
+            'product_gallery_layout' => $edit_config['components']['product_view']['gallery_layout'] ?? 'thumbnails-bottom',
+            'product_image_size' => $edit_config['components']['product_view']['image_size'] ?? 'medium',
+            'product_thumbnail_size' => $edit_config['components']['product_view']['thumbnail_size'] ?? 'medium',
+            'product_show_breadcrumb' => $edit_config['components']['product_view']['show_breadcrumb'] ?? true,
+            'product_show_share' => $edit_config['components']['product_view']['show_share'] ?? true,
+            'product_show_sku' => $edit_config['components']['product_view']['show_sku'] ?? true,
+            'product_show_stock' => $edit_config['components']['product_view']['show_stock'] ?? true,
             'original_slug' => $edit_config['slug'] ?? '',
         ];
 
@@ -108,7 +133,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             // Componentes: Buttons
             'button_style' => sanitize_input($_POST['button_style'] ?? 'solid'),
             'button_rounded' => isset($_POST['button_rounded']),
-            'button_shadow' => isset($_POST['button_shadow'])
+            'button_shadow' => isset($_POST['button_shadow']),
+            'button_height' => sanitize_input($_POST['button_height'] ?? 'normal'),
+            'button_width' => sanitize_input($_POST['button_width'] ?? 'auto'),
+            'button_icon' => sanitize_input($_POST['button_icon'] ?? 'show'),
+            'button_hover' => sanitize_input($_POST['button_hover'] ?? 'lift'),
+
+            // Componentes: Vista Producto
+            'product_gallery_layout' => sanitize_input($_POST['product_gallery_layout'] ?? 'thumbnails-bottom'),
+            'product_image_size' => sanitize_input($_POST['product_image_size'] ?? 'medium'),
+            'product_thumbnail_size' => sanitize_input($_POST['product_thumbnail_size'] ?? 'medium'),
+            'product_show_breadcrumb' => isset($_POST['product_show_breadcrumb']),
+            'product_show_share' => isset($_POST['product_show_share']),
+            'product_show_sku' => isset($_POST['product_show_sku']),
+            'product_show_stock' => isset($_POST['product_show_stock'])
         ];
 
         // Validar (pasar original_slug si estamos editando un theme existente)
@@ -1068,6 +1106,82 @@ $user = get_logged_user();
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label>Altura del Botón</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="button_height" value="compact" <?php echo ($form_values['button_height'] ?? 'normal') === 'compact' ? 'checked' : ''; ?>>
+                                    Compacto
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_height" value="normal" <?php echo ($form_values['button_height'] ?? 'normal') === 'normal' ? 'checked' : ''; ?>>
+                                    Normal
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_height" value="large" <?php echo ($form_values['button_height'] ?? 'normal') === 'large' ? 'checked' : ''; ?>>
+                                    Grande
+                                </label>
+                            </div>
+                            <small class="helper-text">Controla el padding vertical de los botones</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ancho del Botón</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="button_width" value="auto" <?php echo ($form_values['button_width'] ?? 'auto') === 'auto' ? 'checked' : ''; ?>>
+                                    Automático (ajustado al contenido)
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_width" value="full" <?php echo ($form_values['button_width'] ?? 'auto') === 'full' ? 'checked' : ''; ?>>
+                                    Ancho completo (100%)
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_width" value="fixed" <?php echo ($form_values['button_width'] ?? 'auto') === 'fixed' ? 'checked' : ''; ?>>
+                                    Ancho fijo (200px)
+                                </label>
+                            </div>
+                            <small class="helper-text">Define el ancho de los botones en las cards</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Iconos en Botones</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="button_icon" value="show" <?php echo ($form_values['button_icon'] ?? 'show') === 'show' ? 'checked' : ''; ?>>
+                                    Mostrar iconos (🛒 ❤️)
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_icon" value="hide" <?php echo ($form_values['button_icon'] ?? 'show') === 'hide' ? 'checked' : ''; ?>>
+                                    Ocultar iconos (solo texto)
+                                </label>
+                            </div>
+                            <small class="helper-text">Muestra u oculta los emojis en los botones de las cards</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Efecto Hover</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="button_hover" value="none" <?php echo ($form_values['button_hover'] ?? 'lift') === 'none' ? 'checked' : ''; ?>>
+                                    Sin efecto
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_hover" value="lift" <?php echo ($form_values['button_hover'] ?? 'lift') === 'lift' ? 'checked' : ''; ?>>
+                                    Elevación (lift)
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_hover" value="glow" <?php echo ($form_values['button_hover'] ?? 'lift') === 'glow' ? 'checked' : ''; ?>>
+                                    Resplandor (glow)
+                                </label>
+                                <label>
+                                    <input type="radio" name="button_hover" value="darken" <?php echo ($form_values['button_hover'] ?? 'lift') === 'darken' ? 'checked' : ''; ?>>
+                                    Oscurecer
+                                </label>
+                            </div>
+                            <small class="helper-text">Efecto visual cuando el usuario pasa el cursor sobre el botón</small>
+                        </div>
+
                         <div class="form-group" style="margin-bottom: 0;">
                             <div class="checkbox-group">
                                 <label>
@@ -1079,6 +1193,92 @@ $user = get_logged_user();
                                     Con sombra
                                 </label>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Componentes: Vista Producto -->
+                    <div class="card">
+                        <div class="card-title">
+                            🖼️ Vista de Producto
+                        </div>
+
+                        <div class="form-group">
+                            <label>Layout de Galería</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_gallery_layout" value="thumbnails-bottom" <?php echo ($form_values['product_gallery_layout'] ?? 'thumbnails-bottom') === 'thumbnails-bottom' ? 'checked' : ''; ?>>
+                                    Miniaturas abajo
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_gallery_layout" value="thumbnails-left" <?php echo ($form_values['product_gallery_layout'] ?? 'thumbnails-bottom') === 'thumbnails-left' ? 'checked' : ''; ?>>
+                                    Miniaturas a la izquierda
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_gallery_layout" value="thumbnails-right" <?php echo ($form_values['product_gallery_layout'] ?? 'thumbnails-bottom') === 'thumbnails-right' ? 'checked' : ''; ?>>
+                                    Miniaturas a la derecha
+                                </label>
+                            </div>
+                            <small class="helper-text">Posición de las miniaturas en la galería del producto</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tamaño de Imagen Principal</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_image_size" value="small" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'small' ? 'checked' : ''; ?>>
+                                    Pequeña (400px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_image_size" value="medium" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'medium' ? 'checked' : ''; ?>>
+                                    Mediana (500px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_image_size" value="large" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'large' ? 'checked' : ''; ?>>
+                                    Grande (600px)
+                                </label>
+                            </div>
+                            <small class="helper-text">Tamaño máximo de la imagen principal del producto</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Secciones Visibles</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" name="product_show_breadcrumb" <?php echo ($form_values['product_show_breadcrumb'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostrar breadcrumb (Inicio > Categoría > Producto)
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="product_show_share" <?php echo ($form_values['product_show_share'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostrar botones de compartir en redes
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="product_show_sku" <?php echo ($form_values['product_show_sku'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostrar SKU del producto
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="product_show_stock" <?php echo ($form_values['product_show_stock'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostrar disponibilidad en stock
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Tamaño de Miniaturas</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_size" value="small" <?php echo ($form_values['product_thumbnail_size'] ?? 'medium') === 'small' ? 'checked' : ''; ?>>
+                                    Pequeñas (60px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_size" value="medium" <?php echo ($form_values['product_thumbnail_size'] ?? 'medium') === 'medium' ? 'checked' : ''; ?>>
+                                    Medianas (80px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_size" value="large" <?php echo ($form_values['product_thumbnail_size'] ?? 'medium') === 'large' ? 'checked' : ''; ?>>
+                                    Grandes (100px)
+                                </label>
+                            </div>
+                            <small class="helper-text">Tamaño de las miniaturas en la galería</small>
                         </div>
                     </div>
                 </div>
@@ -1504,7 +1704,11 @@ $user = get_logged_user();
                 // Buttons
                 buttonStyle: document.querySelector('[name="button_style"]:checked')?.value || 'solid',
                 buttonRounded: document.querySelector('[name="button_rounded"]')?.checked || false,
-                buttonShadow: document.querySelector('[name="button_shadow"]')?.checked || false
+                buttonShadow: document.querySelector('[name="button_shadow"]')?.checked || false,
+                buttonHeight: document.querySelector('[name="button_height"]:checked')?.value || 'normal',
+                buttonWidth: document.querySelector('[name="button_width"]:checked')?.value || 'auto',
+                buttonIcon: document.querySelector('[name="button_icon"]:checked')?.value || 'show',
+                buttonHover: document.querySelector('[name="button_hover"]:checked')?.value || 'lift'
             };
 
             // Generar estilos CSS
@@ -1519,6 +1723,22 @@ $user = get_logged_user();
             const btnBorderRadius = config.buttonRounded ? '50px' : '4px';
             const btnBoxShadow = config.buttonShadow ? '0 2px 4px rgba(0,0,0,0.15)' : 'none';
 
+            // Determinar padding de botones según altura (para preview de botones standalone)
+            let previewButtonPadding = '12px 28px'; // normal
+            if (config.buttonHeight === 'compact') {
+                previewButtonPadding = '8px 20px';
+            } else if (config.buttonHeight === 'large') {
+                previewButtonPadding = '16px 36px';
+            }
+
+            // Determinar ancho de botones (para preview de botones standalone)
+            let previewButtonWidth = 'auto';
+            if (config.buttonWidth === 'full') {
+                previewButtonWidth = '100%';
+            } else if (config.buttonWidth === 'fixed') {
+                previewButtonWidth = '200px';
+            }
+
             // Helper: Generar card de producto
             function generateProductCard(config, borderStyle, borderRadius, boxShadow, btnBorderRadius, btnBoxShadow, index) {
                 const gradients = [
@@ -1532,15 +1752,28 @@ $user = get_logged_user();
                 if (config.cardButtonsPosition === 'left') buttonsAlign = 'flex-start';
                 else if (config.cardButtonsPosition === 'right') buttonsAlign = 'flex-end';
 
-                // Determinar spacing de botones
+                // Determinar spacing horizontal de botones
                 let buttonsGap = '8px';
-                let buttonPadding = '8px 16px';
                 if (config.cardButtonsSpacing === 'compact') {
                     buttonsGap = '4px';
-                    buttonPadding = '6px 12px';
                 } else if (config.cardButtonsSpacing === 'spacious') {
                     buttonsGap = '12px';
-                    buttonPadding = '10px 20px';
+                }
+
+                // Determinar padding de botones según altura
+                let buttonPadding = '8px 16px'; // normal
+                if (config.buttonHeight === 'compact') {
+                    buttonPadding = '6px 12px';
+                } else if (config.buttonHeight === 'large') {
+                    buttonPadding = '12px 24px';
+                }
+
+                // Determinar ancho de botones
+                let buttonWidth = 'auto';
+                if (config.buttonWidth === 'full') {
+                    buttonWidth = '100%';
+                } else if (config.buttonWidth === 'fixed') {
+                    buttonWidth = '200px';
                 }
 
                 // Determinar separación vertical de botones
@@ -1557,15 +1790,19 @@ $user = get_logged_user();
                     ? `background: ${config.primary}; color: white; border: none;`
                     : `background: transparent; color: ${config.primary}; border: 2px solid ${config.primary};`;
 
+                // Determinar texto de botones según si se muestran iconos
+                const cartIcon = config.buttonIcon === 'show' ? '🛒 ' : '';
+                const heartIcon = config.buttonIcon === 'show' ? '❤️' : 'Favorito';
+
                 if (config.cardButtons === 'show') {
                     // Mostrar todos los botones
                     buttonsHTML = `
                         <div style="display: flex; gap: ${buttonsGap}; justify-content: ${buttonsAlign}; margin-top: ${buttonsMarginTop};">
-                            <button style="padding: ${buttonPadding}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
-                                🛒 Comprar
+                            <button style="padding: ${buttonPadding}; width: ${buttonWidth}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                                ${cartIcon}Comprar
                             </button>
-                            <button style="padding: ${buttonPadding}; background: transparent; color: ${config.secondary}; border: 1px solid ${config.secondary}; border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer;">
-                                ❤️
+                            <button style="padding: ${buttonPadding}; width: ${buttonWidth}; background: transparent; color: ${config.secondary}; border: 1px solid ${config.secondary}; border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer;">
+                                ${heartIcon}
                             </button>
                         </div>
                     `;
@@ -1573,8 +1810,8 @@ $user = get_logged_user();
                     // Solo mostrar botón de carrito
                     buttonsHTML = `
                         <div style="display: flex; justify-content: ${buttonsAlign}; margin-top: ${buttonsMarginTop};">
-                            <button style="padding: ${buttonPadding}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
-                                🛒 Agregar al Carrito
+                            <button style="padding: ${buttonPadding}; width: ${buttonWidth}; ${btnStyle} border-radius: ${btnBorderRadius}; font-size: 0.85em; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                                ${cartIcon}Agregar al Carrito
                             </button>
                         </div>
                     `;
@@ -1644,17 +1881,17 @@ $user = get_logged_user();
                     <h2 style="margin-bottom: 15px; color: ${config.primary}; font-size: 1.3em;">🔘 Botones</h2>
                     <div style="display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap;">
                         ${config.buttonStyle === 'solid' ? `
-                            <button style="padding: 12px 28px; background: ${config.primary}; color: white; border: none; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                            <button style="padding: ${previewButtonPadding}; width: ${previewButtonWidth}; background: ${config.primary}; color: white; border: none; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
                                 Primary Button
                             </button>
-                            <button style="padding: 12px 28px; background: ${config.secondary}; color: white; border: none; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                            <button style="padding: ${previewButtonPadding}; width: ${previewButtonWidth}; background: ${config.secondary}; color: white; border: none; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
                                 Secondary Button
                             </button>
                         ` : `
-                            <button style="padding: 12px 28px; background: transparent; color: ${config.primary}; border: 2px solid ${config.primary}; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                            <button style="padding: ${previewButtonPadding}; width: ${previewButtonWidth}; background: transparent; color: ${config.primary}; border: 2px solid ${config.primary}; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
                                 Primary Button
                             </button>
-                            <button style="padding: 12px 28px; background: transparent; color: ${config.secondary}; border: 2px solid ${config.secondary}; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
+                            <button style="padding: ${previewButtonPadding}; width: ${previewButtonWidth}; background: transparent; color: ${config.secondary}; border: 2px solid ${config.secondary}; border-radius: ${btnBorderRadius}; font-weight: 500; cursor: pointer; box-shadow: ${btnBoxShadow};">
                                 Secondary Button
                             </button>
                         `}
@@ -1835,6 +2072,18 @@ $user = get_logged_user();
 
                     const buttonShadow = document.querySelector('[name="button_shadow"]');
                     if (buttonShadow) buttonShadow.checked = config.components?.buttons?.shadow || false;
+
+                    const buttonHeight = config.components?.buttons?.height || 'normal';
+                    document.querySelector(`[name="button_height"][value="${buttonHeight}"]`)?.click();
+
+                    const buttonWidth = config.components?.buttons?.width || 'auto';
+                    document.querySelector(`[name="button_width"][value="${buttonWidth}"]`)?.click();
+
+                    const buttonIcon = config.components?.buttons?.icon || 'show';
+                    document.querySelector(`[name="button_icon"][value="${buttonIcon}"]`)?.click();
+
+                    const buttonHover = config.components?.buttons?.hover || 'lift';
+                    document.querySelector(`[name="button_hover"][value="${buttonHover}"]`)?.click();
 
                     // Mostrar sección de actualizar paleta
                     const editPaletteSection = document.getElementById('edit-palette-section');
