@@ -8,7 +8,9 @@
 
 ## 📋 Resumen Ejecutivo
 
-Diseño e implementación de un instalador interactivo completo para Shop V2 que permite configurar el sistema de forma guiada, crear todos los archivos JSON necesarios con valores por defecto inteligentes, y generar datos de ejemplo opcionales para facilitar el testing inicial del sistema.
+Diseño e implementación de un instalador **MINIMALISTA** para Shop V2 con **mínima fricción**. El instalador solo pide lo estrictamente necesario para arrancar el sistema (paths + usuario admin), crea TODOS los archivos JSON en blanco con estructuras válidas, y permite que el administrador complete toda la configuración desde el panel de administración.
+
+**Filosofía**: Menos preguntas = Instalación más rápida = Mejor experiencia de usuario.
 
 ---
 
@@ -16,17 +18,17 @@ Diseño e implementación de un instalador interactivo completo para Shop V2 que
 
 ### Objetivos Principales
 
-1. **Instalación guiada paso a paso**: Wizard interactivo con múltiples pasos y validación en tiempo real
-2. **Configuración completa del sistema**: Permitir al usuario configurar todos los aspectos críticos
-3. **Generación automática de JSONs**: Crear TODOS los archivos JSON necesarios con estructuras válidas
-4. **Datos de ejemplo opcionales**: Permitir crear productos, cupones y promociones de ejemplo
-5. **Auto-destrucción segura**: El instalador debe eliminarse automáticamente después de completar la instalación
+1. **Instalación ultra-rápida**: Solo 3 pasos (Bienvenida → Paths → Admin → Listo)
+2. **Mínimos datos requeridos**: Solo paths, username, email y password del admin
+3. **Generación automática de JSONs**: Crear TODOS los archivos JSON con valores por defecto mínimos/vacíos
+4. **Configuración posterior desde admin**: El admin completa TODA la configuración desde el panel
+5. **Auto-destrucción segura**: El instalador se elimina automáticamente después de completar
 
 ### Objetivos Secundarios
 
-- Validación robusta de inputs del usuario
-- Mensajes de error claros y descriptivos
-- Interfaz moderna y profesional
+- Detección automática de paths (solo confirmar)
+- Validación mínima pero efectiva
+- Interfaz limpia y moderna
 - Compatibilidad con los 3 entornos (producción, testing, desarrollo)
 - Respeto total de las reglas del proyecto (español, CSP, modales custom)
 
@@ -42,104 +44,98 @@ public_html/install/
 └── .htaccess             # Protección temporal (opcional)
 ```
 
-### Flujo de Instalación
+### Flujo de Instalación (SIMPLIFICADO)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    PASO 1: Bienvenida                        │
-│  - Explicación de arquitectura de seguridad                 │
-│  - Advertencias importantes                                 │
-│  - Botón "Comenzar Instalación"                             │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│              PASO 2: Configuración de Paths                  │
-│  - Ruta de aplicación (app/)                                │
-│  - Ruta pública (public_html/)                              │
-│  - URL del sitio                                            │
-│  - Base path (subdirectorio)                                │
-│  - Validación automática de rutas                           │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│         PASO 3: Información del Administrador                │
-│  - Nombre del administrador                                 │
-│  - Email del administrador                                  │
-│  - Usuario admin                                            │
-│  - Contraseña admin (validación de fortaleza)               │
-│  - Confirmar contraseña                                     │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│           PASO 4: Configuración del Sitio                    │
-│  - Nombre del sitio                                         │
-│  - Descripción del sitio                                    │
-│  - Email de contacto                                        │
-│  - Teléfono de contacto (opcional)                          │
-│  - Logo (opcional - puede subirse después)                  │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│         PASO 5: Configuración de Moneda y Pagos              │
-│  - Moneda principal (ARS/USD)                               │
-│  - Tasa de cambio inicial                                   │
-│  - Habilitar MercadoPago (sí/no)                            │
-│  - Access Token de MercadoPago (opcional)                   │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│            PASO 6: Datos de Ejemplo (Opcional)               │
-│  ┌─────────────────────────────────────────────┐            │
-│  │ ☑ Crear productos de ejemplo (3 productos) │            │
-│  └─────────────────────────────────────────────┘            │
-│  ┌─────────────────────────────────────────────┐            │
-│  │ ☑ Crear cupones de ejemplo (2 cupones)     │            │
-│  └─────────────────────────────────────────────┘            │
-│  ┌─────────────────────────────────────────────┐            │
-│  │ ☑ Crear promociones de ejemplo (1 promo)   │            │
-│  └─────────────────────────────────────────────┘            │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│              PASO 7: Confirmación y Resumen                  │
-│  - Mostrar resumen de toda la configuración                 │
-│  - Botón "Instalar Sistema"                                 │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│               PASO 8: Proceso de Instalación                 │
-│  [████████████████████] 100%                                │
-│  ✅ Creando estructura de directorios                       │
-│  ✅ Generando archivo config.php                            │
-│  ✅ Creando archivos JSON de configuración                  │
-│  ✅ Creando archivos JSON de datos                          │
-│  ✅ Creando usuario administrador                           │
-│  ✅ Generando datos de ejemplo                              │
-│  ✅ Configurando permisos                                   │
-│  ✅ Creando archivos .htaccess                              │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│                  PASO 9: Instalación Exitosa                 │
-│  ✅ ¡Sistema instalado correctamente!                       │
 │                                                             │
-│  📋 Checklist de Seguridad:                                 │
-│  ☐ Verificar permisos de archivos                           │
-│  ☐ Configurar SSL/HTTPS                                     │
-│  ☐ Configurar backups automáticos                           │
+│  🔒 Shop V2 - Instalador Minimalista                        │
+│                                                             │
+│  ✨ Instalación en 3 simples pasos                          │
+│  ✨ Configuración completa desde el panel admin             │
+│  ✨ Todo listo en menos de 2 minutos                        │
+│                                                             │
+│  ⚠️ IMPORTANTE:                                             │
+│  • Código privado FUERA de public_html (seguridad)          │
+│  • Eliminar carpeta /install/ después de instalar           │
+│                                                             │
+│  [Botón: Comenzar Instalación →]                            │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│              PASO 2: Configuración de Rutas                  │
+│                                                             │
+│  📁 Rutas detectadas automáticamente:                       │
+│                                                             │
+│  Ruta Aplicación:  [/home/usuario/shop-v2/app]             │
+│  Ruta Pública:     [/home/usuario/shop-v2/public_html]     │
+│  URL del Sitio:    [http://localhost]                      │
+│  Base Path:        [/shopv2]                               │
+│                                                             │
+│  💡 Puedes editarlas si es necesario                        │
+│                                                             │
+│  [← Atrás]  [Siguiente →]                                   │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│         PASO 3: Usuario Administrador                        │
+│                                                             │
+│  👤 Crea tu usuario administrador:                          │
+│                                                             │
+│  Usuario:           [admin]                                 │
+│  Email:             [admin@ejemplo.com]                     │
+│  Contraseña:        [••••••••]                              │
+│  Confirmar:         [••••••••]                              │
+│                                                             │
+│  ⚠️ Mínimo 8 caracteres                                     │
+│                                                             │
+│  [← Atrás]  [Instalar Sistema →]                            │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│               PASO 4: Instalando Sistema...                  │
+│                                                             │
+│  [████████████████████] 100%                                │
+│                                                             │
+│  ✅ Creando estructura de directorios                       │
+│  ✅ Generando config.php con clave secreta                  │
+│  ✅ Creando 28 archivos JSON con valores por defecto        │
+│  ✅ Creando usuario administrador                           │
+│  ✅ Configurando permisos de seguridad                      │
+│  ✅ Creando archivos .htaccess                              │
+│                                                             │
+│  ⏳ Espera un momento...                                    │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                  PASO 5: ¡Listo! 🎉                         │
+│                                                             │
+│  ✅ Sistema instalado correctamente                         │
+│                                                             │
+│  📋 Próximos pasos:                                         │
+│  1️⃣ Accede al panel de administración                      │
+│  2️⃣ Configura tu sitio (nombre, logo, etc.)                │
+│  3️⃣ Agrega productos                                        │
+│  4️⃣ Configura MercadoPago (opcional)                       │
 │                                                             │
 │  🗑️ ELIMINAR INSTALADOR                                    │
-│  [Botón: Auto-eliminar y Finalizar]                        │
+│  [Botón: Auto-eliminar y Ir al Admin →]                    │
 │                                                             │
-│  Enlaces:                                                   │
-│  → Ir al Sitio                                              │
-│  → Login Admin                                              │
+│  O accede manualmente:                                      │
+│  → Login Admin | → Ver Sitio                                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
+**Total de pasos para el usuario**: 3 clicks + completar formulario simple = Listo en 2 minutos
+
 ---
 
-## 📁 Archivos JSON a Crear
+## 📁 Archivos a Crear
+
+### Principio de Valores por Defecto
+
+**TODOS los archivos JSON se crean con valores MÍNIMOS y GENÉRICOS**. El administrador los completa después desde el panel.
 
 ### 1. Archivo de Configuración Principal
 
@@ -154,13 +150,13 @@ public_html/install/
  */
 
 return [
-    'app_name' => [valor del usuario],
-    'app_url' => [valor del usuario],
-    'base_path' => [valor del usuario],
-    'secret_key' => [generado automáticamente - 64 chars],
+    'app_name' => 'Shop V2',
+    'app_url' => [URL detectada/ingresada],
+    'base_path' => [base path detectado/ingresado],
+    'secret_key' => [generado automáticamente - 64 chars hex],
     'csrf_token_expiry' => 3600,
-    'app_path' => [valor del usuario],
-    'public_path' => [valor del usuario],
+    'app_path' => [path ingresado],
+    'public_path' => [path ingresado],
     'maintenance_mode' => false,
     'debug' => false,
     'log_errors' => true,
@@ -169,16 +165,18 @@ return [
 
 ### 2. Archivos JSON de Configuración (app/config/)
 
+**Todos con valores por defecto mínimos - Se completan desde admin**
+
 #### 2.1 `site.json` - Configuración del Sitio
 
 ```json
 {
-    "site_name": "[nombre del usuario]",
-    "site_description": "[descripción del usuario]",
+    "site_name": "Mi Tienda",
+    "site_description": "Tienda en línea",
     "site_keywords": "ecommerce, tienda, productos",
-    "contact_email": "[email del usuario]",
-    "contact_phone": "[teléfono del usuario o vacío]",
-    "footer_text": "© 2025 [nombre del sitio]. Todos los derechos reservados.",
+    "contact_email": "[email del admin]",
+    "contact_phone": "",
+    "footer_text": "© 2025 Mi Tienda. Todos los derechos reservados.",
     "whatsapp": {
         "enabled": false,
         "number": "",
@@ -194,17 +192,18 @@ return [
     "logo": {
         "enabled": false,
         "path": "",
-        "alt": "[nombre del sitio]"
+        "alt": "Mi Tienda"
     },
-    "site_owner": "[nombre del administrador]",
+    "site_owner": "",
+    "whatsapp_number": "",
     "meta_tags": {
-        "og_title": "[nombre del sitio]",
+        "og_title": "Mi Tienda",
         "og_type": "website",
-        "og_url": "[url del sitio]",
-        "og_url_secure": "[url del sitio]",
+        "og_url": "",
+        "og_url_secure": "",
         "og_image": "",
-        "og_site_name": "[nombre del sitio]",
-        "og_description": "[descripción del sitio]",
+        "og_site_name": "Mi Tienda",
+        "og_description": "Tienda en línea",
         "content_type": "text/html; charset=utf-8",
         "og_image_width": "1200",
         "og_image_height": "630",
@@ -219,9 +218,9 @@ return [
 {
     "enabled": false,
     "method": "smtp",
-    "from_email": "[email del usuario]",
-    "from_name": "[nombre del sitio]",
-    "admin_email": "[email del usuario]",
+    "from_email": "[email del admin]",
+    "from_name": "Mi Tienda",
+    "admin_email": "[email del admin]",
     "notifications": {
         "customer": {
             "order_created": true,
@@ -246,10 +245,10 @@ return [
 ```json
 {
     "mercadopago": {
-        "enabled": [true/false según usuario],
-        "access_token": "[token del usuario o vacío]",
+        "enabled": false,
+        "access_token": "",
         "public_key": "",
-        "webhook_secret": "[generado automáticamente]",
+        "webhook_secret": "[generado automáticamente - 32 chars hex]",
         "sandbox_mode": false
     },
     "payment_methods": {
@@ -265,9 +264,9 @@ return [
 
 ```json
 {
-    "primary": "[ARS o USD según usuario]",
-    "secondary": "[USD o ARS - opuesto a primary]",
-    "exchange_rate": [tasa ingresada por usuario, default 1500],
+    "primary": "ARS",
+    "secondary": "USD",
+    "exchange_rate": 1500,
     "auto_update": false,
     "update_source": "dolarapi",
     "update_type": "blue",
@@ -306,8 +305,8 @@ return [
 ```json
 {
     "enabled": false,
-    "title": "Bienvenido a [nombre del sitio]",
-    "subtitle": "[descripción del sitio]",
+    "title": "Bienvenido a Mi Tienda",
+    "subtitle": "Descubre nuestros productos",
     "image": "",
     "cta_text": "Ver Productos",
     "cta_link": "/productos"
@@ -423,7 +422,7 @@ return [
 
 ### 3. Archivos JSON de Datos (app/data/)
 
-Todos estos archivos se crean con estructuras vacías o con datos de ejemplo según la elección del usuario.
+**TODOS se crean vacíos** - El admin agrega datos desde el panel
 
 #### 3.1 `users.json` - Usuarios del Sistema
 
@@ -432,10 +431,10 @@ Todos estos archivos se crean con estructuras vacías o con datos de ejemplo seg
     "users": [
         {
             "id": "admin-[uniqid]",
-            "username": "[usuario del admin]",
-            "password": "[hash Argon2ID]",
-            "email": "[email del admin]",
-            "name": "[nombre del admin]",
+            "username": "[ingresado en instalador]",
+            "password": "[hash Argon2ID del password]",
+            "email": "[ingresado en instalador]",
+            "name": "",
             "role": "admin",
             "created_at": "[timestamp]",
             "last_login": null
@@ -444,155 +443,9 @@ Todos estos archivos se crean con estructuras vacías o con datos de ejemplo seg
 }
 ```
 
-#### 3.2 `products.json` - Productos
+#### 3.2 Archivos de Datos Vacíos
 
-```json
-{
-    "products": [
-        // Vacío o con datos de ejemplo
-    ]
-}
-```
-
-**Datos de Ejemplo** (si el usuario selecciona crear productos):
-
-```json
-{
-    "products": [
-        {
-            "id": "prod-[uniqid]",
-            "name": "Producto de Ejemplo 1",
-            "slug": "producto-ejemplo-1",
-            "description": "Este es un producto de ejemplo para probar el sistema.",
-            "price_ars": 10000,
-            "price_usd": 10,
-            "stock": 50,
-            "stock_enabled": true,
-            "category": "General",
-            "images": [],
-            "thumbnail": "/assets/images/placeholder-product.jpg",
-            "featured": true,
-            "active": true,
-            "created_at": "[timestamp]",
-            "updated_at": "[timestamp]"
-        },
-        {
-            "id": "prod-[uniqid]",
-            "name": "Producto de Ejemplo 2",
-            "slug": "producto-ejemplo-2",
-            "description": "Segundo producto de ejemplo con stock limitado.",
-            "price_ars": 25000,
-            "price_usd": 25,
-            "stock": 10,
-            "stock_enabled": true,
-            "category": "Destacados",
-            "images": [],
-            "thumbnail": "/assets/images/placeholder-product.jpg",
-            "featured": true,
-            "active": true,
-            "created_at": "[timestamp]",
-            "updated_at": "[timestamp]"
-        },
-        {
-            "id": "prod-[uniqid]",
-            "name": "Producto de Ejemplo 3",
-            "slug": "producto-ejemplo-3",
-            "description": "Tercer producto con precio solo en USD.",
-            "price_ars": 0,
-            "price_usd": 50,
-            "stock": 0,
-            "stock_enabled": false,
-            "category": "Sin Stock",
-            "images": [],
-            "thumbnail": "/assets/images/placeholder-product.jpg",
-            "featured": false,
-            "active": true,
-            "created_at": "[timestamp]",
-            "updated_at": "[timestamp]"
-        }
-    ]
-}
-```
-
-#### 3.3 `coupons.json` - Cupones de Descuento
-
-```json
-{
-    "coupons": [
-        // Vacío o con datos de ejemplo
-    ]
-}
-```
-
-**Datos de Ejemplo** (si el usuario selecciona crear cupones):
-
-```json
-{
-    "coupons": [
-        {
-            "id": "coupon-[uniqid]",
-            "code": "BIENVENIDO10",
-            "description": "10% de descuento para nuevos clientes",
-            "type": "percentage",
-            "value": 10,
-            "min_purchase": 5000,
-            "max_uses": 100,
-            "used_count": 0,
-            "active": true,
-            "valid_from": "[timestamp]",
-            "valid_until": "[timestamp + 30 días]",
-            "created_at": "[timestamp]"
-        },
-        {
-            "id": "coupon-[uniqid]",
-            "code": "DESCUENTO500",
-            "description": "$500 de descuento en compras mayores a $10.000",
-            "type": "fixed",
-            "value": 500,
-            "min_purchase": 10000,
-            "max_uses": 50,
-            "used_count": 0,
-            "active": true,
-            "valid_from": "[timestamp]",
-            "valid_until": "[timestamp + 60 días]",
-            "created_at": "[timestamp]"
-        }
-    ]
-}
-```
-
-#### 3.4 `promotions.json` - Promociones
-
-```json
-{
-    "promotions": [
-        // Vacío o con datos de ejemplo
-    ]
-}
-```
-
-**Datos de Ejemplo** (si el usuario selecciona crear promociones):
-
-```json
-{
-    "promotions": [
-        {
-            "id": "promo-[uniqid]",
-            "name": "Promoción de Lanzamiento",
-            "description": "2x1 en productos seleccionados",
-            "type": "2x1",
-            "applicable_products": [],
-            "applicable_categories": ["General"],
-            "active": true,
-            "valid_from": "[timestamp]",
-            "valid_until": "[timestamp + 15 días]",
-            "created_at": "[timestamp]"
-        }
-    ]
-}
-```
-
-#### 3.5 Otros Archivos de Datos (Vacíos)
+**Todos estos archivos se crean vacíos con su estructura base**:
 
 ```json
 // orders.json
@@ -660,29 +513,24 @@ Todos estos archivos se crean con estructuras vacías o con datos de ejemplo seg
 
 ## 🔧 Funcionalidades del Instalador
 
-### 1. Validación de Inputs
+### 1. Validación de Inputs (MÍNIMA)
+
+**Solo se validan 3 cosas**:
 
 #### Validaciones de Paths
 
-- Verificar que las rutas existan y sean accesibles
-- Verificar permisos de escritura
-- Validar que `app_path` esté FUERA de `public_path`
-- Prevenir paths que puedan causar problemas de seguridad
+- Verificar permisos de escritura en app_path y public_path
+- Validar que `app_path` esté FUERA de `public_path` (seguridad)
+- Verificar que las rutas sean absolutas
 
-#### Validaciones de Usuario
+#### Validaciones de Usuario Admin
 
-- Email válido (formato RFC compliant)
+- Email válido (formato básico)
 - Contraseña mínimo 8 caracteres
-- Recomendación de contraseña fuerte (16+ chars, mayúsculas, números, símbolos)
 - Confirmar contraseña (deben coincidir)
 - Username no vacío y sin espacios
 
-#### Validaciones de Configuración
-
-- URL válida (con http:// o https://)
-- Moneda válida (ARS o USD)
-- Tasa de cambio numérica y positiva
-- Access Token de MercadoPago (formato válido si se proporciona)
+**Eso es todo**. Sin validaciones complejas para mantener velocidad de instalación.
 
 ### 2. Detección Automática de Entorno
 
@@ -921,40 +769,20 @@ function delete_installer() {
 </div>
 ```
 
-#### Checkbox de Opciones
-
-```html
-<div class="checkbox-group">
-    <label class="checkbox-label">
-        <input type="checkbox" name="create_sample_products" value="1" checked>
-        <span class="checkbox-custom"></span>
-        <span class="checkbox-text">
-            <strong>Crear productos de ejemplo</strong>
-            <small>Se crearán 3 productos de ejemplo para testing</small>
-        </span>
-    </label>
-</div>
-```
-
 ---
 
 ## 🧪 Testing del Instalador
 
 ### Escenarios de Prueba
 
-#### 1. Instalación Básica (Sin Datos de Ejemplo)
+#### 1. Instalación Rápida (Happy Path)
 
-- Configurar solo lo mínimo necesario
-- No crear datos de ejemplo
-- Verificar que el sistema funcione correctamente
+- Confirmar paths detectados automáticamente
+- Ingresar usuario admin básico
+- Completar instalación en menos de 2 minutos
+- Verificar que todos los archivos JSON se crearon
 
-#### 2. Instalación Completa (Con Datos de Ejemplo)
-
-- Configurar todos los campos
-- Crear todos los datos de ejemplo
-- Verificar que productos, cupones y promociones aparezcan correctamente
-
-#### 3. Validación de Errores
+#### 2. Validación de Errores
 
 - Intentar usar paths inválidos
 - Usar contraseña débil
@@ -986,24 +814,19 @@ function delete_installer() {
 - [ ] Crear sistema de sesiones para almacenar datos entre pasos
 - [ ] Implementar navegación entre pasos (siguiente/anterior)
 
-### Fase 2: Formularios y Validación
+### Fase 2: Formularios y Validación (SIMPLIFICADO)
 
-- [ ] Implementar formulario de Paso 2 (Paths)
-- [ ] Implementar formulario de Paso 3 (Admin)
-- [ ] Implementar formulario de Paso 4 (Sitio)
-- [ ] Implementar formulario de Paso 5 (Moneda/Pagos)
-- [ ] Implementar formulario de Paso 6 (Datos de Ejemplo)
-- [ ] Crear sistema de validación frontend (JavaScript)
-- [ ] Crear sistema de validación backend (PHP)
+- [ ] Implementar formulario de Paso 2 (Paths con detección automática)
+- [ ] Implementar formulario de Paso 3 (Admin: user, email, password)
+- [ ] Crear validación mínima frontend (JavaScript)
+- [ ] Crear validación mínima backend (PHP)
 
-### Fase 3: Generación de Archivos
+### Fase 3: Generación de Archivos (TODO VACÍO/MÍNIMO)
 
-- [ ] Implementar función para crear `config.php`
-- [ ] Implementar función para crear todos los JSONs de configuración
-- [ ] Implementar función para crear JSONs de datos vacíos
-- [ ] Implementar función para crear datos de ejemplo (productos)
-- [ ] Implementar función para crear datos de ejemplo (cupones)
-- [ ] Implementar función para crear datos de ejemplo (promociones)
+- [ ] Implementar función para crear `config.php` con valores básicos
+- [ ] Implementar función para crear TODOS los JSONs de configuración con valores por defecto
+- [ ] Implementar función para crear TODOS los JSONs de datos vacíos
+- [ ] Implementar función para crear usuario admin en users.json
 
 ### Fase 4: Configuración del Sistema
 
@@ -1082,23 +905,23 @@ function delete_installer() {
 
 ## ⏱️ Estimación de Complejidad
 
-### Complejidad Total: **ALTA**
+### Complejidad Total: **MEDIA** (Simplificado)
 
-- **Líneas de código estimadas**: 1500-2000 líneas
-- **Archivos a crear/modificar**: 2-3 archivos
-- **Funciones a implementar**: ~20 funciones
-- **Archivos JSON a crear**: 28 archivos
+- **Líneas de código estimadas**: 800-1200 líneas (menos de la mitad que versión compleja)
+- **Archivos a crear/modificar**: 1 archivo (installer.php mejorado)
+- **Funciones a implementar**: ~12 funciones
+- **Archivos JSON a crear**: 28 archivos (todos con valores por defecto)
+- **Tiempo de instalación usuario**: < 2 minutos
 
 ### Desglose por Componente
 
-| Componente | Complejidad | Prioridad |
-|------------|-------------|-----------|
-| Wizard UI | Media | Alta |
-| Validación | Alta | Crítica |
-| Generación de JSONs | Alta | Crítica |
-| Datos de Ejemplo | Media | Media |
-| Auto-eliminación | Baja | Alta |
-| Testing | Media | Alta |
+| Componente | Complejidad | Prioridad | Cambio vs V1 |
+|------------|-------------|-----------|--------------|
+| Wizard UI | Baja | Alta | Simplificado (3 pasos) |
+| Validación | Baja | Media | Solo lo esencial |
+| Generación de JSONs | Media | Crítica | Valores por defecto |
+| Auto-eliminación | Baja | Alta | Sin cambios |
+| Testing | Baja | Media | Menos escenarios |
 
 ---
 
@@ -1106,19 +929,19 @@ function delete_installer() {
 
 ### Funcionales
 
-- ✅ El instalador completa la instalación sin errores
-- ✅ Todos los archivos JSON se crean correctamente
-- ✅ El usuario admin puede hacer login después de instalar
-- ✅ Los datos de ejemplo aparecen correctamente en el panel admin
+- ✅ Instalación completa en menos de 2 minutos
+- ✅ Todos los 28 archivos JSON se crean con valores por defecto
+- ✅ El usuario admin puede hacer login inmediatamente
+- ✅ El sistema arranca sin errores (aunque esté "vacío")
 - ✅ El instalador se auto-elimina exitosamente
 
 ### No Funcionales
 
-- ✅ Interfaz intuitiva y fácil de usar
-- ✅ Mensajes de error claros y útiles
+- ✅ **Experiencia ultra-rápida**: Mínima fricción, máxima velocidad
+- ✅ Interfaz limpia y minimalista
+- ✅ Solo pide lo ESTRICTAMENTE necesario
 - ✅ Responsive en móviles y tablets
 - ✅ Cumple todas las reglas del proyecto (español, CSP, modales)
-- ✅ Código limpio y bien documentado
 
 ---
 
