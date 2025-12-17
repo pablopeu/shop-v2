@@ -1,35 +1,40 @@
 <?php
 /**
- * Shop V2 Installer
- * Instalador interactivo con énfasis en SEGURIDAD
+ * Shop V2 - Instalador Minimalista
+ * Instalación rápida en 3 pasos con mínima fricción
  *
- * IMPORTANTE: Este archivo debe ser eliminado después de la instalación
+ * IMPORTANTE: Este archivo se auto-elimina después de la instalación
  */
 
 // Detectar ruta de app/ según entorno
 if (file_exists('/home2/uv0023/shop-v2-app')) {
     // Producción
     define('INSTALLER_APP_PATH', '/home2/uv0023/shop-v2-app');
+    define('INSTALLER_PUBLIC_PATH', '/home2/uv0023/public_html/shopv2');
+} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app')) {
+    // Testing
+    define('INSTALLER_APP_PATH', '/home/pablo/shop-v2-local-test/shop-v2-app');
+    define('INSTALLER_PUBLIC_PATH', '/home/pablo/shop-v2-local-test/public_html');
 } else {
     // Desarrollo
     define('INSTALLER_APP_PATH', __DIR__ . '/../../app');
+    define('INSTALLER_PUBLIC_PATH', __DIR__ . '/..');
 }
 
 // Prevent re-installation (allow force reinstall with ?force=1)
 if (file_exists(INSTALLER_APP_PATH . '/config/config.php') && !isset($_GET['force'])) {
     die('
     <!DOCTYPE html>
-    <html><head><title>Already Installed</title></head>
+    <html lang="es"><head><meta charset="UTF-8"><title>Ya Instalado</title></head>
     <body style="font-family: sans-serif; text-align: center; padding: 50px;">
         <h1>⚠️ Sistema Ya Instalado</h1>
         <p>El sistema ya ha sido instalado.</p>
         <p><strong>IMPORTANTE:</strong> Elimina la carpeta /install/ por seguridad.</p>
-        <hr>
-        <p><a href="../">Ir al sitio</a> | <a href="../admin/">Admin</a></p>
+        <hr><p><a href="../">Ir al sitio</a> | <a href="../admin/">Admin</a></p>
         <hr style="margin: 30px 0;">
         <p style="color: #dc3545; font-size: 14px;">
             <strong>¿Necesitas reinstalar?</strong><br>
-            <a href="?force=1" style="color: #dc3545; font-weight: bold;">⚠️ Forzar Reinstalación (esto borrará la configuración actual)</a>
+            <a href="?force=1" style="color: #dc3545; font-weight: bold;">⚠️ Forzar Reinstalación</a>
         </p>
     </body></html>
     ');
@@ -42,128 +47,486 @@ $step = $_POST['step'] ?? $_GET['step'] ?? 1;
 $errors = [];
 $success = false;
 
-// Step 4: Self-delete installer
-if ($step == 4 && $_SERVER['REQUEST_METHOD'] === 'POST') {
+// Step 5: Self-delete installer
+if ($step == 5 && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'YES') {
         delete_installer();
-        // Redirect to site after deletion
-        header('Location: ../');
+        header('Location: ../admin/login.php');
         exit;
     }
 }
 
-// Step 2: Process configuration
+// Step 2: Process paths
 if ($step == 2 && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $config = [
-        'app_path' => $_POST['app_path'] ?? '',
-        'public_path' => $_POST['public_path'] ?? '',
-        'app_url' => $_POST['app_url'] ?? '',
-        'base_path' => $_POST['base_path'] ?? '',
-        'admin_username' => $_POST['admin_username'] ?? '',
-        'admin_password' => $_POST['admin_password'] ?? '',
-        'admin_email' => $_POST['admin_email'] ?? '',
+    $_SESSION['config'] = [
+        'app_path' => trim($_POST['app_path'] ?? ''),
+        'public_path' => trim($_POST['public_path'] ?? ''),
+        'app_url' => trim($_POST['app_url'] ?? ''),
+        'base_path' => trim($_POST['base_path'] ?? ''),
     ];
 
-    // Validate
-    if (empty($config['app_path'])) $errors[] = 'Ruta de aplicación requerida';
-    if (empty($config['public_path'])) $errors[] = 'Ruta pública requerida';
-    if (empty($config['admin_username'])) $errors[] = 'Usuario admin requerido';
-    if (empty($config['admin_password'])) $errors[] = 'Contraseña admin requerida';
-    if (strlen($config['admin_password']) < 8) $errors[] = 'Contraseña debe tener al menos 8 caracteres';
+    // Validate paths
+    if (empty($_SESSION['config']['app_path'])) $errors[] = 'Ruta de aplicación requerida';
+    if (empty($_SESSION['config']['public_path'])) $errors[] = 'Ruta pública requerida';
 
     if (empty($errors)) {
-        $success = install_system($config);
+        $step = 3; // Go to admin form
+    }
+}
+
+// Step 3: Process admin and install
+if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_SESSION['config']['admin_username'] = trim($_POST['admin_username'] ?? '');
+    $_SESSION['config']['admin_email'] = trim($_POST['admin_email'] ?? '');
+    $_SESSION['config']['admin_password'] = $_POST['admin_password'] ?? '';
+    $_SESSION['config']['admin_password_confirm'] = $_POST['admin_password_confirm'] ?? '';
+
+    // Validate admin
+    if (empty($_SESSION['config']['admin_username'])) $errors[] = 'Usuario admin requerido';
+    if (empty($_SESSION['config']['admin_email'])) $errors[] = 'Email admin requerido';
+    if (!filter_var($_SESSION['config']['admin_email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'Email inválido';
+    if (empty($_SESSION['config']['admin_password'])) $errors[] = 'Contraseña requerida';
+    if (strlen($_SESSION['config']['admin_password']) < 8) $errors[] = 'Contraseña debe tener al menos 8 caracteres';
+    if ($_SESSION['config']['admin_password'] !== $_SESSION['config']['admin_password_confirm']) $errors[] = 'Las contraseñas no coinciden';
+
+    if (empty($errors)) {
+        $success = install_system($_SESSION['config']);
         if ($success) {
-            $step = 3; // Success page
+            $step = 4; // Installation progress
         } else {
-            $errors[] = 'Error durante la instalación';
+            $errors[] = 'Error durante la instalación. Verifica permisos de escritura.';
         }
     }
 }
 
+/**
+ * Main installation function
+ */
 function install_system($config) {
     try {
-        // Generate secret key
+        $app_path = $config['app_path'];
+        $public_path = $config['public_path'];
+
+        // Create directory structure
+        create_directory_structure($app_path, $public_path);
+
+        // Generate security keys
         $secret_key = bin2hex(random_bytes(32));
+        $webhook_secret = bin2hex(random_bytes(16));
+        $bypass_code = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 8);
 
         // Create config.php
-        $config_content = "<?php\n/**\n * Auto-generated Configuration\n * Generated: " . date('Y-m-d H:i:s') . "\n */\n\nreturn [\n";
-        $config_content .= "    'app_name' => 'Shop E-commerce',\n";
-        $config_content .= "    'app_url' => " . var_export($config['app_url'], true) . ",\n";
-        $config_content .= "    'base_path' => " . var_export($config['base_path'], true) . ",\n";
-        $config_content .= "    'secret_key' => " . var_export($secret_key, true) . ",\n";
-        $config_content .= "    'csrf_token_expiry' => 3600,\n";
-        $config_content .= "    'app_path' => " . var_export($config['app_path'], true) . ",\n";
-        $config_content .= "    'public_path' => " . var_export($config['public_path'], true) . ",\n";
-        $config_content .= "    'maintenance_mode' => false,\n";
-        $config_content .= "    'debug' => false,\n";
-        $config_content .= "    'log_errors' => true,\n";
-        $config_content .= "];\n";
+        create_config_php($app_path, $config, $secret_key);
 
-        file_put_contents(INSTALLER_APP_PATH . '/config/config.php', $config_content);
+        // Create all configuration JSON files
+        create_configuration_json_files($app_path, $config, $webhook_secret, $bypass_code);
 
-        // Create admin user
-        $admin_data = [
-            'users' => [[
-                'id' => 'admin-' . uniqid(),
-                'username' => $config['admin_username'],
-                'password' => password_hash($config['admin_password'], PASSWORD_ARGON2ID),
-                'email' => $config['admin_email'],
-                'role' => 'admin',
-                'created_at' => date('Y-m-d H:i:s'),
-                'last_login' => null
-            ]]
-        ];
+        // Create all data JSON files
+        create_data_json_files($app_path, $config);
 
-        if (!is_dir(INSTALLER_APP_PATH . '/data')) {
-            mkdir(INSTALLER_APP_PATH . '/data', 0750, true);
-        }
-
-        file_put_contents(
-            INSTALLER_APP_PATH . '/data/users.json',
-            json_encode($admin_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-        );
-
-        // Create .htaccess protection
-        create_htaccess_protection();
+        // Create .htaccess files
+        create_htaccess_files($app_path, $public_path);
 
         // Set permissions
-        chmod(INSTALLER_APP_PATH . '/config/config.php', 0640);
-        chmod(INSTALLER_APP_PATH . '/data', 0750);
-        chmod(INSTALLER_APP_PATH . '/data/users.json', 0640);
+        set_permissions($app_path);
 
         return true;
     } catch (Exception $e) {
+        error_log("Installer error: " . $e->getMessage());
         return false;
     }
 }
 
-function create_htaccess_protection() {
-    // Protect app directory
-    $app_htaccess = "# Security: Block ALL access to application code\nRequire all denied\nOptions -Indexes\n";
-    file_put_contents(INSTALLER_APP_PATH . '/.htaccess', $app_htaccess);
+/**
+ * Create directory structure
+ */
+function create_directory_structure($app_path, $public_path) {
+    $directories = [
+        $app_path . '/config',
+        $app_path . '/data',
+        $app_path . '/data/products',
+        $public_path . '/uploads',
+        $public_path . '/uploads/products',
+        $public_path . '/uploads/logos',
+        $public_path . '/uploads/og-images',
+    ];
 
-    // Public root .htaccess
-    $public_htaccess = "# Rewrite rules\nRewriteEngine On\nRewriteCond %{REQUEST_FILENAME} !-f\nRewriteCond %{REQUEST_FILENAME} !-d\nRewriteRule ^(.*)$ index.php?route=/$1 [QSA,L]\n\n# Security\nOptions -Indexes\n";
-    file_put_contents(__DIR__ . '/../.htaccess', $public_htaccess);
+    foreach ($directories as $dir) {
+        if (!is_dir($dir)) {
+            mkdir($dir, 0750, true);
+        }
+    }
 }
 
+/**
+ * Create config.php
+ */
+function create_config_php($app_path, $config, $secret_key) {
+    $content = "<?php\n";
+    $content .= "/**\n";
+    $content .= " * Auto-generated Configuration\n";
+    $content .= " * Generated: " . date('Y-m-d H:i:s') . "\n";
+    $content .= " * DO NOT commit this file to repository\n";
+    $content .= " */\n\n";
+    $content .= "return [\n";
+    $content .= "    'app_name' => 'Shop V2',\n";
+    $content .= "    'app_url' => " . var_export($config['app_url'], true) . ",\n";
+    $content .= "    'base_path' => " . var_export($config['base_path'], true) . ",\n";
+    $content .= "    'secret_key' => " . var_export($secret_key, true) . ",\n";
+    $content .= "    'csrf_token_expiry' => 3600,\n";
+    $content .= "    'app_path' => " . var_export($config['app_path'], true) . ",\n";
+    $content .= "    'public_path' => " . var_export($config['public_path'], true) . ",\n";
+    $content .= "    'maintenance_mode' => false,\n";
+    $content .= "    'debug' => false,\n";
+    $content .= "    'log_errors' => true,\n";
+    $content .= "];\n";
+
+    file_put_contents($app_path . '/config/config.php', $content);
+}
+
+/**
+ * Create all configuration JSON files
+ */
+function create_configuration_json_files($app_path, $config, $webhook_secret, $bypass_code) {
+    $admin_email = $config['admin_email'];
+    $timestamp = date('Y-m-d H:i:s');
+
+    // site.json
+    $site = [
+        'site_name' => 'Mi Tienda',
+        'site_description' => 'Tienda en línea',
+        'site_keywords' => 'ecommerce, tienda, productos',
+        'contact_email' => $admin_email,
+        'contact_phone' => '',
+        'footer_text' => '© ' . date('Y') . ' Mi Tienda. Todos los derechos reservados.',
+        'whatsapp' => [
+            'enabled' => false,
+            'number' => '',
+            'message' => 'Hola, te estoy consultando desde la tienda,',
+            'custom_link' => '',
+            'display_text' => 'Mensaje Whatsapp'
+        ],
+        'telegram' => [
+            'enabled' => false,
+            'bot_token' => '',
+            'chat_id' => ''
+        ],
+        'logo' => [
+            'enabled' => false,
+            'path' => '',
+            'alt' => 'Mi Tienda'
+        ],
+        'site_owner' => '',
+        'whatsapp_number' => '',
+        'meta_tags' => [
+            'og_title' => 'Mi Tienda',
+            'og_type' => 'website',
+            'og_url' => '',
+            'og_url_secure' => '',
+            'og_image' => '',
+            'og_site_name' => 'Mi Tienda',
+            'og_description' => 'Tienda en línea',
+            'content_type' => 'text/html; charset=utf-8',
+            'og_image_width' => '1200',
+            'og_image_height' => '630',
+            'twitter_card' => 'summary_large_image'
+        ]
+    ];
+    write_json($app_path . '/config/site.json', $site);
+
+    // email.json
+    $email = [
+        'enabled' => false,
+        'method' => 'smtp',
+        'from_email' => $admin_email,
+        'from_name' => 'Mi Tienda',
+        'admin_email' => $admin_email,
+        'notifications' => [
+            'customer' => [
+                'order_created' => true,
+                'payment_approved' => true,
+                'payment_rejected' => false,
+                'payment_pending' => false,
+                'order_shipped' => true,
+                'chargeback_notice' => false
+            ],
+            'admin' => [
+                'new_order' => true,
+                'payment_approved' => true,
+                'chargeback_alert' => true,
+                'low_stock_alert' => false
+            ]
+        ]
+    ];
+    write_json($app_path . '/config/email.json', $email);
+
+    // payment.json
+    $payment = [
+        'mercadopago' => [
+            'enabled' => false,
+            'access_token' => '',
+            'public_key' => '',
+            'webhook_secret' => $webhook_secret,
+            'sandbox_mode' => false
+        ],
+        'payment_methods' => [
+            'credit_card' => true,
+            'debit_card' => true,
+            'bank_transfer' => false,
+            'cash' => false
+        ]
+    ];
+    write_json($app_path . '/config/payment.json', $payment);
+
+    // currency.json
+    $currency = [
+        'primary' => 'ARS',
+        'secondary' => 'USD',
+        'exchange_rate' => 1500,
+        'auto_update' => false,
+        'update_source' => 'dolarapi',
+        'update_type' => 'blue',
+        'last_update' => $timestamp
+    ];
+    write_json($app_path . '/config/currency.json', $currency);
+
+    // theme.json
+    $theme = ['active_theme' => 'minimal'];
+    write_json($app_path . '/config/theme.json', $theme);
+
+    // maintenance.json
+    $maintenance = [
+        'enabled' => false,
+        'bypass_code' => $bypass_code,
+        'message' => 'Sitio en mantenimiento. Volveremos pronto.'
+    ];
+    write_json($app_path . '/config/maintenance.json', $maintenance);
+
+    // carousel.json
+    $carousel = ['slides' => []];
+    write_json($app_path . '/config/carousel.json', $carousel);
+
+    // hero.json
+    $hero = [
+        'enabled' => false,
+        'title' => 'Bienvenido a Mi Tienda',
+        'subtitle' => 'Descubre nuestros productos',
+        'image' => '',
+        'cta_text' => 'Ver Productos',
+        'cta_link' => '/productos'
+    ];
+    write_json($app_path . '/config/hero.json', $hero);
+
+    // footer.json
+    $footer = [
+        'columns' => [
+            ['title' => 'Acerca de', 'links' => []],
+            ['title' => 'Enlaces', 'links' => []],
+            ['title' => 'Contacto', 'links' => []]
+        ],
+        'social_media' => [
+            'facebook' => '',
+            'instagram' => '',
+            'twitter' => '',
+            'youtube' => ''
+        ]
+    ];
+    write_json($app_path . '/config/footer.json', $footer);
+
+    // telegram.json
+    $telegram = [
+        'enabled' => false,
+        'bot_token' => '',
+        'chat_id' => '',
+        'notifications' => [
+            'new_order' => false,
+            'payment_approved' => false,
+            'payment_rejected' => false,
+            'low_stock' => false
+        ]
+    ];
+    write_json($app_path . '/config/telegram.json', $telegram);
+
+    // analytics.json
+    $analytics = [
+        'google_analytics' => ['enabled' => false, 'tracking_id' => ''],
+        'facebook_pixel' => ['enabled' => false, 'pixel_id' => '']
+    ];
+    write_json($app_path . '/config/analytics.json', $analytics);
+
+    // products-heading.json
+    $products_heading = [
+        'enabled' => false,
+        'title' => 'Nuestros Productos',
+        'subtitle' => 'Descubre nuestra selección'
+    ];
+    write_json($app_path . '/config/products-heading.json', $products_heading);
+
+    // strings.json
+    $strings = [
+        'cart' => [
+            'add_to_cart' => 'Agregar al Carrito',
+            'remove_from_cart' => 'Quitar del Carrito',
+            'empty_cart' => 'Tu carrito está vacío',
+            'continue_shopping' => 'Continuar Comprando',
+            'proceed_to_checkout' => 'Proceder al Pago'
+        ],
+        'checkout' => [
+            'shipping_info' => 'Información de Envío',
+            'payment_method' => 'Método de Pago',
+            'order_summary' => 'Resumen del Pedido'
+        ],
+        'common' => [
+            'loading' => 'Cargando...',
+            'error' => 'Error',
+            'success' => 'Éxito',
+            'cancel' => 'Cancelar',
+            'confirm' => 'Confirmar'
+        ]
+    ];
+    write_json($app_path . '/config/strings.json', $strings);
+
+    // dashboard.json
+    $dashboard = [
+        'widgets' => [
+            'sales' => true,
+            'orders' => true,
+            'products' => true,
+            'customers' => false
+        ]
+    ];
+    write_json($app_path . '/config/dashboard.json', $dashboard);
+}
+
+/**
+ * Create all data JSON files
+ */
+function create_data_json_files($app_path, $config) {
+    $timestamp = date('Y-m-d H:i:s');
+
+    // users.json - with admin user
+    $users = [
+        'users' => [[
+            'id' => 'admin-' . uniqid() . '-' . bin2hex(random_bytes(4)),
+            'username' => $config['admin_username'],
+            'password' => password_hash($config['admin_password'], PASSWORD_ARGON2ID),
+            'email' => $config['admin_email'],
+            'name' => '',
+            'role' => 'admin',
+            'created_at' => $timestamp,
+            'last_login' => null
+        ]]
+    ];
+    write_json($app_path . '/data/users.json', $users);
+
+    // All empty data files
+    write_json($app_path . '/data/products.json', ['products' => []]);
+    write_json($app_path . '/data/orders.json', ['orders' => []]);
+    write_json($app_path . '/data/archived_orders.json', ['orders' => []]);
+    write_json($app_path . '/data/reviews.json', ['reviews' => []]);
+    write_json($app_path . '/data/coupons.json', ['coupons' => []]);
+    write_json($app_path . '/data/promotions.json', ['promotions' => []]);
+    write_json($app_path . '/data/wishlists.json', ['wishlists' => []]);
+    write_json($app_path . '/data/newsletters.json', ['subscribers' => []]);
+    write_json($app_path . '/data/admin_logs.json', ['logs' => []]);
+    write_json($app_path . '/data/stock_logs.json', ['logs' => []]);
+    write_json($app_path . '/data/visits.json', ['visits' => []]);
+    write_json($app_path . '/data/webhook_log.json', ['logs' => []]);
+    write_json($app_path . '/data/webhook_rate_limit.json', ['limits' => []]);
+    write_json($app_path . '/data/mp_preference_log.json', ['preferences' => []]);
+    write_json($app_path . '/data/mp_logs.json', ['logs' => []]);
+
+    // install_log.json
+    $install_log = [
+        'installed_at' => $timestamp,
+        'installer_version' => '2.0',
+        'environment' => detect_environment(),
+        'paths' => [
+            'app_path' => $config['app_path'],
+            'public_path' => $config['public_path']
+        ],
+        'admin_user' => $config['admin_username']
+    ];
+    write_json($app_path . '/data/install_log.json', $install_log);
+}
+
+/**
+ * Create .htaccess files
+ */
+function create_htaccess_files($app_path, $public_path) {
+    // Protect app directory
+    $app_htaccess = "# Security: Block ALL access to application code\n";
+    $app_htaccess .= "Require all denied\n";
+    $app_htaccess .= "Options -Indexes\n";
+    file_put_contents($app_path . '/.htaccess', $app_htaccess);
+
+    // Public root .htaccess (only if doesn't exist)
+    $public_htaccess_path = $public_path . '/.htaccess';
+    if (!file_exists($public_htaccess_path)) {
+        $public_htaccess = "# Rewrite rules\n";
+        $public_htaccess .= "RewriteEngine On\n\n";
+        $public_htaccess .= "# Redirect to HTTPS (production only)\n";
+        $public_htaccess .= "RewriteCond %{HTTPS} off\n";
+        $public_htaccess .= "RewriteCond %{HTTP_HOST} !^localhost [NC]\n";
+        $public_htaccess .= "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n\n";
+        $public_htaccess .= "# Frontend routing\n";
+        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} !-f\n";
+        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} !-d\n";
+        $public_htaccess .= "RewriteRule ^(.*)$ index.php?route=/$1 [QSA,L]\n\n";
+        $public_htaccess .= "# Security\n";
+        $public_htaccess .= "Options -Indexes\n\n";
+        $public_htaccess .= "# Protect sensitive files\n";
+        $public_htaccess .= "<FilesMatch \"(\\.env|\\.git|config\\.php)\">\n";
+        $public_htaccess .= "    Require all denied\n";
+        $public_htaccess .= "</FilesMatch>\n";
+        file_put_contents($public_htaccess_path, $public_htaccess);
+    }
+}
+
+/**
+ * Set file permissions
+ */
+function set_permissions($app_path) {
+    @chmod($app_path . '/config/config.php', 0640);
+    @chmod($app_path . '/data', 0750);
+    @chmod($app_path . '/data/users.json', 0640);
+}
+
+/**
+ * Write JSON file
+ */
+function write_json($file, $data) {
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    file_put_contents($file, $json);
+}
+
+/**
+ * Detect environment
+ */
+function detect_environment() {
+    if (file_exists('/home2/uv0023/shop-v2-app')) return 'production';
+    if (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app')) return 'testing';
+    return 'development';
+}
+
+/**
+ * Delete installer directory
+ */
 function delete_installer() {
     $install_dir = __DIR__;
 
-    // Recursive delete function
     $delete_recursive = function($dir) use (&$delete_recursive) {
         if (!is_dir($dir)) {
-            return unlink($dir);
+            return @unlink($dir);
         }
 
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
             $path = $dir . '/' . $file;
-            is_dir($path) ? $delete_recursive($path) : unlink($path);
+            is_dir($path) ? $delete_recursive($path) : @unlink($path);
         }
 
-        return rmdir($dir);
+        return @rmdir($dir);
     };
 
     return $delete_recursive($install_dir);
@@ -175,11 +538,11 @@ function delete_installer() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔒 Instalador Shop V2 - Seguridad Profesional</title>
+    <title>🔒 Instalador Shop V2 - Minimalista</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -189,7 +552,7 @@ function delete_installer() {
         }
         .container {
             background: white;
-            max-width: 800px;
+            max-width: 700px;
             width: 100%;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -198,51 +561,70 @@ function delete_installer() {
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 40px;
+            padding: 30px;
             text-align: center;
         }
         .header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
+            font-size: 28px;
+            margin-bottom: 8px;
         }
         .header p {
             opacity: 0.9;
-            font-size: 16px;
+            font-size: 14px;
+        }
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            height: 4px;
+            width: 100%;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: white;
+            height: 100%;
+            transition: width 0.3s ease;
         }
         .content {
             padding: 40px;
         }
-        .security-warning {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 30px;
         }
-        .security-warning h3 {
-            color: #856404;
+        .info-box h3 {
+            color: #667eea;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 16px;
         }
-        .security-warning ul {
-            color: #856404;
-            margin-left: 20px;
-            line-height: 1.8;
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+        .info-box li {
+            padding: 6px 0;
+            color: #555;
+            font-size: 14px;
+        }
+        .info-box li:before {
+            content: "✨ ";
+            color: #667eea;
         }
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .form-group label {
             display: block;
             font-weight: 600;
             margin-bottom: 8px;
             color: #333;
+            font-size: 14px;
         }
         .form-group input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 12px 14px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 15px;
@@ -254,14 +636,14 @@ function delete_installer() {
         }
         .form-group small {
             display: block;
-            margin-top: 6px;
+            margin-top: 5px;
             color: #666;
-            font-size: 13px;
+            font-size: 12px;
         }
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 16px 32px;
+            padding: 14px 28px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
@@ -273,6 +655,19 @@ function delete_installer() {
         .btn:hover {
             transform: translateY(-2px);
         }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-block;
+            text-decoration: none;
+        }
         .error {
             background: #f8d7da;
             color: #721c24;
@@ -280,6 +675,7 @@ function delete_installer() {
             border-radius: 8px;
             margin-bottom: 20px;
             border: 1px solid #f5c6cb;
+            font-size: 14px;
         }
         .success-box {
             background: #d4edda;
@@ -292,29 +688,93 @@ function delete_installer() {
             color: #155724;
             margin-bottom: 20px;
         }
-        .success-box .security-checklist {
+        .success-box p {
+            color: #155724;
+            margin-bottom: 25px;
+        }
+        .next-steps {
             text-align: left;
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
         }
-        .success-box .security-checklist h3 {
-            color: #dc3545;
+        .next-steps h3 {
+            color: #667eea;
             margin-bottom: 15px;
+            font-size: 16px;
         }
-        .success-box .security-checklist ol {
+        .next-steps ol {
             margin-left: 20px;
-            line-height: 2;
+            line-height: 1.8;
+            color: #333;
         }
-        .success-box .security-checklist strong {
-            color: #dc3545;
+        .delete-box {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
         }
-        .highlight {
-            background: #fff3cd;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
+        .delete-box h3 {
+            color: #721c24;
+            margin-bottom: 10px;
+        }
+        .delete-box p {
+            color: #721c24;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+        .links {
+            margin: 20px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 5px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-list {
+            text-align: left;
+            margin: 30px 0;
+        }
+        .status-item {
+            padding: 10px 0;
+            color: #155724;
+            font-size: 14px;
+        }
+        .status-item:before {
+            content: "✅ ";
         }
     </style>
 </head>
@@ -322,40 +782,41 @@ function delete_installer() {
     <div class="container">
         <div class="header">
             <h1>🔒 Instalador Shop V2</h1>
-            <p>Sistema con Seguridad Profesional</p>
+            <p>Instalación rápida en 3 pasos</p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: <?php echo ($step == 1 ? 20 : ($step == 2 ? 40 : ($step == 3 ? 60 : ($step == 4 ? 80 : 100)))); ?>%;"></div>
+            </div>
         </div>
 
         <div class="content">
             <?php if ($step == 1): ?>
-                <!-- Step 1: Welcome & Security Info -->
-                <div class="security-warning">
-                    <h3>⚠️ IMPORTANTE: Arquitectura de Seguridad</h3>
+                <!-- Step 1: Welcome -->
+                <div class="info-box">
+                    <h3>✨ Instalación Minimalista</h3>
                     <ul>
-                        <li><strong>TODO el código de aplicación estará FUERA de public_html</strong></li>
-                        <li><strong>Solo 4 archivos serán accesibles desde internet:</strong>
-                            <ul>
-                                <li>public_html/index.php (frontend)</li>
-                                <li>public_html/admin/index.php (admin panel)</li>
-                                <li>public_html/admin/login.php (login)</li>
-                                <li>public_html/webhook.php (webhooks externos)</li>
-                            </ul>
-                        </li>
-                        <li><strong>Archivos de configuración, datos y código estarán protegidos nativamente</strong></li>
-                        <li><strong>Después de instalar: ELIMINAR la carpeta /install/</strong></li>
+                        <li>Instalación en menos de 2 minutos</li>
+                        <li>Configuración completa desde el panel admin</li>
+                        <li>28 archivos JSON con valores por defecto</li>
+                        <li>Sistema listo para usar inmediatamente</li>
                     </ul>
                 </div>
 
                 <form method="POST" action="?step=2">
+                    <h3 style="margin-bottom: 20px; color: #333; font-size: 18px;">📁 Configuración de Rutas</h3>
+                    <p style="margin-bottom: 20px; color: #666; font-size: 14px;">
+                        Rutas detectadas automáticamente. Edítalas solo si es necesario.
+                    </p>
+
                     <div class="form-group">
-                        <label>🗂️ Ruta de la Aplicación (código privado)</label>
-                        <input type="text" name="app_path" value="<?php echo dirname(dirname(__DIR__)) . '/app'; ?>" required>
-                        <small>Código fuera de public_html (inaccesible desde web)</small>
+                        <label>🗂️ Ruta de Aplicación</label>
+                        <input type="text" name="app_path" value="<?php echo htmlspecialchars(INSTALLER_APP_PATH); ?>" required>
+                        <small>Código privado (fuera de public_html)</small>
                     </div>
 
                     <div class="form-group">
-                        <label>🌐 Ruta Pública (solo archivos públicos)</label>
-                        <input type="text" name="public_path" value="<?php echo dirname(__DIR__); ?>" required>
-                        <small>Solo archivos necesarios para el web server</small>
+                        <label>🌐 Ruta Pública</label>
+                        <input type="text" name="public_path" value="<?php echo htmlspecialchars(INSTALLER_PUBLIC_PATH); ?>" required>
+                        <small>Archivos públicos accesibles desde web</small>
                     </div>
 
                     <div class="form-group">
@@ -365,114 +826,109 @@ function delete_installer() {
                     </div>
 
                     <div class="form-group">
-                        <label>📁 Base Path (si está en subdirectorio)</label>
-                        <input type="text" name="base_path" value="/shopv2" placeholder="Dejar vacío si está en raíz">
-                        <small>Ej: /shopv2 si está en http://dominio.com/shopv2/</small>
+                        <label>📁 Base Path</label>
+                        <input type="text" name="base_path" value="/shopv2" placeholder="/">
+                        <small>Dejar / si está en raíz. Ej: /shopv2 si está en http://dominio.com/shopv2/</small>
                     </div>
 
-                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">
+                    <button type="submit" class="btn">Siguiente →</button>
+                </form>
 
-                    <h3 style="margin-bottom: 20px; color: #333;">👤 Usuario Administrador</h3>
+            <?php elseif ($step == 2): ?>
+                <!-- Step 2: Show errors if any -->
+                <?php if (!empty($errors)): ?>
+                    <?php foreach ($errors as $error): ?>
+                        <div class="error"><?php echo htmlspecialchars($error); ?></div>
+                    <?php endforeach; ?>
+                    <a href="?step=1" class="btn-secondary">← Volver</a>
+                <?php endif; ?>
 
+            <?php elseif ($step == 3): ?>
+                <!-- Step 3: Admin form -->
+                <?php if (!empty($errors)): ?>
+                    <?php foreach ($errors as $error): ?>
+                        <div class="error"><?php echo htmlspecialchars($error); ?></div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+                <div class="info-box">
+                    <h3>👤 Usuario Administrador</h3>
+                    <ul>
+                        <li>Acceso completo al panel de administración</li>
+                        <li>Configura el sitio desde el panel</li>
+                        <li>Agrega productos, cupones, y más</li>
+                    </ul>
+                </div>
+
+                <form method="POST" action="?step=3">
                     <div class="form-group">
                         <label>Usuario</label>
-                        <input type="text" name="admin_username" value="admin" required>
+                        <input type="text" name="admin_username" value="<?php echo htmlspecialchars($_SESSION['config']['admin_username'] ?? 'admin'); ?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="admin_email" value="<?php echo htmlspecialchars($_SESSION['config']['admin_email'] ?? ''); ?>" required>
+                        <small>Se usará para notificaciones del sistema</small>
                     </div>
 
                     <div class="form-group">
                         <label>Contraseña</label>
                         <input type="password" name="admin_password" required>
-                        <small>Mínimo 8 caracteres (recomendado: 16+ con mayúsculas, números y símbolos)</small>
+                        <small>Mínimo 8 caracteres</small>
                     </div>
 
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="admin_email" required>
+                        <label>Confirmar Contraseña</label>
+                        <input type="password" name="admin_password_confirm" required>
                     </div>
 
-                    <button type="submit" class="btn">🚀 Instalar Sistema Seguro</button>
+                    <button type="submit" class="btn">🚀 Instalar Sistema</button>
                 </form>
 
-            <?php elseif ($step == 2): ?>
-                <!-- Step 2: Errors -->
-                <?php foreach ($errors as $error): ?>
-                    <div class="error"><?php echo htmlspecialchars($error); ?></div>
-                <?php endforeach; ?>
-                <a href="?step=1" class="btn">← Volver</a>
-
-            <?php elseif ($step == 3): ?>
-                <!-- Step 3: Success -->
+            <?php elseif ($step == 4): ?>
+                <!-- Step 4: Installation success -->
                 <div class="success-box">
-                    <h2>✅ ¡Instalación Completada!</h2>
-                    <p>El sistema ha sido instalado con éxito</p>
+                    <h2>✅ ¡Sistema Instalado!</h2>
+                    <p>La instalación se completó exitosamente en menos de 2 minutos.</p>
 
-                    <div class="security-checklist">
-                        <h3>🔒 TAREAS DE SEGURIDAD CRÍTICAS</h3>
+                    <div class="status-list">
+                        <div class="status-item">Estructura de directorios creada</div>
+                        <div class="status-item">Archivo config.php generado con clave secreta</div>
+                        <div class="status-item">28 archivos JSON creados con valores por defecto</div>
+                        <div class="status-item">Usuario administrador configurado</div>
+                        <div class="status-item">Permisos de seguridad aplicados</div>
+                        <div class="status-item">Archivos .htaccess creados</div>
+                    </div>
+
+                    <div class="next-steps">
+                        <h3>📋 Próximos Pasos</h3>
                         <ol>
-                            <li><strong>Verificar permisos</strong> de archivos:
-                                <ul>
-                                    <li>app/config/config.php: 0640</li>
-                                    <li>app/data/: 0750</li>
-                                </ul>
-                            </li>
-                            <li><strong>Cambiar contraseña del admin</strong> después del primer login</li>
-                            <li><strong>Configurar SSL/HTTPS</strong> en producción</li>
-                            <li><strong>Configurar backups</strong> automáticos de /app/data/</li>
+                            <li>Accede al panel de administración</li>
+                            <li>Configura tu sitio (nombre, logo, descripción)</li>
+                            <li>Agrega productos a tu tienda</li>
+                            <li>Configura MercadoPago (opcional)</li>
                         </ol>
                     </div>
 
-                    <div style="background: #f8d7da; border: 2px solid #dc3545; border-radius: 8px; padding: 20px; margin: 30px 0;">
-                        <h3 style="color: #721c24; margin-bottom: 15px;">🗑️ Eliminar Instalador</h3>
-                        <p style="color: #721c24; margin-bottom: 15px;">
-                            Por seguridad, debes eliminar la carpeta <code>/install/</code> ahora.
-                        </p>
-                        <form method="POST" action="?step=4" id="deleteInstallerForm">
+                    <div class="delete-box">
+                        <h3>🗑️ Eliminar Instalador</h3>
+                        <p>Por seguridad, elimina la carpeta /install/ ahora.</p>
+                        <form method="POST" action="?step=5">
                             <input type="hidden" name="confirm_delete" value="YES">
-                            <button type="button" onclick="confirmDeleteInstaller()" style="background: #dc3545; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%;">
-                                🗑️ Eliminar Instalador y Finalizar
-                            </button>
+                            <button type="submit" class="btn-danger">Eliminar Instalador y Acceder al Admin →</button>
                         </form>
-                        <p style="color: #721c24; font-size: 13px; margin-top: 10px;">
-                            Serás redirigido al sitio después de eliminar
-                        </p>
                     </div>
 
-                    <p style="margin: 20px 0; font-size: 14px; color: #666;">
+                    <div class="links">
                         O accede manualmente:
-                        <a href="../" style="color: #667eea; text-decoration: none; font-weight: 600;">→ Ir al Sitio</a>
-                        &nbsp;|&nbsp;
-                        <a href="../admin/login.php" style="color: #667eea; text-decoration: none; font-weight: 600;">→ Login Admin</a>
-                    </p>
+                        <a href="../admin/login.php">→ Login Admin</a>
+                        |
+                        <a href="../">→ Ver Sitio</a>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
     </div>
-
-    <?php if ($step == 3 && $success): ?>
-    <!-- Modal Reutilizable -->
-    <?php
-    // Path al modal dependiendo del entorno
-    if (file_exists(INSTALLER_APP_PATH . '/includes/admin/modal.php')) {
-        include INSTALLER_APP_PATH . '/includes/admin/modal.php';
-    }
-    ?>
-
-    <script>
-    function confirmDeleteInstaller() {
-        showModal({
-            icon: '🗑️',
-            title: '¿Eliminar Instalador?',
-            message: 'El instalador será eliminado permanentemente. Esta acción no se puede deshacer.',
-            details: 'Serás redirigido al sitio después de completar.',
-            confirmText: 'Sí, Eliminar',
-            cancelText: 'Cancelar',
-            confirmType: 'danger',
-            onConfirm: function() {
-                document.getElementById('deleteInstallerForm').submit();
-            }
-        });
-    }
-    </script>
-    <?php endif; ?>
 </body>
 </html>
