@@ -63,6 +63,7 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
     }
 
     // Intentar detectar si ya se instaló previamente leyendo config.php de posibles ubicaciones
+    // ESTO ES SOLO INFORMATIVO - no impide una nueva instalación en otra carpeta
     $installation_info = '';
     $possible_config_paths = [
         $current_dir . '/../shop-v2-app/config/config.php',
@@ -77,10 +78,15 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
             $config = include($config_path);
             if (is_array($config)) {
                 $installation_info = '
-                <div style="background: #e7f3ff; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0066cc;">
-                    <h3 style="margin-top: 0; color: #0066cc;">ℹ️ Sistema Ya Instalado Detectado</h3>
-                    <p><strong>Se encontró una instalación existente en:</strong></p>
-                    <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; font-family: monospace; font-size: 13px;">
+                <details style="margin: 20px 0;">
+                    <summary style="cursor: pointer; padding: 15px; background: #e7f3ff; border-radius: 5px; border-left: 4px solid #0066cc; font-weight: bold; color: #0066cc;">
+                        ℹ️ Información: Se detectó otra instalación en el servidor (click para ver detalles)
+                    </summary>
+                    <div style="background: #f8f9fa; padding: 15px; margin-top: 10px; border-radius: 5px; font-family: monospace; font-size: 13px;">
+                        <p style="color: #0066cc; margin-bottom: 10px;">
+                            <strong>Esto NO impide una nueva instalación.</strong><br>
+                            Solo es información de diagnóstico.
+                        </p>
                         <strong>📄 Archivo config.php encontrado en:</strong><br>
                         <code>' . htmlspecialchars($config_path) . '</code><br><br>
 
@@ -90,11 +96,7 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
                         <strong>• app_url:</strong> <code>' . htmlspecialchars($config['app_url'] ?? 'No definido') . '</code><br>
                         <strong>• base_path:</strong> <code>' . htmlspecialchars($config['base_path'] ?? 'No definido') . '</code>
                     </div>
-                    <p style="color: #0066cc; margin: 10px 0;">
-                        <strong>⚠️ Las carpetas temporales ya fueron movidas a esas ubicaciones.</strong><br>
-                        Por eso no se encuentran en el directorio del instalador.
-                    </p>
-                </div>';
+                </details>';
                 break;
             }
         }
