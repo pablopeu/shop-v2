@@ -6,15 +6,13 @@
  * IMPORTANTE: Este archivo se auto-elimina después de la instalación
  */
 
-// Detectar carpetas del paquete (app/ y public_html/ deben estar en el mismo directorio que el instalador)
+// Detectar carpeta app/ del paquete
+// El contenido público está directamente en __DIR__ (no en subcarpeta public_html/)
 $local_app_path = __DIR__ . '/app';
-$local_public_path = __DIR__ . '/public_html';
+$current_dir = __DIR__;
 
-if (file_exists($local_app_path) && file_exists($local_public_path)) {
+if (file_exists($local_app_path) && is_dir($local_app_path)) {
     // Instalación desde paquete descargado
-
-    // Detectar rutas inteligentes
-    $current_dir = __DIR__;
     $parent_dir = dirname($current_dir);
 
     // Intentar detectar si estamos en public_html
@@ -31,11 +29,10 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
     }
 
     // La ruta pública es donde está actualmente el instalador
-    // (el contenido de public_html/ del paquete se moverá aquí)
+    // (los archivos públicos YA están aquí, solo se moverá la carpeta app/)
     $suggested_public_path = $current_dir;
 
     // Auto-detectar base_path desde la URL
-    $request_uri = $_SERVER['REQUEST_URI'] ?? '';
     $script_name = $_SERVER['SCRIPT_NAME'] ?? '';
     $suggested_base_path = dirname($script_name);
     if ($suggested_base_path === '/' || $suggested_base_path === '\\') {
@@ -43,16 +40,14 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
     }
 
     define('INSTALLER_APP_PATH', $local_app_path);
-    define('INSTALLER_PUBLIC_PATH', $local_public_path);
+    define('INSTALLER_PUBLIC_PATH', $current_dir);  // Archivos públicos YA están aquí
     define('INSTALLER_SUGGESTED_APP_PATH', $suggested_app_path);
     define('INSTALLER_SUGGESTED_PUBLIC_PATH', $suggested_public_path);
     define('INSTALLER_SUGGESTED_BASE_PATH', $suggested_base_path);
     define('INSTALLER_IS_FTP_INSTALL', true);
 } else {
-    // Sin estructura válida - el usuario debe descomprimir el paquete completo
-    $current_dir = __DIR__;
+    // Sin estructura válida - falta la carpeta app/
     $app_exists = file_exists($local_app_path) ? '✅ Existe' : '❌ NO existe';
-    $public_exists = file_exists($local_public_path) ? '✅ Existe' : '❌ NO existe';
 
     // Listar lo que SÍ existe en el directorio actual
     $existing_items = array_diff(scandir($current_dir), ['.', '..']);
@@ -107,15 +102,16 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
     <html lang="es"><head><meta charset="UTF-8"><title>Error - Estructura Incompleta</title></head>
     <body style="font-family: sans-serif; padding: 50px; background: #f8d7da;">
         <div style="max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-            <h1 style="color: #721c24;">⚠️ Error: Faltan Carpetas Temporales del Paquete</h1>
+            <h1 style="color: #721c24;">⚠️ Error: Falta la Carpeta app/</h1>
 
             ' . $installation_info . '
 
             <div style="background: #e7f3ff; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0066cc;">
                 <h3 style="margin-top: 0; color: #0066cc;">ℹ️ Cómo Funciona el Instalador</h3>
                 <p style="margin: 0;">
-                    El instalador busca las carpetas <code>app/</code> y <code>public_html/</code> que vienen en el paquete tar.gz.
-                    Estas son <strong>carpetas temporales</strong> que el instalador luego moverá a las ubicaciones que TÚ configures.
+                    El paquete tar.gz contiene:<br>
+                    • <code>app/</code> - código privado (se moverá a donde configures)<br>
+                    • Archivos públicos directos: admin/, assets/, index.php, etc. (quedan donde están)
                 </p>
             </div>
 
@@ -125,13 +121,9 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
                 <strong>Directorio del instalador:</strong><br>
                 <code>' . htmlspecialchars($current_dir) . '</code><br><br>
 
-                <strong>Buscando carpeta TEMPORAL app/ en:</strong><br>
+                <strong>Buscando carpeta app/ en:</strong><br>
                 <code>' . htmlspecialchars($local_app_path) . '</code> ' . $app_exists . '<br>
-                <small style="color: #666;">↑ Esta carpeta contiene el código privado del paquete</small><br><br>
-
-                <strong>Buscando carpeta TEMPORAL public_html/ en:</strong><br>
-                <code>' . htmlspecialchars($local_public_path) . '</code> ' . $public_exists . '<br>
-                <small style="color: #666;">↑ Esta carpeta contiene admin/, assets/, index.php, etc. del paquete</small><br><br>
+                <small style="color: #666;">↑ Esta carpeta contiene el código privado que se moverá</small><br><br>
 
                 <strong>Lo que SÍ existe en ' . htmlspecialchars(basename($current_dir)) . '/:</strong><br>
                 <div style="background: white; padding: 10px; margin-top: 5px; max-height: 200px; overflow-y: auto;">
@@ -139,53 +131,29 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
                 </div>
             </div>
 
-            <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; color: #856404;">
-                <strong>⚠️ Diagnóstico del Problema:</strong><br><br>
-                ' . (strpos($existing_list, 'admin') !== false || strpos($existing_list, 'assets') !== false ?
-                    '❌ <strong>Detectado:</strong> Tienes carpetas como <code>admin/</code>, <code>assets/</code>, etc. directamente en la raíz.<br>
-                    Esto indica que descomprimiste incorrectamente o moviste archivos manualmente.<br><br>
-                    <strong>El paquete tar.gz debe descomprimirse TAL CUAL está:</strong><br>
-                    • NO extraigas solo el contenido de public_html/<br>
-                    • NO muevas archivos manualmente<br>
-                    • El instalador se encargará de mover todo' :
-                    'Las carpetas temporales <code>app/</code> y <code>public_html/</code> no se encuentran.<br>
-                    Es posible que no se hayan subido o que ya fueron movidas por una instalación previa.') . '
-            </div>
-
             <div style="background: #d4edda; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
-                <h3 style="margin-top: 0; color: #155724;">✅ Solución Correcta</h3>
+                <h3 style="margin-top: 0; color: #155724;">✅ Estructura Correcta del Paquete</h3>
 
-                <p><strong>1. Descarga el paquete:</strong></p>
-                <code>shop-v2-test.tar.gz</code>
-
-                <p style="margin-top: 15px;"><strong>2. Descomprímelo en tu computadora:</strong></p>
+                <p><strong>El tar.gz debe descomprimirse así:</strong></p>
                 <div style="background: #f8f9fa; padding: 10px; font-family: monospace; font-size: 12px;">
-                Al descomprimir verás:<br>
-                📁 alguna-carpeta/<br>
+                📁 tu-carpeta/<br>
                 &nbsp;&nbsp;├── 📄 instalador.php<br>
-                &nbsp;&nbsp;├── 📄 README_INSTALACION.md<br>
-                &nbsp;&nbsp;├── 📁 app/ ← Debe estar aquí<br>
-                &nbsp;&nbsp;└── 📁 public_html/ ← Debe estar aquí
+                &nbsp;&nbsp;├── 📁 app/ ← Carpeta que se moverá<br>
+                &nbsp;&nbsp;├── 📁 admin/ ← Contenido público directo<br>
+                &nbsp;&nbsp;├── 📁 assets/ ← Contenido público directo<br>
+                &nbsp;&nbsp;├── 📄 index.php ← Contenido público directo<br>
+                &nbsp;&nbsp;└── ... más archivos públicos
                 </div>
 
-                <p style="margin-top: 15px;"><strong>3. Sube TODO por FTP:</strong></p>
-                • Sube la carpeta completa con TODO su contenido<br>
-                • NO muevas ni renombres nada<br>
-                • Mantén la estructura tal cual está
-
-                <p style="margin-top: 15px;"><strong>4. Accede al instalador:</strong></p>
-                <code>http://tu-dominio.com/carpeta/instalador.php</code>
-
-                <p style="margin-top: 15px;"><strong>5. El instalador te pedirá:</strong></p>
-                • Dónde quieres la carpeta <code>app/</code> final (ej: /home2/usuario/shop-app)<br>
-                • Dónde quieres el contenido público final (ej: /home2/usuario/public_html/shop)<br><br>
-                <strong>Y él se encargará de mover todo automáticamente.</strong>
+                <p style="margin-top: 15px;"><strong>El instalador hará:</strong></p>
+                1. Mover <code>app/</code> a la ruta que configures (ej: /home/usuario/shop-app)<br>
+                2. Si elegiste otra ubicación pública, mover los archivos públicos allí<br>
+                3. Eliminar el instalador por seguridad
             </div>
 
             <p style="color: #721c24; margin-top: 20px;">
-                <strong>🔄 Si ya instalaste en otra carpeta:</strong><br>
-                Este instalador.php probablemente sea de una instalación previa donde las carpetas ya fueron movidas.
-                Sube el paquete nuevo a una <strong>carpeta diferente</strong> y accede al instalador desde ahí.
+                <strong>🔄 Si ya instalaste:</strong><br>
+                La carpeta app/ ya fue movida. Para una nueva instalación, extrae el tar.gz en una carpeta vacía.
             </p>
         </div>
     </body></html>
@@ -291,7 +259,7 @@ if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_u
  */
 function move_installation_folders($target_app_path, $target_public_path) {
     $source_app = INSTALLER_APP_PATH;
-    $source_public = INSTALLER_PUBLIC_PATH;
+    $source_public = INSTALLER_PUBLIC_PATH; // Ahora es __DIR__ (archivos públicos ya están aquí)
 
     // DEBUG: Log move operations
     error_log("INSTALADOR DEBUG - move_installation_folders():");
@@ -301,25 +269,26 @@ function move_installation_folders($target_app_path, $target_public_path) {
     error_log("  Destino public: " . $target_public_path);
 
     // PASO 1: Mover carpeta app/ a su ubicación final
-    if ($source_app !== $target_app_path) {
-        // Crear directorio padre si no existe
-        $parent_dir = dirname($target_app_path);
-        if (!is_dir($parent_dir)) {
-            if (!mkdir($parent_dir, 0755, true)) {
-                error_log("No se pudo crear directorio padre: $parent_dir");
-                return false;
-            }
-        }
-
-        // Mover carpeta app/
-        if (!rename($source_app, $target_app_path)) {
-            error_log("No se pudo mover $source_app a $target_app_path");
+    // Crear directorio padre si no existe
+    $parent_dir = dirname($target_app_path);
+    if (!is_dir($parent_dir)) {
+        if (!mkdir($parent_dir, 0755, true)) {
+            error_log("No se pudo crear directorio padre: $parent_dir");
             return false;
         }
     }
 
-    // PASO 2: Mover contenido de public_html/ a su ubicación final
-    if ($source_public !== $target_public_path) {
+    // Mover carpeta app/
+    if (!rename($source_app, $target_app_path)) {
+        error_log("No se pudo mover $source_app a $target_app_path");
+        return false;
+    }
+    error_log("INSTALADOR DEBUG - app/ movida exitosamente");
+
+    // PASO 2: Mover archivos públicos SOLO si la ubicación es diferente
+    if (realpath($source_public) !== realpath($target_public_path)) {
+        error_log("INSTALADOR DEBUG - Moviendo archivos públicos a ubicación diferente");
+
         // Si el directorio de destino no existe, crear
         if (!is_dir($target_public_path)) {
             if (!mkdir($target_public_path, 0755, true)) {
@@ -328,10 +297,15 @@ function move_installation_folders($target_app_path, $target_public_path) {
             }
         }
 
-        // Mover todo el contenido de public_html/ a la ubicación final
+        // Mover todos los archivos EXCEPTO instalador.php y README
         $items = scandir($source_public);
         foreach ($items as $item) {
-            if ($item === '.' || $item === '..') continue;
+            if ($item === '.' || $item === '..' ||
+                $item === 'instalador.php' ||
+                $item === 'README_INSTALACION.md' ||
+                $item === 'shop-v2-test.tar.gz') {
+                continue;
+            }
 
             $source_item = $source_public . '/' . $item;
             $target_item = $target_public_path . '/' . $item;
@@ -341,9 +315,9 @@ function move_installation_folders($target_app_path, $target_public_path) {
                 return false;
             }
         }
-
-        // Eliminar carpeta public_html/ vacía
-        @rmdir($source_public);
+        error_log("INSTALADOR DEBUG - Archivos públicos movidos exitosamente");
+    } else {
+        error_log("INSTALADOR DEBUG - Archivos públicos ya están en ubicación final, no se mueven");
     }
 
     return true;
