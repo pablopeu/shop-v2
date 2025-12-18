@@ -7,27 +7,29 @@
  */
 
 // Detectar ruta de app/ según entorno
-if (file_exists('/home2/uv0023/shop-v2-app')) {
-    // Producción
+// PRIMERO verificar si hay subcarpetas app/ y public_html/ en el directorio actual
+// Esto permite tener múltiples instalaciones independientes
+$local_app_path = __DIR__ . '/app';
+$local_public_path = __DIR__ . '/public_html';
+
+if (file_exists($local_app_path) && file_exists($local_public_path)) {
+    // Instalación desde paquete descargado (app/ y public_html/ son subcarpetas)
+    define('INSTALLER_APP_PATH', $local_app_path);
+    define('INSTALLER_PUBLIC_PATH', $local_public_path);
+    define('INSTALLER_IS_FTP_INSTALL', true);
+} elseif (file_exists('/home2/uv0023/shop-v2-app')) {
+    // Producción (solo si no hay subcarpetas locales)
     define('INSTALLER_APP_PATH', '/home2/uv0023/shop-v2-app');
     define('INSTALLER_PUBLIC_PATH', '/home2/uv0023/public_html/shopv2');
     define('INSTALLER_IS_FTP_INSTALL', false);
 } elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app')) {
-    // Testing
+    // Testing (solo si no hay subcarpetas locales)
     define('INSTALLER_APP_PATH', '/home/pablo/shop-v2-local-test/shop-v2-app');
     define('INSTALLER_PUBLIC_PATH', '/home/pablo/shop-v2-local-test/public_html');
     define('INSTALLER_IS_FTP_INSTALL', false);
 } else {
-    // Instalación desde paquete descargado (app/ y public_html/ son subcarpetas)
-    $current_app_path = __DIR__ . '/app';
-    $current_public_path = __DIR__ . '/public_html';
-
-    // Detectar si es nueva instalación (subcarpetas existen)
-    $is_ftp_install = file_exists($current_app_path) && file_exists($current_public_path);
-
-    define('INSTALLER_APP_PATH', $current_app_path);
-    define('INSTALLER_PUBLIC_PATH', $current_public_path);
-    define('INSTALLER_IS_FTP_INSTALL', $is_ftp_install);
+    // Sin estructura válida
+    die('Error: No se encontró la estructura de archivos necesaria (app/ y public_html/).');
 }
 
 // Prevent re-installation (allow force reinstall with ?force=1)
