@@ -62,12 +62,52 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
         $existing_list .= ($is_dir ? '📁 ' : '📄 ') . htmlspecialchars($item) . '<br>';
     }
 
+    // Intentar detectar si ya se instaló previamente leyendo config.php de posibles ubicaciones
+    $installation_info = '';
+    $possible_config_paths = [
+        $current_dir . '/../shop-v2-app/config/config.php',
+        $current_dir . '/../../shop-v2-app/config/config.php',
+        dirname($current_dir) . '/shop-v2-app/config/config.php',
+        preg_replace('#(/public_html|/www|/htdocs).*$#', '', $current_dir) . '/shop-v2-app/config/config.php',
+        preg_replace('#(/public_html|/www|/htdocs).*$#', '', $current_dir) . '/shop/config/config.php',
+    ];
+
+    foreach ($possible_config_paths as $config_path) {
+        if (file_exists($config_path)) {
+            $config = include($config_path);
+            if (is_array($config)) {
+                $installation_info = '
+                <div style="background: #e7f3ff; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0066cc;">
+                    <h3 style="margin-top: 0; color: #0066cc;">ℹ️ Sistema Ya Instalado Detectado</h3>
+                    <p><strong>Se encontró una instalación existente en:</strong></p>
+                    <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; font-family: monospace; font-size: 13px;">
+                        <strong>📄 Archivo config.php encontrado en:</strong><br>
+                        <code>' . htmlspecialchars($config_path) . '</code><br><br>
+
+                        <strong>📍 Rutas configuradas en esa instalación:</strong><br>
+                        <strong>• app_path:</strong> <code>' . htmlspecialchars($config['app_path'] ?? 'No definido') . '</code><br>
+                        <strong>• public_path:</strong> <code>' . htmlspecialchars($config['public_path'] ?? 'No definido') . '</code><br>
+                        <strong>• app_url:</strong> <code>' . htmlspecialchars($config['app_url'] ?? 'No definido') . '</code><br>
+                        <strong>• base_path:</strong> <code>' . htmlspecialchars($config['base_path'] ?? 'No definido') . '</code>
+                    </div>
+                    <p style="color: #0066cc; margin: 10px 0;">
+                        <strong>⚠️ Las carpetas temporales ya fueron movidas a esas ubicaciones.</strong><br>
+                        Por eso no se encuentran en el directorio del instalador.
+                    </p>
+                </div>';
+                break;
+            }
+        }
+    }
+
     die('
     <!DOCTYPE html>
     <html lang="es"><head><meta charset="UTF-8"><title>Error - Estructura Incompleta</title></head>
     <body style="font-family: sans-serif; padding: 50px; background: #f8d7da;">
         <div style="max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
             <h1 style="color: #721c24;">⚠️ Error: Faltan Carpetas Temporales del Paquete</h1>
+
+            ' . $installation_info . '
 
             <div style="background: #e7f3ff; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0066cc;">
                 <h3 style="margin-top: 0; color: #0066cc;">ℹ️ Cómo Funciona el Instalador</h3>
