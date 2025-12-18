@@ -18,13 +18,12 @@ if (file_exists('/home2/uv0023/shop-v2-app')) {
     define('INSTALLER_PUBLIC_PATH', '/home/pablo/shop-v2-local-test/public_html');
     define('INSTALLER_IS_FTP_INSTALL', false);
 } else {
-    // Desarrollo o instalación desde FTP
-    $current_app_path = __DIR__ . '/../../app';
-    $current_public_path = dirname(__DIR__);
+    // Instalación desde paquete descargado (app/ y public_html/ son subcarpetas)
+    $current_app_path = __DIR__ . '/app';
+    $current_public_path = __DIR__ . '/public_html';
 
-    // Detectar si app/ está dentro de public_html (instalación desde FTP)
-    $is_ftp_install = file_exists($current_app_path) &&
-                      strpos(realpath($current_app_path), realpath($current_public_path)) === 0;
+    // Detectar si es nueva instalación (subcarpetas existen)
+    $is_ftp_install = file_exists($current_app_path) && file_exists($current_public_path);
 
     define('INSTALLER_APP_PATH', $current_app_path);
     define('INSTALLER_PUBLIC_PATH', $current_public_path);
@@ -39,8 +38,8 @@ if (file_exists(INSTALLER_APP_PATH . '/config/config.php') && !isset($_GET['forc
     <body style="font-family: sans-serif; text-align: center; padding: 50px;">
         <h1>⚠️ Sistema Ya Instalado</h1>
         <p>El sistema ya ha sido instalado.</p>
-        <p><strong>IMPORTANTE:</strong> Elimina la carpeta /install/ por seguridad.</p>
-        <hr><p><a href="../">Ir al sitio</a> | <a href="../admin/">Admin</a></p>
+        <p><strong>IMPORTANTE:</strong> Elimina el archivo instalador.php por seguridad.</p>
+        <hr><p><a href="public_html/">Ir al sitio</a> | <a href="public_html/admin/">Admin</a></p>
         <hr style="margin: 30px 0;">
         <p style="color: #dc3545; font-size: 14px;">
             <strong>¿Necesitas reinstalar?</strong><br>
@@ -61,7 +60,7 @@ $success = false;
 if ($step == 5 && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'YES') {
         delete_installer();
-        header('Location: ../admin/login.php');
+        header('Location: public_html/admin/login.php');
         exit;
     }
 }
@@ -520,26 +519,11 @@ function detect_environment() {
 }
 
 /**
- * Delete installer directory
+ * Delete installer file
  */
 function delete_installer() {
-    $install_dir = __DIR__;
-
-    $delete_recursive = function($dir) use (&$delete_recursive) {
-        if (!is_dir($dir)) {
-            return @unlink($dir);
-        }
-
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
-            $path = $dir . '/' . $file;
-            is_dir($path) ? $delete_recursive($path) : @unlink($path);
-        }
-
-        return @rmdir($dir);
-    };
-
-    return $delete_recursive($install_dir);
+    $installer_file = __FILE__;
+    return @unlink($installer_file);
 }
 
 ?>
@@ -923,7 +907,7 @@ function delete_installer() {
 
                     <div class="delete-box">
                         <h3>🗑️ Eliminar Instalador</h3>
-                        <p>Por seguridad, elimina la carpeta /install/ ahora.</p>
+                        <p>Por seguridad, elimina el archivo instalador.php ahora.</p>
                         <form method="POST" action="?step=5">
                             <input type="hidden" name="confirm_delete" value="YES">
                             <button type="submit" class="btn-danger">Eliminar Instalador y Acceder al Admin →</button>
@@ -932,9 +916,9 @@ function delete_installer() {
 
                     <div class="links">
                         O accede manualmente:
-                        <a href="../admin/login.php">→ Login Admin</a>
+                        <a href="public_html/admin/login.php">→ Login Admin</a>
                         |
-                        <a href="../">→ Ver Sitio</a>
+                        <a href="public_html/">→ Ver Sitio</a>
                     </div>
                 </div>
             <?php endif; ?>
