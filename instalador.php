@@ -234,6 +234,14 @@ if ($step == 2 && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'base_path' => trim($_POST['base_path'] ?? ''),
     ];
 
+    // DEBUG: Log what was received
+    error_log("INSTALADOR DEBUG - Valores recibidos en POST:");
+    error_log("  app_path: " . ($_POST['app_path'] ?? 'NO ENVIADO'));
+    error_log("  public_path: " . ($_POST['public_path'] ?? 'NO ENVIADO'));
+    error_log("  app_url: " . ($_POST['app_url'] ?? 'NO ENVIADO'));
+    error_log("  base_path: " . ($_POST['base_path'] ?? 'NO ENVIADO'));
+    error_log("SESSION config guardado: " . print_r($_SESSION['config'], true));
+
     // Validate paths
     if (empty($_SESSION['config']['app_path'])) $errors[] = 'Ruta de aplicación requerida';
     if (empty($_SESSION['config']['public_path'])) $errors[] = 'Ruta pública requerida';
@@ -245,6 +253,13 @@ if ($step == 2 && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Step 3: Process admin and install
 if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_username'])) {
+    // DEBUG: Log config from SESSION before adding admin
+    error_log("INSTALADOR DEBUG - Step 3 - Configuración en SESSION antes de agregar admin:");
+    error_log("  app_path: " . ($_SESSION['config']['app_path'] ?? 'NO DEFINIDO'));
+    error_log("  public_path: " . ($_SESSION['config']['public_path'] ?? 'NO DEFINIDO'));
+    error_log("  app_url: " . ($_SESSION['config']['app_url'] ?? 'NO DEFINIDO'));
+    error_log("  base_path: " . ($_SESSION['config']['base_path'] ?? 'NO DEFINIDO'));
+
     // Solo procesar si vienen los datos del formulario admin (no del paso 2)
     $_SESSION['config']['admin_username'] = trim($_POST['admin_username'] ?? '');
     $_SESSION['config']['admin_email'] = trim($_POST['admin_email'] ?? '');
@@ -275,6 +290,13 @@ if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_u
 function move_installation_folders($target_app_path, $target_public_path) {
     $source_app = INSTALLER_APP_PATH;
     $source_public = INSTALLER_PUBLIC_PATH;
+
+    // DEBUG: Log move operations
+    error_log("INSTALADOR DEBUG - move_installation_folders():");
+    error_log("  Origen app: " . $source_app);
+    error_log("  Destino app: " . $target_app_path);
+    error_log("  Origen public: " . $source_public);
+    error_log("  Destino public: " . $target_public_path);
 
     // PASO 1: Mover carpeta app/ a su ubicación final
     if ($source_app !== $target_app_path) {
@@ -330,6 +352,13 @@ function move_installation_folders($target_app_path, $target_public_path) {
  */
 function install_system($config) {
     try {
+        // DEBUG: Log config received in install_system
+        error_log("INSTALADOR DEBUG - install_system() recibió config:");
+        error_log("  app_path: " . ($config['app_path'] ?? 'NO DEFINIDO'));
+        error_log("  public_path: " . ($config['public_path'] ?? 'NO DEFINIDO'));
+        error_log("  app_url: " . ($config['app_url'] ?? 'NO DEFINIDO'));
+        error_log("  base_path: " . ($config['base_path'] ?? 'NO DEFINIDO'));
+
         $app_path = $config['app_path'];
         $public_path = $config['public_path'];
 
@@ -393,6 +422,14 @@ function create_directory_structure($app_path, $public_path) {
  * Create config.php
  */
 function create_config_php($app_path, $config, $secret_key) {
+    // DEBUG: Log what will be written to config.php
+    error_log("INSTALADOR DEBUG - create_config_php() va a escribir:");
+    error_log("  Archivo: " . $app_path . '/config/config.php');
+    error_log("  app_path: " . ($config['app_path'] ?? 'NO DEFINIDO'));
+    error_log("  public_path: " . ($config['public_path'] ?? 'NO DEFINIDO'));
+    error_log("  app_url: " . ($config['app_url'] ?? 'NO DEFINIDO'));
+    error_log("  base_path: " . ($config['base_path'] ?? 'NO DEFINIDO'));
+
     $content = "<?php\n";
     $content .= "/**\n";
     $content .= " * Auto-generated Configuration\n";
@@ -413,6 +450,7 @@ function create_config_php($app_path, $config, $secret_key) {
     $content .= "];\n";
 
     file_put_contents($app_path . '/config/config.php', $content);
+    error_log("INSTALADOR DEBUG - config.php escrito en: " . $app_path . '/config/config.php');
 }
 
 /**
