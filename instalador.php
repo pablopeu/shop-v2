@@ -361,7 +361,7 @@ function install_system($config) {
         create_data_json_files($app_path, $config);
 
         // Create .htaccess files
-        create_htaccess_files($app_path, $public_path);
+        create_htaccess_files($app_path, $public_path, $config);
 
         // Set permissions
         set_permissions($app_path);
@@ -698,7 +698,7 @@ function create_data_json_files($app_path, $config) {
 /**
  * Create .htaccess files
  */
-function create_htaccess_files($app_path, $public_path) {
+function create_htaccess_files($app_path, $public_path, $config) {
     // Protect app directory
     $app_htaccess = "# Security: Block ALL access to application code\n";
     $app_htaccess .= "Require all denied\n";
@@ -708,23 +708,61 @@ function create_htaccess_files($app_path, $public_path) {
     // Public root .htaccess (only if doesn't exist)
     $public_htaccess_path = $public_path . '/.htaccess';
     if (!file_exists($public_htaccess_path)) {
-        $public_htaccess = "# Rewrite rules\n";
-        $public_htaccess .= "RewriteEngine On\n\n";
-        $public_htaccess .= "# Redirect to HTTPS (production only)\n";
-        $public_htaccess .= "RewriteCond %{HTTPS} off\n";
-        $public_htaccess .= "RewriteCond %{HTTP_HOST} !^localhost [NC]\n";
-        $public_htaccess .= "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n\n";
-        $public_htaccess .= "# Frontend routing\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} !-f\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} !-d\n";
-        $public_htaccess .= "RewriteRule ^(.*)$ index.php?route=/$1 [QSA,L]\n\n";
-        $public_htaccess .= "# Security\n";
-        $public_htaccess .= "Options -Indexes\n\n";
+        $base_path = $config['base_path'];
+
+        // Normalizar base_path para RewriteBase (debe terminar en /)
+        $rewrite_base = $base_path;
+        if ($rewrite_base === '' || $rewrite_base === '/') {
+            $rewrite_base = '/';
+        } else {
+            // Asegurar que empiece con / y termine con /
+            if (substr($rewrite_base, 0, 1) !== '/') {
+                $rewrite_base = '/' . $rewrite_base;
+            }
+            if (substr($rewrite_base, -1) !== '/') {
+                $rewrite_base .= '/';
+            }
+        }
+
+        $public_htaccess = "# Public .htaccess\n";
+        $public_htaccess .= "# Routing rules for frontend and admin\n\n";
+
         $public_htaccess .= "# Protect sensitive files\n";
-        $public_htaccess .= "<FilesMatch \"(\\.env|\\.git|config\\.php)\">\n";
-        $public_htaccess .= "    Require all denied\n";
-        $public_htaccess .= "</FilesMatch>\n";
+        $public_htaccess .= "<FilesMatch \"\\.(json|md|log)$\">\n";
+        $public_htaccess .= "    Order deny,allow\n";
+        $public_htaccess .= "    Deny from all\n";
+        $public_htaccess .= "</FilesMatch>\n\n";
+
+        $public_htaccess .= "# Enable rewrite engine\n";
+        $public_htaccess .= "RewriteEngine On\n";
+        $public_htaccess .= "RewriteBase " . $rewrite_base . "\n\n";
+
+        $public_htaccess .= "# Don't redirect existing files (CSS, JS, images, etc.)\n";
+        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -f\n";
+        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+        $public_htaccess .= "# Don't redirect existing directories\n";
+        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -d\n";
+        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+        $public_htaccess .= "# Don't redirect API endpoints\n";
+        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/api/ [OR]\n";
+        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/api/\n";
+        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+        $public_htaccess .= "# Don't redirect webhook\n";
+        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/webhook\\.php$\n";
+        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+        $public_htaccess .= "# Don't redirect admin PHP files\n";
+        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/.*\\.php$\n";
+        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+        $public_htaccess .= "# Redirect all other requests to index.php\n";
+        $public_htaccess .= "RewriteRule ^ index.php [L]\n";
+
         file_put_contents($public_htaccess_path, $public_htaccess);
+        error_log("INSTALADOR DEBUG - .htaccess público creado con RewriteBase: " . $rewrite_base);
     }
 }
 
