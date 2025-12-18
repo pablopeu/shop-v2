@@ -54,48 +54,96 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
     $app_exists = file_exists($local_app_path) ? '✅ Existe' : '❌ NO existe';
     $public_exists = file_exists($local_public_path) ? '✅ Existe' : '❌ NO existe';
 
+    // Listar lo que SÍ existe en el directorio actual
+    $existing_items = array_diff(scandir($current_dir), ['.', '..']);
+    $existing_list = '';
+    foreach ($existing_items as $item) {
+        $is_dir = is_dir($current_dir . '/' . $item);
+        $existing_list .= ($is_dir ? '📁 ' : '📄 ') . htmlspecialchars($item) . '<br>';
+    }
+
     die('
     <!DOCTYPE html>
     <html lang="es"><head><meta charset="UTF-8"><title>Error - Estructura Incompleta</title></head>
     <body style="font-family: sans-serif; padding: 50px; background: #f8d7da;">
-        <div style="max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-            <h1 style="color: #721c24;">⚠️ Error: Estructura Incompleta</h1>
-            <p style="font-size: 16px; color: #721c24; margin: 20px 0;">
-                No se encontraron las carpetas <code>app/</code> y <code>public_html/</code> necesarias.
-            </p>
+        <div style="max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+            <h1 style="color: #721c24;">⚠️ Error: Faltan Carpetas Temporales del Paquete</h1>
+
+            <div style="background: #e7f3ff; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0066cc;">
+                <h3 style="margin-top: 0; color: #0066cc;">ℹ️ Cómo Funciona el Instalador</h3>
+                <p style="margin: 0;">
+                    El instalador busca las carpetas <code>app/</code> y <code>public_html/</code> que vienen en el paquete tar.gz.
+                    Estas son <strong>carpetas temporales</strong> que el instalador luego moverá a las ubicaciones que TÚ configures.
+                </p>
+            </div>
 
             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; font-family: monospace; font-size: 13px;">
-                <strong>Información de diagnóstico:</strong><br><br>
+                <strong>🔍 Información de Diagnóstico:</strong><br><br>
+
                 <strong>Directorio del instalador:</strong><br>
                 <code>' . htmlspecialchars($current_dir) . '</code><br><br>
-                <strong>Buscando carpeta app/ en:</strong><br>
-                <code>' . htmlspecialchars($local_app_path) . '</code> ' . $app_exists . '<br><br>
-                <strong>Buscando carpeta public_html/ en:</strong><br>
-                <code>' . htmlspecialchars($local_public_path) . '</code> ' . $public_exists . '
+
+                <strong>Buscando carpeta TEMPORAL app/ en:</strong><br>
+                <code>' . htmlspecialchars($local_app_path) . '</code> ' . $app_exists . '<br>
+                <small style="color: #666;">↑ Esta carpeta contiene el código privado del paquete</small><br><br>
+
+                <strong>Buscando carpeta TEMPORAL public_html/ en:</strong><br>
+                <code>' . htmlspecialchars($local_public_path) . '</code> ' . $public_exists . '<br>
+                <small style="color: #666;">↑ Esta carpeta contiene admin/, assets/, index.php, etc. del paquete</small><br><br>
+
+                <strong>Lo que SÍ existe en ' . htmlspecialchars(basename($current_dir)) . '/:</strong><br>
+                <div style="background: white; padding: 10px; margin-top: 5px; max-height: 200px; overflow-y: auto;">
+                    ' . $existing_list . '
+                </div>
             </div>
 
             <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; color: #856404;">
-                <strong>⚠️ Posibles causas:</strong><br>
-                1. Estás accediendo a un instalador.php de una instalación previa (las carpetas ya fueron movidas)<br>
-                2. No subiste todas las carpetas por FTP<br>
-                3. El archivo no se descomprimió correctamente
+                <strong>⚠️ Diagnóstico del Problema:</strong><br><br>
+                ' . (strpos($existing_list, 'admin') !== false || strpos($existing_list, 'assets') !== false ?
+                    '❌ <strong>Detectado:</strong> Tienes carpetas como <code>admin/</code>, <code>assets/</code>, etc. directamente en la raíz.<br>
+                    Esto indica que descomprimiste incorrectamente o moviste archivos manualmente.<br><br>
+                    <strong>El paquete tar.gz debe descomprimirse TAL CUAL está:</strong><br>
+                    • NO extraigas solo el contenido de public_html/<br>
+                    • NO muevas archivos manualmente<br>
+                    • El instalador se encargará de mover todo' :
+                    'Las carpetas temporales <code>app/</code> y <code>public_html/</code> no se encuentran.<br>
+                    Es posible que no se hayan subido o que ya fueron movidas por una instalación previa.') . '
             </div>
 
-            <p style="color: #721c24;">
-                <strong>✅ Solución:</strong><br>
-                1. Descarga el archivo <code>shop-v2-test.tar.gz</code> nuevo<br>
-                2. Descomprímelo completamente en tu computadora<br>
-                3. Sube TODAS las carpetas y archivos a una carpeta nueva por FTP<br>
-                4. Accede al <code>instalador.php</code> desde esa carpeta nueva<br><br>
+            <div style="background: #d4edda; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+                <h3 style="margin-top: 0; color: #155724;">✅ Solución Correcta</h3>
 
-                <strong>Estructura correcta al descomprimir:</strong><br>
-                <code style="background: #f8f9fa; padding: 10px; display: block; margin-top: 10px;">
-                /tu-carpeta/<br>
-                ├── instalador.php<br>
-                ├── README_INSTALACION.md<br>
-                ├── app/ ← Esta carpeta debe existir<br>
-                └── public_html/ ← Esta carpeta debe existir
-                </code>
+                <p><strong>1. Descarga el paquete:</strong></p>
+                <code>shop-v2-test.tar.gz</code>
+
+                <p style="margin-top: 15px;"><strong>2. Descomprímelo en tu computadora:</strong></p>
+                <div style="background: #f8f9fa; padding: 10px; font-family: monospace; font-size: 12px;">
+                Al descomprimir verás:<br>
+                📁 alguna-carpeta/<br>
+                &nbsp;&nbsp;├── 📄 instalador.php<br>
+                &nbsp;&nbsp;├── 📄 README_INSTALACION.md<br>
+                &nbsp;&nbsp;├── 📁 app/ ← Debe estar aquí<br>
+                &nbsp;&nbsp;└── 📁 public_html/ ← Debe estar aquí
+                </div>
+
+                <p style="margin-top: 15px;"><strong>3. Sube TODO por FTP:</strong></p>
+                • Sube la carpeta completa con TODO su contenido<br>
+                • NO muevas ni renombres nada<br>
+                • Mantén la estructura tal cual está
+
+                <p style="margin-top: 15px;"><strong>4. Accede al instalador:</strong></p>
+                <code>http://tu-dominio.com/carpeta/instalador.php</code>
+
+                <p style="margin-top: 15px;"><strong>5. El instalador te pedirá:</strong></p>
+                • Dónde quieres la carpeta <code>app/</code> final (ej: /home2/usuario/shop-app)<br>
+                • Dónde quieres el contenido público final (ej: /home2/usuario/public_html/shop)<br><br>
+                <strong>Y él se encargará de mover todo automáticamente.</strong>
+            </div>
+
+            <p style="color: #721c24; margin-top: 20px;">
+                <strong>🔄 Si ya instalaste en otra carpeta:</strong><br>
+                Este instalador.php probablemente sea de una instalación previa donde las carpetas ya fueron movidas.
+                Sube el paquete nuevo a una <strong>carpeta diferente</strong> y accede al instalador desde ahí.
             </p>
         </div>
     </body></html>
