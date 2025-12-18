@@ -1199,6 +1199,29 @@ function delete_installer() {
                     <h2>✅ ¡Sistema Instalado!</h2>
                     <p>La instalación se completó exitosamente en menos de 2 minutos.</p>
 
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; border: 2px solid #28a745;">
+                        <h3 style="color: #155724; margin-top: 0; margin-bottom: 15px;">📋 Configuración Instalada</h3>
+                        <div style="font-family: monospace; font-size: 13px; line-height: 1.8;">
+                            <strong>🗂️ Ruta de Aplicación (privada):</strong><br>
+                            <code style="background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0;"><?php echo htmlspecialchars($_SESSION['config']['app_path'] ?? 'N/A'); ?></code><br><br>
+
+                            <strong>🌐 Ruta Pública:</strong><br>
+                            <code style="background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0;"><?php echo htmlspecialchars($_SESSION['config']['public_path'] ?? 'N/A'); ?></code><br><br>
+
+                            <strong>🔗 URL del Sitio:</strong><br>
+                            <code style="background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0;"><?php echo htmlspecialchars($_SESSION['config']['app_url'] ?? 'N/A'); ?></code><br><br>
+
+                            <strong>📁 Base Path:</strong><br>
+                            <code style="background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0;"><?php echo htmlspecialchars($_SESSION['config']['base_path'] ?? '/'); ?></code><br><br>
+
+                            <strong>👤 Usuario Admin:</strong><br>
+                            <code style="background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0;"><?php echo htmlspecialchars($_SESSION['config']['admin_username'] ?? 'N/A'); ?></code><br><br>
+
+                            <strong>📧 Email Admin:</strong><br>
+                            <code style="background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0;"><?php echo htmlspecialchars($_SESSION['config']['admin_email'] ?? 'N/A'); ?></code>
+                        </div>
+                    </div>
+
                     <div class="status-list">
                         <div class="status-item">Estructura de directorios creada</div>
                         <div class="status-item">Archivo config.php generado con clave secreta</div>
