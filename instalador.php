@@ -12,8 +12,41 @@ $local_public_path = __DIR__ . '/public_html';
 
 if (file_exists($local_app_path) && file_exists($local_public_path)) {
     // Instalación desde paquete descargado
+
+    // Detectar rutas inteligentes
+    $current_dir = __DIR__;
+    $parent_dir = dirname($current_dir);
+
+    // Intentar detectar si estamos en public_html
+    $is_in_public_html = (strpos($current_dir, '/public_html/') !== false ||
+                          strpos($current_dir, '/www/') !== false ||
+                          strpos($current_dir, '/htdocs/') !== false);
+
+    // Sugerir ruta para app (fuera de public_html si es posible)
+    if ($is_in_public_html) {
+        // Intentar sugerir una ruta fuera de public_html
+        $suggested_app_path = preg_replace('#(/public_html|/www|/htdocs)(/.*)?$#', '', $current_dir) . '/shop-v2-app';
+    } else {
+        $suggested_app_path = $parent_dir . '/shop-v2-app';
+    }
+
+    // La ruta pública es donde está actualmente el instalador
+    // (el contenido de public_html/ del paquete se moverá aquí)
+    $suggested_public_path = $current_dir;
+
+    // Auto-detectar base_path desde la URL
+    $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+    $script_name = $_SERVER['SCRIPT_NAME'] ?? '';
+    $suggested_base_path = dirname($script_name);
+    if ($suggested_base_path === '/' || $suggested_base_path === '\\') {
+        $suggested_base_path = '';
+    }
+
     define('INSTALLER_APP_PATH', $local_app_path);
     define('INSTALLER_PUBLIC_PATH', $local_public_path);
+    define('INSTALLER_SUGGESTED_APP_PATH', $suggested_app_path);
+    define('INSTALLER_SUGGESTED_PUBLIC_PATH', $suggested_public_path);
+    define('INSTALLER_SUGGESTED_BASE_PATH', $suggested_base_path);
     define('INSTALLER_IS_FTP_INSTALL', true);
 } else {
     // Sin estructura válida - el usuario debe descomprimir el paquete completo
@@ -89,7 +122,8 @@ if ($step == 2 && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Step 3: Process admin and install
-if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_username'])) {
+    // Solo procesar si vienen los datos del formulario admin (no del paso 2)
     $_SESSION['config']['admin_username'] = trim($_POST['admin_username'] ?? '');
     $_SESSION['config']['admin_email'] = trim($_POST['admin_email'] ?? '');
     $_SESSION['config']['admin_password'] = $_POST['admin_password'] ?? '';
@@ -799,38 +833,90 @@ function delete_installer() {
                     </ul>
                 </div>
 
-                <form method="POST" action="?step=2">
+                <form method="POST" action="?step=2" id="pathForm">
                     <h3 style="margin-bottom: 20px; color: #333; font-size: 18px;">📁 Configuración de Rutas</h3>
                     <p style="margin-bottom: 20px; color: #666; font-size: 14px;">
-                        Rutas detectadas automáticamente. Edítalas solo si es necesario.
+                        Rutas detectadas automáticamente. <strong>Verifica que sean correctas antes de continuar.</strong>
                     </p>
 
+                    <div id="validationMessage" style="display: none; margin-bottom: 20px;"></div>
+
                     <div class="form-group">
-                        <label>🗂️ Ruta de Aplicación</label>
-                        <input type="text" name="app_path" value="<?php echo htmlspecialchars(INSTALLER_APP_PATH); ?>" required>
-                        <small>Código privado (fuera de public_html)</small>
+                        <label>🗂️ Ruta de Aplicación (código privado)</label>
+                        <input type="text" id="app_path" name="app_path" value="<?php echo htmlspecialchars(INSTALLER_SUGGESTED_APP_PATH); ?>" required>
+                        <small>⚠️ Debe estar FUERA de public_html por seguridad</small>
                     </div>
 
                     <div class="form-group">
-                        <label>🌐 Ruta Pública</label>
-                        <input type="text" name="public_path" value="<?php echo htmlspecialchars(INSTALLER_PUBLIC_PATH); ?>" required>
-                        <small>Archivos públicos accesibles desde web</small>
+                        <label>🌐 Ruta Pública (archivos accesibles desde web)</label>
+                        <input type="text" id="public_path" name="public_path" value="<?php echo htmlspecialchars(INSTALLER_SUGGESTED_PUBLIC_PATH); ?>" required>
+                        <small>Donde se instalará el contenido público (index.php, admin/, etc.)</small>
                     </div>
 
                     <div class="form-group">
                         <label>🔗 URL del Sitio</label>
-                        <input type="url" name="app_url" value="http://<?php echo $_SERVER['HTTP_HOST'] ?? 'localhost'; ?>" required>
-                        <small>URL completa del sitio</small>
+                        <input type="url" id="app_url" name="app_url" value="http<?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 's' : ''; ?>://<?php echo $_SERVER['HTTP_HOST'] ?? 'localhost'; ?>" required>
+                        <small>URL completa del sitio (con http:// o https://)</small>
                     </div>
 
                     <div class="form-group">
-                        <label>📁 Base Path</label>
-                        <input type="text" name="base_path" value="/shopv2" placeholder="/">
-                        <small>Dejar / si está en raíz. Ej: /shopv2 si está en http://dominio.com/shopv2/</small>
+                        <label>📁 Base Path (calculado automáticamente)</label>
+                        <input type="text" id="base_path" name="base_path" value="<?php echo htmlspecialchars(INSTALLER_SUGGESTED_BASE_PATH); ?>" placeholder="/">
+                        <small>Ruta después del dominio. Ej: "" si es raíz, "/shop" si está en dominio.com/shop/</small>
                     </div>
+
+                    <button type="button" class="btn-secondary" onclick="verificarRutas()" style="margin-bottom: 15px; width: 100%;">
+                        🔍 Verificar Rutas
+                    </button>
 
                     <button type="submit" class="btn">Siguiente →</button>
                 </form>
+
+                <script>
+                function verificarRutas() {
+                    const appPath = document.getElementById('app_path').value;
+                    const publicPath = document.getElementById('public_path').value;
+                    const messageDiv = document.getElementById('validationMessage');
+
+                    let errors = [];
+                    let warnings = [];
+
+                    // Verificar que app_path esté fuera de public_html
+                    if (appPath.includes('/public_html/') || appPath.includes('/www/') || appPath.includes('/htdocs/')) {
+                        errors.push('⚠️ ERROR: La ruta de aplicación NO debe estar dentro de public_html, www o htdocs por seguridad.');
+                    }
+
+                    // Verificar que app_path y public_path no sean iguales
+                    if (appPath === publicPath) {
+                        errors.push('⚠️ ERROR: La ruta de aplicación y la ruta pública no pueden ser iguales.');
+                    }
+
+                    // Advertir si public_path termina en /public_html
+                    if (publicPath.endsWith('/public_html')) {
+                        warnings.push('⚠️ ADVERTENCIA: La ruta pública termina en /public_html. ¿Estás seguro? Normalmente debería ser la carpeta donde quieres que esté accesible el sitio.');
+                    }
+
+                    if (errors.length > 0) {
+                        messageDiv.innerHTML = '<div class="error">' + errors.join('<br>') + '</div>';
+                        messageDiv.style.display = 'block';
+                    } else if (warnings.length > 0) {
+                        messageDiv.innerHTML = '<div style="background: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; border: 1px solid #ffeaa7;">' + warnings.join('<br>') + '</div>';
+                        messageDiv.style.display = 'block';
+                    } else {
+                        messageDiv.innerHTML = '<div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; border: 1px solid #c3e6cb;">✅ Las rutas parecen correctas. Puedes continuar.</div>';
+                        messageDiv.style.display = 'block';
+                    }
+                }
+
+                // Auto-calcular base_path cuando cambien los otros campos
+                document.getElementById('app_url').addEventListener('input', calcularBasePath);
+                document.getElementById('public_path').addEventListener('input', calcularBasePath);
+
+                function calcularBasePath() {
+                    // Esta función podría mejorar el cálculo automático si es necesario
+                    // Por ahora, el base_path se detecta correctamente en el servidor
+                }
+                </script>
 
             <?php elseif ($step == 2): ?>
                 <!-- Step 2: Show errors if any -->
