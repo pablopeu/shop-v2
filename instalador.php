@@ -148,12 +148,73 @@ if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_u
 }
 
 /**
+ * Move installation folders from temporary location to final location
+ */
+function move_installation_folders($target_app_path, $target_public_path) {
+    $source_app = INSTALLER_APP_PATH;
+    $source_public = INSTALLER_PUBLIC_PATH;
+
+    // PASO 1: Mover carpeta app/ a su ubicación final
+    if ($source_app !== $target_app_path) {
+        // Crear directorio padre si no existe
+        $parent_dir = dirname($target_app_path);
+        if (!is_dir($parent_dir)) {
+            if (!mkdir($parent_dir, 0755, true)) {
+                error_log("No se pudo crear directorio padre: $parent_dir");
+                return false;
+            }
+        }
+
+        // Mover carpeta app/
+        if (!rename($source_app, $target_app_path)) {
+            error_log("No se pudo mover $source_app a $target_app_path");
+            return false;
+        }
+    }
+
+    // PASO 2: Mover contenido de public_html/ a su ubicación final
+    if ($source_public !== $target_public_path) {
+        // Si el directorio de destino no existe, crear
+        if (!is_dir($target_public_path)) {
+            if (!mkdir($target_public_path, 0755, true)) {
+                error_log("No se pudo crear directorio público: $target_public_path");
+                return false;
+            }
+        }
+
+        // Mover todo el contenido de public_html/ a la ubicación final
+        $items = scandir($source_public);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+
+            $source_item = $source_public . '/' . $item;
+            $target_item = $target_public_path . '/' . $item;
+
+            if (!rename($source_item, $target_item)) {
+                error_log("No se pudo mover $source_item a $target_item");
+                return false;
+            }
+        }
+
+        // Eliminar carpeta public_html/ vacía
+        @rmdir($source_public);
+    }
+
+    return true;
+}
+
+/**
  * Main installation function
  */
 function install_system($config) {
     try {
         $app_path = $config['app_path'];
         $public_path = $config['public_path'];
+
+        // PASO 1: Mover carpetas desde ubicación temporal a ubicación final
+        if (!move_installation_folders($app_path, $public_path)) {
+            throw new Exception('Error al mover las carpetas de instalación');
+        }
 
         // Create directory structure
         create_directory_structure($app_path, $public_path);
