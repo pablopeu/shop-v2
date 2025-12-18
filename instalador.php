@@ -50,20 +50,54 @@ if (file_exists($local_app_path) && file_exists($local_public_path)) {
     define('INSTALLER_IS_FTP_INSTALL', true);
 } else {
     // Sin estructura válida - el usuario debe descomprimir el paquete completo
+    $current_dir = __DIR__;
+    $app_exists = file_exists($local_app_path) ? '✅ Existe' : '❌ NO existe';
+    $public_exists = file_exists($local_public_path) ? '✅ Existe' : '❌ NO existe';
+
     die('
     <!DOCTYPE html>
     <html lang="es"><head><meta charset="UTF-8"><title>Error - Estructura Incompleta</title></head>
-    <body style="font-family: sans-serif; text-align: center; padding: 50px; background: #f8d7da;">
-        <h1>⚠️ Error: Estructura Incompleta</h1>
-        <p style="font-size: 16px; color: #721c24; margin: 20px 0;">
-            No se encontraron las carpetas <code>app/</code> y <code>public_html/</code> necesarias.
-        </p>
-        <p style="color: #721c24;">
-            <strong>Asegúrate de:</strong><br>
-            1. Descomprimir el archivo completo (shop-v2-vX.X.X.tar.gz)<br>
-            2. Subir TODAS las carpetas y archivos por FTP<br>
-            3. El archivo <code>instalador.php</code> debe estar al mismo nivel que las carpetas <code>app/</code> y <code>public_html/</code>
-        </p>
+    <body style="font-family: sans-serif; padding: 50px; background: #f8d7da;">
+        <div style="max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+            <h1 style="color: #721c24;">⚠️ Error: Estructura Incompleta</h1>
+            <p style="font-size: 16px; color: #721c24; margin: 20px 0;">
+                No se encontraron las carpetas <code>app/</code> y <code>public_html/</code> necesarias.
+            </p>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; font-family: monospace; font-size: 13px;">
+                <strong>Información de diagnóstico:</strong><br><br>
+                <strong>Directorio del instalador:</strong><br>
+                <code>' . htmlspecialchars($current_dir) . '</code><br><br>
+                <strong>Buscando carpeta app/ en:</strong><br>
+                <code>' . htmlspecialchars($local_app_path) . '</code> ' . $app_exists . '<br><br>
+                <strong>Buscando carpeta public_html/ en:</strong><br>
+                <code>' . htmlspecialchars($local_public_path) . '</code> ' . $public_exists . '
+            </div>
+
+            <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; color: #856404;">
+                <strong>⚠️ Posibles causas:</strong><br>
+                1. Estás accediendo a un instalador.php de una instalación previa (las carpetas ya fueron movidas)<br>
+                2. No subiste todas las carpetas por FTP<br>
+                3. El archivo no se descomprimió correctamente
+            </div>
+
+            <p style="color: #721c24;">
+                <strong>✅ Solución:</strong><br>
+                1. Descarga el archivo <code>shop-v2-test.tar.gz</code> nuevo<br>
+                2. Descomprímelo completamente en tu computadora<br>
+                3. Sube TODAS las carpetas y archivos a una carpeta nueva por FTP<br>
+                4. Accede al <code>instalador.php</code> desde esa carpeta nueva<br><br>
+
+                <strong>Estructura correcta al descomprimir:</strong><br>
+                <code style="background: #f8f9fa; padding: 10px; display: block; margin-top: 10px;">
+                /tu-carpeta/<br>
+                ├── instalador.php<br>
+                ├── README_INSTALACION.md<br>
+                ├── app/ ← Esta carpeta debe existir<br>
+                └── public_html/ ← Esta carpeta debe existir
+                </code>
+            </p>
+        </div>
     </body></html>
     ');
 }
