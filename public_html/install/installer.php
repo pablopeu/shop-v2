@@ -11,14 +11,24 @@ if (file_exists('/home2/uv0023/shop-v2-app')) {
     // Producción
     define('INSTALLER_APP_PATH', '/home2/uv0023/shop-v2-app');
     define('INSTALLER_PUBLIC_PATH', '/home2/uv0023/public_html/shopv2');
+    define('INSTALLER_IS_FTP_INSTALL', false);
 } elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app')) {
     // Testing
     define('INSTALLER_APP_PATH', '/home/pablo/shop-v2-local-test/shop-v2-app');
     define('INSTALLER_PUBLIC_PATH', '/home/pablo/shop-v2-local-test/public_html');
+    define('INSTALLER_IS_FTP_INSTALL', false);
 } else {
-    // Desarrollo
-    define('INSTALLER_APP_PATH', __DIR__ . '/../../app');
-    define('INSTALLER_PUBLIC_PATH', __DIR__ . '/..');
+    // Desarrollo o instalación desde FTP
+    $current_app_path = __DIR__ . '/../../app';
+    $current_public_path = dirname(__DIR__);
+
+    // Detectar si app/ está dentro de public_html (instalación desde FTP)
+    $is_ftp_install = file_exists($current_app_path) &&
+                      strpos(realpath($current_app_path), realpath($current_public_path)) === 0;
+
+    define('INSTALLER_APP_PATH', $current_app_path);
+    define('INSTALLER_PUBLIC_PATH', $current_public_path);
+    define('INSTALLER_IS_FTP_INSTALL', $is_ftp_install);
 }
 
 // Prevent re-installation (allow force reinstall with ?force=1)
