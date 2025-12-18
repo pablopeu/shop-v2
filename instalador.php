@@ -6,30 +6,33 @@
  * IMPORTANTE: Este archivo se auto-elimina después de la instalación
  */
 
-// Detectar ruta de app/ según entorno
-// PRIMERO verificar si hay subcarpetas app/ y public_html/ en el directorio actual
-// Esto permite tener múltiples instalaciones independientes
+// Detectar carpetas del paquete (app/ y public_html/ deben estar en el mismo directorio que el instalador)
 $local_app_path = __DIR__ . '/app';
 $local_public_path = __DIR__ . '/public_html';
 
 if (file_exists($local_app_path) && file_exists($local_public_path)) {
-    // Instalación desde paquete descargado (app/ y public_html/ son subcarpetas)
+    // Instalación desde paquete descargado
     define('INSTALLER_APP_PATH', $local_app_path);
     define('INSTALLER_PUBLIC_PATH', $local_public_path);
     define('INSTALLER_IS_FTP_INSTALL', true);
-} elseif (file_exists('/home2/uv0023/shop-v2-app')) {
-    // Producción (solo si no hay subcarpetas locales)
-    define('INSTALLER_APP_PATH', '/home2/uv0023/shop-v2-app');
-    define('INSTALLER_PUBLIC_PATH', '/home2/uv0023/public_html/shopv2');
-    define('INSTALLER_IS_FTP_INSTALL', false);
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app')) {
-    // Testing (solo si no hay subcarpetas locales)
-    define('INSTALLER_APP_PATH', '/home/pablo/shop-v2-local-test/shop-v2-app');
-    define('INSTALLER_PUBLIC_PATH', '/home/pablo/shop-v2-local-test/public_html');
-    define('INSTALLER_IS_FTP_INSTALL', false);
 } else {
-    // Sin estructura válida
-    die('Error: No se encontró la estructura de archivos necesaria (app/ y public_html/).');
+    // Sin estructura válida - el usuario debe descomprimir el paquete completo
+    die('
+    <!DOCTYPE html>
+    <html lang="es"><head><meta charset="UTF-8"><title>Error - Estructura Incompleta</title></head>
+    <body style="font-family: sans-serif; text-align: center; padding: 50px; background: #f8d7da;">
+        <h1>⚠️ Error: Estructura Incompleta</h1>
+        <p style="font-size: 16px; color: #721c24; margin: 20px 0;">
+            No se encontraron las carpetas <code>app/</code> y <code>public_html/</code> necesarias.
+        </p>
+        <p style="color: #721c24;">
+            <strong>Asegúrate de:</strong><br>
+            1. Descomprimir el archivo completo (shop-v2-vX.X.X.tar.gz)<br>
+            2. Subir TODAS las carpetas y archivos por FTP<br>
+            3. El archivo <code>instalador.php</code> debe estar al mismo nivel que las carpetas <code>app/</code> y <code>public_html/</code>
+        </p>
+    </body></html>
+    ');
 }
 
 // Prevent re-installation (allow force reinstall with ?force=1)
@@ -515,9 +518,8 @@ function write_json($file, $data) {
  * Detect environment
  */
 function detect_environment() {
-    if (file_exists('/home2/uv0023/shop-v2-app')) return 'production';
-    if (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app')) return 'testing';
-    return 'development';
+    // El instalador siempre crea una nueva instalación desde el paquete
+    return 'new_installation';
 }
 
 /**
