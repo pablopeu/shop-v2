@@ -6,6 +6,10 @@
  * IMPORTANTE: Este archivo se auto-elimina después de la instalación
  */
 
+// Version del instalador (sync con VERSION file)
+define('INSTALLER_VERSION', '2.1.0');
+define('INSTALLER_BUILD_DATE', '2025-12-20');
+
 // Detectar carpeta del release
 // Estructura esperada:
 // - instalador.php (este archivo, en la raíz)
@@ -1642,7 +1646,7 @@ function delete_installer() {
     <div class="container">
         <div class="header">
             <h1>🔒 Instalador Shop V2</h1>
-            <p>Instalación rápida en 3 pasos</p>
+            <p>Instalación rápida en 3 pasos <span style="opacity: 0.7; font-size: 0.85em;">• v<?php echo INSTALLER_VERSION; ?></span></p>
             <div class="progress-bar">
                 <div class="progress-fill" style="width: <?php echo ($step == 1 ? 20 : ($step == 2 || $step == '2b' || $step == '2c' ? 40 : ($step == 3 ? 60 : ($step == 4 ? 80 : 100)))); ?>%;"></div>
             </div>
