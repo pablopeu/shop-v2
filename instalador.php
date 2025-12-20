@@ -252,7 +252,8 @@ $success = false;
 // Step 5: Self-delete installer (legacy - por si se accede manualmente)
 if ($step == 5 && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'YES') {
-        delete_installer();
+        $installer_deleted = delete_installer();
+        $_SESSION['installer_deleted'] = $installer_deleted;
         // Don't redirect - show success page with buttons
         $step = 6; // New step: cleanup complete
     }
@@ -1479,9 +1480,19 @@ function delete_installer() {
 
     // Luego eliminar el instalador mismo
     $installer_file = __FILE__;
+
+    error_log("INSTALADOR - Intentando eliminar instalador: $installer_file");
+    error_log("INSTALADOR - Archivo existe: " . (file_exists($installer_file) ? 'SI' : 'NO'));
+    error_log("INSTALADOR - Permisos: " . substr(sprintf('%o', fileperms($installer_file)), -4));
+
     $result = @unlink($installer_file);
+
     if ($result) {
-        error_log("INSTALADOR - Instalador eliminado: $installer_file");
+        error_log("INSTALADOR - ✓ Instalador eliminado exitosamente");
+    } else {
+        $error = error_get_last();
+        error_log("INSTALADOR - ✗ ERROR al eliminar instalador: " . ($error['message'] ?? 'unknown'));
+        error_log("INSTALADOR - Intenta eliminar manualmente vía FTP: " . basename($installer_file));
     }
 
     return $result;
@@ -2093,9 +2104,19 @@ function recursive_rmdir($dir) {
                 <div class="step-content">
                     <div class="success-box" style="text-align: center; padding: 40px 20px;">
                         <h2 style="color: #28a745; font-size: 2.5em; margin-bottom: 20px;">✅ ¡Instalación Completada!</h2>
-                        <p style="font-size: 1.2em; color: #666; margin-bottom: 40px;">
-                            El instalador y archivos temporales han sido eliminados correctamente.
-                        </p>
+
+                        <?php if (isset($_SESSION['installer_deleted']) && $_SESSION['installer_deleted']): ?>
+                            <p style="font-size: 1.2em; color: #666; margin-bottom: 40px;">
+                                El instalador y archivos temporales han sido eliminados correctamente.
+                            </p>
+                        <?php else: ?>
+                            <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                                <p style="color: #856404; margin: 0;">
+                                    ⚠️ <strong>No se pudo eliminar el instalador.php automáticamente.</strong><br>
+                                    Por favor, elimínalo manualmente vía FTP por seguridad.
+                                </p>
+                            </div>
+                        <?php endif; ?>
 
                         <div style="margin-top: 30px;">
                             <h3 style="margin-bottom: 20px;">¿A dónde quieres ir?</h3>
