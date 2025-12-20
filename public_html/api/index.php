@@ -8,15 +8,20 @@
 
 define('APP_ENTRY_POINT', true);
 
-// Detectar entorno y cargar bootstrap
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    // Producción
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    // Testing
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
+// Cargar configuración de ruta al bootstrap (generada por instalador)
+$bootstrap_config = __DIR__ . '/bootstrap_path.php';
+if (file_exists($bootstrap_config)) {
+    require_once $bootstrap_config;
+    if (defined('BOOTSTRAP_PATH') && file_exists(BOOTSTRAP_PATH)) {
+        require_once BOOTSTRAP_PATH;
+    } else {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Bootstrap file not found']);
+        exit;
+    }
 } else {
-    // Desarrollo
+    // Fallback para desarrollo (estructura relativa)
     $bootstrap_path = __DIR__ . '/../../app/bootstrap.php';
     if (!file_exists($bootstrap_path)) {
         http_response_code(500);

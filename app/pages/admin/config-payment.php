@@ -52,15 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payment'])) {
         $credentials_path_file = PAYMENT_CREDENTIALS_PATH_FILE;
 
         if (!file_exists($credentials_path_file)) {
-            // Default path based on environment
-            if (file_exists('/home2/uv0023/shop-v2-app')) {
-                // Production
-                $default_path = '/home2/uv0023/payment_credentials.json';
+            // Default path: try parent directory of APP_PATH first (for production setup),
+            // then fall back to APP_PATH/data (for development)
+            $parent_dir_path = dirname(APP_PATH) . '/payment_credentials.json';
+            if (file_exists($parent_dir_path)) {
+                $credentials_path = $parent_dir_path;
             } else {
-                // Development/Testing
-                $default_path = APP_PATH . '/data/payment_credentials.json';
+                // Development/Testing fallback
+                $credentials_path = APP_PATH . '/data/payment_credentials.json';
             }
-            $credentials_path = $default_path;
         } else {
             $credentials_path = trim(file_get_contents($credentials_path_file));
         }
