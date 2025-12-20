@@ -2072,10 +2072,12 @@ function recursive_rmdir($dir) {
                     </div>
 
                     <div class="links">
-                        O accede manualmente:
+                        O accede manualmente (el instalador quedará en el servidor):
                         <a href="<?php echo htmlspecialchars($_SESSION['config']['base_path'] ?? ''); ?>/admin/login.php">→ Login Admin</a>
                         |
                         <a href="<?php echo htmlspecialchars($_SESSION['config']['app_url'] ?? ''); ?>">→ Ver Sitio</a>
+                        <br><br>
+                        <small style="color: #666;">⚠️ Por seguridad, recuerda eliminar instalador.php manualmente si no usas el botón de arriba</small>
                     </div>
                 </div>
 
