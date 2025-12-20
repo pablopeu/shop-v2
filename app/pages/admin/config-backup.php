@@ -329,17 +329,19 @@ function createBackup($backup_source, $backups_dir) {
             }
         }
 
-        // 3. PUBLIC_HTML: Copy shopv2 directory contents (TODO EL CONTENIDO)
+        // 3. PUBLIC_HTML: Copy public directory contents (TODO EL CONTENIDO)
         if (defined('PUBLIC_PATH')) {
-            error_log(">>> [PUBLIC_HTML] Copiando shopv2...");
+            // Usar el nombre de la carpeta real del public_path (dinámico)
+            $public_folder_name = basename(PUBLIC_PATH);
+            error_log(">>> [PUBLIC_HTML] Copiando $public_folder_name...");
 
-            // Crear estructura public_html/shopv2/
-            $shopv2_dest = $public_dir . '/shopv2';
-            mkdir($shopv2_dest, 0700, true);
+            // Crear estructura public_html/[nombre-carpeta]/
+            $public_dest = $public_dir . '/' . $public_folder_name;
+            mkdir($public_dest, 0700, true);
 
             // Copiar TODO el contenido de PUBLIC_PATH (código PHP, assets, uploads, etc.)
-            recursiveCopy(PUBLIC_PATH, $shopv2_dest, ['.git']);
-            error_log(">>> [PUBLIC_HTML] Copiado TODO el contenido de shopv2/");
+            recursiveCopy(PUBLIC_PATH, $public_dest, ['.git']);
+            error_log(">>> [PUBLIC_HTML] Copiado TODO el contenido de $public_folder_name/");
         }
 
         // Create tar.gz from temp directory
