@@ -37,6 +37,7 @@ fi
 echo "📦 Copiando archivos públicos..."
 
 # Lista de archivos/carpetas públicos a copiar
+# NOTA: NO incluir .htaccess - el instalador lo genera dinámicamente con el base_path correcto
 PUBLIC_ITEMS=(
     "public_html/admin"
     "public_html/api"
@@ -44,7 +45,6 @@ PUBLIC_ITEMS=(
     "public_html/data"
     "public_html/index.php"
     "public_html/webhook.php"
-    "public_html/.htaccess"
 )
 
 for item in "${PUBLIC_ITEMS[@]}"; do
@@ -172,8 +172,9 @@ shop-v2-${RELEASE_VERSION}/   # ← Carpeta con el sistema
   │   └── uploads/            # ← VACÍO (sin fotos de productos/logos)
   ├── data/                   # ← VACÍO (sin datos, solo .htaccess)
   ├── index.php               # Página principal (público)
-  ├── webhook.php             # Webhook de MercadoPago (público)
-  └── .htaccess               # Configuración Apache (público)
+  └── webhook.php             # Webhook de MercadoPago (público)
+
+NOTA: El .htaccess NO se incluye - se genera dinámicamente durante la instalación
 
 NOTA: Sistema limpio sin configuración ni datos del desarrollo local
 

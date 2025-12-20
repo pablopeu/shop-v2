@@ -84,9 +84,15 @@ if ($release_dir && $local_app_path) {
     // Listar lo que SÍ existe en el directorio actual
     $existing_items = array_diff(scandir($current_dir), ['.', '..']);
     $existing_list = '';
+    $has_release_folder = false;
     foreach ($existing_items as $item) {
         $is_dir = is_dir($current_dir . '/' . $item);
         $existing_list .= ($is_dir ? '📁 ' : '📄 ') . htmlspecialchars($item) . '<br>';
+
+        // Detectar si hay carpeta del release (shop-v2-*)
+        if ($is_dir && strpos($item, 'shop-v2-') === 0) {
+            $has_release_folder = true;
+        }
     }
 
     // Intentar detectar si ya se instaló previamente leyendo config.php de posibles ubicaciones
@@ -129,12 +135,34 @@ if ($release_dir && $local_app_path) {
         }
     }
 
+    // Mensaje especial si se detectó instalación previa
+    $title = $has_release_folder
+        ? '✅ Sistema Ya Instalado'
+        : '⚠️ Error: Falta la Carpeta app/';
+
+    $main_message = $has_release_folder
+        ? '<div style="background: #d4edda; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+            <h3 style="margin-top: 0; color: #155724;">✅ El sistema ya fue instalado desde este paquete</h3>
+            <p style="color: #155724; margin-bottom: 10px;">
+                La carpeta <strong>app/</strong> ya fue movida a su ubicación final durante la instalación.<br>
+                Esto es normal después de una instalación exitosa.
+            </p>
+            <p style="color: #155724; margin: 0;">
+                <strong>¿Qué hacer ahora?</strong><br>
+                • Puedes eliminar el instalador.php y la carpeta shop-v2-* por seguridad<br>
+                • El sistema está funcionando en las rutas que configuraste durante la instalación
+            </p>
+        </div>'
+        : '';
+
     die('
     <!DOCTYPE html>
-    <html lang="es"><head><meta charset="UTF-8"><title>Error - Estructura Incompleta</title></head>
-    <body style="font-family: sans-serif; padding: 50px; background: #f8d7da;">
+    <html lang="es"><head><meta charset="UTF-8"><title>' . $title . '</title></head>
+    <body style="font-family: sans-serif; padding: 50px; ' . ($has_release_folder ? 'background: #d4edda;' : 'background: #f8d7da;') . '">
         <div style="max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-            <h1 style="color: #721c24;">⚠️ Error: Falta la Carpeta app/</h1>
+            <h1 style="color: ' . ($has_release_folder ? '#155724' : '#721c24') . ';">' . $title . '</h1>
+
+            ' . $main_message . '
 
             ' . $installation_info . '
 
@@ -1236,65 +1264,63 @@ function create_htaccess_files($app_path, $public_path, $config) {
     $app_htaccess .= "Options -Indexes\n";
     file_put_contents($app_path . '/.htaccess', $app_htaccess);
 
-    // Public root .htaccess (only if doesn't exist)
+    // Public root .htaccess (SIEMPRE crear con base_path dinámico)
     $public_htaccess_path = $public_path . '/.htaccess';
-    if (!file_exists($public_htaccess_path)) {
-        $base_path = $config['base_path'];
+    $base_path = $config['base_path'];
 
-        // Normalizar base_path para RewriteBase (debe terminar en /)
-        $rewrite_base = $base_path;
-        if ($rewrite_base === '' || $rewrite_base === '/') {
-            $rewrite_base = '/';
-        } else {
-            // Asegurar que empiece con / y termine con /
-            if (substr($rewrite_base, 0, 1) !== '/') {
-                $rewrite_base = '/' . $rewrite_base;
-            }
-            if (substr($rewrite_base, -1) !== '/') {
-                $rewrite_base .= '/';
-            }
+    // Normalizar base_path para RewriteBase (debe terminar en /)
+    $rewrite_base = $base_path;
+    if ($rewrite_base === '' || $rewrite_base === '/') {
+        $rewrite_base = '/';
+    } else {
+        // Asegurar que empiece con / y termine con /
+        if (substr($rewrite_base, 0, 1) !== '/') {
+            $rewrite_base = '/' . $rewrite_base;
         }
-
-        $public_htaccess = "# Public .htaccess\n";
-        $public_htaccess .= "# Routing rules for frontend and admin\n\n";
-
-        $public_htaccess .= "# Protect sensitive files\n";
-        $public_htaccess .= "<FilesMatch \"\\.(json|md|log)$\">\n";
-        $public_htaccess .= "    Order deny,allow\n";
-        $public_htaccess .= "    Deny from all\n";
-        $public_htaccess .= "</FilesMatch>\n\n";
-
-        $public_htaccess .= "# Enable rewrite engine\n";
-        $public_htaccess .= "RewriteEngine On\n";
-        $public_htaccess .= "RewriteBase " . $rewrite_base . "\n\n";
-
-        $public_htaccess .= "# Don't redirect existing files (CSS, JS, images, etc.)\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -f\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Don't redirect existing directories\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -d\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Don't redirect API endpoints\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/api/ [OR]\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/api/\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Don't redirect webhook\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/webhook\\.php$\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Don't redirect admin PHP files\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/.*\\.php$\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Redirect all other requests to index.php\n";
-        $public_htaccess .= "RewriteRule ^ index.php [L]\n";
-
-        file_put_contents($public_htaccess_path, $public_htaccess);
-        error_log("INSTALADOR DEBUG - .htaccess público creado con RewriteBase: " . $rewrite_base);
+        if (substr($rewrite_base, -1) !== '/') {
+            $rewrite_base .= '/';
+        }
     }
+
+    $public_htaccess = "# Public .htaccess\n";
+    $public_htaccess .= "# Routing rules for frontend and admin\n\n";
+
+    $public_htaccess .= "# Protect sensitive files\n";
+    $public_htaccess .= "<FilesMatch \"\\.(json|md|log)$\">\n";
+    $public_htaccess .= "    Order deny,allow\n";
+    $public_htaccess .= "    Deny from all\n";
+    $public_htaccess .= "</FilesMatch>\n\n";
+
+    $public_htaccess .= "# Enable rewrite engine\n";
+    $public_htaccess .= "RewriteEngine On\n";
+    $public_htaccess .= "RewriteBase " . $rewrite_base . "\n\n";
+
+    $public_htaccess .= "# Don't redirect existing files (CSS, JS, images, etc.)\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -f\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Don't redirect existing directories\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -d\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Don't redirect API endpoints\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/api/ [OR]\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/api/\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Don't redirect webhook\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/webhook\\.php$\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Don't redirect admin PHP files\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/.*\\.php$\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Redirect all other requests to index.php\n";
+    $public_htaccess .= "RewriteRule ^ index.php [L]\n";
+
+    file_put_contents($public_htaccess_path, $public_htaccess);
+    error_log("INSTALADOR DEBUG - .htaccess público creado con RewriteBase: " . $rewrite_base);
 }
 
 /**
