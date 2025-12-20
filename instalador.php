@@ -192,25 +192,8 @@ if ($release_dir && $local_app_path) {
     ');
 }
 
-// Comprobar si la carpeta app/ del instalador ya fue movida
-// Esto indica que ya se ejecutó la instalación desde este paquete
-if (file_exists(INSTALLER_APP_PATH . '/config/config.php') && !isset($_GET['force'])) {
-    die('
-    <!DOCTYPE html>
-    <html lang="es"><head><meta charset="UTF-8"><title>Ya Instalado</title></head>
-    <body style="font-family: sans-serif; text-align: center; padding: 50px;">
-        <h1>⚠️ Sistema Ya Instalado desde este Paquete</h1>
-        <p>El sistema ya ha sido instalado desde este paquete.</p>
-        <p><strong>IMPORTANTE:</strong> Elimina el archivo instalador.php por seguridad.</p>
-        <hr><p><a href="index.php">Ir al sitio</a> | <a href="admin/">Admin</a></p>
-        <hr style="margin: 30px 0;">
-        <p style="color: #dc3545; font-size: 14px;">
-            <strong>¿Necesitas reinstalar?</strong><br>
-            <a href="?force=1" style="color: #dc3545; font-weight: bold;">⚠️ Forzar Reinstalación</a>
-        </p>
-    </body></html>
-    ');
-}
+// NOTA: No verificamos si ya se instaló aquí porque la carpeta app/ se mueve durante la instalación.
+// La detección de instalación previa se hace en el Step 2, cuando el usuario especifica las rutas de destino.
 
 session_start();
 
@@ -511,12 +494,24 @@ function move_installation_folders($target_app_path, $target_public_path, $insta
             }
         }
 
-        // Copiar todos los archivos EXCEPTO instalador.php, README, app/ (ya movida)
+        // Copiar todos los archivos EXCEPTO instalador.php, README, app/ (ya movida), carpeta del release
         $items = scandir($source_public);
-        $exclude_items = ['.', '..', 'instalador.php', 'README_INSTALACION.md', 'shop-v2-test.tar.gz', 'app', 'docs'];
+        $exclude_items = ['.', '..', 'instalador.php', 'README_INSTALACION.md', 'app', 'docs'];
 
         foreach ($items as $item) {
             if (in_array($item, $exclude_items)) {
+                continue;
+            }
+
+            // Excluir carpetas del release (shop-v2-*)
+            if (strpos($item, 'shop-v2-') === 0) {
+                error_log("INSTALADOR DEBUG - Saltando carpeta del release: $item");
+                continue;
+            }
+
+            // Excluir archivos tar.gz
+            if (pathinfo($item, PATHINFO_EXTENSION) === 'gz') {
+                error_log("INSTALADOR DEBUG - Saltando archivo tar.gz: $item");
                 continue;
             }
 
