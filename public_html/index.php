@@ -44,9 +44,18 @@ error_log("INDEX.PHP - Line 41: About to parse REQUEST_URI");
 $request_uri = $_SERVER['REQUEST_URI'] ?? '/';
 error_log("INDEX.PHP - Line 43: REQUEST_URI = " . $request_uri);
 
-// Remove /shopv2 prefix and query string
-$route = preg_replace('#^/shopv2#', '', parse_url($request_uri, PHP_URL_PATH));
-error_log("INDEX.PHP - Line 47: After removing /shopv2 prefix, route = " . ($route ?: 'EMPTY'));
+// Remove base_path prefix dynamically (set by installer)
+$base_path = $config['base_path'] ?? '';
+$route = parse_url($request_uri, PHP_URL_PATH);
+
+// Remove base_path prefix if it exists and is not root
+if ($base_path && $base_path !== '/' && $base_path !== '') {
+    $pattern = '#^' . preg_quote($base_path, '#') . '#';
+    $route = preg_replace($pattern, '', $route);
+    error_log("INDEX.PHP - Line 47: After removing base_path '$base_path' prefix, route = " . ($route ?: 'EMPTY'));
+} else {
+    error_log("INDEX.PHP - Line 47: No base_path to remove (base_path = '$base_path'), route = " . ($route ?: 'EMPTY'));
+}
 
 $route = $route ?: '/';
 error_log("INDEX.PHP - Line 50: Final route = " . $route);

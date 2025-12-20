@@ -6,13 +6,46 @@
  * IMPORTANTE: Este archivo se auto-elimina después de la instalación
  */
 
-// Detectar carpeta app/ del paquete
-// El contenido público está directamente en __DIR__ (no en subcarpeta public_html/)
-$local_app_path = __DIR__ . '/app';
+// Detectar carpeta del release
+// Estructura esperada:
+// - instalador.php (este archivo, en la raíz)
+// - shop-v2-vX.X.X/ (carpeta del release con app/ y archivos públicos dentro)
 $current_dir = __DIR__;
+$release_dir = null;
+$local_app_path = null;
+$local_public_path = null;
 
-if (file_exists($local_app_path) && is_dir($local_app_path)) {
-    // Instalación desde paquete descargado
+// Buscar carpeta del release (shop-v2-*)
+$items = scandir($current_dir);
+foreach ($items as $item) {
+    if ($item === '.' || $item === '..') continue;
+
+    $item_path = $current_dir . '/' . $item;
+
+    // Buscar carpeta que empiece con "shop-v2-" y tenga app/ dentro
+    if (is_dir($item_path) && strpos($item, 'shop-v2-') === 0) {
+        $app_path = $item_path . '/app';
+        if (is_dir($app_path)) {
+            $release_dir = $item_path;
+            $local_app_path = $app_path;
+            $local_public_path = $item_path;
+            break;
+        }
+    }
+}
+
+// Si no se encontró carpeta del release, buscar app/ directamente (extracción manual)
+if (!$release_dir) {
+    $direct_app_path = $current_dir . '/app';
+    if (is_dir($direct_app_path)) {
+        $release_dir = $current_dir;
+        $local_app_path = $direct_app_path;
+        $local_public_path = $current_dir;
+    }
+}
+
+if ($release_dir && $local_app_path) {
+    // Instalación válida detectada
     $parent_dir = dirname($current_dir);
 
     // Intentar detectar si estamos en public_html
@@ -29,7 +62,6 @@ if (file_exists($local_app_path) && is_dir($local_app_path)) {
     }
 
     // La ruta pública es donde está actualmente el instalador
-    // (los archivos públicos YA están aquí, solo se moverá la carpeta app/)
     $suggested_public_path = $current_dir;
 
     // Auto-detectar base_path desde la URL
@@ -40,7 +72,7 @@ if (file_exists($local_app_path) && is_dir($local_app_path)) {
     }
 
     define('INSTALLER_APP_PATH', $local_app_path);
-    define('INSTALLER_PUBLIC_PATH', $current_dir);  // Archivos públicos YA están aquí
+    define('INSTALLER_PUBLIC_PATH', $local_public_path);
     define('INSTALLER_SUGGESTED_APP_PATH', $suggested_app_path);
     define('INSTALLER_SUGGESTED_PUBLIC_PATH', $suggested_public_path);
     define('INSTALLER_SUGGESTED_BASE_PATH', $suggested_base_path);
@@ -52,9 +84,15 @@ if (file_exists($local_app_path) && is_dir($local_app_path)) {
     // Listar lo que SÍ existe en el directorio actual
     $existing_items = array_diff(scandir($current_dir), ['.', '..']);
     $existing_list = '';
+    $has_release_folder = false;
     foreach ($existing_items as $item) {
         $is_dir = is_dir($current_dir . '/' . $item);
         $existing_list .= ($is_dir ? '📁 ' : '📄 ') . htmlspecialchars($item) . '<br>';
+
+        // Detectar si hay carpeta del release (shop-v2-*)
+        if ($is_dir && strpos($item, 'shop-v2-') === 0) {
+            $has_release_folder = true;
+        }
     }
 
     // Intentar detectar si ya se instaló previamente leyendo config.php de posibles ubicaciones
@@ -97,12 +135,34 @@ if (file_exists($local_app_path) && is_dir($local_app_path)) {
         }
     }
 
+    // Mensaje especial si se detectó instalación previa
+    $title = $has_release_folder
+        ? '✅ Sistema Ya Instalado'
+        : '⚠️ Error: Falta la Carpeta app/';
+
+    $main_message = $has_release_folder
+        ? '<div style="background: #d4edda; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+            <h3 style="margin-top: 0; color: #155724;">✅ El sistema ya fue instalado desde este paquete</h3>
+            <p style="color: #155724; margin-bottom: 10px;">
+                La carpeta <strong>app/</strong> ya fue movida a su ubicación final durante la instalación.<br>
+                Esto es normal después de una instalación exitosa.
+            </p>
+            <p style="color: #155724; margin: 0;">
+                <strong>¿Qué hacer ahora?</strong><br>
+                • Puedes eliminar el instalador.php y la carpeta shop-v2-* por seguridad<br>
+                • El sistema está funcionando en las rutas que configuraste durante la instalación
+            </p>
+        </div>'
+        : '';
+
     die('
     <!DOCTYPE html>
-    <html lang="es"><head><meta charset="UTF-8"><title>Error - Estructura Incompleta</title></head>
-    <body style="font-family: sans-serif; padding: 50px; background: #f8d7da;">
+    <html lang="es"><head><meta charset="UTF-8"><title>' . $title . '</title></head>
+    <body style="font-family: sans-serif; padding: 50px; ' . ($has_release_folder ? 'background: #d4edda;' : 'background: #f8d7da;') . '">
         <div style="max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
-            <h1 style="color: #721c24;">⚠️ Error: Falta la Carpeta app/</h1>
+            <h1 style="color: ' . ($has_release_folder ? '#155724' : '#721c24') . ';">' . $title . '</h1>
+
+            ' . $main_message . '
 
             ' . $installation_info . '
 
@@ -160,24 +220,8 @@ if (file_exists($local_app_path) && is_dir($local_app_path)) {
     ');
 }
 
-// Prevent re-installation (allow force reinstall with ?force=1)
-if (file_exists(INSTALLER_APP_PATH . '/config/config.php') && !isset($_GET['force'])) {
-    die('
-    <!DOCTYPE html>
-    <html lang="es"><head><meta charset="UTF-8"><title>Ya Instalado</title></head>
-    <body style="font-family: sans-serif; text-align: center; padding: 50px;">
-        <h1>⚠️ Sistema Ya Instalado</h1>
-        <p>El sistema ya ha sido instalado.</p>
-        <p><strong>IMPORTANTE:</strong> Elimina el archivo instalador.php por seguridad.</p>
-        <hr><p><a href="public_html/">Ir al sitio</a> | <a href="public_html/admin/">Admin</a></p>
-        <hr style="margin: 30px 0;">
-        <p style="color: #dc3545; font-size: 14px;">
-            <strong>¿Necesitas reinstalar?</strong><br>
-            <a href="?force=1" style="color: #dc3545; font-weight: bold;">⚠️ Forzar Reinstalación</a>
-        </p>
-    </body></html>
-    ');
-}
+// NOTA: No verificamos si ya se instaló aquí porque la carpeta app/ se mueve durante la instalación.
+// La detección de instalación previa se hace en el Step 2, cuando el usuario especifica las rutas de destino.
 
 session_start();
 
@@ -189,8 +233,9 @@ $success = false;
 // Step 5: Self-delete installer
 if ($step == 5 && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'YES') {
+        $base_path = $_SESSION['config']['base_path'] ?? '';
         delete_installer();
-        header('Location: public_html/admin/login.php');
+        header('Location: ' . $base_path . '/admin/login.php');
         exit;
     }
 }
@@ -217,7 +262,51 @@ if ($step == 2 && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($_SESSION['config']['public_path'])) $errors[] = 'Ruta pública requerida';
 
     if (empty($errors)) {
-        $step = 3; // Go to admin form
+        // Detectar si existe una instalación previa en las rutas especificadas
+        $app_path = $_SESSION['config']['app_path'];
+        $public_path = $_SESSION['config']['public_path'];
+
+        $previous_install_detected = detect_previous_installation($app_path, $public_path);
+
+        if ($previous_install_detected) {
+            $_SESSION['previous_install_info'] = $previous_install_detected;
+            $step = '2b'; // Mostrar opciones de reinstalación
+        } else {
+            $step = 3; // Go to admin form
+        }
+    }
+}
+
+// Step 2b: Handle reinstall options
+if ($step == '2b' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install_mode'])) {
+    $_SESSION['config']['install_mode'] = $_POST['install_mode'];
+
+    if ($_POST['install_mode'] === 'reinstall') {
+        $_SESSION['config']['install_mode'] = 'reinstall';
+        $step = 3; // Ir al formulario de admin (usará los datos existentes si hay)
+    } elseif ($_POST['install_mode'] === 'new_version') {
+        $_SESSION['config']['install_mode'] = 'new_version';
+
+        // Validar que no haya conflictos
+        $conflicts = check_installation_conflicts($_SESSION['config']['app_path'], $_SESSION['config']['public_path']);
+
+        if (!empty($conflicts)) {
+            $_SESSION['conflicts'] = $conflicts;
+            $step = '2c'; // Mostrar advertencia de conflictos
+        } else {
+            $step = 3; // Continuar con instalación nueva
+        }
+    }
+}
+
+// Step 2c: Confirm conflicts
+if ($step == '2c' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_overwrite'])) {
+    if ($_POST['confirm_overwrite'] === 'YES') {
+        $step = 3; // Continuar con instalación
+    } else {
+        $step = 1; // Volver al inicio
+        unset($_SESSION['config']);
+        unset($_SESSION['conflicts']);
     }
 }
 
@@ -255,41 +344,177 @@ if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_u
 }
 
 /**
- * Move installation folders from temporary location to final location
+ * Detect previous installation in specified paths
+ * Returns array with installation info if detected, false otherwise
  */
-function move_installation_folders($target_app_path, $target_public_path) {
-    $source_app = INSTALLER_APP_PATH;
-    $source_public = INSTALLER_PUBLIC_PATH; // Ahora es __DIR__ (archivos públicos ya están aquí)
+function detect_previous_installation($app_path, $public_path) {
+    $config_file = $app_path . '/config/config.php';
+    $bootstrap_file = $app_path . '/bootstrap.php';
+    $index_file = $public_path . '/index.php';
 
-    // DEBUG: Log move operations
+    // Verificar si existe configuración en la ruta de aplicación
+    $app_exists = file_exists($config_file) || file_exists($bootstrap_file);
+
+    // Verificar si existen archivos públicos en la ruta pública
+    $public_exists = file_exists($index_file);
+
+    if ($app_exists || $public_exists) {
+        $info = [
+            'app_path' => $app_path,
+            'public_path' => $public_path,
+            'has_config' => file_exists($config_file),
+            'has_bootstrap' => file_exists($bootstrap_file),
+            'has_index' => file_exists($index_file),
+        ];
+
+        // Intentar leer configuración existente
+        if (file_exists($config_file)) {
+            $existing_config = @include($config_file);
+            if (is_array($existing_config)) {
+                $info['existing_config'] = $existing_config;
+            }
+        }
+
+        return $info;
+    }
+
+    return false;
+}
+
+/**
+ * Check for conflicts when installing as new version
+ * Returns array of conflicting files/directories
+ */
+function check_installation_conflicts($app_path, $public_path) {
+    $conflicts = [];
+
+    // Verificar archivos críticos que se sobrescribirían
+    $critical_app_files = [
+        '/config/config.php',
+        '/bootstrap.php',
+        '/includes',
+        '/pages'
+    ];
+
+    $critical_public_files = [
+        '/index.php',
+        '/admin',
+        '/api',
+        '/assets'
+    ];
+
+    foreach ($critical_app_files as $file) {
+        if (file_exists($app_path . $file)) {
+            $conflicts[] = 'app:' . $file;
+        }
+    }
+
+    foreach ($critical_public_files as $file) {
+        if (file_exists($public_path . $file)) {
+            $conflicts[] = 'public:' . $file;
+        }
+    }
+
+    return $conflicts;
+}
+
+/**
+ * Copy directory recursively, excluding JSON files if specified
+ */
+function copy_directory_recursive($source, $dest, $exclude_json = false, $exclude_patterns = []) {
+    if (!is_dir($source)) {
+        return false;
+    }
+
+    if (!is_dir($dest)) {
+        mkdir($dest, 0755, true);
+    }
+
+    $dir = opendir($source);
+    while (($file = readdir($dir)) !== false) {
+        if ($file === '.' || $file === '..') {
+            continue;
+        }
+
+        $source_path = $source . '/' . $file;
+        $dest_path = $dest . '/' . $file;
+
+        // Check exclude patterns
+        $should_exclude = false;
+        foreach ($exclude_patterns as $pattern) {
+            if (fnmatch($pattern, $file)) {
+                $should_exclude = true;
+                break;
+            }
+        }
+
+        if ($should_exclude) {
+            continue;
+        }
+
+        // Exclude JSON files if specified
+        if ($exclude_json && pathinfo($file, PATHINFO_EXTENSION) === 'json') {
+            error_log("INSTALADOR DEBUG - Saltando archivo JSON: $source_path");
+            continue;
+        }
+
+        if (is_dir($source_path)) {
+            copy_directory_recursive($source_path, $dest_path, $exclude_json, $exclude_patterns);
+        } else {
+            copy($source_path, $dest_path);
+        }
+    }
+
+    closedir($dir);
+    return true;
+}
+
+/**
+ * Move installation folders from temporary location to final location
+ * Handles reinstall mode (preserves JSON) and new version mode
+ */
+function move_installation_folders($target_app_path, $target_public_path, $install_mode = 'new') {
+    $source_app = INSTALLER_APP_PATH;
+    $source_public = INSTALLER_PUBLIC_PATH;
+
     error_log("INSTALADOR DEBUG - move_installation_folders():");
+    error_log("  Modo: " . $install_mode);
     error_log("  Origen app: " . $source_app);
     error_log("  Destino app: " . $target_app_path);
     error_log("  Origen public: " . $source_public);
     error_log("  Destino public: " . $target_public_path);
 
-    // PASO 1: Mover carpeta app/ a su ubicación final
-    // Crear directorio padre si no existe
-    $parent_dir = dirname($target_app_path);
-    if (!is_dir($parent_dir)) {
-        if (!mkdir($parent_dir, 0755, true)) {
-            error_log("No se pudo crear directorio padre: $parent_dir");
+    // Crear directorio de destino si no existe
+    if (!is_dir($target_app_path)) {
+        if (!mkdir($target_app_path, 0755, true)) {
+            error_log("No se pudo crear directorio app: $target_app_path");
             return false;
         }
     }
 
-    // Mover carpeta app/
-    if (!rename($source_app, $target_app_path)) {
-        error_log("No se pudo mover $source_app a $target_app_path");
-        return false;
+    // PASO 1: Copiar contenido de app/ (NO la carpeta app/ en sí)
+    if ($install_mode === 'reinstall') {
+        // Modo reinstalación: excluir archivos JSON
+        error_log("INSTALADOR DEBUG - Copiando app/ en modo REINSTALL (sin JSON)");
+        copy_directory_recursive($source_app, $target_app_path, true); // exclude_json = true
+    } else {
+        // Modo instalación nueva: copiar todo
+        error_log("INSTALADOR DEBUG - Copiando app/ en modo NUEVO");
+        copy_directory_recursive($source_app, $target_app_path, false);
     }
-    error_log("INSTALADOR DEBUG - app/ movida exitosamente");
 
-    // PASO 2: Mover archivos públicos SOLO si la ubicación es diferente
+    // Eliminar carpeta app/ del origen después de copiar
+    if (is_dir($source_app)) {
+        delete_directory_recursive($source_app);
+    }
+
+    error_log("INSTALADOR DEBUG - Contenido de app/ copiado exitosamente");
+
+    // PASO 2: Copiar archivos públicos (NO crear carpeta public_html/)
+    // Solo si la ubicación es diferente al directorio actual
     if (realpath($source_public) !== realpath($target_public_path)) {
-        error_log("INSTALADOR DEBUG - Moviendo archivos públicos a ubicación diferente");
+        error_log("INSTALADOR DEBUG - Copiando archivos públicos a ubicación diferente");
 
-        // Si el directorio de destino no existe, crear
         if (!is_dir($target_public_path)) {
             if (!mkdir($target_public_path, 0755, true)) {
                 error_log("No se pudo crear directorio público: $target_public_path");
@@ -297,29 +522,77 @@ function move_installation_folders($target_app_path, $target_public_path) {
             }
         }
 
-        // Mover todos los archivos EXCEPTO instalador.php y README
+        // Copiar todos los archivos EXCEPTO instalador.php, README, app/ (ya movida), carpeta del release
         $items = scandir($source_public);
+        $exclude_items = ['.', '..', 'instalador.php', 'README_INSTALACION.md', 'app', 'docs'];
+
         foreach ($items as $item) {
-            if ($item === '.' || $item === '..' ||
-                $item === 'instalador.php' ||
-                $item === 'README_INSTALACION.md' ||
-                $item === 'shop-v2-test.tar.gz') {
+            if (in_array($item, $exclude_items)) {
+                continue;
+            }
+
+            // Excluir carpetas del release (shop-v2-*)
+            if (strpos($item, 'shop-v2-') === 0) {
+                error_log("INSTALADOR DEBUG - Saltando carpeta del release: $item");
+                continue;
+            }
+
+            // Excluir archivos tar.gz
+            if (pathinfo($item, PATHINFO_EXTENSION) === 'gz') {
+                error_log("INSTALADOR DEBUG - Saltando archivo tar.gz: $item");
                 continue;
             }
 
             $source_item = $source_public . '/' . $item;
             $target_item = $target_public_path . '/' . $item;
 
-            if (!rename($source_item, $target_item)) {
-                error_log("No se pudo mover $source_item a $target_item");
-                return false;
+            if (is_dir($source_item)) {
+                copy_directory_recursive($source_item, $target_item);
+                delete_directory_recursive($source_item);
+            } else {
+                if ($install_mode === 'reinstall') {
+                    // En reinstall, solo copiar archivos que no sean JSON
+                    if (pathinfo($item, PATHINFO_EXTENSION) !== 'json') {
+                        copy($source_item, $target_item);
+                    }
+                } else {
+                    copy($source_item, $target_item);
+                }
             }
         }
-        error_log("INSTALADOR DEBUG - Archivos públicos movidos exitosamente");
+
+        error_log("INSTALADOR DEBUG - Archivos públicos copiados exitosamente");
     } else {
-        error_log("INSTALADOR DEBUG - Archivos públicos ya están en ubicación final, no se mueven");
+        error_log("INSTALADOR DEBUG - Archivos públicos ya están en ubicación final");
     }
 
+    return true;
+}
+
+/**
+ * Delete directory recursively
+ */
+function delete_directory_recursive($dir) {
+    if (!is_dir($dir)) {
+        return false;
+    }
+
+    $items = scandir($dir);
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') {
+            continue;
+        }
+
+        $path = $dir . '/' . $item;
+
+        if (is_dir($path)) {
+            delete_directory_recursive($path);
+        } else {
+            unlink($path);
+        }
+    }
+
+    rmdir($dir);
     return true;
 }
 
@@ -328,39 +601,57 @@ function move_installation_folders($target_app_path, $target_public_path) {
  */
 function install_system($config) {
     try {
-        // DEBUG: Log config received in install_system
         error_log("INSTALADOR DEBUG - install_system() recibió config:");
         error_log("  app_path: " . ($config['app_path'] ?? 'NO DEFINIDO'));
         error_log("  public_path: " . ($config['public_path'] ?? 'NO DEFINIDO'));
         error_log("  app_url: " . ($config['app_url'] ?? 'NO DEFINIDO'));
         error_log("  base_path: " . ($config['base_path'] ?? 'NO DEFINIDO'));
+        error_log("  install_mode: " . ($config['install_mode'] ?? 'new'));
 
         $app_path = $config['app_path'];
         $public_path = $config['public_path'];
+        $install_mode = $config['install_mode'] ?? 'new';
 
-        // PASO 1: Mover carpetas desde ubicación temporal a ubicación final
-        if (!move_installation_folders($app_path, $public_path)) {
-            throw new Exception('Error al mover las carpetas de instalación');
+        // PASO 1: Copiar archivos desde el paquete a ubicación final
+        if (!move_installation_folders($app_path, $public_path, $install_mode)) {
+            throw new Exception('Error al copiar las carpetas de instalación');
         }
 
         // Create directory structure
         create_directory_structure($app_path, $public_path);
 
-        // Generate security keys
-        $secret_key = bin2hex(random_bytes(32));
-        $webhook_secret = bin2hex(random_bytes(16));
-        $bypass_code = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 8);
+        // PASO 2: Configuración según modo de instalación
+        if ($install_mode === 'reinstall') {
+            error_log("INSTALADOR DEBUG - Modo REINSTALL: Preservando archivos JSON existentes");
 
-        // Create config.php
-        create_config_php($app_path, $config, $secret_key);
+            // En reinstall: NO sobrescribir config.php ni JSON
+            // Solo actualizar si no existen (por si acaso)
 
-        // Create all configuration JSON files
-        create_configuration_json_files($app_path, $config, $webhook_secret, $bypass_code);
+            if (!file_exists($app_path . '/config/config.php')) {
+                $secret_key = bin2hex(random_bytes(32));
+                create_config_php($app_path, $config, $secret_key);
+            }
 
-        // Create all data JSON files
-        create_data_json_files($app_path, $config);
+            // No crear JSON files en reinstall - se preservan los existentes
 
-        // Create .htaccess files
+        } else {
+            // Instalación nueva o nueva versión
+            error_log("INSTALADOR DEBUG - Modo NUEVO: Creando archivos de configuración");
+
+            // Generate security keys
+            $secret_key = bin2hex(random_bytes(32));
+            $webhook_secret = bin2hex(random_bytes(16));
+            $bypass_code = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 8);
+
+            // Create config.php (siempre en instalación nueva)
+            create_config_php($app_path, $config, $secret_key);
+
+            // Create JSON files solo si no existen (para nueva versión, crear dummy si falta)
+            create_configuration_json_files_if_needed($app_path, $config, $webhook_secret, $bypass_code);
+            create_data_json_files_if_needed($app_path, $config);
+        }
+
+        // Create .htaccess files (siempre)
         create_htaccess_files($app_path, $public_path, $config);
 
         // Set permissions
@@ -644,6 +935,274 @@ function create_configuration_json_files($app_path, $config, $webhook_secret, $b
 }
 
 /**
+ * Create configuration JSON files only if they don't exist
+ * For new_version mode: creates dummy files if missing
+ */
+function create_configuration_json_files_if_needed($app_path, $config, $webhook_secret, $bypass_code) {
+    $admin_email = $config['admin_email'] ?? 'admin@example.com';
+    $timestamp = date('Y-m-d H:i:s');
+
+    // Helper function to create file only if it doesn't exist
+    $create_if_missing = function($file, $data) {
+        if (!file_exists($file)) {
+            write_json($file, $data);
+        }
+    };
+
+    // site.json
+    $create_if_missing($app_path . '/config/site.json', [
+        'site_name' => 'Mi Tienda',
+        'site_description' => 'Tienda en línea',
+        'site_keywords' => 'ecommerce, tienda, productos',
+        'contact_email' => $admin_email,
+        'contact_phone' => '',
+        'footer_text' => '© ' . date('Y') . ' Mi Tienda. Todos los derechos reservados.',
+        'whatsapp' => [
+            'enabled' => false,
+            'number' => '',
+            'message' => 'Hola, te estoy consultando desde la tienda,',
+            'custom_link' => '',
+            'display_text' => 'Mensaje Whatsapp'
+        ],
+        'telegram' => [
+            'enabled' => false,
+            'bot_token' => '',
+            'chat_id' => ''
+        ],
+        'logo' => [
+            'enabled' => false,
+            'path' => '',
+            'alt' => 'Mi Tienda'
+        ],
+        'site_owner' => '',
+        'whatsapp_number' => '',
+        'meta_tags' => [
+            'og_title' => 'Mi Tienda',
+            'og_type' => 'website',
+            'og_url' => '',
+            'og_url_secure' => '',
+            'og_image' => '',
+            'og_site_name' => 'Mi Tienda',
+            'og_description' => 'Tienda en línea',
+            'content_type' => 'text/html; charset=utf-8',
+            'og_image_width' => '1200',
+            'og_image_height' => '630',
+            'twitter_card' => 'summary_large_image'
+        ]
+    ]);
+
+    // email.json
+    $create_if_missing($app_path . '/config/email.json', [
+        'enabled' => false,
+        'method' => 'smtp',
+        'from_email' => $admin_email,
+        'from_name' => 'Mi Tienda',
+        'admin_email' => $admin_email,
+        'notifications' => [
+            'customer' => [
+                'order_created' => true,
+                'payment_approved' => true,
+                'payment_rejected' => false,
+                'payment_pending' => false,
+                'order_shipped' => true,
+                'chargeback_notice' => false
+            ],
+            'admin' => [
+                'new_order' => true,
+                'payment_approved' => true,
+                'chargeback_alert' => true,
+                'low_stock_alert' => false
+            ]
+        ]
+    ]);
+
+    // payment.json
+    $create_if_missing($app_path . '/config/payment.json', [
+        'mercadopago' => [
+            'enabled' => false,
+            'access_token' => '',
+            'public_key' => '',
+            'webhook_secret' => $webhook_secret,
+            'sandbox_mode' => false
+        ],
+        'payment_methods' => [
+            'credit_card' => true,
+            'debit_card' => true,
+            'bank_transfer' => false,
+            'cash' => false
+        ]
+    ]);
+
+    // currency.json
+    $create_if_missing($app_path . '/config/currency.json', [
+        'primary' => 'ARS',
+        'secondary' => 'USD',
+        'exchange_rate' => 1500,
+        'auto_update' => false,
+        'update_source' => 'dolarapi',
+        'update_type' => 'blue',
+        'last_update' => $timestamp
+    ]);
+
+    // theme.json
+    $create_if_missing($app_path . '/config/theme.json', ['active_theme' => 'minimal']);
+
+    // maintenance.json
+    $create_if_missing($app_path . '/config/maintenance.json', [
+        'enabled' => false,
+        'bypass_code' => $bypass_code,
+        'message' => 'Sitio en mantenimiento. Volveremos pronto.'
+    ]);
+
+    // carousel.json
+    $create_if_missing($app_path . '/config/carousel.json', ['slides' => []]);
+
+    // hero.json
+    $create_if_missing($app_path . '/config/hero.json', [
+        'enabled' => false,
+        'title' => 'Bienvenido a Mi Tienda',
+        'subtitle' => 'Descubre nuestros productos',
+        'image' => '',
+        'cta_text' => 'Ver Productos',
+        'cta_link' => '/productos'
+    ]);
+
+    // footer.json
+    $create_if_missing($app_path . '/config/footer.json', [
+        'columns' => [
+            ['title' => 'Acerca de', 'links' => []],
+            ['title' => 'Enlaces', 'links' => []],
+            ['title' => 'Contacto', 'links' => []]
+        ],
+        'social_media' => [
+            'facebook' => '',
+            'instagram' => '',
+            'twitter' => '',
+            'youtube' => ''
+        ]
+    ]);
+
+    // telegram.json
+    $create_if_missing($app_path . '/config/telegram.json', [
+        'enabled' => false,
+        'bot_token' => '',
+        'chat_id' => '',
+        'notifications' => [
+            'new_order' => false,
+            'payment_approved' => false,
+            'payment_rejected' => false,
+            'low_stock' => false
+        ]
+    ]);
+
+    // analytics.json
+    $create_if_missing($app_path . '/config/analytics.json', [
+        'google_analytics' => ['enabled' => false, 'tracking_id' => ''],
+        'facebook_pixel' => ['enabled' => false, 'pixel_id' => '']
+    ]);
+
+    // products-heading.json
+    $create_if_missing($app_path . '/config/products-heading.json', [
+        'enabled' => false,
+        'title' => 'Nuestros Productos',
+        'subtitle' => 'Descubre nuestra selección'
+    ]);
+
+    // strings.json
+    $create_if_missing($app_path . '/config/strings.json', [
+        'cart' => [
+            'add_to_cart' => 'Agregar al Carrito',
+            'remove_from_cart' => 'Quitar del Carrito',
+            'empty_cart' => 'Tu carrito está vacío',
+            'continue_shopping' => 'Continuar Comprando',
+            'proceed_to_checkout' => 'Proceder al Pago'
+        ],
+        'checkout' => [
+            'shipping_info' => 'Información de Envío',
+            'payment_method' => 'Método de Pago',
+            'order_summary' => 'Resumen del Pedido'
+        ],
+        'common' => [
+            'loading' => 'Cargando...',
+            'error' => 'Error',
+            'success' => 'Éxito',
+            'cancel' => 'Cancelar',
+            'confirm' => 'Confirmar'
+        ]
+    ]);
+
+    // dashboard.json
+    $create_if_missing($app_path . '/config/dashboard.json', [
+        'widgets' => [
+            'sales' => true,
+            'orders' => true,
+            'products' => true,
+            'customers' => false
+        ]
+    ]);
+}
+
+/**
+ * Create data JSON files only if they don't exist
+ */
+function create_data_json_files_if_needed($app_path, $config) {
+    $timestamp = date('Y-m-d H:i:s');
+
+    // Helper function
+    $create_if_missing = function($file, $data) {
+        if (!file_exists($file)) {
+            write_json($file, $data);
+        }
+    };
+
+    // users.json - with admin user
+    if (!file_exists($app_path . '/data/users.json')) {
+        $users = [
+            'users' => [[
+                'id' => 'admin-' . uniqid() . '-' . bin2hex(random_bytes(4)),
+                'username' => $config['admin_username'] ?? 'admin',
+                'password' => password_hash($config['admin_password'] ?? 'admin123', PASSWORD_ARGON2ID),
+                'email' => $config['admin_email'] ?? 'admin@example.com',
+                'name' => '',
+                'role' => 'admin',
+                'created_at' => $timestamp,
+                'last_login' => null
+            ]]
+        ];
+        write_json($app_path . '/data/users.json', $users);
+    }
+
+    // All empty data files
+    $create_if_missing($app_path . '/data/products.json', ['products' => []]);
+    $create_if_missing($app_path . '/data/orders.json', ['orders' => []]);
+    $create_if_missing($app_path . '/data/archived_orders.json', ['orders' => []]);
+    $create_if_missing($app_path . '/data/reviews.json', ['reviews' => []]);
+    $create_if_missing($app_path . '/data/coupons.json', ['coupons' => []]);
+    $create_if_missing($app_path . '/data/promotions.json', ['promotions' => []]);
+    $create_if_missing($app_path . '/data/wishlists.json', ['wishlists' => []]);
+    $create_if_missing($app_path . '/data/newsletters.json', ['subscribers' => []]);
+    $create_if_missing($app_path . '/data/admin_logs.json', ['logs' => []]);
+    $create_if_missing($app_path . '/data/stock_logs.json', ['logs' => []]);
+    $create_if_missing($app_path . '/data/visits.json', ['visits' => []]);
+    $create_if_missing($app_path . '/data/webhook_log.json', ['logs' => []]);
+    $create_if_missing($app_path . '/data/webhook_rate_limit.json', ['limits' => []]);
+    $create_if_missing($app_path . '/data/mp_preference_log.json', ['preferences' => []]);
+    $create_if_missing($app_path . '/data/mp_logs.json', ['logs' => []]);
+
+    // install_log.json
+    $create_if_missing($app_path . '/data/install_log.json', [
+        'installed_at' => $timestamp,
+        'installer_version' => '2.0',
+        'environment' => detect_environment(),
+        'paths' => [
+            'app_path' => $config['app_path'] ?? '',
+            'public_path' => $config['public_path'] ?? ''
+        ],
+        'admin_user' => $config['admin_username'] ?? 'admin'
+    ]);
+}
+
+/**
  * Create all data JSON files
  */
 function create_data_json_files($app_path, $config) {
@@ -705,65 +1264,63 @@ function create_htaccess_files($app_path, $public_path, $config) {
     $app_htaccess .= "Options -Indexes\n";
     file_put_contents($app_path . '/.htaccess', $app_htaccess);
 
-    // Public root .htaccess (only if doesn't exist)
+    // Public root .htaccess (SIEMPRE crear con base_path dinámico)
     $public_htaccess_path = $public_path . '/.htaccess';
-    if (!file_exists($public_htaccess_path)) {
-        $base_path = $config['base_path'];
+    $base_path = $config['base_path'];
 
-        // Normalizar base_path para RewriteBase (debe terminar en /)
-        $rewrite_base = $base_path;
-        if ($rewrite_base === '' || $rewrite_base === '/') {
-            $rewrite_base = '/';
-        } else {
-            // Asegurar que empiece con / y termine con /
-            if (substr($rewrite_base, 0, 1) !== '/') {
-                $rewrite_base = '/' . $rewrite_base;
-            }
-            if (substr($rewrite_base, -1) !== '/') {
-                $rewrite_base .= '/';
-            }
+    // Normalizar base_path para RewriteBase (debe terminar en /)
+    $rewrite_base = $base_path;
+    if ($rewrite_base === '' || $rewrite_base === '/') {
+        $rewrite_base = '/';
+    } else {
+        // Asegurar que empiece con / y termine con /
+        if (substr($rewrite_base, 0, 1) !== '/') {
+            $rewrite_base = '/' . $rewrite_base;
         }
-
-        $public_htaccess = "# Public .htaccess\n";
-        $public_htaccess .= "# Routing rules for frontend and admin\n\n";
-
-        $public_htaccess .= "# Protect sensitive files\n";
-        $public_htaccess .= "<FilesMatch \"\\.(json|md|log)$\">\n";
-        $public_htaccess .= "    Order deny,allow\n";
-        $public_htaccess .= "    Deny from all\n";
-        $public_htaccess .= "</FilesMatch>\n\n";
-
-        $public_htaccess .= "# Enable rewrite engine\n";
-        $public_htaccess .= "RewriteEngine On\n";
-        $public_htaccess .= "RewriteBase " . $rewrite_base . "\n\n";
-
-        $public_htaccess .= "# Don't redirect existing files (CSS, JS, images, etc.)\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -f\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Don't redirect existing directories\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -d\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Don't redirect API endpoints\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/api/ [OR]\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/api/\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Don't redirect webhook\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/webhook\\.php$\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Don't redirect admin PHP files\n";
-        $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/.*\\.php$\n";
-        $public_htaccess .= "RewriteRule ^ - [L]\n\n";
-
-        $public_htaccess .= "# Redirect all other requests to index.php\n";
-        $public_htaccess .= "RewriteRule ^ index.php [L]\n";
-
-        file_put_contents($public_htaccess_path, $public_htaccess);
-        error_log("INSTALADOR DEBUG - .htaccess público creado con RewriteBase: " . $rewrite_base);
+        if (substr($rewrite_base, -1) !== '/') {
+            $rewrite_base .= '/';
+        }
     }
+
+    $public_htaccess = "# Public .htaccess\n";
+    $public_htaccess .= "# Routing rules for frontend and admin\n\n";
+
+    $public_htaccess .= "# Protect sensitive files\n";
+    $public_htaccess .= "<FilesMatch \"\\.(json|md|log)$\">\n";
+    $public_htaccess .= "    Order deny,allow\n";
+    $public_htaccess .= "    Deny from all\n";
+    $public_htaccess .= "</FilesMatch>\n\n";
+
+    $public_htaccess .= "# Enable rewrite engine\n";
+    $public_htaccess .= "RewriteEngine On\n";
+    $public_htaccess .= "RewriteBase " . $rewrite_base . "\n\n";
+
+    $public_htaccess .= "# Don't redirect existing files (CSS, JS, images, etc.)\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -f\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Don't redirect existing directories\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -d\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Don't redirect API endpoints\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/api/ [OR]\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/api/\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Don't redirect webhook\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/webhook\\.php$\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Don't redirect admin PHP files\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/.*\\.php$\n";
+    $public_htaccess .= "RewriteRule ^ - [L]\n\n";
+
+    $public_htaccess .= "# Redirect all other requests to index.php\n";
+    $public_htaccess .= "RewriteRule ^ index.php [L]\n";
+
+    file_put_contents($public_htaccess_path, $public_htaccess);
+    error_log("INSTALADOR DEBUG - .htaccess público creado con RewriteBase: " . $rewrite_base);
 }
 
 /**
@@ -1051,7 +1608,7 @@ function delete_installer() {
             <h1>🔒 Instalador Shop V2</h1>
             <p>Instalación rápida en 3 pasos</p>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: <?php echo ($step == 1 ? 20 : ($step == 2 ? 40 : ($step == 3 ? 60 : ($step == 4 ? 80 : 100)))); ?>%;"></div>
+                <div class="progress-fill" style="width: <?php echo ($step == 1 ? 20 : ($step == 2 || $step == '2b' || $step == '2c' ? 40 : ($step == 3 ? 60 : ($step == 4 ? 80 : 100)))); ?>%;"></div>
             </div>
         </div>
 
@@ -1162,6 +1719,106 @@ function delete_installer() {
                     <a href="?step=1" class="btn-secondary">← Volver</a>
                 <?php endif; ?>
 
+            <?php elseif ($step == '2b'): ?>
+                <!-- Step 2b: Previous installation detected - Choose install mode -->
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                    <h3 style="color: #856404; margin-top: 0;">⚠️ Instalación Previa Detectada</h3>
+                    <p style="color: #856404; margin: 10px 0;">
+                        Se detectó una instalación existente en las rutas especificadas:
+                    </p>
+                    <div style="background: white; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 13px;">
+                        <strong>Ruta privada:</strong> <?php echo htmlspecialchars($_SESSION['config']['app_path']); ?><br>
+                        <?php if (isset($_SESSION['previous_install_info']['has_config']) && $_SESSION['previous_install_info']['has_config']): ?>
+                            ✅ config.php encontrado<br>
+                        <?php endif; ?>
+                        <?php if (isset($_SESSION['previous_install_info']['has_bootstrap']) && $_SESSION['previous_install_info']['has_bootstrap']): ?>
+                            ✅ bootstrap.php encontrado<br>
+                        <?php endif; ?>
+                        <br>
+                        <strong>Ruta pública:</strong> <?php echo htmlspecialchars($_SESSION['config']['public_path']); ?><br>
+                        <?php if (isset($_SESSION['previous_install_info']['has_index']) && $_SESSION['previous_install_info']['has_index']): ?>
+                            ✅ index.php encontrado
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <form method="POST" action="?step=2b">
+                    <h3 style="margin-bottom: 20px; color: #333;">Selecciona el Modo de Instalación</h3>
+
+                    <div style="border: 2px solid #667eea; border-radius: 8px; padding: 20px; margin-bottom: 20px; cursor: pointer;" onclick="document.getElementById('mode_reinstall').checked = true;">
+                        <label style="cursor: pointer; display: flex; align-items: start;">
+                            <input type="radio" name="install_mode" id="mode_reinstall" value="reinstall" style="margin-top: 5px; margin-right: 15px;" checked>
+                            <div>
+                                <strong style="font-size: 16px; color: #667eea;">🔄 Reinstalar (Actualización)</strong>
+                                <p style="margin: 10px 0 0 0; color: #555; font-size: 14px;">
+                                    Actualiza los archivos del sistema sin perder tu configuración.<br>
+                                    <strong style="color: #28a745;">✅ Sobrescribe:</strong> Archivos PHP, JS, CSS, imágenes<br>
+                                    <strong style="color: #dc3545;">❌ NO toca:</strong> Archivos JSON de configuración y datos
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div style="border: 2px solid #6c757d; border-radius: 8px; padding: 20px; margin-bottom: 20px; cursor: pointer;" onclick="document.getElementById('mode_new').checked = true;">
+                        <label style="cursor: pointer; display: flex; align-items: start;">
+                            <input type="radio" name="install_mode" id="mode_new" value="new_version" style="margin-top: 5px; margin-right: 15px;">
+                            <div>
+                                <strong style="font-size: 16px; color: #6c757d;">🆕 Nueva Versión (Instalación Paralela)</strong>
+                                <p style="margin: 10px 0 0 0; color: #555; font-size: 14px;">
+                                    Instala una nueva versión del sistema sin tocar la instalación anterior.<br>
+                                    <strong>⚠️ Nota:</strong> Si hay conflictos de archivos, se solicitará confirmación.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn">Continuar →</button>
+                    <a href="?step=1" class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;">← Volver</a>
+                </form>
+
+            <?php elseif ($step == '2c'): ?>
+                <!-- Step 2c: Conflicts detected - Confirm overwrite -->
+                <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                    <h3 style="color: #721c24; margin-top: 0;">⚠️ Conflictos Detectados</h3>
+                    <p style="color: #721c24; margin: 10px 0;">
+                        Los siguientes archivos/carpetas ya existen y serían sobrescritos:
+                    </p>
+                    <div style="background: white; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 13px; max-height: 200px; overflow-y: auto;">
+                        <?php if (isset($_SESSION['conflicts'])): ?>
+                            <?php foreach ($_SESSION['conflicts'] as $conflict): ?>
+                                <?php
+                                $parts = explode(':', $conflict);
+                                $location = $parts[0] === 'app' ? 'Ruta privada' : 'Ruta pública';
+                                $file = $parts[1] ?? $conflict;
+                                ?>
+                                <div style="padding: 5px 0; border-bottom: 1px solid #eee;">
+                                    <strong style="color: #dc3545;"><?php echo htmlspecialchars($location); ?>:</strong>
+                                    <?php echo htmlspecialchars($file); ?>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div style="background: #d1ecf1; border-left: 4px solid #0c5460; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                    <h3 style="color: #0c5460; margin-top: 0;">⚠️ Advertencia Importante</h3>
+                    <p style="color: #0c5460; margin: 0;">
+                        Si continúas, estos archivos serán sobrescritos. Asegúrate de tener un respaldo si es necesario.
+                    </p>
+                </div>
+
+                <form method="POST" action="?step=2c">
+                    <div style="margin-bottom: 20px;">
+                        <p style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">¿Deseas continuar con la instalación?</p>
+                        <button type="submit" name="confirm_overwrite" value="YES" class="btn" style="background: #dc3545; margin-bottom: 10px;">
+                            Sí, Sobrescribir Archivos
+                        </button>
+                        <button type="submit" name="confirm_overwrite" value="NO" class="btn-secondary" style="width: 100%; background: #6c757d;">
+                            No, Volver al Inicio
+                        </button>
+                    </div>
+                </form>
+
             <?php elseif ($step == 3): ?>
                 <!-- Step 3: Admin form -->
                 <?php if (!empty($errors)): ?>
@@ -1264,9 +1921,9 @@ function delete_installer() {
 
                     <div class="links">
                         O accede manualmente:
-                        <a href="public_html/admin/login.php">→ Login Admin</a>
+                        <a href="<?php echo htmlspecialchars($_SESSION['config']['base_path'] ?? ''); ?>/admin/login.php">→ Login Admin</a>
                         |
-                        <a href="public_html/">→ Ver Sitio</a>
+                        <a href="<?php echo htmlspecialchars($_SESSION['config']['app_url'] ?? ''); ?>">→ Ver Sitio</a>
                     </div>
                 </div>
             <?php endif; ?>

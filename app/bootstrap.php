@@ -13,22 +13,24 @@ if (!defined('APP_ENTRY_POINT')) {
     die('Direct access not permitted');
 }
 
-// Define application paths
-// Detectar entorno: producción o desarrollo normal
-if (file_exists('/home2/uv0023/shop-v2-app')) {
-    // Producción: paths absolutos
-    define('APP_ROOT', '/home2/uv0023');
-    define('APP_PATH', '/home2/uv0023/shop-v2-app');
-    define('PUBLIC_PATH', '/home2/uv0023/public_html/shopv2');
-} else {
-    // Desarrollo normal: paths relativos
-    define('APP_ROOT', dirname(__DIR__));
-    define('APP_PATH', APP_ROOT . '/app');
-    define('PUBLIC_PATH', APP_ROOT . '/public_html');
+// Define application paths - Load from config.php first
+// El bootstrap está en /app/, entonces __DIR__ es la ruta de app
+$bootstrap_app_path = __DIR__;
+$config_file = $bootstrap_app_path . '/config/config.php';
+
+// Cargar configuración para obtener paths dinámicos
+if (!file_exists($config_file)) {
+    die('Configuration file not found. Please run the installer.');
 }
 
-// Load configuration
-require_once APP_PATH . '/config/config.php';
+$config = require_once $config_file;
+
+// Definir paths desde configuración (instalador los configura dinámicamente)
+define('APP_PATH', $config['app_path']);
+define('PUBLIC_PATH', $config['public_path']);
+define('APP_ROOT', dirname(APP_PATH));
+
+// Load additional path configurations
 require_once APP_PATH . '/config/paths.php';
 
 // Load core functions
