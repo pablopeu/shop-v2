@@ -234,7 +234,16 @@ $step = $_POST['step'] ?? $_GET['step'] ?? 1;
 $errors = [];
 $success = false;
 
-// Step 5: Self-delete installer
+// Step 4: Auto-cleanup después de instalación exitosa
+if ($step == 4 && isset($_SESSION['installation_completed']) && $_SESSION['installation_completed'] === true) {
+    // Ejecutar limpieza automática solo una vez (carpeta y tar.gz, NO el instalador)
+    if (!isset($_SESSION['cleanup_executed'])) {
+        cleanup_release_files();
+        $_SESSION['cleanup_executed'] = true;
+    }
+}
+
+// Step 5: Self-delete installer (legacy - por si se accede manualmente)
 if ($step == 5 && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'YES') {
         delete_installer();
@@ -339,6 +348,8 @@ if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_u
     if (empty($errors)) {
         $success = install_system($_SESSION['config']);
         if ($success) {
+            // Marcar instalación como exitosa para limpieza automática
+            $_SESSION['installation_completed'] = true;
             $step = 4; // Installation progress
         } else {
             $errors[] = 'Error durante la instalación. Verifica permisos de escritura.';
@@ -1388,9 +1399,9 @@ function detect_environment() {
 }
 
 /**
- * Delete installer file
+ * Cleanup release files (carpeta y tar.gz, pero NO el instalador)
  */
-function delete_installer() {
+function cleanup_release_files() {
     $installer_file = __FILE__;
     $current_dir = dirname($installer_file);
 
@@ -1399,19 +1410,34 @@ function delete_installer() {
     $release_folder = $current_dir . '/' . $release_name;
     $release_tarball = $current_dir . '/' . $release_name . '.tar.gz';
 
+    $cleaned = false;
+
     // 1. Eliminar carpeta del release (nombre exacto)
     if (is_dir($release_folder)) {
         recursive_rmdir($release_folder);
         error_log("INSTALADOR - Carpeta del release eliminada: $release_folder");
+        $cleaned = true;
     }
 
     // 2. Eliminar archivo tar.gz del release (nombre exacto)
     if (is_file($release_tarball)) {
         @unlink($release_tarball);
         error_log("INSTALADOR - Archivo tar.gz eliminado: $release_tarball");
+        $cleaned = true;
     }
 
-    // 3. Eliminar el instalador mismo
+    return $cleaned;
+}
+
+/**
+ * Delete installer file (incluye carpeta, tar.gz Y el instalador mismo)
+ */
+function delete_installer() {
+    // Primero limpiar archivos del release
+    cleanup_release_files();
+
+    // Luego eliminar el instalador mismo
+    $installer_file = __FILE__;
     $result = @unlink($installer_file);
     if ($result) {
         error_log("INSTALADOR - Instalador eliminado: $installer_file");
@@ -1983,6 +2009,9 @@ function recursive_rmdir($dir) {
                         <div class="status-item">Usuario administrador configurado</div>
                         <div class="status-item">Permisos de seguridad aplicados</div>
                         <div class="status-item">Archivos .htaccess creados</div>
+                        <?php if (isset($_SESSION['cleanup_executed']) && $_SESSION['cleanup_executed']): ?>
+                        <div class="status-item" style="color: #28a745;">✨ Archivos del release eliminados automáticamente</div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="next-steps">
@@ -1997,7 +2026,11 @@ function recursive_rmdir($dir) {
 
                     <div class="delete-box">
                         <h3>🗑️ Eliminar Instalador</h3>
+                        <?php if (isset($_SESSION['cleanup_executed']) && $_SESSION['cleanup_executed']): ?>
+                        <p>Los archivos del release ya fueron eliminados. Solo queda eliminar este archivo instalador.php por seguridad.</p>
+                        <?php else: ?>
                         <p>Por seguridad, elimina el archivo instalador.php ahora.</p>
+                        <?php endif; ?>
                         <form method="POST" action="?step=5">
                             <input type="hidden" name="confirm_delete" value="YES">
                             <button type="submit" class="btn-danger">Eliminar Instalador y Acceder al Admin →</button>
