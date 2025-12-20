@@ -36,9 +36,11 @@ $current_credentials_path = file_exists($credentials_path_file)
 if (file_exists($payment_credentials_path_file)) {
     $current_payment_path = trim(file_get_contents($payment_credentials_path_file));
 } else {
-    // Default path based on environment
-    if (file_exists('/home2/uv0023/shop-v2-app')) {
-        $current_payment_path = '/home2/uv0023/payment_credentials.json';
+    // Default path: try parent directory of APP_PATH first (for production setup),
+    // then fall back to APP_PATH/data (for development)
+    $parent_dir_path = dirname(APP_PATH) . '/payment_credentials.json';
+    if (file_exists($parent_dir_path)) {
+        $current_payment_path = $parent_dir_path;
     } else {
         $current_payment_path = APP_PATH . '/data/payment_credentials.json';
     }
@@ -504,7 +506,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="info-box">
                         <strong>📝 Ejemplos de paths seguros:</strong><br><br>
                         <strong>Desarrollo local:</strong> <code>/home/payment_credentials.json</code><br>
-                        <strong>Hosting cPanel:</strong> <code>/home2/uv0023/payment_credentials.json</code><br>
+                        <strong>Hosting cPanel:</strong> <code>/home2/username/payment_credentials.json</code><br>
                         <strong>VPS:</strong> <code>/home/usuario/payment_credentials.json</code><br><br>
                         <strong>❌ NUNCA uses:</strong> <code>/var/www/html/...</code>, <code>/public_html/...</code>, <code>/www/...</code>
                     </div>
@@ -550,7 +552,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="info-box">
                         <strong>📝 Ejemplos de paths seguros:</strong><br><br>
                         <strong>Desarrollo local:</strong> <code>/home/notification_credentials.json</code><br>
-                        <strong>Hosting cPanel:</strong> <code>/home2/uv0023/notification_credentials.json</code><br>
+                        <strong>Hosting cPanel:</strong> <code>/home2/username/notification_credentials.json</code><br>
                         <strong>VPS:</strong> <code>/home/usuario/credentials.json</code><br><br>
                         <strong>❌ NUNCA uses:</strong> <code>/var/www/html/...</code>, <code>/public_html/...</code>, <code>/www/...</code>
                     </div>
@@ -595,7 +597,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="info-box">
                         <strong>📝 Ejemplos de paths seguros:</strong><br><br>
                         <strong>Desarrollo local:</strong> <code>/home/admin_users.json</code><br>
-                        <strong>Hosting cPanel:</strong> <code>/home2/uv0023/admin_users.json</code><br>
+                        <strong>Hosting cPanel:</strong> <code>/home2/username/admin_users.json</code><br>
                         <strong>VPS:</strong> <code>/home/usuario/secure/users.json</code><br><br>
                         <strong>❌ NUNCA uses:</strong> <code>/var/www/html/...</code>, <code>/public_html/...</code>, <code>/www/...</code>
                     </div>

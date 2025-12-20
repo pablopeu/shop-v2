@@ -250,8 +250,9 @@ function get_css_version($css_files) {
 function get_cached_css($active_theme = 'minimal', $use_cache = null) {
     // Auto-detectar si usar caché basado en entorno
     if ($use_cache === null) {
-        // Usar caché en producción (detectar por path)
-        $use_cache = strpos(APP_PATH, '/home2/uv0023/') !== false;
+        // Usar caché cuando debug está desactivado (producción)
+        global $config;
+        $use_cache = !($config['debug'] ?? false);
     }
 
     if (!$use_cache) {

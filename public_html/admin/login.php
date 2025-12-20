@@ -6,16 +6,18 @@
 define('APP_ENTRY_POINT', true);
 define('ADMIN_AREA', true);
 
-// Detectar entorno y cargar bootstrap apropiadamente
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    // Producción
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    // Testing local
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
+// Cargar configuración de ruta al bootstrap (generada por instalador)
+$bootstrap_config = __DIR__ . '/bootstrap_path.php';
+if (file_exists($bootstrap_config)) {
+    require_once $bootstrap_config;
+    if (defined('BOOTSTRAP_PATH') && file_exists(BOOTSTRAP_PATH)) {
+        require_once BOOTSTRAP_PATH;
+    } else {
+        die('Bootstrap file not found. Please check your installation.');
+    }
 } else {
-    // Desarrollo
-    require_once __DIR__ . '/../app/bootstrap.php';
+    // Fallback para desarrollo (estructura relativa)
+    require_once __DIR__ . '/../../app/bootstrap.php';
 }
 
 // Define security constant to prevent direct file access

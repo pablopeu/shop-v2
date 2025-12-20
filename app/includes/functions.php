@@ -1391,12 +1391,13 @@ function get_payment_credentials() {
     if (!file_exists($credentials_path_file)) {
         error_log("Payment credentials path file not found. Using default path.");
 
-        // Default path based on environment
-        if (file_exists('/home2/uv0023/shop-v2-app')) {
-            // Production
-            $credentials_path = '/home2/uv0023/payment_credentials.json';
+        // Default path: try parent directory of APP_PATH first (for production setup),
+        // then fall back to APP_PATH/data (for development)
+        $parent_dir_path = dirname(APP_PATH) . '/payment_credentials.json';
+        if (file_exists($parent_dir_path)) {
+            $credentials_path = $parent_dir_path;
         } else {
-            // Development/Testing
+            // Development/Testing fallback
             $credentials_path = APP_PATH . '/data/payment_credentials.json';
         }
     } else {

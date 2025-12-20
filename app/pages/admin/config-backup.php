@@ -669,13 +669,13 @@ if (!isset($_SESSION['csrf_token'])) {
                         <h4>📦 Estructura del Backup:</h4>
                         <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0; font-family: monospace; font-size: 13px;">
                             backup_YYYYMMDD_HHMMSS.tar.gz/<br>
-                            ├── <strong>raiz/</strong> (todo lo que va en /home2/uv0023/)<br>
+                            ├── <strong>raiz/</strong> (archivos fuera de public_html)<br>
                             │   ├── shop-v2-app/<br>
                             │   ├── <em>[carpeta-secretos-sistema]/</em> *<br>
                             │   ├── <em>[carpeta-secretos-pago]/</em> *<br>
                             │   └── <em>[carpeta-secretos-usuarios]/</em> *<br>
-                            └── <strong>public_html/</strong> (todo lo que va en /home2/uv0023/public_html/)<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;└── shopv2/<br>
+                            └── <strong>public_html/</strong> (archivos públicos del sitio)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;└── [subdirectorio-del-sitio]/<br>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── index.php<br>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── webhook.php<br>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── admin/<br>
@@ -704,7 +704,7 @@ if (!isset($_SESSION['csrf_token'])) {
                                     <li>Rutas leídas desde: /admin/?page=config-rutas-sistema</li>
                                 </ul>
                             </li>
-                            <li><strong>🌐 public_html/shopv2/</strong> (TODO el código público)
+                            <li><strong>🌐 public_html/[subdirectorio]/</strong> (TODO el código público)
                                 <ul style="margin-left: 20px; margin-top: 5px;">
                                     <li>📄 index.php, webhook.php</li>
                                     <li>📁 admin/, api/, assets/</li>
@@ -723,12 +723,12 @@ if (!isset($_SESSION['csrf_token'])) {
                         <h4 class="mt-3">🔄 Restauración Fácil:</h4>
                         <ol style="margin-left: 20px; color: #6c757d; font-size: 14px;">
                             <li>Extraer <code>backup_YYYYMMDD_HHMMSS.tar.gz</code></li>
-                            <li>Copiar <strong>todo</strong> el contenido de <code>raiz/*</code> → <code>/home2/uv0023/</code>
+                            <li>Copiar <strong>todo</strong> el contenido de <code>raiz/*</code> → directorio raíz del servidor
                                 <ul style="margin-top: 5px;">
                                     <li>Incluye: shop-v2-app/ y todas las carpetas de secretos</li>
                                 </ul>
                             </li>
-                            <li>Copiar contenido de <code>public_html/shopv2/*</code> → <code>/home2/uv0023/public_html/shopv2/</code></li>
+                            <li>Copiar contenido de <code>public_html/[subdirectorio]/*</code> → carpeta pública del sitio</li>
                         </ol>
                         <p class="mt-2" style="color: #6c757d; font-size: 13px;">
                             <strong>Importante:</strong> Las carpetas de secretos se restauran automáticamente con sus rutas originales.

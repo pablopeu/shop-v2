@@ -17,27 +17,25 @@ define('APP_ENTRY_POINT', true);
 error_log("INDEX.PHP - Line 15: APP_ENTRY_POINT defined");
 
 // Bootstrap de la aplicación
-// Detectar entorno y cargar bootstrap apropiadamente
-error_log("INDEX.PHP - Line 19: About to check bootstrap paths");
+// Cargar configuración de ruta al bootstrap (generada por instalador)
+error_log("INDEX.PHP - Line 19: About to load bootstrap");
 
-if (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    error_log("INDEX.PHP - Line 22: Loading PRODUCTION bootstrap");
-    // Producción
-    require_once '/home2/uv0023/shop-v2-app/bootstrap.php';
-    error_log("INDEX.PHP - Line 25: Production bootstrap loaded");
-} elseif (file_exists('/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php')) {
-    error_log("INDEX.PHP - Line 27: Loading TESTING bootstrap");
-    // Testing local
-    require_once '/home/pablo/shop-v2-local-test/shop-v2-app/bootstrap.php';
-    error_log("INDEX.PHP - Line 30: Testing bootstrap loaded");
+$bootstrap_config = __DIR__ . '/bootstrap_path.php';
+if (file_exists($bootstrap_config)) {
+    require_once $bootstrap_config;
+    if (defined('BOOTSTRAP_PATH') && file_exists(BOOTSTRAP_PATH)) {
+        error_log("INDEX.PHP - Line 22: Loading bootstrap from: " . BOOTSTRAP_PATH);
+        require_once BOOTSTRAP_PATH;
+    } else {
+        die('Bootstrap file not found. Please check your installation.');
+    }
 } else {
-    error_log("INDEX.PHP - Line 32: Loading DEVELOPMENT bootstrap");
-    // Desarrollo
+    // Fallback para desarrollo (estructura relativa)
+    error_log("INDEX.PHP - Line 27: Using development fallback");
     require_once __DIR__ . '/../app/bootstrap.php';
-    error_log("INDEX.PHP - Line 35: Development bootstrap loaded");
 }
 
-error_log("INDEX.PHP - Line 38: Bootstrap loading complete");
+error_log("INDEX.PHP - Line 30: Bootstrap loading complete");
 
 // Obtener la ruta desde REQUEST_URI (FallbackResource mode)
 error_log("INDEX.PHP - Line 41: About to parse REQUEST_URI");
