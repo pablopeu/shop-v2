@@ -229,25 +229,18 @@ if ($release_dir && $local_app_path) {
 
 session_start();
 
+// Limpiar sesión si se accede al Step 1 (nueva instalación)
+if (!isset($_POST['step']) && !isset($_GET['step'])) {
+    // Acceso inicial al instalador - limpiar variables de sesión de instalaciones previas
+    unset($_SESSION['installation_completed']);
+    unset($_SESSION['cleanup_executed']);
+    unset($_SESSION['config']);
+}
+
 // Process installation
 $step = $_POST['step'] ?? $_GET['step'] ?? 1;
 $errors = [];
 $success = false;
-
-// Step 4: Auto-cleanup después de instalación exitosa
-error_log("INSTALADOR DEBUG - Verificando cleanup: step=$step, installation_completed=" . (isset($_SESSION['installation_completed']) ? $_SESSION['installation_completed'] : 'NO SET'));
-if ($step == 4 && isset($_SESSION['installation_completed']) && $_SESSION['installation_completed'] === true) {
-    error_log("INSTALADOR DEBUG - Step 4: Instalación completada detectada");
-    // Ejecutar limpieza automática solo una vez (carpeta y tar.gz, NO el instalador)
-    if (!isset($_SESSION['cleanup_executed'])) {
-        error_log("INSTALADOR DEBUG - Ejecutando cleanup_release_files()...");
-        $cleaned = cleanup_release_files();
-        error_log("INSTALADOR DEBUG - cleanup_release_files() retornó: " . ($cleaned ? 'true' : 'false'));
-        $_SESSION['cleanup_executed'] = true;
-    } else {
-        error_log("INSTALADOR DEBUG - Cleanup ya fue ejecutado anteriormente");
-    }
-}
 
 // Step 5: Self-delete installer (legacy - por si se accede manualmente)
 if ($step == 5 && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -360,6 +353,23 @@ if ($step == 3 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_u
         } else {
             $errors[] = 'Error durante la instalación. Verifica permisos de escritura.';
         }
+    }
+}
+
+// Step 4: Auto-cleanup después de instalación exitosa
+// IMPORTANTE: Este bloque se ejecuta DESPUÉS de procesar todos los steps
+// para que $step ya tenga el valor correcto (4) cuando se completa la instalación
+error_log("INSTALADOR DEBUG - Post-procesamiento: step=$step, installation_completed=" . (isset($_SESSION['installation_completed']) ? $_SESSION['installation_completed'] : 'NO SET'));
+if ($step == 4 && isset($_SESSION['installation_completed']) && $_SESSION['installation_completed'] === true) {
+    error_log("INSTALADOR DEBUG - Step 4: Instalación completada detectada");
+    // Ejecutar limpieza automática solo una vez (carpeta y tar.gz, NO el instalador)
+    if (!isset($_SESSION['cleanup_executed'])) {
+        error_log("INSTALADOR DEBUG - Ejecutando cleanup_release_files()...");
+        $cleaned = cleanup_release_files();
+        error_log("INSTALADOR DEBUG - cleanup_release_files() retornó: " . ($cleaned ? 'true' : 'false'));
+        $_SESSION['cleanup_executed'] = true;
+    } else {
+        error_log("INSTALADOR DEBUG - Cleanup ya fue ejecutado anteriormente");
     }
 }
 
