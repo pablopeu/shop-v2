@@ -376,6 +376,19 @@ if ($step == 4 && isset($_SESSION['installation_completed']) && $_SESSION['insta
         $cleaned = cleanup_release_files();
         error_log("INSTALADOR DEBUG - cleanup_release_files() retornó: " . ($cleaned ? 'true' : 'false'));
         $_SESSION['cleanup_executed'] = true;
+
+        // Auto-eliminar el instalador después de mostrar el mensaje de éxito
+        // usando register_shutdown_function para que se ejecute DESPUÉS de enviar el HTML
+        register_shutdown_function(function() {
+            $installer_file = __FILE__;
+            error_log("INSTALADOR - AUTO-ELIMINACIÓN: Intentando eliminar instalador...");
+            $result = @unlink($installer_file);
+            if ($result) {
+                error_log("INSTALADOR - AUTO-ELIMINACIÓN: ✓ Instalador eliminado exitosamente");
+            } else {
+                error_log("INSTALADOR - AUTO-ELIMINACIÓN: ✗ No se pudo eliminar (eliminar manualmente vía FTP)");
+            }
+        });
     } else {
         error_log("INSTALADOR DEBUG - Cleanup ya fue ejecutado anteriormente");
     }
