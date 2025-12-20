@@ -23,8 +23,8 @@ function get_users_file_path() {
         }
     }
 
-    // Fallback to default location
-    return __DIR__ . '/../data/passwords/users.json';
+    // Fallback to default location (APP_PATH/data/users.json)
+    return __DIR__ . '/../data/users.json';
 }
 
 /**
