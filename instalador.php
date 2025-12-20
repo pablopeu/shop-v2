@@ -1394,27 +1394,24 @@ function delete_installer() {
     $installer_file = __FILE__;
     $current_dir = dirname($installer_file);
 
-    // 1. Buscar y eliminar carpeta del release (shop-v2-*)
-    $items = scandir($current_dir);
-    foreach ($items as $item) {
-        if ($item === '.' || $item === '..') continue;
+    // Construir nombres exactos usando la versión conocida del instalador
+    $release_name = 'shop-v2-v' . INSTALLER_VERSION;
+    $release_folder = $current_dir . '/' . $release_name;
+    $release_tarball = $current_dir . '/' . $release_name . '.tar.gz';
 
-        $item_path = $current_dir . '/' . $item;
-
-        // Eliminar carpeta del release
-        if (is_dir($item_path) && strpos($item, 'shop-v2-') === 0) {
-            recursive_rmdir($item_path);
-            error_log("INSTALADOR - Carpeta del release eliminada: $item_path");
-        }
-
-        // Eliminar archivo tar.gz del release
-        if (is_file($item_path) && preg_match('/^shop-v2-.*\.tar\.gz$/', $item)) {
-            @unlink($item_path);
-            error_log("INSTALADOR - Archivo tar.gz eliminado: $item_path");
-        }
+    // 1. Eliminar carpeta del release (nombre exacto)
+    if (is_dir($release_folder)) {
+        recursive_rmdir($release_folder);
+        error_log("INSTALADOR - Carpeta del release eliminada: $release_folder");
     }
 
-    // 2. Eliminar el instalador mismo
+    // 2. Eliminar archivo tar.gz del release (nombre exacto)
+    if (is_file($release_tarball)) {
+        @unlink($release_tarball);
+        error_log("INSTALADOR - Archivo tar.gz eliminado: $release_tarball");
+    }
+
+    // 3. Eliminar el instalador mismo
     $result = @unlink($installer_file);
     if ($result) {
         error_log("INSTALADOR - Instalador eliminado: $installer_file");
