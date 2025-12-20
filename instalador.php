@@ -2044,33 +2044,23 @@ function recursive_rmdir($dir) {
                     <h2>✅ ¡Sistema Instalado!</h2>
                     <p>La instalación se completó exitosamente.</p>
 
-                    <!-- Mensaje de limpieza automática -->
-                    <div style="background: #d4edda; border: 2px solid #28a745; padding: 25px; border-radius: 8px; margin: 20px 0;">
-                        <h3 style="color: #155724; margin-top: 0; margin-bottom: 10px;">✨ Limpieza Automática Completada</h3>
-                        <p style="color: #155724; margin-bottom: 0;">
-                            Todos los archivos temporales del instalador han sido eliminados automáticamente.<br>
-                            <strong>Puedes acceder a tu sitio ahora.</strong>
+                    <!-- Mensaje de éxito y botón principal al admin -->
+                    <div style="background: #d4edda; border: 2px solid #28a745; padding: 30px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                        <h3 style="color: #155724; margin-top: 0; margin-bottom: 15px;">✨ ¡Instalación Completada!</h3>
+                        <p style="color: #155724; margin-bottom: 25px;">
+                            Todos los archivos temporales han sido eliminados automáticamente.<br>
+                            <strong>El instalador se eliminará al salir de esta página.</strong>
                         </p>
-                    </div>
-
-                    <!-- Acceso directo al admin y sitio -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0;">
                         <a href="<?php echo htmlspecialchars(($_SESSION['config']['app_url'] ?? '') . ($_SESSION['config']['base_path'] ?? '') . '/admin/login.php'); ?>"
-                           style="display: block; padding: 30px 20px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; text-decoration: none; border-radius: 12px; text-align: center; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"
-                           onmouseover="this.style.transform='translateY(-5px)'"
-                           onmouseout="this.style.transform='translateY(0)'">
-                            <div style="font-size: 3em; margin-bottom: 10px;">🔐</div>
-                            <div style="font-size: 1.3em; font-weight: bold;">Panel Admin</div>
-                            <div style="font-size: 0.9em; opacity: 0.9; margin-top: 5px;">Configurar tu tienda</div>
+                           style="display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; text-decoration: none; border-radius: 8px; font-size: 18px; font-weight: bold; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"
+                           onmouseover="this.style.transform='scale(1.05)'"
+                           onmouseout="this.style.transform='scale(1)'">
+                            🔐 Ir al Panel de Administración
                         </a>
-
+                        <br><br>
                         <a href="<?php echo htmlspecialchars($_SESSION['config']['app_url'] . ($_SESSION['config']['base_path'] ?? '')); ?>"
-                           style="display: block; padding: 30px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 12px; text-align: center; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"
-                           onmouseover="this.style.transform='translateY(-5px)'"
-                           onmouseout="this.style.transform='translateY(0)'">
-                            <div style="font-size: 3em; margin-bottom: 10px;">🏪</div>
-                            <div style="font-size: 1.3em; font-weight: bold;">Ver Tienda</div>
-                            <div style="font-size: 0.9em; opacity: 0.9; margin-top: 5px;">Frontend público</div>
+                           style="color: #667eea; text-decoration: none; font-weight: bold; font-size: 14px;">
+                            O ver tu tienda →
                         </a>
                     </div>
 
