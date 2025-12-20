@@ -9,6 +9,7 @@ RELEASE_VERSION="v2.0.0-test"
 RELEASE_NAME="shop-v2-${RELEASE_VERSION}"
 BUILD_DIR="build"
 RELEASE_DIR="${BUILD_DIR}/${RELEASE_NAME}"
+TEMP_DIR="${BUILD_DIR}/temp"
 
 echo "🚀 Creando release ${RELEASE_VERSION} para testeo local..."
 
@@ -21,15 +22,7 @@ fi
 # Crear estructura de directorios
 echo "📁 Creando estructura de directorios..."
 mkdir -p "$RELEASE_DIR"
-
-# Copiar instalador
-echo "📄 Copiando instalador.php..."
-cp instalador.php "$RELEASE_DIR/"
-
-# Copiar README si existe
-if [ -f "README_INSTALACION.md" ]; then
-    cp README_INSTALACION.md "$RELEASE_DIR/"
-fi
+mkdir -p "$TEMP_DIR"
 
 # Copiar carpeta app/ (código privado)
 echo "📦 Copiando carpeta app/ (código privado)..."
@@ -40,7 +33,7 @@ else
     exit 1
 fi
 
-# Copiar archivos públicos (NO en carpeta public_html, directamente en raíz)
+# Copiar archivos públicos (NO en carpeta public_html, directamente en raíz del release)
 echo "📦 Copiando archivos públicos..."
 
 # Lista de archivos/carpetas públicos a copiar
@@ -49,7 +42,6 @@ PUBLIC_ITEMS=(
     "public_html/api"
     "public_html/assets"
     "public_html/data"
-    "public_html/scripts"
     "public_html/index.php"
     "public_html/webhook.php"
     "public_html/.htaccess"
@@ -66,7 +58,44 @@ for item in "${PUBLIC_ITEMS[@]}"; do
     fi
 done
 
-# Crear archivo .htaccess placeholder en data/ si no existe
+# Copiar README si existe
+if [ -f "README_INSTALACION.md" ]; then
+    cp README_INSTALACION.md "$RELEASE_DIR/"
+fi
+
+# Limpiar archivos de configuración, datos y uploads del release
+echo "🧹 Limpiando archivos de configuración, datos y uploads..."
+
+# Eliminar archivos JSON de configuración en app/config/
+if [ -d "$RELEASE_DIR/app/config" ]; then
+    echo "  Limpiando app/config/*.json..."
+    find "$RELEASE_DIR/app/config" -name "*.json" -delete 2>/dev/null || true
+    find "$RELEASE_DIR/app/config" -name "*.php" -delete 2>/dev/null || true
+fi
+
+# Eliminar archivos JSON de datos en app/data/
+if [ -d "$RELEASE_DIR/app/data" ]; then
+    echo "  Limpiando app/data/*.json..."
+    find "$RELEASE_DIR/app/data" -name "*.json" -delete 2>/dev/null || true
+    # Mantener la estructura de directorios pero vacía
+    find "$RELEASE_DIR/app/data" -type f -delete 2>/dev/null || true
+fi
+
+# Limpiar directorio data/ público (mantener estructura pero vacío)
+if [ -d "$RELEASE_DIR/data" ]; then
+    echo "  Limpiando data/ público..."
+    find "$RELEASE_DIR/data" -type f ! -name ".htaccess" -delete 2>/dev/null || true
+fi
+
+# Limpiar uploads (fotos de productos, logos, etc.)
+if [ -d "$RELEASE_DIR/assets/uploads" ]; then
+    echo "  Limpiando assets/uploads/ (fotos)..."
+    find "$RELEASE_DIR/assets/uploads" -type f ! -name ".gitkeep" -delete 2>/dev/null || true
+    # Mantener estructura de directorios
+    find "$RELEASE_DIR/assets/uploads" -mindepth 1 -type d -empty -delete 2>/dev/null || true
+fi
+
+# Crear archivo .htaccess de seguridad en data/ si no existe
 if [ ! -f "$RELEASE_DIR/data/.htaccess" ]; then
     echo "📄 Creando .htaccess de seguridad en data/..."
     cat > "$RELEASE_DIR/data/.htaccess" <<'EOF'
@@ -77,7 +106,7 @@ EOF
 fi
 
 # Limpiar archivos innecesarios del release
-echo "🧹 Limpiando archivos innecesarios..."
+echo "🧹 Limpiando archivos de desarrollo..."
 
 # Eliminar archivos de desarrollo, git, etc.
 find "$RELEASE_DIR" -name ".git" -exec rm -rf {} + 2>/dev/null || true
@@ -87,11 +116,18 @@ find "$RELEASE_DIR" -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
 find "$RELEASE_DIR" -name ".env" -delete 2>/dev/null || true
 find "$RELEASE_DIR" -name "*.log" -delete 2>/dev/null || true
 
-# Crear archivo tar.gz
-echo "📦 Creando archivo tar.gz..."
-cd "$BUILD_DIR"
-tar -czf "${RELEASE_NAME}.tar.gz" "$RELEASE_NAME"
-cd ..
+# Copiar instalador a la raíz del build (fuera de la carpeta del release)
+echo "📄 Copiando instalador.php a la raíz..."
+cp instalador.php "$TEMP_DIR/"
+
+# Mover carpeta del release al temp
+mv "$RELEASE_DIR" "$TEMP_DIR/"
+
+# Crear archivo tar.gz con instalador en la raíz
+echo "📦 Creando archivo tar.gz con instalador en raíz..."
+cd "$TEMP_DIR"
+tar -czf "../${RELEASE_NAME}.tar.gz" instalador.php "$RELEASE_NAME"
+cd ../..
 
 # Calcular hash
 echo "🔐 Calculando hash SHA256..."
@@ -119,10 +155,13 @@ SHA256: ${SHA256}
 Estructura del Paquete
 ========================================
 
-shop-v2-${RELEASE_VERSION}/
-  ├── instalador.php          # Instalador v2 con detección de instalación previa
+RAÍZ DEL TAR.GZ:
+  instalador.php              # ← Instalador en RAÍZ (acceso inmediato)
+
+shop-v2-${RELEASE_VERSION}/   # ← Carpeta con el sistema
   ├── app/                    # Código privado (se instalará fuera de public_html)
-  │   ├── config/
+  │   ├── config/             # ← VACÍO (sin archivos JSON de configuración)
+  │   ├── data/               # ← VACÍO (sin productos, ventas, usuarios)
   │   ├── includes/
   │   ├── pages/
   │   ├── bootstrap.php
@@ -130,30 +169,52 @@ shop-v2-${RELEASE_VERSION}/
   ├── admin/                  # Panel de administración (público)
   ├── api/                    # API endpoints (público)
   ├── assets/                 # Recursos estáticos (público)
-  ├── data/                   # Directorio de datos (público pero protegido)
-  ├── scripts/                # Scripts auxiliares (público)
+  │   └── uploads/            # ← VACÍO (sin fotos de productos/logos)
+  ├── data/                   # ← VACÍO (sin datos, solo .htaccess)
   ├── index.php               # Página principal (público)
   ├── webhook.php             # Webhook de MercadoPago (público)
   └── .htaccess               # Configuración Apache (público)
+
+NOTA: Sistema limpio sin configuración ni datos del desarrollo local
 
 ========================================
 Instrucciones de Instalación
 ========================================
 
-1. Extraer el archivo tar.gz en el servidor:
+OPCIÓN A: Instalación vía FTP (Recomendada)
+--------------------------------------------
+1. Extraer el tar.gz localmente:
    tar -xzf ${RELEASE_NAME}.tar.gz
 
-2. Subir TODO el contenido de la carpeta ${RELEASE_NAME}/ a la ubicación deseada vía FTP
+2. Subir VÍA FTP a la carpeta donde quieres instalar:
+   - instalador.php (quedará en la raíz de tu carpeta)
+   - ${RELEASE_NAME}/ (carpeta completa)
 
 3. Acceder al instalador desde el navegador:
    http://tu-dominio.com/ruta/instalador.php
 
-4. El instalador:
-   - Detectará si hay instalación previa
-   - Ofrecerá reinstalar (actualizar) o instalar nueva versión
-   - Copiará el contenido de app/ a la ruta privada
-   - Copiará los archivos públicos a la ruta pública
-   - NO creará carpetas intermedias app/ o public_html/
+   ✅ El instalador está en la raíz, NO necesitas entrar a ninguna subcarpeta
+
+4. El instalador automáticamente:
+   - Detectará la carpeta ${RELEASE_NAME}/
+   - Leerá app/ y archivos públicos de allí
+   - Los copiará a las rutas que configures
+   - NO creará carpetas intermedias
+
+OPCIÓN B: Instalación vía SSH
+--------------------------------------------
+1. Subir el tar.gz al servidor vía FTP/SCP
+
+2. Conectar por SSH y extraer:
+   tar -xzf ${RELEASE_NAME}.tar.gz
+
+3. Acceder al instalador:
+   http://tu-dominio.com/ruta/instalador.php
+
+IMPORTANTE:
+- El instalador lee desde ${RELEASE_NAME}/
+- Después de instalar, puedes eliminar la carpeta ${RELEASE_NAME}/
+- El sistema quedará instalado en las rutas que configures
 
 ========================================
 Características del Instalador v2

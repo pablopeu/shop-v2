@@ -6,13 +6,46 @@
  * IMPORTANTE: Este archivo se auto-elimina después de la instalación
  */
 
-// Detectar carpeta app/ del paquete
-// El contenido público está directamente en __DIR__ (no en subcarpeta public_html/)
-$local_app_path = __DIR__ . '/app';
+// Detectar carpeta del release
+// Estructura esperada:
+// - instalador.php (este archivo, en la raíz)
+// - shop-v2-vX.X.X/ (carpeta del release con app/ y archivos públicos dentro)
 $current_dir = __DIR__;
+$release_dir = null;
+$local_app_path = null;
+$local_public_path = null;
 
-if (file_exists($local_app_path) && is_dir($local_app_path)) {
-    // Instalación desde paquete descargado
+// Buscar carpeta del release (shop-v2-*)
+$items = scandir($current_dir);
+foreach ($items as $item) {
+    if ($item === '.' || $item === '..') continue;
+
+    $item_path = $current_dir . '/' . $item;
+
+    // Buscar carpeta que empiece con "shop-v2-" y tenga app/ dentro
+    if (is_dir($item_path) && strpos($item, 'shop-v2-') === 0) {
+        $app_path = $item_path . '/app';
+        if (is_dir($app_path)) {
+            $release_dir = $item_path;
+            $local_app_path = $app_path;
+            $local_public_path = $item_path;
+            break;
+        }
+    }
+}
+
+// Si no se encontró carpeta del release, buscar app/ directamente (extracción manual)
+if (!$release_dir) {
+    $direct_app_path = $current_dir . '/app';
+    if (is_dir($direct_app_path)) {
+        $release_dir = $current_dir;
+        $local_app_path = $direct_app_path;
+        $local_public_path = $current_dir;
+    }
+}
+
+if ($release_dir && $local_app_path) {
+    // Instalación válida detectada
     $parent_dir = dirname($current_dir);
 
     // Intentar detectar si estamos en public_html
@@ -29,7 +62,6 @@ if (file_exists($local_app_path) && is_dir($local_app_path)) {
     }
 
     // La ruta pública es donde está actualmente el instalador
-    // (los archivos públicos YA están aquí, solo se moverá la carpeta app/)
     $suggested_public_path = $current_dir;
 
     // Auto-detectar base_path desde la URL
@@ -40,7 +72,7 @@ if (file_exists($local_app_path) && is_dir($local_app_path)) {
     }
 
     define('INSTALLER_APP_PATH', $local_app_path);
-    define('INSTALLER_PUBLIC_PATH', $current_dir);  // Archivos públicos YA están aquí
+    define('INSTALLER_PUBLIC_PATH', $local_public_path);
     define('INSTALLER_SUGGESTED_APP_PATH', $suggested_app_path);
     define('INSTALLER_SUGGESTED_PUBLIC_PATH', $suggested_public_path);
     define('INSTALLER_SUGGESTED_BASE_PATH', $suggested_base_path);
