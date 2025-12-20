@@ -78,7 +78,8 @@ echo "🧹 Limpiando archivos de configuración, datos y uploads..."
 if [ -d "$RELEASE_DIR/app/config" ]; then
     echo "  Limpiando app/config/*.json..."
     find "$RELEASE_DIR/app/config" -name "*.json" -delete 2>/dev/null || true
-    find "$RELEASE_DIR/app/config" -name "*.php" -delete 2>/dev/null || true
+    # Eliminar solo config.php generado (PRESERVAR paths.php y config.example.php)
+    rm -f "$RELEASE_DIR/app/config/config.php" 2>/dev/null || true
 fi
 
 # Eliminar archivos JSON de datos en app/data/
