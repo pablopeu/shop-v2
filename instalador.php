@@ -239,6 +239,13 @@ if (!isset($_POST['step']) && !isset($_GET['step'])) {
 
 // Process installation
 $step = $_POST['step'] ?? $_GET['step'] ?? 1;
+
+// Si la instalación ya se completó y el usuario accede sin especificar step,
+// redirigir al Step 4 (mensaje de éxito) en lugar de mostrar error
+if ($step == 1 && isset($_SESSION['installation_completed']) && $_SESSION['installation_completed'] === true) {
+    $step = 4;
+}
+
 $errors = [];
 $success = false;
 
@@ -2011,7 +2018,22 @@ function recursive_rmdir($dir) {
                 <!-- Step 4: Installation success -->
                 <div class="success-box">
                     <h2>✅ ¡Sistema Instalado!</h2>
-                    <p>La instalación se completó exitosamente en menos de 2 minutos.</p>
+                    <p>La instalación se completó exitosamente.</p>
+
+                    <!-- Botón de eliminar instalador PRIMERO -->
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 25px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="color: #856404; margin-top: 0; margin-bottom: 10px;">🔒 Último Paso: Eliminar Instalador</h3>
+                        <p style="color: #856404; margin-bottom: 15px;">Por seguridad, elimina este archivo ahora haciendo clic en el botón:</p>
+                        <form method="POST" action="?step=5" style="margin: 0;">
+                            <input type="hidden" name="confirm_delete" value="YES">
+                            <button type="submit" class="btn-danger" style="width: 100%; padding: 15px; font-size: 16px; font-weight: bold;">
+                                🗑️ Eliminar Instalador y Acceder al Panel Admin
+                            </button>
+                        </form>
+                        <p style="color: #666; font-size: 13px; margin-top: 10px; margin-bottom: 0;">
+                            Los archivos del release ya fueron eliminados automáticamente. Solo falta eliminar este instalador.php
+                        </p>
+                    </div>
 
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; border: 2px solid #28a745;">
                         <h3 style="color: #155724; margin-top: 0; margin-bottom: 15px;">📋 Configuración Instalada</h3>
@@ -2049,35 +2071,20 @@ function recursive_rmdir($dir) {
                     </div>
 
                     <div class="next-steps">
-                        <h3>📋 Próximos Pasos</h3>
+                        <h3>📋 Próximos Pasos en el Panel Admin</h3>
                         <ol>
-                            <li>Accede al panel de administración</li>
                             <li>Configura tu sitio (nombre, logo, descripción)</li>
                             <li>Agrega productos a tu tienda</li>
                             <li>Configura MercadoPago (opcional)</li>
+                            <li>Personaliza el diseño y colores</li>
                         </ol>
                     </div>
 
-                    <div class="delete-box">
-                        <h3>🗑️ Eliminar Instalador</h3>
-                        <?php if (isset($_SESSION['cleanup_executed']) && $_SESSION['cleanup_executed']): ?>
-                        <p>Los archivos del release ya fueron eliminados. Solo queda eliminar este archivo instalador.php por seguridad.</p>
-                        <?php else: ?>
-                        <p>Por seguridad, elimina el archivo instalador.php ahora.</p>
-                        <?php endif; ?>
-                        <form method="POST" action="?step=5">
-                            <input type="hidden" name="confirm_delete" value="YES">
-                            <button type="submit" class="btn-danger">Eliminar Instalador y Acceder al Admin →</button>
-                        </form>
-                    </div>
-
-                    <div class="links">
-                        O accede manualmente (el instalador quedará en el servidor):
-                        <a href="<?php echo htmlspecialchars($_SESSION['config']['base_path'] ?? ''); ?>/admin/login.php">→ Login Admin</a>
-                        |
-                        <a href="<?php echo htmlspecialchars($_SESSION['config']['app_url'] ?? ''); ?>">→ Ver Sitio</a>
-                        <br><br>
-                        <small style="color: #666;">⚠️ Por seguridad, recuerda eliminar instalador.php manualmente si no usas el botón de arriba</small>
+                    <div style="text-align: center; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <p style="color: #666; font-size: 14px; margin: 0;">
+                            <strong>Nota:</strong> Si no eliminas el instalador ahora, puedes borrarlo manualmente vía FTP:<br>
+                            <code style="background: white; padding: 3px 8px; border-radius: 4px; font-size: 12px;">instalador.php</code>
+                        </p>
                     </div>
                 </div>
 
