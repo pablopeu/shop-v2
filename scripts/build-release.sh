@@ -5,7 +5,15 @@
 
 set -e
 
-RELEASE_VERSION="v2.0.0-test"
+# Leer versión del archivo VERSION
+if [ -f "VERSION" ]; then
+    VERSION=$(cat VERSION | tr -d '[:space:]')
+    RELEASE_VERSION="v${VERSION}"
+else
+    echo "❌ ERROR: Archivo VERSION no encontrado"
+    exit 1
+fi
+
 RELEASE_NAME="shop-v2-${RELEASE_VERSION}"
 BUILD_DIR="build"
 RELEASE_DIR="${BUILD_DIR}/${RELEASE_NAME}"
@@ -116,9 +124,17 @@ find "$RELEASE_DIR" -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
 find "$RELEASE_DIR" -name ".env" -delete 2>/dev/null || true
 find "$RELEASE_DIR" -name "*.log" -delete 2>/dev/null || true
 
-# Copiar instalador a la raíz del build (fuera de la carpeta del release)
-echo "📄 Copiando instalador.php a la raíz..."
-cp instalador.php "$TEMP_DIR/"
+# Copiar y actualizar instalador con versión y fecha
+echo "📄 Preparando instalador.php con versión ${VERSION}..."
+cp instalador.php "$TEMP_DIR/instalador.php"
+
+# Actualizar versión y fecha en el instalador
+BUILD_DATE=$(date '+%Y-%m-%d')
+sed -i "s/define('INSTALLER_VERSION', '.*');/define('INSTALLER_VERSION', '${VERSION}');/" "$TEMP_DIR/instalador.php"
+sed -i "s/define('INSTALLER_BUILD_DATE', '.*');/define('INSTALLER_BUILD_DATE', '${BUILD_DATE}');/" "$TEMP_DIR/instalador.php"
+
+echo "  ✅ Versión: ${VERSION}"
+echo "  ✅ Fecha: ${BUILD_DATE}"
 
 # Mover carpeta del release al temp
 mv "$RELEASE_DIR" "$TEMP_DIR/"
