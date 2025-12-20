@@ -235,11 +235,17 @@ $errors = [];
 $success = false;
 
 // Step 4: Auto-cleanup después de instalación exitosa
+error_log("INSTALADOR DEBUG - Verificando cleanup: step=$step, installation_completed=" . (isset($_SESSION['installation_completed']) ? $_SESSION['installation_completed'] : 'NO SET'));
 if ($step == 4 && isset($_SESSION['installation_completed']) && $_SESSION['installation_completed'] === true) {
+    error_log("INSTALADOR DEBUG - Step 4: Instalación completada detectada");
     // Ejecutar limpieza automática solo una vez (carpeta y tar.gz, NO el instalador)
     if (!isset($_SESSION['cleanup_executed'])) {
-        cleanup_release_files();
+        error_log("INSTALADOR DEBUG - Ejecutando cleanup_release_files()...");
+        $cleaned = cleanup_release_files();
+        error_log("INSTALADOR DEBUG - cleanup_release_files() retornó: " . ($cleaned ? 'true' : 'false'));
         $_SESSION['cleanup_executed'] = true;
+    } else {
+        error_log("INSTALADOR DEBUG - Cleanup ya fue ejecutado anteriormente");
     }
 }
 
@@ -1405,27 +1411,45 @@ function cleanup_release_files() {
     $installer_file = __FILE__;
     $current_dir = dirname($installer_file);
 
+    error_log("INSTALADOR CLEANUP - Iniciando limpieza");
+    error_log("INSTALADOR CLEANUP - Directorio actual: $current_dir");
+    error_log("INSTALADOR CLEANUP - INSTALLER_VERSION: " . INSTALLER_VERSION);
+
     // Construir nombres exactos usando la versión conocida del instalador
     $release_name = 'shop-v2-v' . INSTALLER_VERSION;
     $release_folder = $current_dir . '/' . $release_name;
     $release_tarball = $current_dir . '/' . $release_name . '.tar.gz';
 
+    error_log("INSTALADOR CLEANUP - Buscando carpeta: $release_folder");
+    error_log("INSTALADOR CLEANUP - Buscando tarball: $release_tarball");
+
+    // Listar archivos en el directorio actual para debug
+    $files = scandir($current_dir);
+    error_log("INSTALADOR CLEANUP - Archivos en directorio: " . implode(', ', array_filter($files, function($f) { return $f !== '.' && $f !== '..'; })));
+
     $cleaned = false;
 
     // 1. Eliminar carpeta del release (nombre exacto)
     if (is_dir($release_folder)) {
-        recursive_rmdir($release_folder);
-        error_log("INSTALADOR - Carpeta del release eliminada: $release_folder");
+        error_log("INSTALADOR CLEANUP - ✓ Carpeta encontrada, eliminando: $release_folder");
+        $result = recursive_rmdir($release_folder);
+        error_log("INSTALADOR CLEANUP - Resultado de eliminar carpeta: " . ($result ? 'SUCCESS' : 'FAILED'));
         $cleaned = true;
+    } else {
+        error_log("INSTALADOR CLEANUP - ✗ Carpeta NO encontrada: $release_folder");
     }
 
     // 2. Eliminar archivo tar.gz del release (nombre exacto)
     if (is_file($release_tarball)) {
-        @unlink($release_tarball);
-        error_log("INSTALADOR - Archivo tar.gz eliminado: $release_tarball");
+        error_log("INSTALADOR CLEANUP - ✓ Tarball encontrado, eliminando: $release_tarball");
+        $result = @unlink($release_tarball);
+        error_log("INSTALADOR CLEANUP - Resultado de eliminar tarball: " . ($result ? 'SUCCESS' : 'FAILED'));
         $cleaned = true;
+    } else {
+        error_log("INSTALADOR CLEANUP - ✗ Tarball NO encontrado: $release_tarball");
     }
 
+    error_log("INSTALADOR CLEANUP - Finalizando, cleaned=$cleaned");
     return $cleaned;
 }
 
