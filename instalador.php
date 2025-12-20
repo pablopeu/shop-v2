@@ -1497,7 +1497,7 @@ function recursive_rmdir($dir) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔒 Instalador Shop V2 - Minimalista</title>
+    <title>🔒 Instalador Shop V2 v<?php echo INSTALLER_VERSION; ?></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
