@@ -1000,32 +1000,32 @@ $user = get_logged_user();
                             <div class="form-group">
                                 <label>Success</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_success" value="#2e7d32">
-                                    <input type="text" value="#2e7d32" readonly>
+                                    <input type="color" name="color_success" value="<?php echo htmlspecialchars($form_values['color_success'] ?? '#2e7d32'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_success'] ?? '#2e7d32'); ?>" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label>Warning</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_warning" value="#f57c00">
-                                    <input type="text" value="#f57c00" readonly>
+                                    <input type="color" name="color_warning" value="<?php echo htmlspecialchars($form_values['color_warning'] ?? '#f57c00'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_warning'] ?? '#f57c00'); ?>" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label>Error</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_error" value="#c62828">
-                                    <input type="text" value="#c62828" readonly>
+                                    <input type="color" name="color_error" value="<?php echo htmlspecialchars($form_values['color_error'] ?? '#c62828'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_error'] ?? '#c62828'); ?>" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label>Info</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_info" value="#1565c0">
-                                    <input type="text" value="#1565c0" readonly>
+                                    <input type="color" name="color_info" value="<?php echo htmlspecialchars($form_values['color_info'] ?? '#1565c0'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_info'] ?? '#1565c0'); ?>" readonly>
                                 </div>
                             </div>
                         </div>
@@ -2042,22 +2042,49 @@ $user = get_logged_user();
                     document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = config.colors.background;
                     document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = config.colors.text;
 
-                    // Poblar tipografía
+                    // Colores de estado
+                    if (config.colors.success) {
+                        document.querySelector('[name="color_success"]').value = config.colors.success;
+                        document.querySelector('[name="color_success"]').parentElement.querySelector('input[type="text"]').value = config.colors.success;
+                    }
+                    if (config.colors.warning) {
+                        document.querySelector('[name="color_warning"]').value = config.colors.warning;
+                        document.querySelector('[name="color_warning"]').parentElement.querySelector('input[type="text"]').value = config.colors.warning;
+                    }
+                    if (config.colors.error) {
+                        document.querySelector('[name="color_error"]').value = config.colors.error;
+                        document.querySelector('[name="color_error"]').parentElement.querySelector('input[type="text"]').value = config.colors.error;
+                    }
+                    if (config.colors.info) {
+                        document.querySelector('[name="color_info"]').value = config.colors.info;
+                        document.querySelector('[name="color_info"]').parentElement.querySelector('input[type="text"]').value = config.colors.info;
+                    }
+
+                    // Poblar tipografía base
                     const fontFamily = config.typography?.font_family || 'sans-serif';
                     document.querySelector(`[name="font_family"][value="${fontFamily}"]`)?.click();
 
                     document.querySelector('[name="font_size"]').value = config.typography?.base_size || '16px';
                     document.querySelector('[name="line_height"]').value = config.typography?.line_height || '1.5';
 
+                    // Poblar tipografía avanzada
+                    const fontFamilyHeading = config.typography?.font_family_heading || 'sans-serif';
+                    document.querySelector(`[name="font_family_heading"][value="${fontFamilyHeading}"]`)?.click();
+
+                    const headingWeight = config.typography?.heading_weight || '600';
+                    document.querySelector(`[name="heading_weight"][value="${headingWeight}"]`)?.click();
+
                     // Poblar cards
                     const cardBorder = document.querySelector('[name="card_border"]');
                     if (cardBorder) cardBorder.checked = config.components?.cards?.border || false;
 
-                    const cardShadow = config.components?.cards?.shadow || 'subtle';
+                    // Shadow style viene de features, no de components.cards
+                    const cardShadow = config.features?.shadow_style || 'subtle';
                     document.querySelector(`[name="card_shadow"][value="${cardShadow}"]`)?.click();
 
+                    // Rounded viene de features.border_style
                     const cardRounded = document.querySelector('[name="card_rounded"]');
-                    if (cardRounded) cardRounded.checked = config.components?.cards?.rounded || false;
+                    if (cardRounded) cardRounded.checked = (config.features?.border_style === 'rounded');
 
                     const cardHover = config.components?.cards?.hover_effect || 'glow';
                     document.querySelector(`[name="card_hover"][value="${cardHover}"]`)?.click();
@@ -2096,6 +2123,62 @@ $user = get_logged_user();
 
                     const buttonHover = config.components?.buttons?.hover || 'lift';
                     document.querySelector(`[name="button_hover"][value="${buttonHover}"]`)?.click();
+
+                    // Poblar efectos visuales
+                    const animations = config.features?.animations || 'smooth';
+                    document.querySelector(`[name="animations"][value="${animations}"]`)?.click();
+
+                    const glassmorphism = document.querySelector('[name="glassmorphism"]');
+                    if (glassmorphism) glassmorphism.checked = config.features?.glassmorphism || false;
+
+                    const gradientEffects = document.querySelector('[name="gradient_effects"]');
+                    if (gradientEffects) gradientEffects.checked = config.features?.gradient_effects || false;
+
+                    const transform3d = document.querySelector('[name="transform_3d"]');
+                    if (transform3d) transform3d.checked = config.features?.transform_3d || false;
+
+                    // Poblar spacing
+                    document.querySelector('[name="base_unit"]').value = config.spacing?.base_unit || '12px';
+
+                    const spacingScale = config.spacing?.scale || 'proportional';
+                    document.querySelector(`[name="spacing_scale"][value="${spacingScale}"]`)?.click();
+
+                    // Poblar layout
+                    document.querySelector('[name="container_width"]').value = config.layout?.container_width || '1200px';
+                    document.querySelector('[name="grid_gap"]').value = config.layout?.grid_gap || '28px';
+                    document.querySelector('[name="sidebar_width"]').value = config.layout?.sidebar_width || '300px';
+
+                    // Poblar footer
+                    document.querySelector('[name="footer_bg_color"]').value = config.footer?.background_color || '#292c2f';
+                    document.querySelector('[name="footer_text_color"]').value = config.footer?.text_color || '#ffffff';
+
+                    // Poblar vista de producto
+                    const galleryLayout = config.components?.product_view?.gallery_layout || 'thumbnails-bottom';
+                    document.querySelector(`[name="product_gallery_layout"][value="${galleryLayout}"]`)?.click();
+
+                    const imageSize = config.components?.product_view?.image_size || 'medium';
+                    document.querySelector(`[name="product_image_size"][value="${imageSize}"]`)?.click();
+
+                    const thumbnailSize = config.components?.product_view?.thumbnail_size || 'medium';
+                    document.querySelector(`[name="product_thumbnail_size"][value="${thumbnailSize}"]`)?.click();
+
+                    const showBreadcrumb = document.querySelector('[name="product_show_breadcrumb"]');
+                    if (showBreadcrumb) showBreadcrumb.checked = config.components?.product_view?.show_breadcrumb !== false;
+
+                    const showShare = document.querySelector('[name="product_show_share"]');
+                    if (showShare) showShare.checked = config.components?.product_view?.show_share !== false;
+
+                    const showSku = document.querySelector('[name="product_show_sku"]');
+                    if (showSku) showSku.checked = config.components?.product_view?.show_sku !== false;
+
+                    const showStock = document.querySelector('[name="product_show_stock"]');
+                    if (showStock) showStock.checked = config.components?.product_view?.show_stock !== false;
+
+                    const showNavButtons = document.querySelector('[name="product_show_nav_buttons"]');
+                    if (showNavButtons) showNavButtons.checked = config.components?.product_view?.show_nav_buttons !== false;
+
+                    const showImageCounter = document.querySelector('[name="product_show_image_counter"]');
+                    if (showImageCounter) showImageCounter.checked = config.components?.product_view?.show_image_counter !== false;
 
                     // Mostrar sección de actualizar paleta
                     const editPaletteSection = document.getElementById('edit-palette-section');
