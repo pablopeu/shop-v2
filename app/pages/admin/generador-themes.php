@@ -46,6 +46,24 @@ $form_values = [
     'product_show_stock' => true,
     'product_show_nav_buttons' => true,
     'product_show_image_counter' => true,
+    // Efectos visuales
+    'animations' => 'smooth',
+    'glassmorphism' => false,
+    'gradient_effects' => false,
+    'transform_3d' => false,
+    // Tipografía avanzada
+    'font_family_heading' => 'sans-serif',
+    'heading_weight' => '600',
+    // Spacing
+    'base_unit' => '12px',
+    'spacing_scale' => 'proportional',
+    // Layout
+    'container_width' => '1200px',
+    'grid_gap' => '28px',
+    'sidebar_width' => '300px',
+    // Footer
+    'footer_bg_color' => '#292c2f',
+    'footer_text_color' => '#ffffff',
 ];
 
 // Si viene de redirect después de guardar, cargar el theme
@@ -87,6 +105,24 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'product_show_stock' => $edit_config['components']['product_view']['show_stock'] ?? true,
             'product_show_nav_buttons' => $edit_config['components']['product_view']['show_nav_buttons'] ?? true,
             'product_show_image_counter' => $edit_config['components']['product_view']['show_image_counter'] ?? true,
+            // Efectos visuales
+            'animations' => $edit_config['features']['animations'] ?? 'smooth',
+            'glassmorphism' => $edit_config['features']['glassmorphism'] ?? false,
+            'gradient_effects' => $edit_config['features']['gradient_effects'] ?? false,
+            'transform_3d' => $edit_config['features']['transform_3d'] ?? false,
+            // Tipografía avanzada
+            'font_family_heading' => $edit_config['typography']['font_family_heading'] ?? 'sans-serif',
+            'heading_weight' => $edit_config['typography']['heading_weight'] ?? '600',
+            // Spacing
+            'base_unit' => $edit_config['spacing']['base_unit'] ?? '12px',
+            'spacing_scale' => $edit_config['spacing']['scale'] ?? 'proportional',
+            // Layout
+            'container_width' => $edit_config['layout']['container_width'] ?? '1200px',
+            'grid_gap' => $edit_config['layout']['grid_gap'] ?? '28px',
+            'sidebar_width' => $edit_config['layout']['sidebar_width'] ?? '300px',
+            // Footer
+            'footer_bg_color' => $edit_config['footer']['background_color'] ?? '#292c2f',
+            'footer_text_color' => $edit_config['footer']['text_color'] ?? '#ffffff',
             'original_slug' => $edit_config['slug'] ?? '',
         ];
 
@@ -152,7 +188,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'product_show_sku' => isset($_POST['product_show_sku']),
             'product_show_stock' => isset($_POST['product_show_stock']),
             'product_show_nav_buttons' => isset($_POST['product_show_nav_buttons']),
-            'product_show_image_counter' => isset($_POST['product_show_image_counter'])
+            'product_show_image_counter' => isset($_POST['product_show_image_counter']),
+
+            // Efectos Visuales
+            'animations' => sanitize_input($_POST['animations'] ?? 'smooth'),
+            'glassmorphism' => isset($_POST['glassmorphism']),
+            'gradient_effects' => isset($_POST['gradient_effects']),
+            'transform_3d' => isset($_POST['transform_3d']),
+
+            // Tipografía Avanzada
+            'font_family_heading' => sanitize_input($_POST['font_family_heading'] ?? 'sans-serif'),
+            'heading_weight' => sanitize_input($_POST['heading_weight'] ?? '600'),
+
+            // Spacing
+            'base_unit' => sanitize_input($_POST['base_unit'] ?? '12px'),
+            'spacing_scale' => sanitize_input($_POST['spacing_scale'] ?? 'proportional'),
+
+            // Layout
+            'container_width' => sanitize_input($_POST['container_width'] ?? '1200px'),
+            'grid_gap' => sanitize_input($_POST['grid_gap'] ?? '28px'),
+            'sidebar_width' => sanitize_input($_POST['sidebar_width'] ?? '300px'),
+
+            // Footer
+            'footer_bg_color' => sanitize_input($_POST['footer_bg_color'] ?? '#292c2f'),
+            'footer_text_color' => sanitize_input($_POST['footer_text_color'] ?? '#ffffff')
         ];
 
         // Validar (pasar original_slug si estamos editando un theme existente)
