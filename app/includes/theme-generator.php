@@ -1167,10 +1167,13 @@ function generate_theme($data) {
 
         'features' => [
             'dark_mode' => false,
-            'animations' => 'smooth',
+            'animations' => $data['animations'] ?? 'smooth',
             'border_style' => $data['card_rounded'] ? 'rounded' : 'sharp',
             'shadow_style' => $data['card_shadow'] ?? 'subtle',
-            'color_scheme' => 'custom'
+            'color_scheme' => 'custom',
+            'glassmorphism' => $data['glassmorphism'] ?? false,
+            'gradient_effects' => $data['gradient_effects'] ?? false,
+            'transform_3d' => $data['transform_3d'] ?? false
         ],
 
         'colors' => [
@@ -1189,15 +1192,15 @@ function generate_theme($data) {
 
         'typography' => [
             'font_family' => $data['font_family'] ?? 'sans-serif',
-            'font_family_heading' => $data['font_family'] ?? 'sans-serif',
-            'heading_weight' => '600',
+            'font_family_heading' => $data['font_family_heading'] ?? 'sans-serif',
+            'heading_weight' => $data['heading_weight'] ?? '600',
             'base_size' => $data['font_size'] ?? '16px',
             'line_height' => $data['line_height'] ?? '1.5'
         ],
 
         'spacing' => [
-            'base_unit' => '12px',
-            'scale' => 'proportional'
+            'base_unit' => $data['base_unit'] ?? '12px',
+            'scale' => $data['spacing_scale'] ?? 'proportional'
         ],
 
         'components' => [
@@ -1239,14 +1242,14 @@ function generate_theme($data) {
         ],
 
         'layout' => [
-            'container_width' => '1200px',
-            'grid_gap' => '28px',
-            'sidebar_width' => '300px'
+            'container_width' => $data['container_width'] ?? '1200px',
+            'grid_gap' => $data['grid_gap'] ?? '28px',
+            'sidebar_width' => $data['sidebar_width'] ?? '300px'
         ],
 
         'footer' => [
-            'background_color' => '#292c2f',
-            'text_color' => '#ffffff'
+            'background_color' => $data['footer_bg_color'] ?? '#292c2f',
+            'text_color' => $data['footer_text_color'] ?? '#ffffff'
         ],
 
         'compatibility' => [
