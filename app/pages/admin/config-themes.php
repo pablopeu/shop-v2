@@ -63,12 +63,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_theme'])) {
         $error = 'Token de seguridad inválido';
     } else {
         $slug = sanitize_input($_POST['theme_slug'] ?? '');
+        $current_view = sanitize_input($_POST['current_view'] ?? 'active');
         $result = delete_theme($slug);
 
         if ($result['success']) {
             log_admin_action('theme_deleted', $_SESSION['username'], ['slug' => $slug]);
             $_SESSION['success_message'] = $result['message'];
-            redirect(url('/admin/?page=config-themes'));
+
+            // Si estamos en vista de archivados, verificar si quedan themes archivados
+            $redirect_url = url('/admin/?page=config-themes');
+            if ($current_view === 'archived') {
+                // Recargar themes para verificar si aún hay archivados
+                $remaining_themes = get_available_themes();
+                $has_archived = false;
+                foreach ($remaining_themes as $theme_info) {
+                    if ($theme_info['archived'] ?? false) {
+                        $has_archived = true;
+                        break;
+                    }
+                }
+
+                // Si aún hay themes archivados, mantener la vista
+                if ($has_archived) {
+                    $redirect_url .= '&view=archived';
+                }
+            }
+
+            redirect($redirect_url);
             exit;
         } else {
             $error = $result['message'];
@@ -750,12 +771,17 @@ $user = get_logged_user();
                 icon: '🗑️',
                 confirmType: 'danger',
                 onConfirm: function() {
+                    // Detectar vista activa actual
+                    const activeTab = document.querySelector('.filter-tab.active');
+                    const currentView = activeTab ? activeTab.dataset.filter : 'active';
+
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.innerHTML = `
                         <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                         <input type="hidden" name="delete_theme" value="1">
                         <input type="hidden" name="theme_slug" value="${slug}">
+                        <input type="hidden" name="current_view" value="${currentView}">
                     `;
                     document.body.appendChild(form);
                     form.submit();
@@ -772,6 +798,25 @@ $user = get_logged_user();
         window.unarchiveTheme = unarchiveTheme;
         window.deleteTheme = deleteTheme;
         window.filterThemes = filterThemes;
+
+        // ============================================================================
+        // INICIALIZACIÓN AL CARGAR LA PÁGINA
+        // ============================================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detectar parámetro 'view' en la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewParam = urlParams.get('view');
+
+            if (viewParam) {
+                // Encontrar el tab correspondiente
+                const targetTab = document.querySelector(`.filter-tab[data-filter="${viewParam}"]`);
+
+                if (targetTab) {
+                    // Simular click en el tab para activar la vista
+                    targetTab.click();
+                }
+            }
+        });
     </script>
 
     <!-- Modal Component -->
