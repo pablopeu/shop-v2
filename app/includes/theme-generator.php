@@ -926,6 +926,56 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
     }
 
+    // Ajustar contenedor de galería al tamaño de imagen
+    $css .= ".product-gallery {\n";
+    $css .= "    max-width: {$max_width};\n";
+    $css .= "    margin: 0 auto;\n";
+    $css .= "}\n\n";
+
+    // === RESPONSIVE ===
+    $css .= "/* =================================\n";
+    $css .= "   RESPONSIVE\n";
+    $css .= "   ================================= */\n\n";
+
+    // Tablet and below
+    $css .= "@media (max-width: 768px) {\n";
+    $css .= "    .product-grid {\n";
+    $css .= "        grid-template-columns: 1fr !important;\n";
+    $css .= "        gap: var(--spacing-lg) !important;\n";
+    $css .= "    }\n\n";
+
+    $css .= "    .product-gallery {\n";
+    $css .= "        max-width: 100% !important;\n";
+    $css .= "        margin: 0 !important;\n";
+    $css .= "    }\n\n";
+
+    $css .= "    .product-main-image {\n";
+    $css .= "        max-width: 100% !important;\n";
+    $css .= "    }\n\n";
+
+    // Force thumbnails to bottom on mobile/tablet
+    if ($gallery_layout !== 'thumbnails-bottom') {
+        $css .= "    .product-gallery {\n";
+        $css .= "        flex-direction: column !important;\n";
+        $css .= "    }\n\n";
+
+        $css .= "    .product-thumbnails {\n";
+        $css .= "        flex-direction: row !important;\n";
+        $css .= "        margin: var(--spacing-md) 0 0 0 !important;\n";
+        $css .= "        justify-content: center;\n";
+        $css .= "    }\n\n";
+    }
+
+    $css .= "}\n\n";
+
+    // Mobile only
+    $css .= "@media (max-width: 480px) {\n";
+    $css .= "    .product-thumbnail {\n";
+    $css .= "        width: 60px !important;\n";
+    $css .= "        height: 60px !important;\n";
+    $css .= "    }\n";
+    $css .= "}\n\n";
+
     return $css;
 }
 
