@@ -1378,6 +1378,11 @@ function create_htaccess_files($app_path, $public_path, $config) {
     $public_htaccess .= "    Deny from all\n";
     $public_htaccess .= "</FilesMatch>\n\n";
 
+    $public_htaccess .= "# Protect bootstrap path configuration\n";
+    $public_htaccess .= "<Files \"bootstrap_path.php\">\n";
+    $public_htaccess .= "    Require all denied\n";
+    $public_htaccess .= "</Files>\n\n";
+
     $public_htaccess .= "# Enable rewrite engine\n";
     $public_htaccess .= "RewriteEngine On\n";
     $public_htaccess .= "RewriteBase " . $rewrite_base . "\n\n";
