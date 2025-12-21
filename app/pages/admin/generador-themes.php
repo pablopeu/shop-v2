@@ -1590,324 +1590,6 @@ $user = get_logged_user();
             }
         }
 
-        // Mapear paleta de ColorHunt
-        function mapPalette(event, element, params) {
-            event.preventDefault();
-
-            // Obtener el texto del textarea
-            const paletteText = document.getElementById('palette-colors').value.trim();
-
-            if (!paletteText) {
-                showModal({
-                    title: 'Error',
-                    message: 'Por favor pega los 4 colores de ColorHunt',
-                    icon: '⚠️',
-                    confirmType: 'danger'
-                });
-                return;
-            }
-
-            // Extraer todos los colores hex del texto (formato #RRGGBB)
-            const hexPattern = /#[a-fA-F0-9]{6}/g;
-            const colors = paletteText.match(hexPattern);
-
-            // Validar que sean exactamente 4 colores
-            if (!colors || colors.length !== 4) {
-                showModal({
-                    title: 'Error de Formato',
-                    message: `Se encontraron ${colors ? colors.length : 0} colores. Necesitas exactamente 4 colores en formato #RRGGBB`,
-                    icon: '⚠️',
-                    confirmType: 'danger'
-                });
-                return;
-            }
-
-            // Mostrar loading en el botón
-            const btn = event.target;
-            const originalText = btn.textContent;
-            btn.textContent = '⏳ Mapeando...';
-            btn.disabled = true;
-
-            // Enviar petición AJAX
-            fetch('<?php echo url('/admin/?page=generador-themes&action=map_palette'); ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ colors: colors })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.textContent = originalText;
-                btn.disabled = false;
-
-                if (data.success) {
-                    // Poblar inputs de color
-                    document.getElementById('color-primary').value = data.colors.primary;
-                    document.getElementById('color-secondary').value = data.colors.secondary;
-                    document.getElementById('color-accent').value = data.colors.accent;
-                    document.getElementById('color-background').value = data.colors.background;
-                    document.getElementById('color-text').value = data.colors.text;
-
-                    // Sincronizar text inputs
-                    document.querySelector('#color-primary').parentElement.querySelector('input[type="text"]').value = data.colors.primary;
-                    document.querySelector('#color-secondary').parentElement.querySelector('input[type="text"]').value = data.colors.secondary;
-                    document.querySelector('#color-accent').parentElement.querySelector('input[type="text"]').value = data.colors.accent;
-                    document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = data.colors.background;
-                    document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = data.colors.text;
-
-                    showModal({
-                        title: 'Éxito',
-                        message: '✅ Paleta mapeada exitosamente con contraste WCAG validado',
-                        icon: '🎨',
-                        confirmType: 'success'
-                    });
-                } else {
-                    showModal({
-                        title: 'Error',
-                        message: data.message,
-                        icon: '⚠️',
-                        confirmType: 'danger'
-                    });
-                }
-            })
-            .catch(error => {
-                btn.textContent = originalText;
-                btn.disabled = false;
-
-                showModal({
-                    title: 'Error de Red',
-                    message: 'Error al conectar con el servidor: ' + error,
-                    icon: '⚠️',
-                    confirmType: 'danger'
-                });
-            });
-        }
-
-        // Cargar paletas populares
-        let popularPalettes = [];
-
-        function loadPopularPalettes() {
-            const loadingDiv = document.getElementById('palettes-loading');
-            const gridDiv = document.getElementById('palettes-grid');
-
-            // Usar paletas cargadas desde PHP
-            try {
-                if (!POPULAR_PALETTES || POPULAR_PALETTES.length === 0) {
-                    throw new Error('No hay paletas disponibles');
-                }
-
-                popularPalettes = POPULAR_PALETTES;
-
-                // Ocultar loading, mostrar grid
-                loadingDiv.style.display = 'none';
-                gridDiv.style.display = 'grid';
-
-                // Renderizar paletas
-                renderPalettesGrid(POPULAR_PALETTES);
-            } catch (error) {
-                loadingDiv.innerHTML = '❌ Error al cargar paletas populares';
-                console.error('Error loading palettes:', error);
-            }
-        }
-
-        function renderPalettesGrid(palettes) {
-            const gridDiv = document.getElementById('palettes-grid');
-
-            // Crear grid responsivo
-            gridDiv.style.display = 'grid';
-            gridDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-            gridDiv.style.gap = '12px';
-
-            // Renderizar cada paleta
-            palettes.forEach(palette => {
-                const paletteCard = document.createElement('div');
-                paletteCard.className = 'palette-card';
-                paletteCard.setAttribute('data-action', 'selectPopularPalette');
-                paletteCard.setAttribute('data-palette-id', palette.id);
-                paletteCard.style.cursor = 'pointer';
-                paletteCard.style.borderRadius = '8px';
-                paletteCard.style.overflow = 'hidden';
-                paletteCard.style.border = '2px solid transparent';
-                paletteCard.style.transition = 'all 0.2s';
-                paletteCard.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-
-                // Crear los 4 cuadros de colores
-                paletteCard.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; height: 80px;">
-                        <div style="background: ${palette.colors[0]};"></div>
-                        <div style="background: ${palette.colors[1]};"></div>
-                        <div style="background: ${palette.colors[2]};"></div>
-                        <div style="background: ${palette.colors[3]};"></div>
-                    </div>
-                    <div style="background: white; padding: 6px; text-align: center; font-size: 11px; color: #666;">
-                        #${palette.id}
-                    </div>
-                `;
-
-                // Hover effect
-                paletteCard.addEventListener('mouseenter', function() {
-                    this.style.borderColor = '#667eea';
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-                });
-
-                paletteCard.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('selected')) {
-                        this.style.borderColor = 'transparent';
-                        this.style.transform = 'translateY(0)';
-                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                    }
-                });
-
-                gridDiv.appendChild(paletteCard);
-            });
-        }
-
-        function selectPopularPalette(event, element, params) {
-            const paletteId = parseInt(params?.paletteId);
-            if (!paletteId) return;
-
-            // Encontrar la paleta
-            const palette = popularPalettes.find(p => p.id === paletteId);
-            if (!palette) return;
-
-            // Remover selección anterior (en ambos grids)
-            document.querySelectorAll('.palette-card, .palette-card-edit').forEach(card => {
-                card.classList.remove('selected');
-                card.style.borderColor = 'transparent';
-                card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            });
-
-            // Marcar como seleccionada
-            element.classList.add('selected');
-            element.style.borderColor = '#667eea';
-            element.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.5)';
-
-            // Aplicar colores mapeados directamente (ya vienen procesados del JSON)
-            const mapped = palette.mapped;
-
-            document.getElementById('color-primary').value = mapped.primary;
-            document.getElementById('color-secondary').value = mapped.secondary;
-            document.getElementById('color-accent').value = mapped.accent;
-            document.getElementById('color-background').value = mapped.background;
-            document.getElementById('color-text').value = mapped.text;
-
-            // Sincronizar text inputs
-            document.querySelector('#color-primary').parentElement.querySelector('input[type="text"]').value = mapped.primary;
-            document.querySelector('#color-secondary').parentElement.querySelector('input[type="text"]').value = mapped.secondary;
-            document.querySelector('#color-accent').parentElement.querySelector('input[type="text"]').value = mapped.accent;
-            document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = mapped.background;
-            document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = mapped.text;
-
-            // Scroll al formulario de colores para que el usuario vea los cambios
-            document.getElementById('colors-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // Cargar paletas en sección de edición
-        function loadEditPalettes() {
-            const loadingDiv = document.getElementById('edit-palettes-loading');
-            const gridDiv = document.getElementById('edit-palettes-grid');
-            const previewBtnContainer = document.getElementById('edit-preview-btn-container');
-
-            // Usar paletas cargadas desde PHP
-            try {
-                if (!POPULAR_PALETTES || POPULAR_PALETTES.length === 0) {
-                    throw new Error('No hay paletas disponibles');
-                }
-
-                popularPalettes = POPULAR_PALETTES;
-
-                // Ocultar loading, mostrar grid y botón preview
-                loadingDiv.style.display = 'none';
-                gridDiv.style.display = 'grid';
-                previewBtnContainer.style.display = 'block';
-
-                // Renderizar paletas
-                renderEditPalettesGrid(POPULAR_PALETTES);
-            } catch (error) {
-                loadingDiv.innerHTML = '❌ Error al cargar paletas';
-                console.error('Error loading edit palettes:', error);
-            }
-        }
-
-        function renderEditPalettesGrid(palettes) {
-            const gridDiv = document.getElementById('edit-palettes-grid');
-
-            // Limpiar grid
-            gridDiv.innerHTML = '';
-
-            // Configurar grid
-            gridDiv.style.display = 'grid';
-            gridDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-            gridDiv.style.gap = '12px';
-
-            // Renderizar cada paleta
-            palettes.forEach(palette => {
-                const paletteCard = document.createElement('div');
-                paletteCard.className = 'palette-card-edit';
-                paletteCard.setAttribute('data-action', 'selectPopularPalette');
-                paletteCard.setAttribute('data-palette-id', palette.id);
-                paletteCard.style.cursor = 'pointer';
-                paletteCard.style.borderRadius = '8px';
-                paletteCard.style.overflow = 'hidden';
-                paletteCard.style.border = '2px solid transparent';
-                paletteCard.style.transition = 'all 0.2s';
-                paletteCard.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-
-                // Crear los 4 cuadros de colores
-                paletteCard.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; height: 80px;">
-                        <div style="background: ${palette.colors[0]};"></div>
-                        <div style="background: ${palette.colors[1]};"></div>
-                        <div style="background: ${palette.colors[2]};"></div>
-                        <div style="background: ${palette.colors[3]};"></div>
-                    </div>
-                    <div style="background: white; padding: 6px; text-align: center; font-size: 11px; color: #666;">
-                        #${palette.id}
-                    </div>
-                `;
-
-                // Hover effect
-                paletteCard.addEventListener('mouseenter', function() {
-                    this.style.borderColor = '#667eea';
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-                });
-
-                paletteCard.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('selected')) {
-                        this.style.borderColor = 'transparent';
-                        this.style.transform = 'translateY(0)';
-                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                    }
-                });
-
-                gridDiv.appendChild(paletteCard);
-            });
-        }
-
-        // Cargar paletas cuando se muestra la sección
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cargar paletas al inicio si la sección de palette está visible
-            const paletteImport = document.getElementById('palette-import');
-            if (paletteImport && paletteImport.style.display !== 'none') {
-                loadPopularPalettes();
-            }
-        });
-
-        // También cargar cuando se cambia a método de creación "palette"
-        const creationMethodRadios = document.querySelectorAll('[name="creation_method"]');
-        creationMethodRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.value === 'palette') {
-                    // Solo cargar si aún no se han cargado
-                    if (popularPalettes.length === 0) {
-                        loadPopularPalettes();
-                    }
-                }
-            });
-        });
 
         // Sincronizar color picker con text input
         document.querySelectorAll('.color-input-wrapper').forEach(wrapper => {
@@ -2495,11 +2177,132 @@ $user = get_logged_user();
         // Exportar funciones para event delegation
         window.generateSlug = generateSlug;
         window.toggleCreationMethod = toggleCreationMethod;
-        window.mapPalette = mapPalette;
-        window.selectPopularPalette = selectPopularPalette;
         window.loadThemeForEdit = loadThemeForEdit;
         window.showPreview = showPreview;
         window.activateTheme = activateTheme;
+
+        // ===== DETECCIÓN DE CAMBIOS EN FORMULARIO =====
+        let formInitialState = null;
+        let formHasChanges = false;
+        let allowNavigation = false;
+
+        // Capturar estado inicial del formulario
+        function captureFormState() {
+            const form = document.getElementById('theme-generator-form');
+            if (!form) return null;
+
+            const formData = new FormData(form);
+            const state = {};
+
+            // Capturar todos los campos del formulario
+            for (let [key, value] of formData.entries()) {
+                state[key] = value;
+            }
+
+            // Capturar también color pickers (pueden no estar en FormData si no cambiaron)
+            const colorInputs = form.querySelectorAll('input[type="color"]');
+            colorInputs.forEach(input => {
+                state[input.id] = input.value;
+            });
+
+            // Capturar textareas
+            const textareas = form.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                state[textarea.id || textarea.name] = textarea.value;
+            });
+
+            return JSON.stringify(state);
+        }
+
+        // Verificar si hay cambios en el formulario
+        function checkFormChanges() {
+            if (!formInitialState) return false;
+
+            const currentState = captureFormState();
+            formHasChanges = (formInitialState !== currentState);
+            return formHasChanges;
+        }
+
+        // Confirmar navegación si hay cambios
+        function confirmNavigation(callback) {
+            if (!formHasChanges || allowNavigation) {
+                callback();
+                return;
+            }
+
+            showModal({
+                title: 'Cambios sin guardar',
+                message: '¿Deseas salir sin guardar los cambios en el theme?',
+                icon: '⚠️',
+                confirmType: 'danger',
+                onConfirm: function() {
+                    allowNavigation = true;
+                    callback();
+                }
+            });
+        }
+
+        // Inicializar detección de cambios cuando carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('theme-generator-form');
+            if (!form) return;
+
+            // Capturar estado inicial después de un pequeño delay (para que carguen todos los campos)
+            setTimeout(() => {
+                formInitialState = captureFormState();
+            }, 500);
+
+            // Detectar cambios en todos los campos
+            form.addEventListener('input', checkFormChanges);
+            form.addEventListener('change', checkFormChanges);
+
+            // Interceptar submit del formulario para permitir navegación
+            form.addEventListener('submit', function(e) {
+                // Al hacer submit, permitir que la página se recargue sin confirmación
+                allowNavigation = true;
+                formHasChanges = false;
+            });
+
+            // Interceptar navegación en links del sidebar
+            document.querySelectorAll('.admin-sidebar a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (formHasChanges && !allowNavigation) {
+                        e.preventDefault();
+                        const href = this.href;
+                        confirmNavigation(() => {
+                            window.location.href = href;
+                        });
+                    }
+                });
+            });
+
+            // Interceptar navegación al salir de la página
+            window.addEventListener('beforeunload', function(e) {
+                if (formHasChanges && !allowNavigation) {
+                    e.preventDefault();
+                    e.returnValue = '¿Deseas salir sin guardar los cambios en el theme?';
+                    return e.returnValue;
+                }
+            });
+
+            // También interceptar navegación en tabs (botones de tabs dentro de la misma página)
+            document.querySelectorAll('.tab-button').forEach(tabBtn => {
+                tabBtn.addEventListener('click', function(e) {
+                    // Los tabs dentro de la misma página no requieren confirmación
+                    // Solo alertar si intentan navegar fuera
+                });
+            });
+        });
+
+        // Marcar como guardado exitosamente después de submit AJAX
+        function markFormAsSaved() {
+            formInitialState = captureFormState();
+            formHasChanges = false;
+            allowNavigation = false;
+        }
+
+        // Exportar función para que otros scripts puedan usarla
+        window.markFormAsSaved = markFormAsSaved;
     </script>
 
     <!-- Modal Component -->
