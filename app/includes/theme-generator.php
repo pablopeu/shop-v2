@@ -856,17 +856,16 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
     }
 
-    // Main Image Size
+    // Main Image Size - usando porcentajes para diseño fluido
     $image_size = $config['components']['product_view']['image_size'] ?? 'medium';
-    $max_width = '500px'; // medium
+    $gallery_width = '80%'; // medium
     if ($image_size === 'small') {
-        $max_width = '400px';
+        $gallery_width = '60%';
     } elseif ($image_size === 'large') {
-        $max_width = '600px';
+        $gallery_width = '100%';
     }
 
     $css .= ".product-main-image {\n";
-    $css .= "    max-width: {$max_width};\n";
     $css .= "    width: 100%;\n";
     $css .= "    height: auto;\n";
     $css .= "}\n\n";
@@ -925,6 +924,75 @@ function generate_theme_css_basic($config) {
         $css .= "    display: none !important;\n";
         $css .= "}\n\n";
     }
+
+    // Navigation buttons
+    $show_nav_buttons = $config['components']['product_view']['show_nav_buttons'] ?? true;
+    if (!$show_nav_buttons) {
+        $css .= ".gallery-nav,\n";
+        $css .= ".gallery-nav.prev,\n";
+        $css .= ".gallery-nav.next {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
+    // Image counter
+    $show_image_counter = $config['components']['product_view']['show_image_counter'] ?? true;
+    if (!$show_image_counter) {
+        $css .= ".image-counter {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
+    // Ajustar contenedor de galería con ancho porcentual fluido
+    $css .= ".product-gallery {\n";
+    $css .= "    width: {$gallery_width};\n";
+    $css .= "    max-width: 100%;\n";
+    $css .= "    margin: 0 auto;\n";
+    $css .= "}\n\n";
+
+    // === RESPONSIVE ===
+    $css .= "/* =================================\n";
+    $css .= "   RESPONSIVE\n";
+    $css .= "   ================================= */\n\n";
+
+    // Tablet and below
+    $css .= "@media (max-width: 768px) {\n";
+    $css .= "    .product-grid {\n";
+    $css .= "        grid-template-columns: 1fr !important;\n";
+    $css .= "        gap: var(--spacing-lg) !important;\n";
+    $css .= "    }\n\n";
+
+    $css .= "    .product-gallery {\n";
+    $css .= "        max-width: 100% !important;\n";
+    $css .= "        margin: 0 !important;\n";
+    $css .= "    }\n\n";
+
+    $css .= "    .product-main-image {\n";
+    $css .= "        max-width: 100% !important;\n";
+    $css .= "    }\n\n";
+
+    // Force thumbnails to bottom on mobile/tablet
+    if ($gallery_layout !== 'thumbnails-bottom') {
+        $css .= "    .product-gallery {\n";
+        $css .= "        flex-direction: column !important;\n";
+        $css .= "    }\n\n";
+
+        $css .= "    .product-thumbnails {\n";
+        $css .= "        flex-direction: row !important;\n";
+        $css .= "        margin: var(--spacing-md) 0 0 0 !important;\n";
+        $css .= "        justify-content: center;\n";
+        $css .= "    }\n\n";
+    }
+
+    $css .= "}\n\n";
+
+    // Mobile only
+    $css .= "@media (max-width: 480px) {\n";
+    $css .= "    .product-thumbnail {\n";
+    $css .= "        width: 60px !important;\n";
+    $css .= "        height: 60px !important;\n";
+    $css .= "    }\n";
+    $css .= "}\n\n";
 
     return $css;
 }
@@ -1164,7 +1232,9 @@ function generate_theme($data) {
                 'show_breadcrumb' => $data['product_show_breadcrumb'] ?? true,
                 'show_share' => $data['product_show_share'] ?? true,
                 'show_sku' => $data['product_show_sku'] ?? true,
-                'show_stock' => $data['product_show_stock'] ?? true
+                'show_stock' => $data['product_show_stock'] ?? true,
+                'show_nav_buttons' => $data['product_show_nav_buttons'] ?? true,
+                'show_image_counter' => $data['product_show_image_counter'] ?? true
             ]
         ],
 

@@ -602,7 +602,7 @@
 .product-grid {
     display: grid;
     grid-template-columns: 3fr 2fr;
-    gap: 60px;
+    gap: 30px;
 }
 
 /* Gallery */

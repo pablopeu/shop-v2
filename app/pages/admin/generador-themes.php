@@ -44,6 +44,8 @@ $form_values = [
     'product_show_share' => true,
     'product_show_sku' => true,
     'product_show_stock' => true,
+    'product_show_nav_buttons' => true,
+    'product_show_image_counter' => true,
 ];
 
 // Si viene de redirect después de guardar, cargar el theme
@@ -83,6 +85,8 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'product_show_share' => $edit_config['components']['product_view']['show_share'] ?? true,
             'product_show_sku' => $edit_config['components']['product_view']['show_sku'] ?? true,
             'product_show_stock' => $edit_config['components']['product_view']['show_stock'] ?? true,
+            'product_show_nav_buttons' => $edit_config['components']['product_view']['show_nav_buttons'] ?? true,
+            'product_show_image_counter' => $edit_config['components']['product_view']['show_image_counter'] ?? true,
             'original_slug' => $edit_config['slug'] ?? '',
         ];
 
@@ -146,7 +150,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'product_show_breadcrumb' => isset($_POST['product_show_breadcrumb']),
             'product_show_share' => isset($_POST['product_show_share']),
             'product_show_sku' => isset($_POST['product_show_sku']),
-            'product_show_stock' => isset($_POST['product_show_stock'])
+            'product_show_stock' => isset($_POST['product_show_stock']),
+            'product_show_nav_buttons' => isset($_POST['product_show_nav_buttons']),
+            'product_show_image_counter' => isset($_POST['product_show_image_counter'])
         ];
 
         // Validar (pasar original_slug si estamos editando un theme existente)
@@ -468,7 +474,7 @@ $user = get_logged_user();
 
         .color-input-wrapper input[type="color"] {
             width: 50px;
-            height: 38px;
+            height: 50px;
             border: 2px solid #ddd;
             border-radius: 6px;
             cursor: pointer;
@@ -1238,18 +1244,18 @@ $user = get_logged_user();
                             <div class="radio-group">
                                 <label>
                                     <input type="radio" name="product_image_size" value="small" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'small' ? 'checked' : ''; ?>>
-                                    Pequeña (400px)
+                                    Pequeña (60%)
                                 </label>
                                 <label>
                                     <input type="radio" name="product_image_size" value="medium" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'medium' ? 'checked' : ''; ?>>
-                                    Mediana (500px)
+                                    Mediana (80%)
                                 </label>
                                 <label>
                                     <input type="radio" name="product_image_size" value="large" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'large' ? 'checked' : ''; ?>>
-                                    Grande (600px)
+                                    Grande (100%)
                                 </label>
                             </div>
-                            <small class="helper-text">Tamaño máximo de la imagen principal del producto</small>
+                            <small class="helper-text">Ancho de la galería respecto al contenedor</small>
                         </div>
 
                         <div class="form-group">
@@ -1274,7 +1280,7 @@ $user = get_logged_user();
                             </div>
                         </div>
 
-                        <div class="form-group" style="margin-bottom: 0;">
+                        <div class="form-group">
                             <label>Tamaño de Miniaturas</label>
                             <div class="radio-group">
                                 <label>
@@ -1291,6 +1297,22 @@ $user = get_logged_user();
                                 </label>
                             </div>
                             <small class="helper-text">Tamaño de las miniaturas en la galería</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="product_show_nav_buttons" <?php echo ($form_values['product_show_nav_buttons'] ?? true) ? 'checked' : ''; ?>>
+                                Mostrar botones de navegación (‹ ›)
+                            </label>
+                            <small class="helper-text">Botones para navegar entre imágenes</small>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>
+                                <input type="checkbox" name="product_show_image_counter" <?php echo ($form_values['product_show_image_counter'] ?? true) ? 'checked' : ''; ?>>
+                                Mostrar contador de imágenes (1/5)
+                            </label>
+                            <small class="helper-text">Indicador de imagen actual</small>
                         </div>
                     </div>
                 </div>
