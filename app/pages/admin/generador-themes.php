@@ -2254,11 +2254,11 @@ $user = get_logged_user();
                 `;
 
                 const colors = [
-                    palette.primary,
-                    palette.secondary,
-                    palette.accent,
-                    palette.text,
-                    palette.background
+                    palette.mapped?.primary || palette.primary,
+                    palette.mapped?.secondary || palette.secondary,
+                    palette.mapped?.accent || palette.accent,
+                    palette.mapped?.text || palette.text,
+                    palette.mapped?.background || palette.background
                 ];
 
                 colors.forEach(color => {
@@ -2311,13 +2311,14 @@ $user = get_logged_user();
 
         // Seleccionar y aplicar una paleta popular
         function selectPopularPalette(palette) {
-            // Aplicar colores a los inputs
+            // Aplicar colores a los inputs (soporta formato con y sin .mapped)
+            const colors = palette.mapped || palette;
             const colorMappings = {
-                'color-primary': palette.primary,
-                'color-secondary': palette.secondary,
-                'color-accent': palette.accent,
-                'color-text': palette.text,
-                'color-background': palette.background
+                'color-primary': colors.primary,
+                'color-secondary': colors.secondary,
+                'color-accent': colors.accent,
+                'color-text': colors.text,
+                'color-background': colors.background
             };
 
             Object.entries(colorMappings).forEach(([inputId, color]) => {
