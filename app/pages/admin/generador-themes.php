@@ -889,6 +889,27 @@ $user = get_logged_user();
                         🎨 Colores
                     </div>
 
+                    <!-- Selector de Paletas Populares -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #444;">Paletas Populares</h4>
+                            <span style="font-size: 12px; color: #888;">(<?php echo count($paletas_populares); ?> paletas disponibles)</span>
+                        </div>
+                        <div id="popular-palettes-grid" style="
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                            gap: 12px;
+                            max-height: 300px;
+                            overflow-y: auto;
+                            padding: 4px;
+                            background: #f9f9f9;
+                            border-radius: 8px;
+                            border: 1px solid #e0e0e0;
+                        ">
+                            <!-- Las paletas se cargan dinámicamente aquí -->
+                        </div>
+                    </div>
+
                     <div class="color-grid">
                         <div class="form-group">
                             <label>Primary *</label>
@@ -1548,6 +1569,9 @@ $user = get_logged_user();
 
     <!-- JavaScript -->
     <script nonce="<?= csp_nonce() ?>">
+        // Paletas populares cargadas desde PHP
+        const POPULAR_PALETTES = <?php echo $paletas_json; ?>;
+
         // ===== SISTEMA DE TABS =====
         document.addEventListener('DOMContentLoaded', function() {
             const tabButtons = document.querySelectorAll('.tab-button');
@@ -1578,6 +1602,9 @@ $user = get_logged_user();
                     editDiv.style.display = 'block';
                 }
             }
+
+            // Renderizar paletas populares
+            renderPalettesGrid();
         });
 
         // Auto-generar slug desde nombre
@@ -2189,12 +2216,137 @@ $user = get_logged_user();
             });
         }
 
+        // ===== PALETAS POPULARES =====
+
+        // Renderizar grid de paletas populares
+        function renderPalettesGrid() {
+            const grid = document.getElementById('popular-palettes-grid');
+            if (!grid || !POPULAR_PALETTES || POPULAR_PALETTES.length === 0) return;
+
+            grid.innerHTML = '';
+
+            POPULAR_PALETTES.forEach((palette, index) => {
+                const paletteCard = document.createElement('div');
+                paletteCard.style.cssText = `
+                    background: white;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    padding: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                `;
+
+                // Crear mini preview con los 5 colores
+                const colorsPreview = document.createElement('div');
+                colorsPreview.style.cssText = `
+                    display: grid;
+                    grid-template-columns: repeat(5, 1fr);
+                    gap: 3px;
+                    height: 40px;
+                    border-radius: 4px;
+                    overflow: hidden;
+                `;
+
+                const colors = [
+                    palette.primary,
+                    palette.secondary,
+                    palette.accent,
+                    palette.text,
+                    palette.background
+                ];
+
+                colors.forEach(color => {
+                    const colorSquare = document.createElement('div');
+                    colorSquare.style.cssText = `
+                        background: ${color};
+                        border: 1px solid rgba(0,0,0,0.1);
+                    `;
+                    colorsPreview.appendChild(colorSquare);
+                });
+
+                paletteCard.appendChild(colorsPreview);
+
+                // Agregar nombre de la paleta si existe
+                if (palette.name) {
+                    const paletteName = document.createElement('div');
+                    paletteName.textContent = palette.name;
+                    paletteName.style.cssText = `
+                        font-size: 11px;
+                        color: #666;
+                        text-align: center;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    `;
+                    paletteCard.appendChild(paletteName);
+                }
+
+                // Hover effect
+                paletteCard.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#667eea';
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.2)';
+                });
+
+                paletteCard.addEventListener('mouseleave', function() {
+                    this.style.borderColor = '#e0e0e0';
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+
+                // Click para seleccionar paleta
+                paletteCard.addEventListener('click', function() {
+                    selectPopularPalette(palette);
+                });
+
+                grid.appendChild(paletteCard);
+            });
+        }
+
+        // Seleccionar y aplicar una paleta popular
+        function selectPopularPalette(palette) {
+            // Aplicar colores a los inputs
+            const colorMappings = {
+                'color-primary': palette.primary,
+                'color-secondary': palette.secondary,
+                'color-accent': palette.accent,
+                'color-text': palette.text,
+                'color-background': palette.background
+            };
+
+            Object.entries(colorMappings).forEach(([inputId, color]) => {
+                const colorInput = document.getElementById(inputId);
+                const wrapper = colorInput?.closest('.color-input-wrapper');
+                const textInput = wrapper?.querySelector('input[type="text"]');
+
+                if (colorInput && textInput && color) {
+                    colorInput.value = color;
+                    textInput.value = color;
+
+                    // Disparar evento change para que se detecte el cambio
+                    colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+
+            // Mostrar feedback visual
+            showModal({
+                title: '✓ Paleta Aplicada',
+                message: palette.name ? `Paleta "${palette.name}" aplicada correctamente` : 'Paleta aplicada correctamente',
+                icon: '🎨'
+            });
+        }
+
         // Exportar funciones para event delegation
         window.generateSlug = generateSlug;
         window.toggleCreationMethod = toggleCreationMethod;
         window.loadThemeForEdit = loadThemeForEdit;
         window.showPreview = showPreview;
         window.activateTheme = activateTheme;
+        window.renderPalettesGrid = renderPalettesGrid;
+        window.selectPopularPalette = selectPopularPalette;
 
         // ===== DETECCIÓN DE CAMBIOS EN FORMULARIO =====
         let formInitialState = null;
