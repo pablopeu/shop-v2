@@ -172,7 +172,7 @@ write_json($visits_file, $visits_data);
         <div class="product-container">
             <div class="product-grid">
                 <!-- Gallery -->
-                <div class="gallery-container">
+                <div class="product-gallery gallery-container">
                     <div class="main-image-container" id="mainImageContainer">
                         <?php if (!empty($product['images'])): ?>
                             <?php
@@ -182,7 +182,7 @@ write_json($visits_file, $visits_data);
                             ?>
                             <img src="<?php echo htmlspecialchars(url($first_img_url)); ?>"
                                  alt="<?php echo htmlspecialchars($first_img_alt); ?>"
-                                 class="main-image"
+                                 class="product-main-image main-image"
                                  id="mainImage">
 
                             <!-- Click to Zoom Indicator -->
@@ -205,13 +205,13 @@ write_json($visits_file, $visits_data);
                     </div>
 
                     <?php if (!empty($product['images']) && count($product['images']) > 1): ?>
-                    <div class="thumbnails">
+                    <div class="product-thumbnails thumbnails">
                         <?php foreach ($product['images'] as $index => $image): ?>
                             <?php
                             $img_url = is_array($image) ? ($image['url'] ?? '') : $image;
                             $img_alt = is_array($image) ? ($image['alt'] ?? $product['name']) : $product['name'];
                             ?>
-                            <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>"
+                            <div class="product-thumbnail thumbnail <?php echo $index === 0 ? 'active' : ''; ?>"
                                  data-action="selectImage" data-index="<?php echo $index; ?>">
                                 <img src="<?php echo htmlspecialchars(url($img_url)); ?>"
                                      alt="<?php echo htmlspecialchars($img_alt); ?>">
