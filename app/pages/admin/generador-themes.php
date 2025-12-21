@@ -1563,6 +1563,15 @@ $user = get_logged_user();
                     }
                 });
             });
+
+            // Mostrar selector de theme si "Modificar existente" está seleccionado por defecto
+            const editRadio = document.querySelector('input[name="creation_method"][value="edit"]');
+            if (editRadio && editRadio.checked) {
+                const editDiv = document.getElementById('edit-theme');
+                if (editDiv) {
+                    editDiv.style.display = 'block';
+                }
+            }
         });
 
         // Auto-generar slug desde nombre
