@@ -926,6 +926,24 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
     }
 
+    // Navigation buttons
+    $show_nav_buttons = $config['components']['product_view']['show_nav_buttons'] ?? true;
+    if (!$show_nav_buttons) {
+        $css .= ".gallery-nav,\n";
+        $css .= ".gallery-nav.prev,\n";
+        $css .= ".gallery-nav.next {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
+    // Image counter
+    $show_image_counter = $config['components']['product_view']['show_image_counter'] ?? true;
+    if (!$show_image_counter) {
+        $css .= ".image-counter {\n";
+        $css .= "    display: none !important;\n";
+        $css .= "}\n\n";
+    }
+
     // Ajustar contenedor de galería al tamaño de imagen
     $css .= ".product-gallery {\n";
     $css .= "    max-width: {$max_width};\n";
@@ -1214,7 +1232,9 @@ function generate_theme($data) {
                 'show_breadcrumb' => $data['product_show_breadcrumb'] ?? true,
                 'show_share' => $data['product_show_share'] ?? true,
                 'show_sku' => $data['product_show_sku'] ?? true,
-                'show_stock' => $data['product_show_stock'] ?? true
+                'show_stock' => $data['product_show_stock'] ?? true,
+                'show_nav_buttons' => $data['product_show_nav_buttons'] ?? true,
+                'show_image_counter' => $data['product_show_image_counter'] ?? true
             ]
         ],
 
