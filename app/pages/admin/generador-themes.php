@@ -88,13 +88,17 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'color_text' => $edit_config['colors']['text'] ?? '#1a1a1a',
             'color_background' => $edit_config['colors']['background'] ?? '#ffffff',
 
-            // Colores de estado (NUEVO - faltaban!)
+            // Variantes de primary (NUEVO)
+            'color_primary_dark' => $edit_config['colors']['primary_dark'] ?? '',
+            'color_primary_light' => $edit_config['colors']['primary_light'] ?? '',
+
+            // Colores de estado
             'color_success' => $edit_config['colors']['success'] ?? '#2e7d32',
             'color_warning' => $edit_config['colors']['warning'] ?? '#f57c00',
             'color_error' => $edit_config['colors']['error'] ?? '#c62828',
             'color_info' => $edit_config['colors']['info'] ?? '#1565c0',
 
-            // Tipografía base (NUEVO - faltaban!)
+            // Tipografía base
             'font_family' => $edit_config['typography']['font_family'] ?? 'sans-serif',
             'font_size' => $edit_config['typography']['base_size'] ?? '16px',
             'line_height' => $edit_config['typography']['line_height'] ?? '1.5',
@@ -135,6 +139,12 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'glassmorphism' => $edit_config['features']['glassmorphism'] ?? false,
             'gradient_effects' => $edit_config['features']['gradient_effects'] ?? false,
             'transform_3d' => $edit_config['features']['transform_3d'] ?? false,
+            'color_scheme' => $edit_config['features']['color_scheme'] ?? 'custom',
+
+            // Forms (NUEVO)
+            'form_border_style' => $edit_config['components']['forms']['border_style'] ?? 'solid',
+            'form_focus_ring' => $edit_config['components']['forms']['focus_ring'] ?? true,
+            'form_glow_effect' => $edit_config['components']['forms']['glow_effect'] ?? false,
 
             // Tipografía avanzada
             'font_family_heading' => $edit_config['typography']['font_family_heading'] ?? 'sans-serif',
@@ -181,6 +191,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'color_accent' => sanitize_input($_POST['color_accent'] ?? '#4facfe'),
             'color_text' => sanitize_input($_POST['color_text'] ?? '#1a1a1a'),
             'color_background' => sanitize_input($_POST['color_background'] ?? '#ffffff'),
+            'color_primary_dark' => sanitize_input($_POST['color_primary_dark'] ?? ''),
+            'color_primary_light' => sanitize_input($_POST['color_primary_light'] ?? ''),
             'color_success' => sanitize_input($_POST['color_success'] ?? '#2e7d32'),
             'color_warning' => sanitize_input($_POST['color_warning'] ?? '#f57c00'),
             'color_error' => sanitize_input($_POST['color_error'] ?? '#c62828'),
@@ -226,6 +238,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'glassmorphism' => isset($_POST['glassmorphism']),
             'gradient_effects' => isset($_POST['gradient_effects']),
             'transform_3d' => isset($_POST['transform_3d']),
+            'color_scheme' => sanitize_input($_POST['color_scheme'] ?? 'custom'),
+
+            // Componentes: Forms
+            'form_border_style' => sanitize_input($_POST['form_border_style'] ?? 'solid'),
+            'form_focus_ring' => isset($_POST['form_focus_ring']),
+            'form_glow_effect' => isset($_POST['form_glow_effect']),
 
             // Tipografía Avanzada
             'font_family_heading' => sanitize_input($_POST['font_family_heading'] ?? 'sans-serif'),
@@ -993,6 +1011,32 @@ $user = get_logged_user();
 
                     <details style="margin-top: 20px;">
                         <summary style="cursor: pointer; font-weight: 500; color: #667eea;">
+                            Variantes de Primary (Opcional)
+                        </summary>
+
+                        <div class="color-grid" style="margin-top: 16px;">
+                            <div class="form-group">
+                                <label>Primary Dark</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" name="color_primary_dark" value="<?php echo htmlspecialchars($form_values['color_primary_dark'] ?? ''); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary_dark'] ?? ''); ?>" readonly>
+                                </div>
+                                <small class="helper-text">Variante oscura (auto si vacío)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Primary Light</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" name="color_primary_light" value="<?php echo htmlspecialchars($form_values['color_primary_light'] ?? ''); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary_light'] ?? ''); ?>" readonly>
+                                </div>
+                                <small class="helper-text">Variante clara (auto si vacío)</small>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details style="margin-top: 20px;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #667eea;">
                             Colores de Estado (Opcional)
                         </summary>
 
@@ -1074,6 +1118,29 @@ $user = get_logged_user();
                             </label>
                         </div>
                         <small class="helper-text">Efectos visuales avanzados para componentes</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Esquema de Color</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="color_scheme" value="custom" <?php echo ($form_values['color_scheme'] ?? 'custom') === 'custom' ? 'checked' : ''; ?>>
+                                Personalizado
+                            </label>
+                            <label>
+                                <input type="radio" name="color_scheme" value="vibrant" <?php echo ($form_values['color_scheme'] ?? 'custom') === 'vibrant' ? 'checked' : ''; ?>>
+                                Vibrante
+                            </label>
+                            <label>
+                                <input type="radio" name="color_scheme" value="pastel" <?php echo ($form_values['color_scheme'] ?? 'custom') === 'pastel' ? 'checked' : ''; ?>>
+                                Pastel
+                            </label>
+                            <label>
+                                <input type="radio" name="color_scheme" value="monochrome" <?php echo ($form_values['color_scheme'] ?? 'custom') === 'monochrome' ? 'checked' : ''; ?>>
+                                Monocromático
+                            </label>
+                        </div>
+                        <small class="helper-text">Categoría del esquema de colores del theme</small>
                     </div>
                 </div>
                 </div>
@@ -1478,6 +1545,43 @@ $user = get_logged_user();
                                     Con sombra
                                 </label>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Componentes: Forms -->
+                    <div class="card card-full" style="margin-top: 20px;">
+                        <div class="card-title">
+                            📝 Componentes: Formularios
+                        </div>
+
+                        <div class="form-group">
+                            <label>Estilo de Bordes</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="form_border_style" value="solid" <?php echo ($form_values['form_border_style'] ?? 'solid') === 'solid' ? 'checked' : ''; ?>>
+                                    Sólido
+                                </label>
+                                <label>
+                                    <input type="radio" name="form_border_style" value="rounded" <?php echo ($form_values['form_border_style'] ?? 'solid') === 'rounded' ? 'checked' : ''; ?>>
+                                    Redondeado
+                                </label>
+                            </div>
+                            <small class="helper-text">Estilo de bordes para inputs y formularios</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px;">Efectos</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" name="form_focus_ring" <?php echo ($form_values['form_focus_ring'] ?? true) ? 'checked' : ''; ?>>
+                                    Anillo de foco (focus ring)
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="form_glow_effect" <?php echo ($form_values['form_glow_effect'] ?? false) ? 'checked' : ''; ?>>
+                                    Efecto de brillo (glow)
+                                </label>
+                            </div>
+                            <small class="helper-text">Efectos visuales en inputs cuando reciben foco</small>
                         </div>
                     </div>
                 </div>
@@ -2046,6 +2150,16 @@ $user = get_logged_user();
                     document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = config.colors.background;
                     document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = config.colors.text;
 
+                    // Variantes de primary
+                    if (config.colors.primary_dark) {
+                        document.querySelector('[name="color_primary_dark"]').value = config.colors.primary_dark;
+                        document.querySelector('[name="color_primary_dark"]').parentElement.querySelector('input[type="text"]').value = config.colors.primary_dark;
+                    }
+                    if (config.colors.primary_light) {
+                        document.querySelector('[name="color_primary_light"]').value = config.colors.primary_light;
+                        document.querySelector('[name="color_primary_light"]').parentElement.querySelector('input[type="text"]').value = config.colors.primary_light;
+                    }
+
                     // Colores de estado
                     if (config.colors.success) {
                         document.querySelector('[name="color_success"]').value = config.colors.success;
@@ -2143,6 +2257,9 @@ $user = get_logged_user();
                     const transform3d = document.querySelector('[name="transform_3d"]');
                     if (transform3d) transform3d.checked = config.features?.transform_3d || false;
 
+                    const colorScheme = config.features?.color_scheme || 'custom';
+                    document.querySelector(`[name="color_scheme"][value="${colorScheme}"]`)?.click();
+
                     // Poblar spacing
                     document.querySelector('[name="base_unit"]').value = config.spacing?.base_unit || '12px';
 
@@ -2185,6 +2302,16 @@ $user = get_logged_user();
 
                     const showImageCounter = document.querySelector('[name="product_show_image_counter"]');
                     if (showImageCounter) showImageCounter.checked = config.components?.product_view?.show_image_counter !== false;
+
+                    // Poblar forms
+                    const formBorderStyle = config.components?.forms?.border_style || 'solid';
+                    document.querySelector(`[name="form_border_style"][value="${formBorderStyle}"]`)?.click();
+
+                    const formFocusRing = document.querySelector('[name="form_focus_ring"]');
+                    if (formFocusRing) formFocusRing.checked = config.components?.forms?.focus_ring !== false;
+
+                    const formGlowEffect = document.querySelector('[name="form_glow_effect"]');
+                    if (formGlowEffect) formGlowEffect.checked = config.components?.forms?.glow_effect || false;
 
                     // Mostrar sección de actualizar paleta
                     const editPaletteSection = document.getElementById('edit-palette-section');

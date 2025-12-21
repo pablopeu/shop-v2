@@ -1172,7 +1172,7 @@ function generate_theme($data) {
             'animations' => $data['animations'] ?? 'smooth',
             'border_style' => $data['card_rounded'] ? 'rounded' : 'sharp',
             'shadow_style' => $data['card_shadow'] ?? 'subtle',
-            'color_scheme' => 'custom',
+            'color_scheme' => $data['color_scheme'] ?? 'custom',
             'glassmorphism' => $data['glassmorphism'] ?? false,
             'gradient_effects' => $data['gradient_effects'] ?? false,
             'transform_3d' => $data['transform_3d'] ?? false
@@ -1180,8 +1180,8 @@ function generate_theme($data) {
 
         'colors' => [
             'primary' => $data['color_primary'],
-            'primary_dark' => generate_color_variants($data['color_primary'])['dark'],
-            'primary_light' => generate_color_variants($data['color_primary'])['light'],
+            'primary_dark' => !empty($data['color_primary_dark']) ? $data['color_primary_dark'] : generate_color_variants($data['color_primary'])['dark'],
+            'primary_light' => !empty($data['color_primary_light']) ? $data['color_primary_light'] : generate_color_variants($data['color_primary'])['light'],
             'secondary' => $data['color_secondary'],
             'accent' => $data['color_accent'] ?? '#4facfe',
             'success' => $data['color_success'] ?? '#2e7d32',
@@ -1229,8 +1229,9 @@ function generate_theme($data) {
             ],
             'forms' => [
                 'style' => 'modern',
-                'border_style' => 'solid',
-                'focus_ring' => true
+                'border_style' => $data['form_border_style'] ?? 'solid',
+                'focus_ring' => $data['form_focus_ring'] ?? true,
+                'glow_effect' => $data['form_glow_effect'] ?? false
             ],
             'product_view' => [
                 'gallery_layout' => $data['product_gallery_layout'] ?? 'thumbnails-bottom',
