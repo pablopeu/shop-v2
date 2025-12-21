@@ -380,11 +380,14 @@ $site_config = read_json(APP_PATH . '/config/site.json');
 // Cargar paletas populares desde el archivo JSON
 $paletas_file = PUBLIC_PATH . '/assets/data/paletas-populares.json';
 $paletas_json = '[]'; // Default vacío
+$paletas_array = []; // Array para contar
 if (file_exists($paletas_file)) {
     $paletas_content = file_get_contents($paletas_file);
     // Validar que sea JSON válido
-    if (json_decode($paletas_content) !== null) {
+    $decoded = json_decode($paletas_content, true);
+    if ($decoded !== null) {
         $paletas_json = $paletas_content;
+        $paletas_array = $decoded;
     }
 }
 
@@ -893,7 +896,7 @@ $user = get_logged_user();
                     <div style="margin-bottom: 24px;">
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                             <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #444;">Paletas Populares</h4>
-                            <span style="font-size: 12px; color: #888;">(<?php echo count($paletas_populares); ?> paletas disponibles)</span>
+                            <span style="font-size: 12px; color: #888;">(<?php echo count($paletas_array); ?> paletas disponibles)</span>
                         </div>
                         <div id="popular-palettes-grid" style="
                             display: grid;
