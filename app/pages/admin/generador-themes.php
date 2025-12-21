@@ -1042,7 +1042,20 @@ $user = get_logged_user();
                     </details>
                 </div>
                 </div>
+                </div>
+                <!-- Fin Tab 2: Colores y Efectos -->
 
+                <!-- Tab 3: Tipografía y Layout -->
+                <div class="tab-content" id="tab-typography">
+                <!-- Aquí irán los campos avanzados de tipografía, spacing y layout -->
+                <div class="info-box" style="margin-bottom: 20px;">
+                    <p>⚠️ Tab en construcción - Se agregarán campos para Typography heading, Spacing, Layout y Footer</p>
+                </div>
+                </div>
+                <!-- Fin Tab 3 -->
+
+                <!-- Tab 4: Componentes -->
+                <div class="tab-content" id="tab-components">
                 <!-- Grid: Cards + Buttons -->
                 <div class="cards-grid">
                     <!-- Componentes: Cards -->
@@ -1293,7 +1306,13 @@ $user = get_logged_user();
                             </div>
                         </div>
                     </div>
+                </div>
+                </div>
+                <!-- Fin Tab 4: Componentes -->
 
+                <!-- Tab 5: Vista de Producto -->
+                <div class="tab-content" id="tab-product">
+                <div class="cards-grid">
                     <!-- Componentes: Vista Producto -->
                     <div class="card">
                         <div class="card-title">
@@ -1396,6 +1415,9 @@ $user = get_logged_user();
                         </div>
                     </div>
                 </div>
+                </div>
+                </div>
+                <!-- Fin Tab 5: Vista de Producto -->
 
                 <!-- Botones de acción -->
                 <div style="margin-top: 32px; text-align: center; display: flex; gap: 16px; justify-content: center;">
@@ -1413,6 +1435,29 @@ $user = get_logged_user();
     <script nonce="<?= csp_nonce() ?>">
         // Paletas populares cargadas desde PHP (evita restricción .htaccess en archivos .json)
         const POPULAR_PALETTES = <?php echo $paletas_json; ?>;
+
+        // ===== SISTEMA DE TABS =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+
+                    // Remover active de todos los botones y contenidos
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Agregar active al botón clickeado y su contenido
+                    this.classList.add('active');
+                    const targetContent = document.getElementById('tab-' + targetTab);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+        });
 
         // Auto-generar slug desde nombre
         function generateSlug(event, element, params) {
