@@ -2285,22 +2285,8 @@ $user = get_logged_user();
                 });
             });
 
-            // Interceptar navegación al salir de la página
-            window.addEventListener('beforeunload', function(e) {
-                if (formHasChanges && !allowNavigation) {
-                    e.preventDefault();
-                    e.returnValue = '¿Deseas salir sin guardar los cambios en el theme?';
-                    return e.returnValue;
-                }
-            });
-
-            // También interceptar navegación en tabs (botones de tabs dentro de la misma página)
-            document.querySelectorAll('.tab-button').forEach(tabBtn => {
-                tabBtn.addEventListener('click', function(e) {
-                    // Los tabs dentro de la misma página no requieren confirmación
-                    // Solo alertar si intentan navegar fuera
-                });
-            });
+            // NOTA: No usamos beforeunload porque solo puede mostrar alerts nativos del navegador
+            // En su lugar, solo interceptamos clicks en links del sidebar (arriba) con el modal reutilizable
         });
 
         // Marcar como guardado exitosamente después de submit AJAX
