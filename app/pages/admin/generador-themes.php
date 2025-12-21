@@ -304,6 +304,18 @@ $csrf_token = generate_csrf_token();
 
 // Config del sitio
 $site_config = read_json(APP_PATH . '/config/site.json');
+
+// Cargar paletas populares desde el archivo JSON
+$paletas_file = PUBLIC_PATH . '/assets/data/paletas-populares.json';
+$paletas_json = '[]'; // Default vacío
+if (file_exists($paletas_file)) {
+    $paletas_content = file_get_contents($paletas_file);
+    // Validar que sea JSON válido
+    if (json_decode($paletas_content) !== null) {
+        $paletas_json = $paletas_content;
+    }
+}
+
 $page_title = 'Generador de Themes';
 $user = get_logged_user();
 ?>
@@ -740,7 +752,7 @@ $user = get_logged_user();
                     <div class="form-group">
                         <label for="theme-slug">Slug *</label>
                         <input type="text" name="slug" id="theme-slug" required
-                               pattern="[a-z0-9-]+"
+                               pattern="^[a-z0-9\-]+$"
                                placeholder="mi-theme-personalizado"
                                value="<?php echo htmlspecialchars($form_values['slug']); ?>">
                         <small class="helper-text">Identificador único (solo minúsculas, números y guiones). Se genera automáticamente.</small>
@@ -1297,6 +1309,9 @@ $user = get_logged_user();
 
     <!-- JavaScript -->
     <script nonce="<?= csp_nonce() ?>">
+        // Paletas populares cargadas desde PHP (evita restricción .htaccess en archivos .json)
+        const POPULAR_PALETTES = <?php echo $paletas_json; ?>;
+
         // Auto-generar slug desde nombre
         function generateSlug(event, element, params) {
             const name = element.value;
@@ -1428,22 +1443,24 @@ $user = get_logged_user();
             const loadingDiv = document.getElementById('palettes-loading');
             const gridDiv = document.getElementById('palettes-grid');
 
-            fetch('<?php echo url('/assets/data/paletas-populares.json'); ?>')
-                .then(res => res.json())
-                .then(data => {
-                    popularPalettes = data;
+            // Usar paletas cargadas desde PHP
+            try {
+                if (!POPULAR_PALETTES || POPULAR_PALETTES.length === 0) {
+                    throw new Error('No hay paletas disponibles');
+                }
 
-                    // Ocultar loading, mostrar grid
-                    loadingDiv.style.display = 'none';
-                    gridDiv.style.display = 'grid';
+                popularPalettes = POPULAR_PALETTES;
 
-                    // Renderizar paletas
-                    renderPalettesGrid(data);
-                })
-                .catch(error => {
-                    loadingDiv.innerHTML = '❌ Error al cargar paletas populares';
-                    console.error('Error loading palettes:', error);
-                });
+                // Ocultar loading, mostrar grid
+                loadingDiv.style.display = 'none';
+                gridDiv.style.display = 'grid';
+
+                // Renderizar paletas
+                renderPalettesGrid(POPULAR_PALETTES);
+            } catch (error) {
+                loadingDiv.innerHTML = '❌ Error al cargar paletas populares';
+                console.error('Error loading palettes:', error);
+            }
         }
 
         function renderPalettesGrid(palettes) {
@@ -1545,36 +1562,25 @@ $user = get_logged_user();
             const gridDiv = document.getElementById('edit-palettes-grid');
             const previewBtnContainer = document.getElementById('edit-preview-btn-container');
 
-            // Mostrar loading
-            loadingDiv.style.display = 'block';
+            // Usar paletas cargadas desde PHP
+            try {
+                if (!POPULAR_PALETTES || POPULAR_PALETTES.length === 0) {
+                    throw new Error('No hay paletas disponibles');
+                }
 
-            // Si ya tenemos las paletas cargadas, reutilizarlas
-            if (popularPalettes.length > 0) {
+                popularPalettes = POPULAR_PALETTES;
+
+                // Ocultar loading, mostrar grid y botón preview
                 loadingDiv.style.display = 'none';
                 gridDiv.style.display = 'grid';
                 previewBtnContainer.style.display = 'block';
-                renderEditPalettesGrid(popularPalettes);
-                return;
+
+                // Renderizar paletas
+                renderEditPalettesGrid(POPULAR_PALETTES);
+            } catch (error) {
+                loadingDiv.innerHTML = '❌ Error al cargar paletas';
+                console.error('Error loading edit palettes:', error);
             }
-
-            // Cargar paletas
-            fetch('<?php echo url('/assets/data/paletas-populares.json'); ?>')
-                .then(res => res.json())
-                .then(data => {
-                    popularPalettes = data;
-
-                    // Ocultar loading, mostrar grid y botón preview
-                    loadingDiv.style.display = 'none';
-                    gridDiv.style.display = 'grid';
-                    previewBtnContainer.style.display = 'block';
-
-                    // Renderizar paletas
-                    renderEditPalettesGrid(data);
-                })
-                .catch(error => {
-                    loadingDiv.innerHTML = '❌ Error al cargar paletas';
-                    console.error('Error loading edit palettes:', error);
-                });
         }
 
         function renderEditPalettesGrid(palettes) {
