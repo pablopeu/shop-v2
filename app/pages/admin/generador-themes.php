@@ -1041,15 +1041,195 @@ $user = get_logged_user();
                         </div>
                     </details>
                 </div>
+
+                <!-- Efectos Visuales -->
+                <div class="card card-full" style="margin-top: 20px;">
+                    <div class="card-title">
+                        ✨ Efectos Visuales
+                    </div>
+
+                    <div class="form-group">
+                        <label>Animaciones</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="animations" value="none" <?php echo ($form_values['animations'] ?? 'smooth') === 'none' ? 'checked' : ''; ?>>
+                                Sin animaciones
+                            </label>
+                            <label>
+                                <input type="radio" name="animations" value="smooth" <?php echo ($form_values['animations'] ?? 'smooth') === 'smooth' ? 'checked' : ''; ?>>
+                                Suaves
+                            </label>
+                            <label>
+                                <input type="radio" name="animations" value="fluid" <?php echo ($form_values['animations'] ?? 'smooth') === 'fluid' ? 'checked' : ''; ?>>
+                                Fluidas
+                            </label>
+                        </div>
+                        <small class="helper-text">Estilo de animaciones en hover y transiciones</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 8px;">Efectos Especiales</label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="glassmorphism" <?php echo ($form_values['glassmorphism'] ?? false) ? 'checked' : ''; ?>>
+                                Glassmorphism (efecto vidrio)
+                            </label>
+                            <label>
+                                <input type="checkbox" name="gradient_effects" <?php echo ($form_values['gradient_effects'] ?? false) ? 'checked' : ''; ?>>
+                                Efectos de gradiente
+                            </label>
+                            <label>
+                                <input type="checkbox" name="transform_3d" <?php echo ($form_values['transform_3d'] ?? false) ? 'checked' : ''; ?>>
+                                Transformaciones 3D
+                            </label>
+                        </div>
+                        <small class="helper-text">Efectos visuales avanzados para componentes</small>
+                    </div>
+                </div>
                 </div>
                 </div>
                 <!-- Fin Tab 2: Colores y Efectos -->
 
                 <!-- Tab 3: Tipografía y Layout -->
                 <div class="tab-content" id="tab-typography">
-                <!-- Aquí irán los campos avanzados de tipografía, spacing y layout -->
-                <div class="info-box" style="margin-bottom: 20px;">
-                    <p>⚠️ Tab en construcción - Se agregarán campos para Typography heading, Spacing, Layout y Footer</p>
+                <div class="cards-grid">
+                    <!-- Tipografía Avanzada -->
+                    <div class="card">
+                        <div class="card-title">
+                            ✍️ Tipografía Avanzada
+                        </div>
+
+                        <div class="form-group">
+                            <label>Familia de Fuente para Headings</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="font_family_heading" value="sans-serif" <?php echo ($form_values['font_family_heading'] ?? 'sans-serif') === 'sans-serif' ? 'checked' : ''; ?>>
+                                    Sans-serif
+                                </label>
+                                <label>
+                                    <input type="radio" name="font_family_heading" value="serif" <?php echo ($form_values['font_family_heading'] ?? 'sans-serif') === 'serif' ? 'checked' : ''; ?>>
+                                    Serif
+                                </label>
+                                <label>
+                                    <input type="radio" name="font_family_heading" value="monospace" <?php echo ($form_values['font_family_heading'] ?? 'sans-serif') === 'monospace' ? 'checked' : ''; ?>>
+                                    Monospace
+                                </label>
+                            </div>
+                            <small class="helper-text">Fuente para títulos y encabezados</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="heading_weight">Peso de Headings</label>
+                            <select name="heading_weight" id="heading_weight">
+                                <option value="400" <?php echo ($form_values['heading_weight'] ?? '600') === '400' ? 'selected' : ''; ?>>400 (Normal)</option>
+                                <option value="500" <?php echo ($form_values['heading_weight'] ?? '600') === '500' ? 'selected' : ''; ?>>500 (Medium)</option>
+                                <option value="600" <?php echo ($form_values['heading_weight'] ?? '600') === '600' ? 'selected' : ''; ?>>600 (Semibold)</option>
+                                <option value="700" <?php echo ($form_values['heading_weight'] ?? '600') === '700' ? 'selected' : ''; ?>>700 (Bold)</option>
+                                <option value="800" <?php echo ($form_values['heading_weight'] ?? '600') === '800' ? 'selected' : ''; ?>>800 (Extra Bold)</option>
+                            </select>
+                            <small class="helper-text">Grosor de los títulos</small>
+                        </div>
+                    </div>
+
+                    <!-- Espaciado -->
+                    <div class="card">
+                        <div class="card-title">
+                            📐 Espaciado
+                        </div>
+
+                        <div class="form-group">
+                            <label for="base_unit">Unidad Base</label>
+                            <select name="base_unit" id="base_unit">
+                                <option value="8px" <?php echo ($form_values['base_unit'] ?? '12px') === '8px' ? 'selected' : ''; ?>>8px (Compacto)</option>
+                                <option value="12px" <?php echo ($form_values['base_unit'] ?? '12px') === '12px' ? 'selected' : ''; ?>>12px (Normal)</option>
+                                <option value="16px" <?php echo ($form_values['base_unit'] ?? '12px') === '16px' ? 'selected' : ''; ?>>16px (Espacioso)</option>
+                                <option value="20px" <?php echo ($form_values['base_unit'] ?? '12px') === '20px' ? 'selected' : ''; ?>>20px (Extra espacioso)</option>
+                            </select>
+                            <small class="helper-text">Unidad base para cálculo de espacios</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Escala de Espaciado</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="spacing_scale" value="proportional" <?php echo ($form_values['spacing_scale'] ?? 'proportional') === 'proportional' ? 'checked' : ''; ?>>
+                                    Proporcional
+                                </label>
+                                <label>
+                                    <input type="radio" name="spacing_scale" value="geometric" <?php echo ($form_values['spacing_scale'] ?? 'proportional') === 'geometric' ? 'checked' : ''; ?>>
+                                    Geométrica
+                                </label>
+                            </div>
+                            <small class="helper-text">Cómo escalan los espacios (xs, sm, md, lg, xl)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cards-grid" style="margin-top: 20px;">
+                    <!-- Layout -->
+                    <div class="card">
+                        <div class="card-title">
+                            📏 Layout
+                        </div>
+
+                        <div class="form-group">
+                            <label for="container_width">Ancho del Contenedor</label>
+                            <select name="container_width" id="container_width">
+                                <option value="1140px" <?php echo ($form_values['container_width'] ?? '1200px') === '1140px' ? 'selected' : ''; ?>>1140px (Estándar)</option>
+                                <option value="1200px" <?php echo ($form_values['container_width'] ?? '1200px') === '1200px' ? 'selected' : ''; ?>>1200px (Normal)</option>
+                                <option value="1320px" <?php echo ($form_values['container_width'] ?? '1200px') === '1320px' ? 'selected' : ''; ?>>1320px (Ancho)</option>
+                                <option value="1440px" <?php echo ($form_values['container_width'] ?? '1200px') === '1440px' ? 'selected' : ''; ?>>1440px (Extra ancho)</option>
+                            </select>
+                            <small class="helper-text">Ancho máximo del contenido</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="grid_gap">Espacio entre Columnas</label>
+                            <select name="grid_gap" id="grid_gap">
+                                <option value="16px" <?php echo ($form_values['grid_gap'] ?? '28px') === '16px' ? 'selected' : ''; ?>>16px (Compacto)</option>
+                                <option value="24px" <?php echo ($form_values['grid_gap'] ?? '28px') === '24px' ? 'selected' : ''; ?>>24px (Ajustado)</option>
+                                <option value="28px" <?php echo ($form_values['grid_gap'] ?? '28px') === '28px' ? 'selected' : ''; ?>>28px (Normal)</option>
+                                <option value="32px" <?php echo ($form_values['grid_gap'] ?? '28px') === '32px' ? 'selected' : ''; ?>>32px (Espacioso)</option>
+                                <option value="40px" <?php echo ($form_values['grid_gap'] ?? '28px') === '40px' ? 'selected' : ''; ?>>40px (Muy espacioso)</option>
+                            </select>
+                            <small class="helper-text">Espacio entre columnas en grids</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sidebar_width">Ancho del Sidebar</label>
+                            <select name="sidebar_width" id="sidebar_width">
+                                <option value="250px" <?php echo ($form_values['sidebar_width'] ?? '300px') === '250px' ? 'selected' : ''; ?>>250px (Estrecho)</option>
+                                <option value="300px" <?php echo ($form_values['sidebar_width'] ?? '300px') === '300px' ? 'selected' : ''; ?>>300px (Normal)</option>
+                                <option value="350px" <?php echo ($form_values['sidebar_width'] ?? '300px') === '350px' ? 'selected' : ''; ?>>350px (Ancho)</option>
+                            </select>
+                            <small class="helper-text">Ancho de sidebars y columnas secundarias</small>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card">
+                        <div class="card-title">
+                            🦶 Footer
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color de Fondo</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" name="footer_bg_color" value="<?php echo htmlspecialchars($form_values['footer_bg_color'] ?? '#292c2f'); ?>">
+                                <input type="text" name="footer_bg_color_text" value="<?php echo htmlspecialchars($form_values['footer_bg_color'] ?? '#292c2f'); ?>" readonly>
+                            </div>
+                            <small class="helper-text">Color de fondo del footer</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color de Texto</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" name="footer_text_color" value="<?php echo htmlspecialchars($form_values['footer_text_color'] ?? '#ffffff'); ?>">
+                                <input type="text" name="footer_text_color_text" value="<?php echo htmlspecialchars($form_values['footer_text_color'] ?? '#ffffff'); ?>" readonly>
+                            </div>
+                            <small class="helper-text">Color del texto en el footer</small>
+                        </div>
+                    </div>
                 </div>
                 </div>
                 <!-- Fin Tab 3 -->
