@@ -551,6 +551,61 @@ $user = get_logged_user();
             font-size: 12px;
             line-height: 1.4;
         }
+
+        /* Tabs de navegación */
+        .tabs-navigation {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            margin-bottom: -2px;
+        }
+
+        .tab-button:hover {
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive tabs */
+        @media (max-width: 768px) {
+            .tabs-navigation {
+                gap: 4px;
+            }
+
+            .tab-button {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
     </style>
 
     <!-- Admin Common Responsive Styles -->
@@ -738,6 +793,27 @@ $user = get_logged_user();
                     </div>
                 </div>
 
+                <!-- Tabs de Navegación -->
+                <div class="tabs-navigation">
+                    <button type="button" class="tab-button active" data-tab="general">
+                        📝 Información General
+                    </button>
+                    <button type="button" class="tab-button" data-tab="colors">
+                        🎨 Colores y Efectos
+                    </button>
+                    <button type="button" class="tab-button" data-tab="typography">
+                        ✍️ Tipografía y Layout
+                    </button>
+                    <button type="button" class="tab-button" data-tab="components">
+                        🎛️ Componentes
+                    </button>
+                    <button type="button" class="tab-button" data-tab="product">
+                        🖼️ Vista de Producto
+                    </button>
+                </div>
+
+                <!-- Tab 1: Información General -->
+                <div class="tab-content active" id="tab-general">
                 <!-- Grid: Información Básica + Tipografía -->
                 <div class="cards-grid">
                     <!-- Información Básica -->
@@ -820,6 +896,8 @@ $user = get_logged_user();
                         </div>
                     </div>
                 </div>
+                </div>
+                <!-- Fin Tab 1: Información General -->
 
                 <!-- Actualizar Paleta (solo visible al editar theme) -->
                 <div class="card card-full" id="edit-palette-section" style="display: none; margin-bottom: 20px;">
@@ -866,6 +944,8 @@ $user = get_logged_user();
                     </div>
                 </div>
 
+                <!-- Tab 2: Colores y Efectos -->
+                <div class="tab-content" id="tab-colors">
                 <!-- Grid: Colores (ancho completo) -->
                 <div class="cards-grid">
                     <!-- Colores -->
