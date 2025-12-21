@@ -1384,6 +1384,10 @@ $user = get_logged_user();
                                     <input type="radio" name="button_style" value="outline" <?php echo ($form_values['button_style'] ?? 'solid') === 'outline' ? 'checked' : ''; ?>>
                                     Outline
                                 </label>
+                                <label>
+                                    <input type="radio" name="button_style" value="gradient" <?php echo ($form_values['button_style'] ?? 'solid') === 'gradient' ? 'checked' : ''; ?>>
+                                    Gradiente
+                                </label>
                             </div>
                         </div>
 
@@ -2071,8 +2075,10 @@ $user = get_logged_user();
                     const fontFamilyHeading = config.typography?.font_family_heading || 'sans-serif';
                     document.querySelector(`[name="font_family_heading"][value="${fontFamilyHeading}"]`)?.click();
 
+                    // heading_weight es un select, no radio
                     const headingWeight = config.typography?.heading_weight || '600';
-                    document.querySelector(`[name="heading_weight"][value="${headingWeight}"]`)?.click();
+                    const headingWeightSelect = document.querySelector('[name="heading_weight"]');
+                    if (headingWeightSelect) headingWeightSelect.value = headingWeight;
 
                     // Poblar cards
                     const cardBorder = document.querySelector('[name="card_border"]');
