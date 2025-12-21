@@ -621,11 +621,10 @@ $user = get_logged_user();
         /* Tabs de navegación */
         .tabs-navigation {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             margin-bottom: 20px;
             border-bottom: 2px solid #e0e0e0;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
         .tab-button {
