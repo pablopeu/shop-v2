@@ -80,22 +80,46 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'slug' => $edit_config['slug'] ?? '',
             'description' => $edit_config['description'] ?? '',
             'author' => $edit_config['author'] ?? 'Shop Team',
+
+            // Colores principales
             'color_primary' => $edit_config['colors']['primary'] ?? '#000000',
             'color_secondary' => $edit_config['colors']['secondary'] ?? '#d4af37',
             'color_accent' => $edit_config['colors']['accent'] ?? '#4facfe',
             'color_text' => $edit_config['colors']['text'] ?? '#1a1a1a',
             'color_background' => $edit_config['colors']['background'] ?? '#ffffff',
+
+            // Colores de estado (NUEVO - faltaban!)
+            'color_success' => $edit_config['colors']['success'] ?? '#2e7d32',
+            'color_warning' => $edit_config['colors']['warning'] ?? '#f57c00',
+            'color_error' => $edit_config['colors']['error'] ?? '#c62828',
+            'color_info' => $edit_config['colors']['info'] ?? '#1565c0',
+
+            // Tipografía base (NUEVO - faltaban!)
+            'font_family' => $edit_config['typography']['font_family'] ?? 'sans-serif',
+            'font_size' => $edit_config['typography']['base_size'] ?? '16px',
+            'line_height' => $edit_config['typography']['line_height'] ?? '1.5',
+
+            // Cards
+            'card_border' => $edit_config['components']['cards']['border'] ?? false,
+            'card_shadow' => $edit_config['features']['shadow_style'] ?? 'subtle',
+            'card_rounded' => ($edit_config['features']['border_style'] ?? 'sharp') === 'rounded',
+            'card_hover' => $edit_config['components']['cards']['hover_effect'] ?? 'glow',
             'card_buttons' => $edit_config['components']['cards']['buttons'] ?? 'show',
             'card_buttons_position' => $edit_config['components']['cards']['buttons_position'] ?? 'center',
             'card_buttons_spacing' => $edit_config['components']['cards']['buttons_spacing'] ?? 'normal',
             'card_buttons_vertical_spacing' => $edit_config['components']['cards']['buttons_vertical_spacing'] ?? 'normal',
+
+            // Buttons
             'button_style' => $edit_config['components']['buttons']['style'] ?? 'solid',
             'button_rounded' => $edit_config['components']['buttons']['rounded'] ?? false,
             'button_shadow' => $edit_config['components']['buttons']['shadow'] ?? false,
+            'button_transform' => $edit_config['components']['buttons']['transform'] ?? false,
             'button_height' => $edit_config['components']['buttons']['height'] ?? 'normal',
             'button_width' => $edit_config['components']['buttons']['width'] ?? 'auto',
             'button_icon' => $edit_config['components']['buttons']['icon'] ?? 'show',
             'button_hover' => $edit_config['components']['buttons']['hover'] ?? 'lift',
+
+            // Vista de Producto
             'product_gallery_layout' => $edit_config['components']['product_view']['gallery_layout'] ?? 'thumbnails-bottom',
             'product_image_size' => $edit_config['components']['product_view']['image_size'] ?? 'medium',
             'product_thumbnail_size' => $edit_config['components']['product_view']['thumbnail_size'] ?? 'medium',
@@ -105,24 +129,31 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'product_show_stock' => $edit_config['components']['product_view']['show_stock'] ?? true,
             'product_show_nav_buttons' => $edit_config['components']['product_view']['show_nav_buttons'] ?? true,
             'product_show_image_counter' => $edit_config['components']['product_view']['show_image_counter'] ?? true,
+
             // Efectos visuales
             'animations' => $edit_config['features']['animations'] ?? 'smooth',
             'glassmorphism' => $edit_config['features']['glassmorphism'] ?? false,
             'gradient_effects' => $edit_config['features']['gradient_effects'] ?? false,
             'transform_3d' => $edit_config['features']['transform_3d'] ?? false,
+
             // Tipografía avanzada
             'font_family_heading' => $edit_config['typography']['font_family_heading'] ?? 'sans-serif',
             'heading_weight' => $edit_config['typography']['heading_weight'] ?? '600',
+
             // Spacing
             'base_unit' => $edit_config['spacing']['base_unit'] ?? '12px',
             'spacing_scale' => $edit_config['spacing']['scale'] ?? 'proportional',
+
             // Layout
             'container_width' => $edit_config['layout']['container_width'] ?? '1200px',
             'grid_gap' => $edit_config['layout']['grid_gap'] ?? '28px',
             'sidebar_width' => $edit_config['layout']['sidebar_width'] ?? '300px',
+
             // Footer
             'footer_bg_color' => $edit_config['footer']['background_color'] ?? '#292c2f',
             'footer_text_color' => $edit_config['footer']['text_color'] ?? '#ffffff',
+
+            // Original slug para edición
             'original_slug' => $edit_config['slug'] ?? '',
         ];
 
