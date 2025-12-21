@@ -856,17 +856,16 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
     }
 
-    // Main Image Size
+    // Main Image Size - usando porcentajes para diseño fluido
     $image_size = $config['components']['product_view']['image_size'] ?? 'medium';
-    $max_width = '500px'; // medium
+    $gallery_width = '80%'; // medium
     if ($image_size === 'small') {
-        $max_width = '400px';
+        $gallery_width = '60%';
     } elseif ($image_size === 'large') {
-        $max_width = '600px';
+        $gallery_width = '100%';
     }
 
     $css .= ".product-main-image {\n";
-    $css .= "    max-width: {$max_width};\n";
     $css .= "    width: 100%;\n";
     $css .= "    height: auto;\n";
     $css .= "}\n\n";
@@ -944,9 +943,10 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
     }
 
-    // Ajustar contenedor de galería al tamaño de imagen
+    // Ajustar contenedor de galería con ancho porcentual fluido
     $css .= ".product-gallery {\n";
-    $css .= "    max-width: {$max_width};\n";
+    $css .= "    width: {$gallery_width};\n";
+    $css .= "    max-width: 100%;\n";
     $css .= "    margin: 0 auto;\n";
     $css .= "}\n\n";
 

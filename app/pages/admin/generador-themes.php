@@ -474,7 +474,7 @@ $user = get_logged_user();
 
         .color-input-wrapper input[type="color"] {
             width: 50px;
-            height: 38px;
+            height: 50px;
             border: 2px solid #ddd;
             border-radius: 6px;
             cursor: pointer;
@@ -1244,18 +1244,18 @@ $user = get_logged_user();
                             <div class="radio-group">
                                 <label>
                                     <input type="radio" name="product_image_size" value="small" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'small' ? 'checked' : ''; ?>>
-                                    Pequeña (400px)
+                                    Pequeña (60%)
                                 </label>
                                 <label>
                                     <input type="radio" name="product_image_size" value="medium" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'medium' ? 'checked' : ''; ?>>
-                                    Mediana (500px)
+                                    Mediana (80%)
                                 </label>
                                 <label>
                                     <input type="radio" name="product_image_size" value="large" <?php echo ($form_values['product_image_size'] ?? 'medium') === 'large' ? 'checked' : ''; ?>>
-                                    Grande (600px)
+                                    Grande (100%)
                                 </label>
                             </div>
-                            <small class="helper-text">Tamaño máximo de la imagen principal del producto</small>
+                            <small class="helper-text">Ancho de la galería respecto al contenedor</small>
                         </div>
 
                         <div class="form-group">
