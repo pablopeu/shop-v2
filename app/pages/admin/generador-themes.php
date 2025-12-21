@@ -722,100 +722,15 @@ $user = get_logged_user();
                         <label style="display: block; margin-bottom: 12px; font-weight: 500; color: #555;">Elige cómo crear tu theme:</label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="creation_method" value="new" checked data-onchange="toggleCreationMethod">
-                                Nuevo desde cero
+                                <input type="radio" name="creation_method" value="edit" checked data-onchange="toggleCreationMethod">
+                                Modificar existente
                             </label>
                             <label>
-                                <input type="radio" name="creation_method" value="palette" data-onchange="toggleCreationMethod">
-                                Importar paleta de ColorHunt
-                            </label>
-                            <label>
-                                <input type="radio" name="creation_method" value="edit" data-onchange="toggleCreationMethod">
-                                Editar theme existente
+                                <input type="radio" name="creation_method" value="new" data-onchange="toggleCreationMethod">
+                                Crear nuevo
                             </label>
                         </div>
                     </div>
-                </div>
-
-                <!-- Importar Paleta de ColorHunt -->
-                <div class="card card-full" id="palette-import" style="display: none; margin-bottom: 20px;">
-                    <div class="card-title">
-                        🎨 Importar Paleta de ColorHunt
-                    </div>
-
-                    <!-- Opción 1: Paletas Populares -->
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
-                            ⭐ Opción 1: Paletas Populares
-                        </h3>
-                        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
-                            Selecciona una de las 114 paletas más populares de ColorHunt:
-                        </p>
-
-                        <!-- Loading state -->
-                        <div id="palettes-loading" style="text-align: center; padding: 20px; color: #999;">
-                            ⏳ Cargando paletas populares...
-                        </div>
-
-                        <!-- Grid de paletas -->
-                        <div id="palettes-grid" style="display: none; max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa;">
-                            <!-- Las paletas se cargarán aquí dinámicamente -->
-                        </div>
-
-                        <!-- Botón de Preview debajo de paletas -->
-                        <div style="text-align: center; margin-top: 15px;">
-                            <button type="button" data-action="showPreview" class="btn-preview" style="background: #667eea; color: white; padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                                👁️ Preview del Theme
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Separador -->
-                    <div style="border-top: 2px dashed #e0e0e0; margin: 30px 0; position: relative;">
-                        <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: #999; font-size: 13px;">
-                            O
-                        </span>
-                    </div>
-
-                    <!-- Opción 2: Paleta Personalizada -->
-                    <div>
-                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
-                            ✏️ Opción 2: Paleta Personalizada
-                        </h3>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
-                            <!-- Explicación a la izquierda -->
-                            <div class="info-box">
-                                <p style="font-size: 13px;">
-                                    <strong>ℹ️ Cómo usar:</strong><br>
-                                    1. Ve a <a href="https://colorhunt.co" target="_blank" rel="noopener" style="color: #667eea; text-decoration: underline;">ColorHunt.co</a><br>
-                                    2. Elige una paleta que te guste (debe tener 4 colores)<br>
-                                    3. Haz click en el ícono de copiar (📋) en la paleta<br>
-                                    4. Pega directamente aquí los 4 colores
-                                </p>
-                            </div>
-
-                            <!-- Campo de texto a la derecha -->
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label for="palette-colors" style="font-size: 13px; margin-bottom: 8px;">Pega los 4 colores aquí</label>
-                                <textarea id="palette-colors" rows="5" style="font-family: monospace; font-size: 14px; line-height: 1.8; width: 100%;" placeholder="#005461
-#018790
-#00B7B5
-#F4F4F4"></textarea>
-                                <small class="helper-text">El sistema detectará automáticamente los 4 colores.</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="text-align: center; margin-top: 16px;">
-                        <button type="button" data-action="mapPalette" class="btn-save">
-                            🎨 Aplicar Mapeo Inteligente
-                        </button>
-                    </div>
-
-                    <small class="helper-text" style="display: block; text-align: center; margin-top: 12px;">
-                        El sistema mapeará automáticamente los colores a primary, secondary, accent, background y text con validación de contraste WCAG.
-                    </small>
                 </div>
 
                 <!-- Editar Theme Existente -->
@@ -957,51 +872,6 @@ $user = get_logged_user();
                 </div>
                 </div>
                 <!-- Fin Tab 1: Información General -->
-
-                <!-- Actualizar Paleta (solo visible al editar theme) -->
-                <div class="card card-full" id="edit-palette-section" style="display: none; margin-bottom: 20px;">
-                    <div class="card-title">
-                        🎨 Actualizar Paleta de Colores (Opcional)
-                    </div>
-
-                    <div class="info-box" style="margin-bottom: 20px;">
-                        <p style="font-size: 14px;">
-                            <strong>💡 Puedes:</strong><br>
-                            • Seleccionar una paleta popular de ColorHunt para actualizar los colores<br>
-                            • O saltar esta sección y editar los colores manualmente más abajo
-                        </p>
-                    </div>
-
-                    <!-- Selector de paletas populares -->
-                    <div style="margin-bottom: 20px;">
-                        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
-                            ⭐ Paletas Populares de ColorHunt
-                        </h3>
-
-                        <!-- Loading state -->
-                        <div id="edit-palettes-loading" style="text-align: center; padding: 20px; color: #999; display: none;">
-                            ⏳ Cargando paletas...
-                        </div>
-
-                        <!-- Grid de paletas -->
-                        <div id="edit-palettes-grid" style="display: none; max-height: 350px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa;">
-                            <!-- Las paletas se cargarán aquí dinámicamente -->
-                        </div>
-
-                        <!-- Botón de Preview -->
-                        <div style="text-align: center; margin-top: 15px; display: none;" id="edit-preview-btn-container">
-                            <button type="button" data-action="showPreview" class="btn-preview" style="background: #667eea; color: white; padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                                👁️ Preview del Theme
-                            </button>
-                        </div>
-                    </div>
-
-                    <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 2px dashed #dee2e6;">
-                        <p style="font-size: 13px; color: #666; margin: 0;">
-                            💡 <strong>Tip:</strong> Si no quieres usar presets, simplemente edita los colores manualmente en la sección de abajo
-                        </p>
-                    </div>
-                </div>
 
                 <!-- Tab 2: Colores y Efectos -->
                 <div class="tab-content" id="tab-colors">
@@ -1672,9 +1542,6 @@ $user = get_logged_user();
 
     <!-- JavaScript -->
     <script nonce="<?= csp_nonce() ?>">
-        // Paletas populares cargadas desde PHP (evita restricción .htaccess en archivos .json)
-        const POPULAR_PALETTES = <?php echo $paletas_json; ?>;
-
         // ===== SISTEMA DE TABS =====
         document.addEventListener('DOMContentLoaded', function() {
             const tabButtons = document.querySelectorAll('.tab-button');
@@ -1713,18 +1580,13 @@ $user = get_logged_user();
         // Toggle método de creación
         function toggleCreationMethod(event, element, params) {
             const value = element.value;
-            const paletteDiv = document.getElementById('palette-import');
             const editDiv = document.getElementById('edit-theme');
 
-            // Ocultar todos
-            paletteDiv.style.display = 'none';
-            editDiv.style.display = 'none';
-
-            // Mostrar el seleccionado
-            if (value === 'palette') {
-                paletteDiv.style.display = 'block';
-            } else if (value === 'edit') {
+            // Mostrar selector solo si es editar
+            if (value === 'edit') {
                 editDiv.style.display = 'block';
+            } else {
+                editDiv.style.display = 'none';
             }
         }
 
