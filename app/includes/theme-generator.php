@@ -211,6 +211,7 @@ function map_colors_intelligently($colors) {
  */
 function validate_theme_input($slug, $name, $colors, $original_slug = '') {
     $errors = [];
+    $warnings = [];
 
     // Validar slug
     if (empty($slug)) {
@@ -245,17 +246,18 @@ function validate_theme_input($slug, $name, $colors, $original_slug = '') {
         }
     }
 
-    // Warning si el contraste es bajo (no bloquea, solo advierte)
+    // Warning si el contraste es bajo (NO bloquea el guardado, solo advierte)
     if (!empty($colors['primary']) && !empty($colors['background'])) {
         $contrast = calculate_contrast_ratio($colors['primary'], $colors['background']);
         if ($contrast < 4.5) {
-            $errors[] = "⚠️ Warning: El contraste entre primary y background es bajo ({$contrast}:1). Se recomienda >= 4.5:1 para accesibilidad";
+            $warnings[] = "El contraste entre primary y background es bajo ({$contrast}:1). Se recomienda >= 4.5:1 para accesibilidad";
         }
     }
 
     return [
         'valid' => empty($errors),
-        'errors' => $errors
+        'errors' => $errors,
+        'warnings' => $warnings
     ];
 }
 

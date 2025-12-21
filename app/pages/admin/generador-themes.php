@@ -229,7 +229,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             $result = generate_theme($data);
 
             if ($result['success']) {
+                // Mensaje de éxito base
                 $message = $result['message'];
+
+                // Agregar warnings si existen (no bloquean el guardado)
+                if (!empty($validation['warnings'])) {
+                    $message .= '<br><br>⚠️ <strong>Advertencias:</strong><br>' . implode('<br>', $validation['warnings']);
+                }
+
                 $saved_theme_slug = $result['slug'];
                 log_admin_action('theme_generated', $_SESSION['username'], [
                     'slug' => $result['slug'],
