@@ -774,12 +774,10 @@ $user = get_logged_user();
 
         <h1 style="margin-bottom: 24px;">✨ Generador de Themes</h1>
 
-        <!-- Info Box -->
-        <div class="info-box">
-            <p>
-                <strong>ℹ️ Crea themes personalizados para tu tienda</strong><br>
-                Define colores, tipografía y estilos de componentes. El sistema generará automáticamente
-                todos los archivos CSS necesarios con más de 150 variables personalizadas.
+        <!-- Info Box - Compacto -->
+        <div class="info-box" style="margin-bottom: 16px; padding: 12px 16px;">
+            <p style="margin: 0; font-size: 13px;">
+                <strong>ℹ️ Generador de Themes</strong> - Personaliza colores, tipografía y componentes. El sistema genera automáticamente 150+ variables CSS.
             </p>
         </div>
 
@@ -808,16 +806,12 @@ $user = get_logged_user();
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                 <input type="hidden" name="original_slug" id="original-slug" value="<?php echo htmlspecialchars($form_values['original_slug'] ?? ''); ?>">
 
-                <!-- Método de Creación -->
-                <div class="card card-full" style="margin-bottom: 20px;">
-                    <div class="card-title">
-                        🎨 Método de Creación
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label style="display: block; margin-bottom: 12px; font-weight: 500; color: #555;">Elige cómo crear tu theme:</label>
-                        <div class="radio-group">
-                            <label>
+                <!-- Método de Creación - Compacto -->
+                <div class="card card-full" style="margin-bottom: 12px; padding: 12px 16px;">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <label style="font-weight: 500; color: #555; font-size: 14px; margin: 0;">🎨 Método:</label>
+                        <div class="radio-group" style="margin: 0;">
+                            <label style="margin-right: 20px;">
                                 <input type="radio" name="creation_method" value="edit" checked data-onchange="toggleCreationMethod">
                                 Modificar existente
                             </label>
@@ -829,38 +823,27 @@ $user = get_logged_user();
                     </div>
                 </div>
 
-                <!-- Editar Theme Existente -->
-                <div class="card card-full" id="edit-theme" style="display: none; margin-bottom: 20px;">
-                    <div class="card-title">
-                        ✏️ Editar Theme Existente
-                    </div>
+                <!-- Editar Theme Existente - Compacto -->
+                <div class="card card-full" id="edit-theme" style="display: none; margin-bottom: 12px; padding: 12px 16px;">
+                    <div class="card-title" style="font-size: 14px; margin-bottom: 12px;">✏️ Editar Theme Existente</div>
 
-                    <div class="info-box" style="margin-bottom: 20px;">
-                        <p>
-                            <strong>ℹ️ Cómo funciona:</strong><br>
-                            Selecciona un theme existente para cargarlo en el formulario.<br>
-                            Modifica lo que necesites y regenera el theme (se sobrescribirá el original).
-                        </p>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit-theme-select">Selecciona el theme a editar</label>
-                        <select id="edit-theme-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
-                            <option value="">-- Selecciona un theme --</option>
-                            <?php foreach ($available_themes as $slug => $theme): ?>
-                                <option value="<?php echo htmlspecialchars($slug); ?>">
-                                    <?php echo htmlspecialchars($theme['name']); ?> (<?php echo htmlspecialchars($slug); ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <small class="helper-text">El theme seleccionado se cargará en el formulario para editarlo</small>
-                    </div>
-
-                    <div style="text-align: center; margin-top: 16px;">
-                        <button type="button" data-action="loadThemeForEdit" class="btn-save">
-                            📥 Cargar Theme
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end;">
+                        <div>
+                            <label for="edit-theme-select" style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500;">Selecciona theme:</label>
+                            <select id="edit-theme-select" style="width: 100%; padding: 8px 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                <option value="">-- Selecciona un theme --</option>
+                                <?php foreach ($available_themes as $slug => $theme): ?>
+                                    <option value="<?php echo htmlspecialchars($slug); ?>">
+                                        <?php echo htmlspecialchars($theme['name']); ?> (<?php echo htmlspecialchars($slug); ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button type="button" data-action="loadThemeForEdit" class="btn-save" style="padding: 8px 20px; white-space: nowrap;">
+                            📥 Cargar
                         </button>
                     </div>
+                    <small class="helper-text" style="margin-top: 8px; font-size: 12px;">Carga un theme existente para modificarlo</small>
                 </div>
 
                 <!-- Tabs de Navegación -->

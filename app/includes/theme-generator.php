@@ -1163,6 +1163,32 @@ function generate_theme_css_basic($config) {
     $css .= "    }\n";
     $css .= "}\n\n";
 
+    // === HEADER Y CONTAINER GLASSMORPHISM ===
+    $css .= "/* =================================\n";
+    $css .= "   HEADER & CONTAINERS 3D\n";
+    $css .= "   ================================= */\n\n";
+
+    // Header con glassmorphism y sombra
+    $css .= ".header {\n";
+    $css .= "    background: rgba(255, 255, 255, 0.85);\n";
+    $css .= "    backdrop-filter: blur(var(--blur-md, 16px));\n";
+    $css .= "    -webkit-backdrop-filter: blur(var(--blur-md, 16px));\n";
+    $css .= "    border-bottom: 1px solid rgba(255, 255, 255, 0.3);\n";
+    $css .= "    box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));\n";
+    $css .= "    position: relative;\n";
+    $css .= "}\n\n";
+
+    // Product container con glassmorphism
+    $css .= ".product-container {\n";
+    $css .= "    background: rgba(255, 255, 255, 0.7);\n";
+    $css .= "    backdrop-filter: blur(var(--blur-md, 16px));\n";
+    $css .= "    -webkit-backdrop-filter: blur(var(--blur-md, 16px));\n";
+    $css .= "    border: 1px solid rgba(255, 255, 255, 0.3);\n";
+    $css .= "    border-radius: var(--border-radius-2xl, 32px);\n";
+    $css .= "    padding: var(--spacing-2xl, 48px);\n";
+    $css .= "    box-shadow: var(--shadow-2xl, 0 20px 48px rgba(0, 0, 0, 0.25));\n";
+    $css .= "}\n\n";
+
     // === PRODUCT GALLERY LAYOUTS ===
     $css .= "/* =================================\n";
     $css .= "   PRODUCT GALLERY LAYOUTS\n";
@@ -1249,6 +1275,11 @@ function generate_theme_css_basic($config) {
     $css .= "    width: 100%;\n";
     $css .= "    height: 100%;\n";
     $css .= "    object-fit: cover;\n";
+    $css .= "}\n\n";
+
+    // Ocultar zoom indicator (el cursor lupa es suficiente)
+    $css .= ".zoom-indicator {\n";
+    $css .= "    display: none;\n";
     $css .= "}\n\n";
 
     // Thumbnails Bottom (default)
