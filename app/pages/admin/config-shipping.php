@@ -1,7 +1,7 @@
 <?php
 /**
- * Admin - Shipping Configuration (Zipnova)
- * Configuración de envíos con Zipnova
+ * Admin - Logistics Configuration (Multi-Carrier)
+ * Configuración de logística multi-carrier
  */
 
 require_admin();
@@ -36,6 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
         if (!$config) {
             $config = json_decode(file_get_contents(APP_PATH . '/config/shipping.json'), true)['zipnova'];
         }
+
+        // Update carrier metadata
+        $config['tag'] = strtoupper(sanitize_input($_POST['carrier_tag'] ?? 'ZNVA'));
+        $config['name'] = sanitize_input($_POST['carrier_name'] ?? 'Zipnova');
+        $config['type'] = sanitize_input($_POST['carrier_type'] ?? 'zipnova');
 
         // Update configuration
         $config['enabled'] = isset($_POST['zipnova_enabled']);
@@ -104,7 +109,7 @@ if (isset($_SESSION['shipping_config_message'])) {
 
 require_once APP_PATH . '/includes/zipnova.php';
 $shipping_config = zipnova_get_config();
-$page_title = 'Configuración de Envíos';
+$page_title = 'Configuración de Logística';
 $csrf_token = generate_csrf_token();
 $user = get_logged_user();
 
@@ -126,7 +131,7 @@ $provincias = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración de Envíos - Admin</title>
+    <title>Configuración de Logística - Admin</title>
     <style nonce="<?= csp_nonce() ?>">
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
@@ -335,7 +340,7 @@ $provincias = [
         <?php endif; ?>
 
         <div class="alert-box">
-            <strong>📦 Configuración de Envíos con Zipnova</strong>
+            <strong>🚚 Configuración de Logística</strong>
             <p>1. Obtené tus credenciales de API en el panel de Zipnova</p>
             <p>2. Configurá tus credenciales y datos de origen</p>
             <p>3. Probá la conexión antes de habilitar el sistema</p>
@@ -346,6 +351,50 @@ $provincias = [
             <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
             <div class="cards-grid">
+                <!-- Información del Carrier -->
+                <div class="card card-full">
+                    <div class="card-title">
+                        ℹ️ Información del Carrier
+                    </div>
+                    <div class="card-description">
+                        Identificación y nombre del carrier para el sistema multi-carrier
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tag del Carrier (4 letras)</label>
+                        <input type="text" name="carrier_tag"
+                               value="<?php echo htmlspecialchars($shipping_config['tag'] ?? 'ZNVA'); ?>"
+                               maxlength="4"
+                               pattern="[A-Z0-9]{4}"
+                               placeholder="ZNVA"
+                               style="text-transform: uppercase; width: 150px;"
+                               required>
+                        <div class="help-text">Tag único de 4 letras para identificar este carrier (ej: ZNVA, ZNV2)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nombre Descriptivo</label>
+                        <input type="text" name="carrier_name"
+                               value="<?php echo htmlspecialchars($shipping_config['name'] ?? 'Zipnova'); ?>"
+                               placeholder="Zipnova Principal"
+                               required>
+                        <div class="help-text">Nombre que se mostrará en el sistema</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Carrier</label>
+                        <select name="carrier_type" required>
+                            <option value="zipnova" <?php echo ($shipping_config['type'] ?? 'zipnova') === 'zipnova' ? 'selected' : ''; ?>>
+                                Zipnova
+                            </option>
+                            <option value="manual" <?php echo ($shipping_config['type'] ?? '') === 'manual' ? 'selected' : ''; ?>>
+                                Manual
+                            </option>
+                        </select>
+                        <div class="help-text">Tipo de integración a utilizar</div>
+                    </div>
+                </div>
+
                 <!-- Estado General -->
                 <div class="card card-full">
                     <div class="card-title">
