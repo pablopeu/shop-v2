@@ -36,12 +36,78 @@
         "font_family_heading": "sans-serif",
         "heading_weight": "700",
         "base_size": "16px",
-        "line_height": "1.6"
+        "line_height": "1.6",
+        "font_sizes": {
+            "xs": "12px",
+            "sm": "14px",
+            "base": "16px",
+            "lg": "18px",
+            "xl": "20px",
+            "2xl": "24px",
+            "3xl": "32px",
+            "4xl": "48px"
+        },
+        "font_weights": {
+            "normal": "400",
+            "medium": "500",
+            "semibold": "600",
+            "bold": "700",
+            "extrabold": "800"
+        },
+        "line_heights": {
+            "tight": "1.25",
+            "normal": "1.6",
+            "relaxed": "1.8"
+        }
     },
 
     "spacing": {
-        "base_unit": "16px",
-        "scale": "geometric"
+        "base_unit": "8px",
+        "scale": "custom",
+        "values": {
+            "xs": "4px",
+            "sm": "8px",
+            "md": "16px",
+            "lg": "24px",
+            "xl": "32px",
+            "2xl": "48px",
+            "3xl": "64px",
+            "4xl": "96px"
+        }
+    },
+
+    "borders": {
+        "radius": {
+            "none": "0",
+            "sm": "8px",
+            "md": "12px",
+            "lg": "16px",
+            "xl": "24px",
+            "2xl": "32px",
+            "full": "9999px"
+        },
+        "width": {
+            "default": "1px",
+            "thick": "2px",
+            "bold": "3px"
+        }
+    },
+
+    "effects": {
+        "blur": {
+            "sm": "8px",
+            "md": "16px",
+            "lg": "24px",
+            "xl": "32px"
+        },
+        "shadows": {
+            "xs": "0 1px 2px rgba(0, 84, 97, 0.05)",
+            "sm": "0 2px 8px rgba(0, 84, 97, 0.1)",
+            "md": "0 4px 16px rgba(0, 84, 97, 0.15)",
+            "lg": "0 8px 24px rgba(0, 84, 97, 0.2)",
+            "xl": "0 12px 32px rgba(0, 84, 97, 0.25)",
+            "2xl": "0 20px 48px rgba(0, 84, 97, 0.3)"
+        }
     },
 
     "components": {

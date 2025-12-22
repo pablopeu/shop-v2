@@ -388,92 +388,163 @@ function generate_variables_css($config) {
     $css .= "    --font-family-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, {$font_family};\n";
     $css .= "    --font-family-mono: 'SF Mono', Monaco, Consolas, monospace;\n\n";
 
-    $css .= "    --font-size-xs: 12px;\n";
-    $css .= "    --font-size-sm: 14px;\n";
-    $css .= "    --font-size-base: {$config['typography']['base_size']};\n";
-    $css .= "    --font-size-lg: 18px;\n";
-    $css .= "    --font-size-xl: 22px;\n";
-    $css .= "    --font-size-2xl: 28px;\n";
-    $css .= "    --font-size-3xl: 36px;\n";
-    $css .= "    --font-size-4xl: 52px;\n\n";
+    // Font sizes - leer del theme.json o usar defaults
+    $font_sizes = $config['typography']['font_sizes'] ?? [
+        'xs' => '12px', 'sm' => '14px', 'base' => '16px', 'lg' => '18px',
+        'xl' => '22px', '2xl' => '28px', '3xl' => '36px', '4xl' => '52px'
+    ];
+    foreach ($font_sizes as $size => $value) {
+        $css .= "    --font-size-{$size}: {$value};\n";
+    }
+    $css .= "\n";
 
-    $css .= "    --font-weight-normal: 400;\n";
-    $css .= "    --font-weight-medium: 500;\n";
-    $css .= "    --font-weight-semibold: 600;\n";
-    $css .= "    --font-weight-bold: 700;\n";
-    $css .= "    --font-weight-extrabold: 800;\n\n";
+    // Font weights - leer del theme.json o usar defaults
+    $font_weights = $config['typography']['font_weights'] ?? [
+        'normal' => '400', 'medium' => '500', 'semibold' => '600',
+        'bold' => '700', 'extrabold' => '800'
+    ];
+    foreach ($font_weights as $weight => $value) {
+        $css .= "    --font-weight-{$weight}: {$value};\n";
+    }
+    $css .= "\n";
 
-    $line_height = $config['typography']['line_height'] ?? '1.5';
-    $css .= "    --line-height-tight: 1.2;\n";
-    $css .= "    --line-height-normal: {$line_height};\n";
-    $css .= "    --line-height-relaxed: 1.8;\n\n";
+    // Line heights - leer del theme.json o usar defaults
+    $line_heights = $config['typography']['line_heights'] ?? [
+        'tight' => '1.2', 'normal' => '1.5', 'relaxed' => '1.8'
+    ];
+    foreach ($line_heights as $height => $value) {
+        $css .= "    --line-height-{$height}: {$value};\n";
+    }
+    $css .= "\n";
 
     // === ESPACIADO ===
     $css .= "    /* Espaciado */\n";
-    $base_unit = (int)str_replace('px', '', $config['spacing']['base_unit'] ?? '12px');
-    $css .= "    --spacing-xs: " . (int)($base_unit * 0.5) . "px;\n";
-    $css .= "    --spacing-sm: {$base_unit}px;\n";
-    $css .= "    --spacing-md: " . (int)($base_unit * 1.67) . "px;\n";
-    $css .= "    --spacing-lg: " . (int)($base_unit * 2.33) . "px;\n";
-    $css .= "    --spacing-xl: " . (int)($base_unit * 3) . "px;\n";
-    $css .= "    --spacing-2xl: " . (int)($base_unit * 4) . "px;\n";
-    $css .= "    --spacing-3xl: " . (int)($base_unit * 5.33) . "px;\n";
-    $css .= "    --spacing-4xl: " . (int)($base_unit * 6.67) . "px;\n\n";
+
+    // Leer spacing del theme.json (valores custom o generados desde base_unit)
+    if (isset($config['spacing']['values'])) {
+        // Usar valores custom del theme.json
+        $spacing_values = $config['spacing']['values'];
+        foreach ($spacing_values as $size => $value) {
+            $css .= "    --spacing-{$size}: {$value};\n";
+        }
+    } else {
+        // Generar desde base_unit (fallback para themes viejos)
+        $base_unit = (int)str_replace('px', '', $config['spacing']['base_unit'] ?? '12px');
+        $css .= "    --spacing-xs: " . (int)($base_unit * 0.5) . "px;\n";
+        $css .= "    --spacing-sm: {$base_unit}px;\n";
+        $css .= "    --spacing-md: " . (int)($base_unit * 1.67) . "px;\n";
+        $css .= "    --spacing-lg: " . (int)($base_unit * 2.33) . "px;\n";
+        $css .= "    --spacing-xl: " . (int)($base_unit * 3) . "px;\n";
+        $css .= "    --spacing-2xl: " . (int)($base_unit * 4) . "px;\n";
+        $css .= "    --spacing-3xl: " . (int)($base_unit * 5.33) . "px;\n";
+        $css .= "    --spacing-4xl: " . (int)($base_unit * 6.67) . "px;\n";
+    }
+    $css .= "\n";
 
     // === BORDES ===
     $css .= "    /* Bordes */\n";
-    // Activar border-radius si CUALQUIERA de cards o buttons lo requiere
-    $cards_rounded = $config['components']['cards']['rounded'] ?? false;
-    $buttons_rounded = $config['components']['buttons']['rounded'] ?? false;
-    $any_rounded = $cards_rounded || $buttons_rounded;
 
-    if ($any_rounded) {
-        $css .= "    --border-radius-none: 0;\n";
-        $css .= "    --border-radius-sm: 2px;\n";
-        $css .= "    --border-radius-md: 4px;\n";
-        $css .= "    --border-radius-lg: 8px;\n";
-        $css .= "    --border-radius-xl: 12px;\n";
-        $css .= "    --border-radius-full: 9999px;\n\n";
+    // Border radius - leer del theme.json o usar defaults
+    if (isset($config['borders']['radius'])) {
+        $border_radius = $config['borders']['radius'];
+        foreach ($border_radius as $size => $value) {
+            $css .= "    --border-radius-{$size}: {$value};\n";
+        }
     } else {
-        $css .= "    --border-radius-none: 0;\n";
-        $css .= "    --border-radius-sm: 0;\n";
-        $css .= "    --border-radius-md: 0;\n";
-        $css .= "    --border-radius-lg: 0;\n";
-        $css .= "    --border-radius-xl: 0;\n";
-        $css .= "    --border-radius-full: 0;\n\n";
-    }
+        // Fallback: generar según si es rounded o no
+        $cards_rounded = $config['components']['cards']['rounded'] ?? false;
+        $buttons_rounded = $config['components']['buttons']['rounded'] ?? false;
+        $any_rounded = $cards_rounded || $buttons_rounded;
 
-    $css .= "    --border-width: 1px;\n";
-    $css .= "    --border-width-thick: 2px;\n\n";
+        if ($any_rounded) {
+            $css .= "    --border-radius-none: 0;\n";
+            $css .= "    --border-radius-sm: 2px;\n";
+            $css .= "    --border-radius-md: 4px;\n";
+            $css .= "    --border-radius-lg: 8px;\n";
+            $css .= "    --border-radius-xl: 12px;\n";
+            $css .= "    --border-radius-2xl: 16px;\n";
+            $css .= "    --border-radius-full: 9999px;\n";
+        } else {
+            $css .= "    --border-radius-none: 0;\n";
+            $css .= "    --border-radius-sm: 0;\n";
+            $css .= "    --border-radius-md: 0;\n";
+            $css .= "    --border-radius-lg: 0;\n";
+            $css .= "    --border-radius-xl: 0;\n";
+            $css .= "    --border-radius-2xl: 0;\n";
+            $css .= "    --border-radius-full: 0;\n";
+        }
+    }
+    $css .= "\n";
+
+    // Border width - leer del theme.json o usar defaults
+    if (isset($config['borders']['width'])) {
+        $border_width = $config['borders']['width'];
+        $css .= "    --border-width: {$border_width['default']};\n";
+        $css .= "    --border-width-thick: {$border_width['thick']};\n";
+        if (isset($border_width['bold'])) {
+            $css .= "    --border-width-bold: {$border_width['bold']};\n";
+        }
+    } else {
+        $css .= "    --border-width: 1px;\n";
+        $css .= "    --border-width-thick: 2px;\n";
+    }
+    $css .= "\n";
 
     // === SOMBRAS ===
     $css .= "    /* Sombras */\n";
-    $shadow_style = $config['features']['shadow_style'] ?? 'subtle';
 
-    if ($shadow_style === 'none' || $shadow_style === false) {
-        $css .= "    --shadow-sm: none;\n";
-        $css .= "    --shadow-md: none;\n";
-        $css .= "    --shadow-lg: none;\n";
-        $css .= "    --shadow-xl: none;\n";
-        $css .= "    --shadow-2xl: none;\n\n";
-    } elseif ($shadow_style === 'subtle') {
-        $css .= "    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);\n";
-        $css .= "    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);\n";
-        $css .= "    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);\n";
-        $css .= "    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.18);\n";
-        $css .= "    --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.25);\n\n";
-    } elseif ($shadow_style === 'medium') {
-        $css .= "    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.12);\n";
-        $css .= "    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);\n";
-        $css .= "    --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.18);\n";
-        $css .= "    --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.22);\n";
-        $css .= "    --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.3);\n\n";
-    } else { // deep
-        $css .= "    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.15);\n";
-        $css .= "    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.2);\n";
-        $css .= "    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.25);\n";
-        $css .= "    --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.3);\n";
-        $css .= "    --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.4);\n\n";
+    // Leer shadows del theme.json si están disponibles
+    if (isset($config['effects']['shadows'])) {
+        // Usar valores custom del theme.json
+        $shadows = $config['effects']['shadows'];
+        if (isset($shadows['xs'])) {
+            $css .= "    --shadow-xs: {$shadows['xs']};\n";
+        }
+        if (isset($shadows['sm'])) {
+            $css .= "    --shadow-sm: {$shadows['sm']};\n";
+        }
+        if (isset($shadows['md'])) {
+            $css .= "    --shadow-md: {$shadows['md']};\n";
+        }
+        if (isset($shadows['lg'])) {
+            $css .= "    --shadow-lg: {$shadows['lg']};\n";
+        }
+        if (isset($shadows['xl'])) {
+            $css .= "    --shadow-xl: {$shadows['xl']};\n";
+        }
+        if (isset($shadows['2xl'])) {
+            $css .= "    --shadow-2xl: {$shadows['2xl']};\n";
+        }
+        $css .= "\n";
+    } else {
+        // Fallback para themes viejos: generar desde shadow_style
+        $shadow_style = $config['features']['shadow_style'] ?? 'subtle';
+
+        if ($shadow_style === 'none' || $shadow_style === false) {
+            $css .= "    --shadow-sm: none;\n";
+            $css .= "    --shadow-md: none;\n";
+            $css .= "    --shadow-lg: none;\n";
+            $css .= "    --shadow-xl: none;\n";
+            $css .= "    --shadow-2xl: none;\n\n";
+        } elseif ($shadow_style === 'subtle') {
+            $css .= "    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);\n";
+            $css .= "    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);\n";
+            $css .= "    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);\n";
+            $css .= "    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.18);\n";
+            $css .= "    --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.25);\n\n";
+        } elseif ($shadow_style === 'medium') {
+            $css .= "    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.12);\n";
+            $css .= "    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);\n";
+            $css .= "    --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.18);\n";
+            $css .= "    --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.22);\n";
+            $css .= "    --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.3);\n\n";
+        } else { // deep
+            $css .= "    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.15);\n";
+            $css .= "    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.2);\n";
+            $css .= "    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.25);\n";
+            $css .= "    --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.3);\n";
+            $css .= "    --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.4);\n\n";
+        }
     }
 
     // Sombras con efectos de brillo (glow)
@@ -504,10 +575,30 @@ function generate_variables_css($config) {
     // === GLASSMORPHISM ===
     if ($config['features']['glassmorphism'] ?? false) {
         $css .= "    /* Glassmorphism */\n";
-        $css .= "    --blur-sm: 4px;\n";
-        $css .= "    --blur-md: 12px;\n";
-        $css .= "    --blur-lg: 24px;\n";
-        $css .= "    --blur-xl: 40px;\n";
+
+        // Leer blur del theme.json si está disponible
+        if (isset($config['effects']['blur'])) {
+            $blur = $config['effects']['blur'];
+            if (isset($blur['sm'])) {
+                $css .= "    --blur-sm: {$blur['sm']};\n";
+            }
+            if (isset($blur['md'])) {
+                $css .= "    --blur-md: {$blur['md']};\n";
+            }
+            if (isset($blur['lg'])) {
+                $css .= "    --blur-lg: {$blur['lg']};\n";
+            }
+            if (isset($blur['xl'])) {
+                $css .= "    --blur-xl: {$blur['xl']};\n";
+            }
+        } else {
+            // Fallback para themes viejos
+            $css .= "    --blur-sm: 4px;\n";
+            $css .= "    --blur-md: 12px;\n";
+            $css .= "    --blur-lg: 24px;\n";
+            $css .= "    --blur-xl: 40px;\n";
+        }
+
         $css .= "    --glass-bg: rgba(255, 255, 255, 0.7);\n";
         $css .= "    --glass-border: rgba(255, 255, 255, 0.3);\n\n";
 
