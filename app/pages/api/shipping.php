@@ -56,7 +56,7 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'GET') {
 
     // Check cache
     $cache_key = 'quote_' . md5(json_encode($destination) . json_encode($packages));
-    $cache_file = BASE_PATH . '/data/cache/' . $cache_key . '.json';
+    $cache_file = APP_PATH . '/data/cache/' . $cache_key . '.json';
     $config = zipnova_get_config();
     $cache_minutes = $config['options']['cache_quotes_minutes'] ?? 5;
 
@@ -70,7 +70,7 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'GET') {
 
     if ($result['success']) {
         // Save to cache
-        $cache_dir = BASE_PATH . '/data/cache';
+        $cache_dir = APP_PATH . '/data/cache';
         if (!is_dir($cache_dir)) {
             mkdir($cache_dir, 0755, true);
         }
@@ -122,7 +122,7 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Check cache
     $cache_key = 'quote_' . md5(json_encode($destination) . json_encode($packages));
-    $cache_file = BASE_PATH . '/data/cache/' . $cache_key . '.json';
+    $cache_file = APP_PATH . '/data/cache/' . $cache_key . '.json';
     $config = zipnova_get_config();
     $cache_minutes = $config['options']['cache_quotes_minutes'] ?? 5;
 
@@ -136,7 +136,7 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result['success']) {
         // Save to cache
-        $cache_dir = BASE_PATH . '/data/cache';
+        $cache_dir = APP_PATH . '/data/cache';
         if (!is_dir($cache_dir)) {
             mkdir($cache_dir, 0755, true);
         }
