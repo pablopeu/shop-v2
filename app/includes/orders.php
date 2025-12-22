@@ -127,9 +127,18 @@ function build_shipping_data($order_data) {
         'cost' => (float)($order_data['shipping_cost'] ?? 0),
         'address' => $shipping_address,
         'estimated_delivery' => $order_data['shipping_estimated_days'] ?? null,
-        'zipnova_shipment_id' => null,
-        'tracking_id' => null,
-        'status' => 'pending',
+
+        // Multi-carrier fields
+        'carrier' => null,                    // Tag del carrier (ZNVA, etc.)
+        'carrier_shipment_id' => null,        // ID del envío en el carrier
+        'carrier_status' => null,             // Estado raw del carrier API
+
+        // Backward compatibility
+        'zipnova_shipment_id' => null,        // Legacy field (deprecated)
+        'tracking_id' => null,                // Tracking ID público
+
+        // Estado base del sistema
+        'status' => 'pendiente',              // Estado base universal
         'created_at' => null,
         'updated_at' => null,
         'history' => []
@@ -646,8 +655,8 @@ function create_zipnova_shipment_for_order($order_id) {
         return ['success' => false, 'error' => 'La orden no tiene datos de envío'];
     }
 
-    // Check if shipment already created
-    if (!empty($order['shipping']['zipnova_shipment_id'])) {
+    // Check if shipment already created (check both new and legacy fields)
+    if (!empty($order['shipping']['carrier_shipment_id']) || !empty($order['shipping']['zipnova_shipment_id'])) {
         return ['success' => false, 'error' => 'El envío ya fue creado en Zipnova'];
     }
 
@@ -682,11 +691,26 @@ function create_zipnova_shipment_for_order($order_id) {
         // Update order with shipment info
         $shipment_id = $result['data']['id'] ?? null;
         $tracking_id = $result['data']['tracking_id'] ?? $shipment_id;
+        $carrier_status = $result['data']['status'] ?? 'pending';
+
+        // Get carrier tag from config
+        $carrier_tag = $config['tag'] ?? 'ZNVA';
+
+        // Map carrier status to base status
+        $base_status = map_carrier_status_to_base('zipnova', $carrier_status);
 
         update_order_shipping_info($order_id, [
+            // Multi-carrier fields
+            'carrier' => $carrier_tag,
+            'carrier_shipment_id' => $shipment_id,
+            'carrier_status' => $carrier_status,
+
+            // Legacy backward compatibility
             'zipnova_shipment_id' => $shipment_id,
             'tracking_id' => $tracking_id,
-            'status' => 'pending',
+
+            // Base status
+            'status' => $base_status,
             'created_at' => date('Y-m-d H:i:s')
         ]);
     }
@@ -755,7 +779,23 @@ function update_shipping_status_by_tracking($tracking_id, $new_status, $extra_da
 
     foreach ($data['orders'] as &$order) {
         if (isset($order['shipping']['tracking_id']) && $order['shipping']['tracking_id'] === $tracking_id) {
-            $order['shipping']['status'] = $new_status;
+            // Get carrier type to map status correctly
+            $carrier = $order['shipping']['carrier'] ?? null;
+            $carrier_type = 'zipnova'; // Default, can be extended later
+
+            if ($carrier) {
+                require_once __DIR__ . '/zipnova.php';
+                $carrier_config = get_carrier_config($carrier);
+                $carrier_type = $carrier_config['type'] ?? 'zipnova';
+            }
+
+            // Save raw carrier status
+            $order['shipping']['carrier_status'] = $new_status;
+
+            // Map to base status
+            require_once __DIR__ . '/zipnova.php';
+            $base_status = map_carrier_status_to_base($carrier_type, $new_status);
+            $order['shipping']['status'] = $base_status;
             $order['shipping']['updated_at'] = date('Y-m-d H:i:s');
 
             // Add to history
@@ -764,7 +804,8 @@ function update_shipping_status_by_tracking($tracking_id, $new_status, $extra_da
             }
             $order['shipping']['history'][] = [
                 'date' => date('Y-m-d H:i:s'),
-                'status' => $new_status,
+                'carrier_status' => $new_status,
+                'status' => $base_status,
                 'data' => $extra_data
             ];
 
