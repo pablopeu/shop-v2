@@ -6,7 +6,7 @@
  * Documentación: /zipnova/
  */
 
-if (!defined('BASE_PATH')) {
+if (!defined('APP_ENTRY_POINT')) {
     die('Acceso directo no permitido');
 }
 
