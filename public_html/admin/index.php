@@ -62,6 +62,7 @@ $pages_map = [
     // Envíos
     'envios-pendientes' => 'pages/admin/envios-pendientes.php',
     'envios-archivo' => 'pages/admin/envios-archivo.php',
+    'shipping-list' => 'pages/admin/shipping-list.php',
     
     // Promociones
     'promociones-listado' => 'pages/admin/promociones-listado.php',
@@ -99,6 +100,7 @@ $pages_map = [
     'config-footer' => 'pages/admin/config-footer.php',
     'config-dashboard' => 'pages/admin/config-dashboard.php',
     'config-productos-heading' => 'pages/admin/config-productos-heading.php',
+    'config-shipping' => 'pages/admin/config-shipping.php',
     
     // Mantenimiento
     'config-mantenimiento' => 'pages/admin/config-mantenimiento.php',
