@@ -1294,22 +1294,60 @@ function generate_theme($data, $original_config = null) {
         ];
     }
 
-    // Generar variables.css
-    $variables_css = generate_variables_css($config);
-    if (file_put_contents($theme_dir . '/variables.css', $variables_css) === false) {
-        return [
-            'success' => false,
-            'message' => 'Error al guardar variables.css'
-        ];
-    }
+    // Generar o copiar variables.css y theme.css
+    if ($original_config !== null) {
+        // EDITANDO THEME EXISTENTE: Copiar archivos CSS originales
+        $original_slug = $original_config['slug'] ?? null;
+        if ($original_slug) {
+            $original_theme_dir = PUBLIC_PATH . "/assets/themes/{$original_slug}";
 
-    // Generar theme.css
-    $theme_css = generate_theme_css_basic($config);
-    if (file_put_contents($theme_dir . '/theme.css', $theme_css) === false) {
-        return [
-            'success' => false,
-            'message' => 'Error al guardar theme.css'
-        ];
+            // Copiar variables.css original
+            $original_variables = $original_theme_dir . '/variables.css';
+            if (file_exists($original_variables)) {
+                if (!copy($original_variables, $theme_dir . '/variables.css')) {
+                    return [
+                        'success' => false,
+                        'message' => 'Error al copiar variables.css original'
+                    ];
+                }
+            } else {
+                // Si no existe, generar uno básico
+                $variables_css = generate_variables_css($config);
+                file_put_contents($theme_dir . '/variables.css', $variables_css);
+            }
+
+            // Copiar theme.css original
+            $original_theme_css = $original_theme_dir . '/theme.css';
+            if (file_exists($original_theme_css)) {
+                if (!copy($original_theme_css, $theme_dir . '/theme.css')) {
+                    return [
+                        'success' => false,
+                        'message' => 'Error al copiar theme.css original'
+                    ];
+                }
+            } else {
+                // Si no existe, generar uno básico
+                $theme_css = generate_theme_css_basic($config);
+                file_put_contents($theme_dir . '/theme.css', $theme_css);
+            }
+        }
+    } else {
+        // THEME NUEVO: Generar archivos CSS desde cero
+        $variables_css = generate_variables_css($config);
+        if (file_put_contents($theme_dir . '/variables.css', $variables_css) === false) {
+            return [
+                'success' => false,
+                'message' => 'Error al guardar variables.css'
+            ];
+        }
+
+        $theme_css = generate_theme_css_basic($config);
+        if (file_put_contents($theme_dir . '/theme.css', $theme_css) === false) {
+            return [
+                'success' => false,
+                'message' => 'Error al guardar theme.css'
+            ];
+        }
     }
 
     // Establecer permisos
