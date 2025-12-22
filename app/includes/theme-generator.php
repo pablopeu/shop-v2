@@ -1596,20 +1596,25 @@ function generate_theme($data, $original_config = null) {
                 // Método 2 (fallback): Si copy() falla, usar file_get_contents/put_contents
                 if (!$copied) {
                     $content = @file_get_contents($original_theme_css);
-                    if ($content === false) {
-                        return [
-                            'success' => false,
-                            'message' => 'Error: no se pudo leer el contenido de theme.css'
-                        ];
+                    if ($content !== false) {
+                        $written = @file_put_contents($dest_file, $content);
+                        if ($written !== false) {
+                            $copied = true; // Éxito con método alternativo
+                        }
                     }
+                }
 
-                    $written = @file_put_contents($dest_file, $content);
-                    if ($written === false) {
+                // Método 3 (último fallback): Si todo falla, generar CSS básico
+                if (!$copied) {
+                    $theme_css = generate_theme_css_basic($config);
+                    if (file_put_contents($dest_file, $theme_css) === false) {
                         return [
                             'success' => false,
-                            'message' => 'Error: no se pudo escribir theme.css en destino'
+                            'message' => 'Error: no se pudo generar theme.css (permisos de escritura)'
                         ];
                     }
+                    // Advertencia en lugar de error
+                    $copy_warning = 'Nota: Se generó CSS básico (no se pudo copiar theme.css original)';
                 }
             } else {
                 // No existe theme.css original, generar básico
@@ -1634,9 +1639,15 @@ function generate_theme($data, $original_config = null) {
     chmod($theme_dir . '/variables.css', 0644);
     chmod($theme_dir . '/theme.css', 0644);
 
+    // Construir mensaje de éxito con posibles advertencias
+    $success_message = "Theme '{$data['name']}' generado exitosamente";
+    if (isset($copy_warning)) {
+        $success_message .= "<br><br>⚠️ {$copy_warning}";
+    }
+
     return [
         'success' => true,
-        'message' => "Theme '{$data['name']}' generado exitosamente",
+        'message' => $success_message,
         'slug' => $slug
     ];
 }
