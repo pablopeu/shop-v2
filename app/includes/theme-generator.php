@@ -1360,18 +1360,34 @@ function generate_theme($data, $original_config = null) {
             'background' => $data['color_background']
         ],
 
-        'typography' => [
-            'font_family' => $data['font_family'] ?? 'sans-serif',
-            'font_family_heading' => $data['font_family_heading'] ?? 'sans-serif',
-            'heading_weight' => $data['heading_weight'] ?? '600',
-            'base_size' => $data['font_size'] ?? '16px',
-            'line_height' => $data['line_height'] ?? '1.5'
-        ],
+        'typography' => array_merge(
+            [
+                'font_family' => $data['font_family'] ?? 'sans-serif',
+                'font_family_heading' => $data['font_family_heading'] ?? 'sans-serif',
+                'heading_weight' => $data['heading_weight'] ?? '600',
+                'base_size' => $data['font_size'] ?? '16px',
+                'line_height' => $data['line_height'] ?? '1.5'
+            ],
+            // Preservar configuración completa del original si existe
+            isset($original_config['typography']['font_sizes']) ? ['font_sizes' => $original_config['typography']['font_sizes']] : [],
+            isset($original_config['typography']['font_weights']) ? ['font_weights' => $original_config['typography']['font_weights']] : [],
+            isset($original_config['typography']['line_heights']) ? ['line_heights' => $original_config['typography']['line_heights']] : []
+        ),
 
-        'spacing' => [
-            'base_unit' => $data['base_unit'] ?? '12px',
-            'scale' => $data['spacing_scale'] ?? 'proportional'
-        ],
+        'spacing' => array_merge(
+            [
+                'base_unit' => $data['base_unit'] ?? '12px',
+                'scale' => $data['spacing_scale'] ?? 'proportional'
+            ],
+            // Preservar valores custom del original si existen
+            isset($original_config['spacing']['values']) ? ['values' => $original_config['spacing']['values']] : []
+        ),
+
+        // Preservar borders del original si existe
+        'borders' => $original_config['borders'] ?? [],
+
+        // Preservar effects del original si existe
+        'effects' => $original_config['effects'] ?? [],
 
         'components' => [
             'buttons' => array_merge(
