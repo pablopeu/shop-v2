@@ -6,10 +6,15 @@ Integrar Zipnova y futuros carriers en el sistema existente de gestión de enví
 
 ## Carriers Soportados
 
-| Carrier | Tag | Nombre |
-|---------|-----|--------|
-| Zipnova | ZNVA | Zipnova |
-| (Futuro) | XXXX | Otro carrier |
+Los carriers se identifican con tags de 4 letras personalizables:
+
+| Tipo | Tag (ejemplo) | Nombre (personalizable) |
+|------|---------------|-------------------------|
+| Zipnova | ZNVA | Zipnova Principal |
+| Zipnova | ZNV2 | Zipnova Secundaria |
+| Otro | OTRO | Otro carrier |
+
+**Nota:** El tag y nombre son editables por el usuario en la configuración.
 
 ## Estructura de Datos
 
@@ -127,7 +132,9 @@ function render_shipping_status($order) {
 {
   "carriers": {
     "ZNVA": {
-      "name": "Zipnova",
+      "tag": "ZNVA",           // Tag de 4 letras (personalizable por usuario)
+      "name": "Zipnova Principal",  // Nombre descriptivo (personalizable)
+      "type": "zipnova",       // Tipo de carrier (determina qué integración usar)
       "enabled": false,
       "mode": "sandbox",
       "credentials": {
@@ -208,19 +215,32 @@ function render_shipping_status($order) {
 
 1. **UI con Tabs:**
    ```
-   ┌─────────────────────────────────┐
-   │ [ZNVA - Zipnova] [+ Agregar]   │
-   ├─────────────────────────────────┤
-   │                                 │
-   │  Configuración de Zipnova       │
-   │  (formulario actual)            │
-   │                                 │
-   └─────────────────────────────────┘
+   ┌─────────────────────────────────────────┐
+   │ [ZNVA - Zipnova Principal] [+ Agregar]  │
+   ├─────────────────────────────────────────┤
+   │                                         │
+   │  ┌─ Información del Carrier ─────────┐ │
+   │  │ Tag (4 letras): [ZNVA]            │ │
+   │  │ Nombre: [Zipnova Principal]       │ │
+   │  │ Tipo: [Zipnova ▼]                 │ │
+   │  │ Habilitado: [✓]                   │ │
+   │  └───────────────────────────────────┘ │
+   │                                         │
+   │  Configuración de Zipnova               │
+   │  (formulario actual)                    │
+   │                                         │
+   └─────────────────────────────────────────┘
    ```
 
-2. **Futuro:**
+2. **Campos editables:**
+   - **Tag**: Input de 4 letras (validación: solo letras mayúsculas/números)
+   - **Nombre**: Input de texto libre para describir el carrier
+   - **Tipo**: Select con opciones (Zipnova, Manual, etc.)
+
+3. **Futuro:**
    - Botón "+ Agregar Carrier" para agregar nuevos
    - Cada carrier en su propio tab
+   - Validación de tags únicos
 
 ## Archivos a Modificar
 
