@@ -1490,10 +1490,29 @@ function generate_theme($data, $original_config = null) {
             $original_theme_css = PUBLIC_PATH . "/assets/themes/{$original_slug}/theme.css";
             if (file_exists($original_theme_css)) {
                 // Copiar theme.css original (preserva efectos personalizados)
-                if (!copy($original_theme_css, $theme_dir . '/theme.css')) {
+                $dest_file = $theme_dir . '/theme.css';
+
+                // Verificar si el directorio de destino existe y es escribible
+                if (!is_dir($theme_dir)) {
                     return [
                         'success' => false,
-                        'message' => 'Error al copiar theme.css original'
+                        'message' => 'Error: el directorio del theme no existe'
+                    ];
+                }
+
+                if (!is_writable($theme_dir)) {
+                    return [
+                        'success' => false,
+                        'message' => 'Error: el directorio del theme no tiene permisos de escritura'
+                    ];
+                }
+
+                // Intentar copiar
+                if (!@copy($original_theme_css, $dest_file)) {
+                    $error = error_get_last();
+                    return [
+                        'success' => false,
+                        'message' => 'Error al copiar theme.css: ' . ($error['message'] ?? 'desconocido')
                     ];
                 }
             } else {
