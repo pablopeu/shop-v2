@@ -772,14 +772,7 @@ $user = get_logged_user();
     <div class="main-content">
         <?php include APP_PATH . '/includes/admin/header.php'; ?>
 
-        <h1 style="margin-bottom: 24px;">✨ Generador de Themes</h1>
-
-        <!-- Info Box - Compacto -->
-        <div class="info-box" style="margin-bottom: 16px; padding: 12px 16px;">
-            <p style="margin: 0; font-size: 13px;">
-                <strong>ℹ️ Generador de Themes</strong> - Personaliza colores, tipografía y componentes. El sistema genera automáticamente 150+ variables CSS.
-            </p>
-        </div>
+        <h1 style="margin-bottom: 20px;">✨ Generador de Themes</h1>
 
         <!-- Mensajes -->
         <?php if ($message): ?>
@@ -806,44 +799,41 @@ $user = get_logged_user();
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                 <input type="hidden" name="original_slug" id="original-slug" value="<?php echo htmlspecialchars($form_values['original_slug'] ?? ''); ?>">
 
-                <!-- Método de Creación - Compacto -->
+                <!-- Método y Selector - Una línea en desktop -->
                 <div class="card card-full" style="margin-bottom: 12px; padding: 12px 16px;">
-                    <div style="display: flex; align-items: center; gap: 20px;">
-                        <label style="font-weight: 500; color: #555; font-size: 14px; margin: 0;">🎨 Método:</label>
-                        <div class="radio-group" style="margin: 0;">
-                            <label style="margin-right: 20px;">
-                                <input type="radio" name="creation_method" value="edit" checked data-onchange="toggleCreationMethod">
-                                Modificar existente
-                            </label>
-                            <label>
-                                <input type="radio" name="creation_method" value="new" data-onchange="toggleCreationMethod">
-                                Crear nuevo
-                            </label>
+                    <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                        <!-- Método -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <label style="font-weight: 500; color: #555; font-size: 14px; margin: 0; white-space: nowrap;">🎨 Método:</label>
+                            <div class="radio-group" style="margin: 0; display: flex; gap: 16px;">
+                                <label style="white-space: nowrap;">
+                                    <input type="radio" name="creation_method" value="edit" checked data-onchange="toggleCreationMethod">
+                                    Modificar existente
+                                </label>
+                                <label style="white-space: nowrap;">
+                                    <input type="radio" name="creation_method" value="new" data-onchange="toggleCreationMethod">
+                                    Crear nuevo
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Selector de theme (solo visible cuando método=edit) -->
+                        <div id="edit-theme-inline" style="display: none; flex: 1; min-width: 300px;">
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <select id="edit-theme-select" style="flex: 1; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                    <option value="">-- Selecciona un theme --</option>
+                                    <?php foreach ($available_themes as $slug => $theme): ?>
+                                        <option value="<?php echo htmlspecialchars($slug); ?>">
+                                            <?php echo htmlspecialchars($theme['name']); ?> (<?php echo htmlspecialchars($slug); ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="button" data-action="loadThemeForEdit" class="btn-save" style="padding: 8px 20px; white-space: nowrap;">
+                                    📥 Cargar
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Editar Theme Existente - Compacto -->
-                <div class="card card-full" id="edit-theme" style="display: none; margin-bottom: 12px; padding: 12px 16px;">
-                    <div class="card-title" style="font-size: 14px; margin-bottom: 12px;">✏️ Editar Theme Existente</div>
-
-                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end;">
-                        <div>
-                            <label for="edit-theme-select" style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500;">Selecciona theme:</label>
-                            <select id="edit-theme-select" style="width: 100%; padding: 8px 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
-                                <option value="">-- Selecciona un theme --</option>
-                                <?php foreach ($available_themes as $slug => $theme): ?>
-                                    <option value="<?php echo htmlspecialchars($slug); ?>">
-                                        <?php echo htmlspecialchars($theme['name']); ?> (<?php echo htmlspecialchars($slug); ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <button type="button" data-action="loadThemeForEdit" class="btn-save" style="padding: 8px 20px; white-space: nowrap;">
-                            📥 Cargar
-                        </button>
-                    </div>
-                    <small class="helper-text" style="margin-top: 8px; font-size: 12px;">Carga un theme existente para modificarlo</small>
                 </div>
 
                 <!-- Tabs de Navegación -->
@@ -1948,7 +1938,7 @@ $user = get_logged_user();
             // Mostrar selector de theme si "Modificar existente" está seleccionado por defecto
             const editRadio = document.querySelector('input[name="creation_method"][value="edit"]');
             if (editRadio && editRadio.checked) {
-                const editDiv = document.getElementById('edit-theme');
+                const editDiv = document.getElementById('edit-theme-inline');
                 if (editDiv) {
                     editDiv.style.display = 'block';
                 }
@@ -1973,9 +1963,9 @@ $user = get_logged_user();
         // Toggle método de creación
         function toggleCreationMethod(event, element, params) {
             const value = element.value;
-            const editDiv = document.getElementById('edit-theme');
+            const editDiv = document.getElementById('edit-theme-inline');
 
-            // Mostrar selector solo si es editar
+            // Mostrar selector inline solo si es editar
             if (value === 'edit') {
                 editDiv.style.display = 'block';
             } else {
