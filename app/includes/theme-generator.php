@@ -1168,22 +1168,60 @@ function generate_theme_css_basic($config) {
     $css .= "   PRODUCT GALLERY LAYOUTS\n";
     $css .= "   ================================= */\n\n";
 
-    // Estilos para contenedor de imagen principal
+    // Estilos para contenedor de imagen principal (dinámico desde config)
+    $gallery_config = $config['components']['product_gallery'] ?? [];
+
+    // Main image border
+    $main_border_width = $gallery_config['main_image_border_width'] ?? '2px';
+    $main_border_style = $gallery_config['main_image_border_style'] ?? 'glassmorphism';
+    $main_shadow = $gallery_config['main_image_shadow'] ?? 'deep';
+    $main_radius = $gallery_config['main_image_border_radius'] ?? 'xl';
+
     $css .= ".main-image-container {\n";
-    $css .= "    border: 2px solid rgba(255, 255, 255, 0.3);\n";
-    $css .= "    border-radius: var(--border-radius-xl, 24px);\n";
-    $css .= "    box-shadow: var(--shadow-xl, 0 24px 48px rgba(0, 0, 0, 0.3));\n";
+
+    // Border dinámico
+    if ($main_border_width !== '0px') {
+        if ($main_border_style === 'glassmorphism') {
+            $css .= "    border: {$main_border_width} solid rgba(255, 255, 255, 0.3);\n";
+            $css .= "    background: rgba(255, 255, 255, 0.7);\n";
+            $css .= "    backdrop-filter: blur(10px);\n";
+        } else {
+            $css .= "    border: {$main_border_width} solid var(--color-border, #e0e0e0);\n";
+        }
+    }
+
+    // Border radius
+    $css .= "    border-radius: var(--border-radius-{$main_radius}, 24px);\n";
+
+    // Shadow dinámico
+    $shadow_values = [
+        'none' => 'none',
+        'subtle' => 'var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.1))',
+        'medium' => 'var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.2))',
+        'deep' => 'var(--shadow-xl, 0 24px 48px rgba(0, 0, 0, 0.3))'
+    ];
+    $css .= "    box-shadow: " . ($shadow_values[$main_shadow] ?? $shadow_values['deep']) . ";\n";
+
     $css .= "    position: relative;\n";
     $css .= "    overflow: hidden;\n";
-    $css .= "    background: rgba(255, 255, 255, 0.7);\n";
     $css .= "}\n\n";
 
-    // Estilos para thumbnails
+    // Estilos para thumbnails (dinámico desde config)
+    $thumb_border_width = $gallery_config['thumbnail_border_width'] ?? '3px';
+    $thumb_radius = $gallery_config['thumbnail_border_radius'] ?? 'md';
+    $thumb_hover_effect = $gallery_config['thumbnail_hover_effect'] ?? 'scale';
+    $thumb_opacity = $gallery_config['thumbnail_opacity_inactive'] ?? '0.6';
+
     $css .= ".thumbnail {\n";
-    $css .= "    border: 3px solid var(--color-border, #e0e0e0);\n";
-    $css .= "    border-radius: var(--border-radius-md, 12px);\n";
+
+    // Border
+    if ($thumb_border_width !== '0px') {
+        $css .= "    border: {$thumb_border_width} solid var(--color-border, #e0e0e0);\n";
+    }
+
+    $css .= "    border-radius: var(--border-radius-{$thumb_radius}, 12px);\n";
     $css .= "    transition: all var(--transition-base, 0.3s ease);\n";
-    $css .= "    opacity: 0.6;\n";
+    $css .= "    opacity: {$thumb_opacity};\n";
     $css .= "    cursor: pointer;\n";
     $css .= "    overflow: hidden;\n";
     $css .= "}\n\n";
@@ -1191,13 +1229,20 @@ function generate_theme_css_basic($config) {
     $css .= ".thumbnail:hover {\n";
     $css .= "    opacity: 1;\n";
     $css .= "    border-color: var(--color-primary, #005461);\n";
-    $css .= "    transform: scale(1.05);\n";
+
+    // Hover effect dinámico
+    if ($thumb_hover_effect === 'scale') {
+        $css .= "    transform: scale(1.05);\n";
+    } elseif ($thumb_hover_effect === 'glow') {
+        $css .= "    box-shadow: 0 0 12px rgba(var(--color-primary-rgb, 0, 84, 97), 0.5);\n";
+    }
+
     $css .= "}\n\n";
 
     $css .= ".thumbnail.active {\n";
     $css .= "    opacity: 1;\n";
     $css .= "    border-color: var(--color-primary, #005461);\n";
-    $css .= "    box-shadow: 0 0 0 2px rgba(0, 84, 97, 0.2);\n";
+    $css .= "    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 0, 84, 97), 0.2);\n";
     $css .= "}\n\n";
 
     $css .= ".thumbnail img {\n";
@@ -1546,6 +1591,16 @@ function generate_theme($data, $original_config = null) {
                 'show_stock' => $data['product_show_stock'] ?? true,
                 'show_nav_buttons' => $data['product_show_nav_buttons'] ?? true,
                 'show_image_counter' => $data['product_show_image_counter'] ?? true
+            ],
+            'product_gallery' => [
+                'main_image_border_width' => $data['product_main_image_border_width'] ?? '2px',
+                'main_image_border_style' => $data['product_main_image_border_style'] ?? 'glassmorphism',
+                'main_image_shadow' => $data['product_main_image_shadow'] ?? 'deep',
+                'main_image_border_radius' => $data['product_main_image_border_radius'] ?? 'xl',
+                'thumbnail_border_width' => $data['product_thumbnail_border_width'] ?? '3px',
+                'thumbnail_border_radius' => $data['product_thumbnail_border_radius'] ?? 'md',
+                'thumbnail_hover_effect' => $data['product_thumbnail_hover_effect'] ?? 'scale',
+                'thumbnail_opacity_inactive' => $data['product_thumbnail_opacity_inactive'] ?? '0.6'
             ]
         ],
 

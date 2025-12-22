@@ -46,6 +46,15 @@ $form_values = [
     'product_show_stock' => true,
     'product_show_nav_buttons' => true,
     'product_show_image_counter' => true,
+    // Estilos de galería
+    'product_main_image_border_width' => '2px',
+    'product_main_image_border_style' => 'glassmorphism',
+    'product_main_image_shadow' => 'deep',
+    'product_main_image_border_radius' => 'xl',
+    'product_thumbnail_border_width' => '3px',
+    'product_thumbnail_border_radius' => 'md',
+    'product_thumbnail_hover_effect' => 'scale',
+    'product_thumbnail_opacity_inactive' => '0.6',
     // Efectos visuales
     'animations' => 'smooth',
     'glassmorphism' => false,
@@ -133,6 +142,16 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'product_show_stock' => $edit_config['components']['product_view']['show_stock'] ?? true,
             'product_show_nav_buttons' => $edit_config['components']['product_view']['show_nav_buttons'] ?? true,
             'product_show_image_counter' => $edit_config['components']['product_view']['show_image_counter'] ?? true,
+
+            // Estilos de Galería
+            'product_main_image_border_width' => $edit_config['components']['product_gallery']['main_image_border_width'] ?? '2px',
+            'product_main_image_border_style' => $edit_config['components']['product_gallery']['main_image_border_style'] ?? 'glassmorphism',
+            'product_main_image_shadow' => $edit_config['components']['product_gallery']['main_image_shadow'] ?? 'deep',
+            'product_main_image_border_radius' => $edit_config['components']['product_gallery']['main_image_border_radius'] ?? 'xl',
+            'product_thumbnail_border_width' => $edit_config['components']['product_gallery']['thumbnail_border_width'] ?? '3px',
+            'product_thumbnail_border_radius' => $edit_config['components']['product_gallery']['thumbnail_border_radius'] ?? 'md',
+            'product_thumbnail_hover_effect' => $edit_config['components']['product_gallery']['thumbnail_hover_effect'] ?? 'scale',
+            'product_thumbnail_opacity_inactive' => $edit_config['components']['product_gallery']['thumbnail_opacity_inactive'] ?? '0.6',
 
             // Efectos visuales
             'animations' => $edit_config['features']['animations'] ?? 'smooth',
@@ -232,6 +251,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'product_show_stock' => isset($_POST['product_show_stock']),
             'product_show_nav_buttons' => isset($_POST['product_show_nav_buttons']),
             'product_show_image_counter' => isset($_POST['product_show_image_counter']),
+
+            // Estilos de Galería
+            'product_main_image_border_width' => sanitize_input($_POST['product_main_image_border_width'] ?? '2px'),
+            'product_main_image_border_style' => sanitize_input($_POST['product_main_image_border_style'] ?? 'glassmorphism'),
+            'product_main_image_shadow' => sanitize_input($_POST['product_main_image_shadow'] ?? 'deep'),
+            'product_main_image_border_radius' => sanitize_input($_POST['product_main_image_border_radius'] ?? 'xl'),
+            'product_thumbnail_border_width' => sanitize_input($_POST['product_thumbnail_border_width'] ?? '3px'),
+            'product_thumbnail_border_radius' => sanitize_input($_POST['product_thumbnail_border_radius'] ?? 'md'),
+            'product_thumbnail_hover_effect' => sanitize_input($_POST['product_thumbnail_hover_effect'] ?? 'scale'),
+            'product_thumbnail_opacity_inactive' => sanitize_input($_POST['product_thumbnail_opacity_inactive'] ?? '0.6'),
 
             // Efectos Visuales
             'animations' => sanitize_input($_POST['animations'] ?? 'smooth'),
@@ -1701,6 +1730,184 @@ $user = get_logged_user();
                             <small class="helper-text">Indicador de imagen actual</small>
                         </div>
                     </div>
+
+                    <!-- Estilos de Galería -->
+                    <div class="card">
+                        <div class="card-title">
+                            🎨 Estilos de Galería
+                        </div>
+
+                        <h4 style="margin-top: 0; color: var(--color-text-dark); font-size: 14px;">Imagen Principal</h4>
+
+                        <div class="form-group">
+                            <label>Grosor de Borde</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_main_image_border_width" value="0px" <?php echo ($form_values['product_main_image_border_width'] ?? '2px') === '0px' ? 'checked' : ''; ?>>
+                                    Sin borde
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_width" value="1px" <?php echo ($form_values['product_main_image_border_width'] ?? '2px') === '1px' ? 'checked' : ''; ?>>
+                                    Delgado (1px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_width" value="2px" <?php echo ($form_values['product_main_image_border_width'] ?? '2px') === '2px' ? 'checked' : ''; ?>>
+                                    Normal (2px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_width" value="3px" <?php echo ($form_values['product_main_image_border_width'] ?? '2px') === '3px' ? 'checked' : ''; ?>>
+                                    Grueso (3px)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Estilo de Borde</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_main_image_border_style" value="normal" <?php echo ($form_values['product_main_image_border_style'] ?? 'glassmorphism') === 'normal' ? 'checked' : ''; ?>>
+                                    Sólido
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_style" value="glassmorphism" <?php echo ($form_values['product_main_image_border_style'] ?? 'glassmorphism') === 'glassmorphism' ? 'checked' : ''; ?>>
+                                    Glassmorphism
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sombra</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_main_image_shadow" value="none" <?php echo ($form_values['product_main_image_shadow'] ?? 'deep') === 'none' ? 'checked' : ''; ?>>
+                                    Sin sombra
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_shadow" value="subtle" <?php echo ($form_values['product_main_image_shadow'] ?? 'deep') === 'subtle' ? 'checked' : ''; ?>>
+                                    Sutil
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_shadow" value="medium" <?php echo ($form_values['product_main_image_shadow'] ?? 'deep') === 'medium' ? 'checked' : ''; ?>>
+                                    Media
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_shadow" value="deep" <?php echo ($form_values['product_main_image_shadow'] ?? 'deep') === 'deep' ? 'checked' : ''; ?>>
+                                    Profunda
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Borde Redondeado</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_main_image_border_radius" value="sm" <?php echo ($form_values['product_main_image_border_radius'] ?? 'xl') === 'sm' ? 'checked' : ''; ?>>
+                                    Pequeño (8px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_radius" value="md" <?php echo ($form_values['product_main_image_border_radius'] ?? 'xl') === 'md' ? 'checked' : ''; ?>>
+                                    Mediano (12px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_radius" value="lg" <?php echo ($form_values['product_main_image_border_radius'] ?? 'xl') === 'lg' ? 'checked' : ''; ?>>
+                                    Grande (16px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_radius" value="xl" <?php echo ($form_values['product_main_image_border_radius'] ?? 'xl') === 'xl' ? 'checked' : ''; ?>>
+                                    Extra Grande (24px)
+                                </label>
+                            </div>
+                        </div>
+
+                        <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--color-border-light);">
+
+                        <h4 style="margin-top: 0; color: var(--color-text-dark); font-size: 14px;">Thumbnails (Miniaturas)</h4>
+
+                        <div class="form-group">
+                            <label>Grosor de Borde</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_width" value="0px" <?php echo ($form_values['product_thumbnail_border_width'] ?? '3px') === '0px' ? 'checked' : ''; ?>>
+                                    Sin borde
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_width" value="1px" <?php echo ($form_values['product_thumbnail_border_width'] ?? '3px') === '1px' ? 'checked' : ''; ?>>
+                                    Delgado (1px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_width" value="2px" <?php echo ($form_values['product_thumbnail_border_width'] ?? '3px') === '2px' ? 'checked' : ''; ?>>
+                                    Normal (2px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_width" value="3px" <?php echo ($form_values['product_thumbnail_border_width'] ?? '3px') === '3px' ? 'checked' : ''; ?>>
+                                    Grueso (3px)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Borde Redondeado</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_radius" value="sm" <?php echo ($form_values['product_thumbnail_border_radius'] ?? 'md') === 'sm' ? 'checked' : ''; ?>>
+                                    Pequeño (8px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_radius" value="md" <?php echo ($form_values['product_thumbnail_border_radius'] ?? 'md') === 'md' ? 'checked' : ''; ?>>
+                                    Mediano (12px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_radius" value="lg" <?php echo ($form_values['product_thumbnail_border_radius'] ?? 'md') === 'lg' ? 'checked' : ''; ?>>
+                                    Grande (16px)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Efecto Hover</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_hover_effect" value="none" <?php echo ($form_values['product_thumbnail_hover_effect'] ?? 'scale') === 'none' ? 'checked' : ''; ?>>
+                                    Sin efecto
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_hover_effect" value="scale" <?php echo ($form_values['product_thumbnail_hover_effect'] ?? 'scale') === 'scale' ? 'checked' : ''; ?>>
+                                    Escala (1.05x)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_hover_effect" value="glow" <?php echo ($form_values['product_thumbnail_hover_effect'] ?? 'scale') === 'glow' ? 'checked' : ''; ?>>
+                                    Brillo
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Opacidad Inactivo</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="0.3" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '0.3' ? 'checked' : ''; ?>>
+                                    30%
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="0.5" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '0.5' ? 'checked' : ''; ?>>
+                                    50%
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="0.6" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '0.6' ? 'checked' : ''; ?>>
+                                    60%
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="0.8" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '0.8' ? 'checked' : ''; ?>>
+                                    80%
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="1.0" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '1.0' ? 'checked' : ''; ?>>
+                                    100%
+                                </label>
+                            </div>
+                            <small class="helper-text">Opacidad de thumbnails no seleccionados</small>
+                        </div>
+                    </div>
                 </div>
                 </div>
                 </div>
@@ -2321,6 +2528,31 @@ $user = get_logged_user();
 
                     const showImageCounter = document.querySelector('[name="product_show_image_counter"]');
                     if (showImageCounter) showImageCounter.checked = config.components?.product_view?.show_image_counter !== false;
+
+                    // Poblar estilos de galería
+                    const mainImageBorderWidth = config.components?.product_gallery?.main_image_border_width || '2px';
+                    document.querySelector(`[name="product_main_image_border_width"][value="${mainImageBorderWidth}"]`)?.click();
+
+                    const mainImageBorderStyle = config.components?.product_gallery?.main_image_border_style || 'glassmorphism';
+                    document.querySelector(`[name="product_main_image_border_style"][value="${mainImageBorderStyle}"]`)?.click();
+
+                    const mainImageShadow = config.components?.product_gallery?.main_image_shadow || 'deep';
+                    document.querySelector(`[name="product_main_image_shadow"][value="${mainImageShadow}"]`)?.click();
+
+                    const mainImageBorderRadius = config.components?.product_gallery?.main_image_border_radius || 'xl';
+                    document.querySelector(`[name="product_main_image_border_radius"][value="${mainImageBorderRadius}"]`)?.click();
+
+                    const thumbnailBorderWidth = config.components?.product_gallery?.thumbnail_border_width || '3px';
+                    document.querySelector(`[name="product_thumbnail_border_width"][value="${thumbnailBorderWidth}"]`)?.click();
+
+                    const thumbnailBorderRadius = config.components?.product_gallery?.thumbnail_border_radius || 'md';
+                    document.querySelector(`[name="product_thumbnail_border_radius"][value="${thumbnailBorderRadius}"]`)?.click();
+
+                    const thumbnailHoverEffect = config.components?.product_gallery?.thumbnail_hover_effect || 'scale';
+                    document.querySelector(`[name="product_thumbnail_hover_effect"][value="${thumbnailHoverEffect}"]`)?.click();
+
+                    const thumbnailOpacityInactive = config.components?.product_gallery?.thumbnail_opacity_inactive || '0.6';
+                    document.querySelector(`[name="product_thumbnail_opacity_inactive"][value="${thumbnailOpacityInactive}"]`)?.click();
 
                     // Poblar forms
                     const formBorderStyle = config.components?.forms?.border_style || 'solid';
