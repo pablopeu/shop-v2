@@ -11,25 +11,78 @@ if (!defined('APP_ENTRY_POINT')) {
 }
 
 /**
- * Carga la configuración de Zipnova
+ * Carga la configuración de un carrier específico
+ * @param string $carrier_tag Tag del carrier (ej: 'ZNVA')
+ * @return array|null Configuración del carrier
  */
-function zipnova_get_config() {
+function get_carrier_config($carrier_tag = 'ZNVA') {
     $config_file = __DIR__ . '/../config/shipping.json';
     if (!file_exists($config_file)) {
         return null;
     }
     $config = json_decode(file_get_contents($config_file), true);
-    return $config['zipnova'] ?? null;
+
+    // Try new multi-carrier structure first
+    if (isset($config['carriers'][$carrier_tag])) {
+        return $config['carriers'][$carrier_tag];
+    }
+
+    // Backward compatibility: try legacy structure
+    if ($carrier_tag === 'ZNVA' && isset($config['zipnova'])) {
+        return $config['zipnova'];
+    }
+
+    return null;
 }
 
 /**
- * Guarda la configuración de Zipnova
+ * Carga la configuración de Zipnova (backward compatibility)
+ */
+function zipnova_get_config() {
+    return get_carrier_config('ZNVA');
+}
+
+/**
+ * Guarda la configuración de un carrier
+ * @param string $carrier_tag Tag del carrier
+ * @param array $carrier_config Configuración del carrier
+ * @return int|false Bytes written or false on failure
+ */
+function save_carrier_config($carrier_tag, $carrier_config) {
+    $config_file = __DIR__ . '/../config/shipping.json';
+    $config = file_exists($config_file)
+        ? json_decode(file_get_contents($config_file), true)
+        : ['carriers' => []];
+
+    // Initialize carriers array if not exists
+    if (!isset($config['carriers'])) {
+        $config['carriers'] = [];
+    }
+
+    // Save to new structure
+    $config['carriers'][$carrier_tag] = $carrier_config;
+
+    return file_put_contents($config_file, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+/**
+ * Guarda la configuración de Zipnova (backward compatibility)
  */
 function zipnova_save_config($zipnova_config) {
+    return save_carrier_config('ZNVA', $zipnova_config);
+}
+
+/**
+ * Obtiene todos los carriers configurados
+ * @return array Array de carriers con sus configs
+ */
+function get_all_carriers() {
     $config_file = __DIR__ . '/../config/shipping.json';
+    if (!file_exists($config_file)) {
+        return [];
+    }
     $config = json_decode(file_get_contents($config_file), true);
-    $config['zipnova'] = $zipnova_config;
-    return file_put_contents($config_file, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    return $config['carriers'] ?? [];
 }
 
 /**
@@ -710,4 +763,91 @@ function zipnova_test_connection() {
             'error' => 'Error al consultar API: ' . $test_quote['error']
         ];
     }
+}
+
+// ============================================================================
+// MULTI-CARRIER HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Mapea el estado de un carrier a un estado base del sistema
+ * @param string $carrier_type Tipo de carrier (zipnova, etc.)
+ * @param string $carrier_status Estado del carrier
+ * @return string Estado base del sistema
+ */
+function map_carrier_status_to_base($carrier_type, $carrier_status) {
+    $mappings = [
+        'zipnova' => [
+            'pending' => 'pendiente',
+            'in_transit' => 'en_transito',
+            'out_for_delivery' => 'en_reparto',
+            'delivered' => 'entregada',
+            'failed' => 'fallida',
+            'returned' => 'devuelta',
+            'cancelled' => 'cancelada'
+        ]
+    ];
+
+    if (isset($mappings[$carrier_type][$carrier_status])) {
+        return $mappings[$carrier_type][$carrier_status];
+    }
+
+    // Default fallback
+    return 'pendiente';
+}
+
+/**
+ * Obtiene el label legible para un estado base
+ * @param string $base_status Estado base del sistema
+ * @return string Label del estado
+ */
+function get_status_label($base_status) {
+    $labels = [
+        'pendiente' => 'Pendiente',
+        'en_transito' => 'En tránsito',
+        'en_reparto' => 'En reparto',
+        'entregada' => 'Entregada',
+        'fallida' => 'Fallida',
+        'devuelta' => 'Devuelta',
+        'cancelada' => 'Cancelada',
+        // Legacy states
+        'cobrada' => 'Cobrada',
+        'enviada' => 'Enviada'
+    ];
+
+    return $labels[$base_status] ?? ucfirst($base_status);
+}
+
+/**
+ * Renderiza un estado con el tag del carrier si existe
+ * @param array $shipping Objeto shipping de la orden
+ * @return string HTML del estado con badge
+ */
+function render_shipping_status($shipping) {
+    if (!$shipping) {
+        return '<span class="status-badge status-pending">Sin envío</span>';
+    }
+
+    $status = $shipping['status'] ?? 'pendiente';
+    $carrier = $shipping['carrier'] ?? null;
+    $status_label = get_status_label($status);
+
+    $class = 'status-badge status-' . str_replace('_', '-', $status);
+
+    if ($carrier) {
+        return '<span class="' . $class . '">' . htmlspecialchars($status_label) .
+               ' <span class="carrier-tag">' . htmlspecialchars($carrier) . '</span></span>';
+    }
+
+    return '<span class="' . $class . '">' . htmlspecialchars($status_label) . '</span>';
+}
+
+/**
+ * Obtiene el nombre de un carrier por su tag
+ * @param string $carrier_tag Tag del carrier
+ * @return string Nombre del carrier
+ */
+function get_carrier_name($carrier_tag) {
+    $config = get_carrier_config($carrier_tag);
+    return $config['name'] ?? $carrier_tag;
 }
