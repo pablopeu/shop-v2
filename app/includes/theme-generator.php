@@ -1507,13 +1507,39 @@ function generate_theme($data, $original_config = null) {
                     ];
                 }
 
-                // Intentar copiar
-                if (!@copy($original_theme_css, $dest_file)) {
-                    $error = error_get_last();
+                // Verificar que el archivo origen es legible
+                if (!is_readable($original_theme_css)) {
                     return [
                         'success' => false,
-                        'message' => 'Error al copiar theme.css: ' . ($error['message'] ?? 'desconocido')
+                        'message' => 'Error: no se puede leer theme.css original (permisos)'
                     ];
+                }
+
+                // Si el archivo destino existe, intentar eliminarlo
+                if (file_exists($dest_file)) {
+                    @unlink($dest_file);
+                }
+
+                // Método 1: Intentar copy()
+                $copied = @copy($original_theme_css, $dest_file);
+
+                // Método 2 (fallback): Si copy() falla, usar file_get_contents/put_contents
+                if (!$copied) {
+                    $content = @file_get_contents($original_theme_css);
+                    if ($content === false) {
+                        return [
+                            'success' => false,
+                            'message' => 'Error: no se pudo leer el contenido de theme.css'
+                        ];
+                    }
+
+                    $written = @file_put_contents($dest_file, $content);
+                    if ($written === false) {
+                        return [
+                            'success' => false,
+                            'message' => 'Error: no se pudo escribir theme.css en destino'
+                        ];
+                    }
                 }
             } else {
                 // No existe theme.css original, generar básico
