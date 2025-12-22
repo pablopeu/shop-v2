@@ -1027,7 +1027,7 @@ $user = get_logged_user();
                             <div class="form-group">
                                 <label>Primary Dark</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_primary_dark" value="<?php echo htmlspecialchars($form_values['color_primary_dark'] ?: '#000000'); ?>">
+                                    <input type="color" name="color_primary_dark" value="<?php echo htmlspecialchars(($form_values['color_primary_dark'] ?? '') ?: '#000000'); ?>">
                                     <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary_dark'] ?? ''); ?>" readonly>
                                 </div>
                                 <small class="helper-text">Variante oscura (auto si vacío)</small>
@@ -1036,7 +1036,7 @@ $user = get_logged_user();
                             <div class="form-group">
                                 <label>Primary Light</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_primary_light" value="<?php echo htmlspecialchars($form_values['color_primary_light'] ?: '#ffffff'); ?>">
+                                    <input type="color" name="color_primary_light" value="<?php echo htmlspecialchars(($form_values['color_primary_light'] ?? '') ?: '#ffffff'); ?>">
                                     <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary_light'] ?? ''); ?>" readonly>
                                 </div>
                                 <small class="helper-text">Variante clara (auto si vacío)</small>
