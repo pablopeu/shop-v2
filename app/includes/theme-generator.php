@@ -1168,6 +1168,44 @@ function generate_theme_css_basic($config) {
     $css .= "   PRODUCT GALLERY LAYOUTS\n";
     $css .= "   ================================= */\n\n";
 
+    // Estilos para contenedor de imagen principal
+    $css .= ".main-image-container {\n";
+    $css .= "    border: 2px solid rgba(255, 255, 255, 0.3);\n";
+    $css .= "    border-radius: var(--border-radius-xl, 24px);\n";
+    $css .= "    box-shadow: var(--shadow-xl, 0 24px 48px rgba(0, 0, 0, 0.3));\n";
+    $css .= "    position: relative;\n";
+    $css .= "    overflow: hidden;\n";
+    $css .= "    background: rgba(255, 255, 255, 0.7);\n";
+    $css .= "}\n\n";
+
+    // Estilos para thumbnails
+    $css .= ".thumbnail {\n";
+    $css .= "    border: 3px solid var(--color-border, #e0e0e0);\n";
+    $css .= "    border-radius: var(--border-radius-md, 12px);\n";
+    $css .= "    transition: all var(--transition-base, 0.3s ease);\n";
+    $css .= "    opacity: 0.6;\n";
+    $css .= "    cursor: pointer;\n";
+    $css .= "    overflow: hidden;\n";
+    $css .= "}\n\n";
+
+    $css .= ".thumbnail:hover {\n";
+    $css .= "    opacity: 1;\n";
+    $css .= "    border-color: var(--color-primary, #005461);\n";
+    $css .= "    transform: scale(1.05);\n";
+    $css .= "}\n\n";
+
+    $css .= ".thumbnail.active {\n";
+    $css .= "    opacity: 1;\n";
+    $css .= "    border-color: var(--color-primary, #005461);\n";
+    $css .= "    box-shadow: 0 0 0 2px rgba(0, 84, 97, 0.2);\n";
+    $css .= "}\n\n";
+
+    $css .= ".thumbnail img {\n";
+    $css .= "    width: 100%;\n";
+    $css .= "    height: 100%;\n";
+    $css .= "    object-fit: cover;\n";
+    $css .= "}\n\n";
+
     // Thumbnails Bottom (default)
     $css .= ".product-gallery.thumbnails-bottom {\n";
     $css .= "    display: flex;\n";
