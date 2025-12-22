@@ -451,10 +451,10 @@ $current_page = $_GET['page'] ?? 'index';
                 <!-- Medios de Pago -->
                 <li>
                     <div class="menu-item" data-action="toggleSubmenu" data-menu-id="payment">
-                        <span>💳 Medios de Pago</span>
+                        <span>💳 Medios de Pago y Envíos</span>
                         <span class="menu-arrow" id="arrow-payment">▶</span>
                     </div>
-                    <ul class="submenu <?php echo in_array($current_page, ['config-payment', 'config-moneda', 'reprocesar-pago-mp']) ? 'open' : ''; ?>"
+                    <ul class="submenu <?php echo in_array($current_page, ['config-payment', 'config-moneda', 'reprocesar-pago-mp', 'config-shipping']) ? 'open' : ''; ?>"
                         id="submenu-payment">
                         <li>
                             <a href="<?php echo url('/admin/?page=config-payment'); ?>"
@@ -466,6 +466,12 @@ $current_page = $_GET['page'] ?? 'index';
                             <a href="<?php echo url('/admin/?page=config-moneda'); ?>"
                                class="<?php echo $current_page === 'config-moneda' ? 'active' : ''; ?>">
                                 💱 Moneda y Cambio
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo url('/admin/?page=config-shipping'); ?>"
+                               class="<?php echo $current_page === 'config-shipping' ? 'active' : ''; ?>">
+                                📦 Envíos (Zipnova)
                             </a>
                         </li>
                         <li>

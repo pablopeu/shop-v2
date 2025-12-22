@@ -1509,39 +1509,93 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
                             <div id="shipping-fields" class="hidden">
                                 <div class="form-group">
-                                    <label for="address">Dirección *</label>
-                                    <input type="text" id="address" name="address" placeholder="Calle y número"
-                                           value="<?php echo htmlspecialchars($_POST['address'] ?? $saved_address); ?>">
+                                    <label for="shipping_address">Dirección *</label>
+                                    <input type="text" id="shipping_address" name="shipping_address" placeholder="Calle y número"
+                                           value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="postal_code">Código Postal *</label>
-                                        <input type="text" id="postal_code" name="postal_code"
-                                               value="<?php echo htmlspecialchars($_POST['postal_code'] ?? $saved_postal_code); ?>">
+                                        <label for="shipping_postal_code">Código Postal *</label>
+                                        <input type="text" id="shipping_postal_code" name="shipping_postal_code"
+                                               value="<?php echo htmlspecialchars($_POST['shipping_postal_code'] ?? $saved_postal_code); ?>">
+                                        <small>Ingresá tu código postal para calcular el envío</small>
                                     </div>
                                     <div class="form-group">
-                                        <label for="city">Ciudad *</label>
-                                        <input type="text" id="city" name="city"
-                                               value="<?php echo htmlspecialchars($_POST['city'] ?? $saved_city); ?>">
+                                        <label for="shipping_city">Ciudad *</label>
+                                        <input type="text" id="shipping_city" name="shipping_city"
+                                               value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? $saved_city); ?>">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="shipping_province">Provincia / Estado *</label>
+                                        <select id="shipping_province" name="shipping_province">
+                                            <?php
+                                            $provincias = [
+                                                'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
+                                                'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
+                                                'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
+                                                'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
+                                                'Tierra del Fuego', 'Tucumán'
+                                            ];
+                                            $selected_province = $_POST['shipping_province'] ?? $saved_state ?? '';
+                                            ?>
+                                            <option value="">Seleccionar provincia...</option>
+                                            <?php foreach ($provincias as $provincia): ?>
+                                                <option value="<?php echo $provincia; ?>" <?php echo ($selected_province === $provincia) ? 'selected' : ''; ?>>
+                                                    <?php echo $provincia; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="shipping_country">País *</label>
+                                        <select id="shipping_country" name="shipping_country">
+                                            <?php $selected_saved_country = $_POST['shipping_country'] ?? $saved_country ?? 'AR'; ?>
+                                            <option value="AR" <?php echo ($selected_saved_country === 'AR' || $selected_saved_country === 'Argentina' || empty($selected_saved_country)) ? 'selected' : ''; ?>>Argentina</option>
+                                        </select>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="state">Provincia / Estado *</label>
-                                    <input type="text" id="state" name="state"
-                                           value="<?php echo htmlspecialchars($_POST['state'] ?? $saved_state); ?>">
+                                    <label for="shipping_notes">Referencias de entrega (opcional)</label>
+                                    <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
                                 </div>
 
+                                <!-- Botón para cotizar -->
                                 <div class="form-group">
-                                    <label for="country">País *</label>
-                                    <select id="country" name="country">
-                                        <?php $selected_saved_country = $_POST['country'] ?? $saved_country; ?>
-                                        <option value="Argentina" <?php echo ($selected_saved_country === 'Argentina' || empty($selected_saved_country)) ? 'selected' : ''; ?>>Argentina</option>
-                                        <option value="Chile" <?php echo ($selected_saved_country === 'Chile') ? 'selected' : ''; ?>>Chile</option>
-                                        <option value="Uruguay" <?php echo ($selected_saved_country === 'Uruguay') ? 'selected' : ''; ?>>Uruguay</option>
-                                    </select>
+                                    <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote">
+                                        📦 Calcular Costo de Envío
+                                    </button>
                                 </div>
+
+                                <!-- Cotizaciones de envío -->
+                                <div id="shipping-quotes-container" class="hidden">
+                                    <div class="form-group">
+                                        <label>Seleccioná tu método de envío *</label>
+                                        <div id="shipping-quotes" class="radio-group">
+                                            <!-- Las cotizaciones se cargarán aquí dinámicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Loading indicator -->
+                                <div id="shipping-loading" class="hidden" style="text-align: center; padding: 1rem;">
+                                    <p>⏳ Calculando opciones de envío...</p>
+                                </div>
+
+                                <!-- Error message -->
+                                <div id="shipping-error" class="hidden alert-box" style="background: #fee; border-left-color: #c00;">
+                                    <p id="shipping-error-message"></p>
+                                </div>
+
+                                <!-- Hidden fields para guardar el método seleccionado -->
+                                <input type="hidden" id="shipping_service_id" name="shipping_service_id">
+                                <input type="hidden" id="shipping_cost" name="shipping_cost" value="0">
+                                <input type="hidden" id="shipping_estimated_days" name="shipping_estimated_days">
                             </div>
                         </div>
                     </div>
@@ -2372,5 +2426,8 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
     <!-- Event Delegation System for CSP -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
+
+    <!-- Shipping Module (Zipnova Integration) -->
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shipping.js'); ?>"></script>
 </body>
 </html>
