@@ -56,7 +56,8 @@
             "shadow": true,
             "rounded": true,
             "hover_effect": "lift-3d",
-            "glassmorphism": true
+            "glassmorphism": true,
+            "buttons": "hide"
         },
         "forms": {
             "style": "modern",
