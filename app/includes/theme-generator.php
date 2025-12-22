@@ -1189,6 +1189,43 @@ function generate_theme_css_basic($config) {
     $css .= "    box-shadow: var(--shadow-2xl, 0 20px 48px rgba(0, 0, 0, 0.25));\n";
     $css .= "}\n\n";
 
+    // Breadcrumb en línea horizontal
+    $css .= ".breadcrumb {\n";
+    $css .= "    margin-bottom: var(--spacing-md, 16px);\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb ol {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-wrap: wrap;\n";
+    $css .= "    align-items: center;\n";
+    $css .= "    gap: 8px;\n";
+    $css .= "    list-style: none;\n";
+    $css .= "    margin: 0;\n";
+    $css .= "    padding: 0;\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb li {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    align-items: center;\n";
+    $css .= "    gap: 8px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb a {\n";
+    $css .= "    color: var(--color-primary, #005461);\n";
+    $css .= "    text-decoration: none;\n";
+    $css .= "    transition: opacity 0.2s;\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb a:hover {\n";
+    $css .= "    opacity: 0.7;\n";
+    $css .= "    text-decoration: underline;\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb-separator {\n";
+    $css .= "    color: var(--color-text-light, #999);\n";
+    $css .= "    user-select: none;\n";
+    $css .= "}\n\n";
+
     // === PRODUCT GALLERY LAYOUTS ===
     $css .= "/* =================================\n";
     $css .= "   PRODUCT GALLERY LAYOUTS\n";
