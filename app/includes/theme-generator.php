@@ -665,11 +665,12 @@ function generate_theme_css_basic($config) {
 
     // Ocultar iconos si está configurado
     if ($btn_icon === 'hide') {
-        $css .= "/* Ocultar iconos en botones */\n";
-        $css .= ".btn-buy::before, .btn-fav::before,\n";
-        $css .= ".btn-add-cart .cart-icon,\n";
-        $css .= "button[data-action=\"addToCart\"]::before {\n";
-        $css .= "    display: none !important;\n";
+        $css .= "/* Ocultar iconos en botones (ocultar emojis) */\n";
+        $css .= "button[data-action=\"addToCart\"],\n";
+        $css .= "button[data-action=\"viewProduct\"] {\n";
+        $css .= "    overflow: hidden !important;\n";
+        $css .= "    text-indent: -20px !important;\n";
+        $css .= "    padding-left: calc(var(--spacing-lg) + 20px) !important;\n";
         $css .= "}\n\n";
     }
 
@@ -1142,9 +1143,10 @@ function delete_theme($slug) {
  * Crea directorio, theme.json, variables.css y theme.css
  *
  * @param array $data Datos del formulario
+ * @param array|null $original_config Theme.json original si estamos editando
  * @return array ['success' => bool, 'message' => string, 'slug' => string]
  */
-function generate_theme($data) {
+function generate_theme($data, $original_config = null) {
     $slug = $data['slug'];
     $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
 
@@ -1206,45 +1208,59 @@ function generate_theme($data) {
         ],
 
         'components' => [
-            'buttons' => [
-                'style' => $data['button_style'] ?? 'solid',
-                'rounded' => $data['button_rounded'] ?? false,
-                'shadow' => $data['button_shadow'] ?? false,
-                'transform' => $data['transform_3d'] ?? false,
-                'height' => $data['button_height'] ?? 'normal',
-                'width' => $data['button_width'] ?? 'auto',
-                'icon' => $data['button_icon'] ?? 'show',
-                'hover' => $data['button_hover'] ?? 'lift'
-            ],
-            'cards' => [
-                'border' => $data['card_border'] ?? true,
-                'shadow' => !empty($data['card_shadow']) && $data['card_shadow'] !== 'none',
-                'rounded' => $data['card_rounded'] ?? false,
-                'hover_effect' => $data['card_hover'] ?? 'glow',
-                'glassmorphism' => $data['glassmorphism'] ?? false,
-                'buttons' => $data['card_buttons'] ?? 'show',
-                'buttons_position' => $data['card_buttons_position'] ?? 'center',
-                'buttons_spacing' => $data['card_buttons_spacing'] ?? 'normal',
-                'buttons_vertical_spacing' => $data['card_buttons_vertical_spacing'] ?? 'normal'
-            ],
+            'buttons' => array_merge(
+                // Base: campos siempre presentes
+                [
+                    'style' => $data['button_style'] ?? 'solid',
+                    'rounded' => $data['button_rounded'] ?? false,
+                    'shadow' => $data['button_shadow'] ?? false,
+                    'transform' => $data['transform_3d'] ?? false
+                ],
+                // Opcionales: solo si existen en original O si son theme nuevo
+                $original_config === null || isset($original_config['components']['buttons']['height']) ? ['height' => $data['button_height'] ?? 'normal'] : [],
+                $original_config === null || isset($original_config['components']['buttons']['width']) ? ['width' => $data['button_width'] ?? 'auto'] : [],
+                $original_config === null || isset($original_config['components']['buttons']['icon']) ? ['icon' => $data['button_icon'] ?? 'show'] : [],
+                $original_config === null || isset($original_config['components']['buttons']['hover']) ? ['hover' => $data['button_hover'] ?? 'lift'] : []
+            ),
+            'cards' => array_merge(
+                // Campos base
+                [
+                    'border' => $data['card_border'] ?? true,
+                    'shadow' => !empty($data['card_shadow']) && $data['card_shadow'] !== 'none',
+                    'rounded' => $data['card_rounded'] ?? false,
+                    'hover_effect' => $data['card_hover'] ?? 'glow',
+                    'glassmorphism' => $data['glassmorphism'] ?? false
+                ],
+                // Opcionales: solo si existen en original O si es theme nuevo
+                $original_config === null || isset($original_config['components']['cards']['buttons']) ? [
+                    'buttons' => $data['card_buttons'] ?? 'show',
+                    'buttons_position' => $data['card_buttons_position'] ?? 'center',
+                    'buttons_spacing' => $data['card_buttons_spacing'] ?? 'normal',
+                    'buttons_vertical_spacing' => $data['card_buttons_vertical_spacing'] ?? 'normal'
+                ] : []
+            ),
             'forms' => [
                 'style' => 'modern',
                 'border_style' => $data['form_border_style'] ?? 'solid',
                 'focus_ring' => $data['form_focus_ring'] ?? true,
                 'glow_effect' => $data['form_glow_effect'] ?? false
-            ],
-            'product_view' => [
-                'gallery_layout' => $data['product_gallery_layout'] ?? 'thumbnails-bottom',
-                'image_size' => $data['product_image_size'] ?? 'medium',
-                'thumbnail_size' => $data['product_thumbnail_size'] ?? 'medium',
-                'show_breadcrumb' => $data['product_show_breadcrumb'] ?? true,
-                'show_share' => $data['product_show_share'] ?? true,
-                'show_sku' => $data['product_show_sku'] ?? true,
-                'show_stock' => $data['product_show_stock'] ?? true,
-                'show_nav_buttons' => $data['product_show_nav_buttons'] ?? true,
-                'show_image_counter' => $data['product_show_image_counter'] ?? true
             ]
-        ],
+        ] + (
+            // product_view: solo si existe en original O si es theme nuevo
+            $original_config === null || isset($original_config['components']['product_view']) ? [
+                'product_view' => [
+                    'gallery_layout' => $data['product_gallery_layout'] ?? 'thumbnails-bottom',
+                    'image_size' => $data['product_image_size'] ?? 'medium',
+                    'thumbnail_size' => $data['product_thumbnail_size'] ?? 'medium',
+                    'show_breadcrumb' => $data['product_show_breadcrumb'] ?? true,
+                    'show_share' => $data['product_show_share'] ?? true,
+                    'show_sku' => $data['product_show_sku'] ?? true,
+                    'show_stock' => $data['product_show_stock'] ?? true,
+                    'show_nav_buttons' => $data['product_show_nav_buttons'] ?? true,
+                    'show_image_counter' => $data['product_show_image_counter'] ?? true
+                ]
+            ] : []
+        ),
 
         'layout' => [
             'container_width' => $data['container_width'] ?? '1200px',

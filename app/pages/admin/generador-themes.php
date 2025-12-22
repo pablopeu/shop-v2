@@ -274,8 +274,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
         if (!$validation['valid']) {
             $error = implode('<br>', $validation['errors']);
         } else {
-            // Generar theme
-            $result = generate_theme($data);
+            // Cargar theme original si estamos editando
+            $original_config = null;
+            if (!empty($original_slug)) {
+                $original_theme_path = PUBLIC_PATH . "/assets/themes/{$original_slug}/theme.json";
+                if (file_exists($original_theme_path)) {
+                    $original_config = json_decode(file_get_contents($original_theme_path), true);
+                }
+            }
+
+            // Generar theme (pasando config original si existe)
+            $result = generate_theme($data, $original_config);
 
             if ($result['success']) {
                 // Mensaje de éxito base
@@ -1018,7 +1027,7 @@ $user = get_logged_user();
                             <div class="form-group">
                                 <label>Primary Dark</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_primary_dark" value="<?php echo htmlspecialchars($form_values['color_primary_dark'] ?? ''); ?>">
+                                    <input type="color" name="color_primary_dark" value="<?php echo htmlspecialchars($form_values['color_primary_dark'] ?: '#000000'); ?>">
                                     <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary_dark'] ?? ''); ?>" readonly>
                                 </div>
                                 <small class="helper-text">Variante oscura (auto si vacío)</small>
@@ -1027,7 +1036,7 @@ $user = get_logged_user();
                             <div class="form-group">
                                 <label>Primary Light</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_primary_light" value="<?php echo htmlspecialchars($form_values['color_primary_light'] ?? ''); ?>">
+                                    <input type="color" name="color_primary_light" value="<?php echo htmlspecialchars($form_values['color_primary_light'] ?: '#ffffff'); ?>">
                                     <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary_light'] ?? ''); ?>" readonly>
                                 </div>
                                 <small class="helper-text">Variante clara (auto si vacío)</small>
@@ -1736,6 +1745,16 @@ $user = get_logged_user();
                 });
             });
 
+            // Restaurar tab guardado después de submit
+            const savedTab = localStorage.getItem('themeGenLastTab');
+            if (savedTab) {
+                const savedTabButton = document.querySelector(`.tab-button[data-tab="${savedTab}"]`);
+                if (savedTabButton) {
+                    savedTabButton.click();
+                    localStorage.removeItem('themeGenLastTab'); // Limpiar después de usar
+                }
+            }
+
             // Mostrar selector de theme si "Modificar existente" está seleccionado por defecto
             const editRadio = document.querySelector('input[name="creation_method"][value="edit"]');
             if (editRadio && editRadio.checked) {
@@ -2385,9 +2404,12 @@ $user = get_logged_user();
                 if (editRadio) {
                     editRadio.checked = true;
 
-                    // Ocultar secciones de otros métodos
-                    document.getElementById('palette-import').style.display = 'none';
-                    document.getElementById('edit-theme').style.display = 'block';
+                    // Ocultar secciones de otros métodos (si existen)
+                    const paletteImport = document.getElementById('palette-import');
+                    if (paletteImport) paletteImport.style.display = 'none';
+
+                    const editTheme = document.getElementById('edit-theme');
+                    if (editTheme) editTheme.style.display = 'block';
                 }
 
                 // Mostrar sección de actualizar paleta
@@ -2679,6 +2701,12 @@ $user = get_logged_user();
                 // Al hacer submit, permitir que la página se recargue sin confirmación
                 allowNavigation = true;
                 formHasChanges = false;
+
+                // Guardar el tab activo para restaurarlo después del submit
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab) {
+                    localStorage.setItem('themeGenLastTab', activeTab.dataset.tab);
+                }
             });
 
             // Interceptar navegación en links del sidebar
