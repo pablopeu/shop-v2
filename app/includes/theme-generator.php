@@ -687,9 +687,27 @@ function generate_theme_css_basic($config) {
 
     // === HEADINGS ===
     $css .= "/* Headings */\n";
+
+    // Usar heading_weight del config o default a bold
+    $heading_weight = $config['typography']['heading_weight'] ?? '700';
+    $weight_name = 'bold'; // default
+
+    // Mapear valores numéricos a nombres
+    $weight_map = [
+        '400' => 'normal',
+        '500' => 'medium',
+        '600' => 'semibold',
+        '700' => 'bold',
+        '800' => 'extrabold'
+    ];
+
+    if (isset($weight_map[$heading_weight])) {
+        $weight_name = $weight_map[$heading_weight];
+    }
+
     $css .= "h1, h2, h3, h4, h5, h6 {\n";
     $css .= "    font-family: var(--font-family-heading);\n";
-    $css .= "    font-weight: var(--font-weight-semibold);\n";
+    $css .= "    font-weight: var(--font-weight-{$weight_name});\n";
     $css .= "    line-height: var(--line-height-tight);\n";
     $css .= "    color: var(--color-text-dark);\n";
     $css .= "    margin-bottom: var(--spacing-md);\n";
@@ -814,7 +832,7 @@ function generate_theme_css_basic($config) {
     if ($btn_width !== 'auto') {
         $css .= "    width: {$width_value};\n";
     }
-    $css .= "    font-weight: var(--font-weight-medium);\n";
+    $css .= "    font-weight: var(--font-weight-semibold);\n";
     $css .= "    transition: var(--transition-base);\n";
     $css .= "    cursor: pointer;\n";
     $css .= "    display: inline-block;\n";
