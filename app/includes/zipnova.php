@@ -14,7 +14,7 @@ if (!defined('APP_ENTRY_POINT')) {
  * Carga la configuración de Zipnova
  */
 function zipnova_get_config() {
-    $config_file = APP_PATH . '/config/shipping.json';
+    $config_file = __DIR__ . '/../config/shipping.json';
     if (!file_exists($config_file)) {
         return null;
     }
@@ -26,7 +26,7 @@ function zipnova_get_config() {
  * Guarda la configuración de Zipnova
  */
 function zipnova_save_config($zipnova_config) {
-    $config_file = APP_PATH . '/config/shipping.json';
+    $config_file = __DIR__ . '/../config/shipping.json';
     $config = json_decode(file_get_contents($config_file), true);
     $config['zipnova'] = $zipnova_config;
     return file_put_contents($config_file, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -445,7 +445,7 @@ function zipnova_webhook_verify($payload, $signature) {
  * Guarda un envío localmente
  */
 function zipnova_save_shipment($shipment_id, $data) {
-    $shipments_dir = APP_PATH . '/data/shipments';
+    $shipments_dir = __DIR__ . '/../data/shipments';
     if (!is_dir($shipments_dir)) {
         mkdir($shipments_dir, 0755, true);
     }
@@ -458,7 +458,7 @@ function zipnova_save_shipment($shipment_id, $data) {
  * Carga un envío local
  */
 function zipnova_load_shipment($shipment_id) {
-    $file = APP_PATH . '/data/shipments/' . $shipment_id . '.json';
+    $file = __DIR__ . '/../data/shipments/' . $shipment_id . '.json';
     if (!file_exists($file)) return null;
 
     return json_decode(file_get_contents($file), true);
@@ -485,7 +485,7 @@ function zipnova_update_shipment_status($shipment_id, $new_data) {
  * Obtiene todos los envíos locales
  */
 function zipnova_get_all_shipments($filter = []) {
-    $shipments_dir = APP_PATH . '/data/shipments';
+    $shipments_dir = __DIR__ . '/../data/shipments';
     if (!is_dir($shipments_dir)) return [];
 
     $files = glob($shipments_dir . '/*.json');
@@ -517,7 +517,7 @@ function zipnova_get_all_shipments($filter = []) {
  * Log de eventos de Zipnova
  */
 function zipnova_log($event, $data = []) {
-    $logs_dir = APP_PATH . '/logs/zipnova';
+    $logs_dir = __DIR__ . '/../logs/zipnova';
     if (!is_dir($logs_dir)) {
         mkdir($logs_dir, 0755, true);
     }
