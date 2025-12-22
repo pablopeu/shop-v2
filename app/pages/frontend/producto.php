@@ -44,6 +44,19 @@ $theme_config = read_json(APP_PATH . '/config/theme.json');
 $active_theme = $theme_config['active_theme'] ?? 'minimal';
 $selected_currency = $_SESSION['currency'] ?? $currency_config['primary'];
 
+// Load active theme configuration for product view settings
+$theme_json_path = PUBLIC_PATH . "/assets/themes/{$active_theme}/theme.json";
+$theme_json = file_exists($theme_json_path) ? read_json($theme_json_path) : [];
+$product_view_config = $theme_json['components']['product_view'] ?? [];
+
+// Extract product view settings with defaults
+$gallery_layout = $product_view_config['gallery_layout'] ?? 'thumbnails-bottom';
+$show_breadcrumb = $product_view_config['show_breadcrumb'] ?? true;
+$show_share = $product_view_config['show_share'] ?? true;
+$show_stock = $product_view_config['show_stock'] ?? true;
+$show_nav_buttons = $product_view_config['show_nav_buttons'] ?? true;
+$show_image_counter = $product_view_config['show_image_counter'] ?? true;
+
 // Get all products for cart panel
 $all_products = get_all_products(true); // Only active products
 
@@ -159,6 +172,7 @@ write_json($visits_file, $visits_data);
     <?php include APP_PATH . '/includes/header-frontend.php'; ?>
 
     <!-- Breadcrumb Component -->
+    <?php if ($show_breadcrumb): ?>
     <?php
     require_once APP_PATH . '/includes/frontend/breadcrumb.php';
     render_breadcrumb([
@@ -166,13 +180,14 @@ write_json($visits_file, $visits_data);
         ['label' => $product['name'], 'url' => null]
     ], ['separator' => '/']);
     ?>
+    <?php endif; ?>
 
     <!-- Product -->
     <div class="container-fluid container-fluid-limited">
         <div class="product-container">
             <div class="product-grid">
                 <!-- Gallery -->
-                <div class="product-gallery gallery-container">
+                <div class="product-gallery gallery-container <?php echo htmlspecialchars($gallery_layout); ?>">
                     <div class="main-image-container" id="mainImageContainer">
                         <?php if (!empty($product['images'])): ?>
                             <?php
@@ -191,14 +206,16 @@ write_json($visits_file, $visits_data);
                                 <span>Click to zoom</span>
                             </div>
 
-                            <?php if (count($product['images']) > 1): ?>
+                            <?php if ($show_nav_buttons && count($product['images']) > 1): ?>
                                 <button class="gallery-nav prev" data-action="changeImage" data-direction="-1">‹</button>
                                 <button class="gallery-nav next" data-action="changeImage" data-direction="1">›</button>
                             <?php endif; ?>
 
+                            <?php if ($show_image_counter): ?>
                             <div class="image-counter">
                                 <span id="currentImageIndex">1</span>/<?php echo count($product['images']); ?>
                             </div>
+                            <?php endif; ?>
                         <?php else: ?>
                             <div class="no-image">Sin imagen disponible</div>
                         <?php endif; ?>
@@ -247,10 +264,12 @@ write_json($visits_file, $visits_data);
                                 </div>
                             <?php endif; ?>
                         </div>
-                        <?php if ($product['stock'] > 0): ?>
-                            <span class="stock-badge-inline">En Stock</span>
-                        <?php else: ?>
-                            <span class="stock-badge-out">Sin Stock</span>
+                        <?php if ($show_stock): ?>
+                            <?php if ($product['stock'] > 0): ?>
+                                <span class="stock-badge-inline">En Stock</span>
+                            <?php else: ?>
+                                <span class="stock-badge-out">Sin Stock</span>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
 
@@ -316,6 +335,7 @@ write_json($visits_file, $visits_data);
                     </div>
 
                     <!-- Share Buttons Component -->
+                    <?php if ($show_share): ?>
                     <?php
                     require_once APP_PATH . '/includes/frontend/share-buttons.php';
                     render_share_buttons([
@@ -323,6 +343,7 @@ write_json($visits_file, $visits_data);
                         'title' => $product['name']
                     ]);
                     ?>
+                    <?php endif; ?>
                 </div>
             </div>
 

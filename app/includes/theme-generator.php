@@ -1163,6 +1163,76 @@ function generate_theme_css_basic($config) {
     $css .= "    }\n";
     $css .= "}\n\n";
 
+    // === PRODUCT GALLERY LAYOUTS ===
+    $css .= "/* =================================\n";
+    $css .= "   PRODUCT GALLERY LAYOUTS\n";
+    $css .= "   ================================= */\n\n";
+
+    // Thumbnails Bottom (default)
+    $css .= ".product-gallery.thumbnails-bottom {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: column;\n";
+    $css .= "    gap: 16px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-bottom .product-thumbnails {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: row;\n";
+    $css .= "    gap: 12px;\n";
+    $css .= "    justify-content: center;\n";
+    $css .= "}\n\n";
+
+    // Thumbnails Left
+    $css .= ".product-gallery.thumbnails-left {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: row-reverse;\n";
+    $css .= "    gap: 16px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-left .product-thumbnails {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: column;\n";
+    $css .= "    gap: 12px;\n";
+    $css .= "    max-width: 100px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-left .main-image-container {\n";
+    $css .= "    flex: 1;\n";
+    $css .= "}\n\n";
+
+    // Thumbnails Right
+    $css .= ".product-gallery.thumbnails-right {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: row;\n";
+    $css .= "    gap: 16px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-right .product-thumbnails {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: column;\n";
+    $css .= "    gap: 12px;\n";
+    $css .= "    max-width: 100px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-right .main-image-container {\n";
+    $css .= "    flex: 1;\n";
+    $css .= "}\n\n";
+
+    // Mobile: always use bottom layout
+    $css .= "@media (max-width: 768px) {\n";
+    $css .= "    .product-gallery.thumbnails-left,\n";
+    $css .= "    .product-gallery.thumbnails-right {\n";
+    $css .= "        flex-direction: column !important;\n";
+    $css .= "    }\n\n";
+
+    $css .= "    .product-gallery.thumbnails-left .product-thumbnails,\n";
+    $css .= "    .product-gallery.thumbnails-right .product-thumbnails {\n";
+    $css .= "        flex-direction: row !important;\n";
+    $css .= "        max-width: none !important;\n";
+    $css .= "        justify-content: center;\n";
+    $css .= "    }\n";
+    $css .= "}\n\n";
+
     return $css;
 }
 
