@@ -288,12 +288,27 @@
     }
 
     /**
-     * Calculate total cart weight (mock - should come from cart data)
+     * Calculate total cart weight from cart data
      */
     function calculateCartWeight() {
-        // TODO: Get actual weight from cart items
-        // For now, return default weight
-        return 1; // kg
+        // Try to get weight from cart data attribute or element
+        const cartDataEl = document.getElementById('cart-data');
+        if (cartDataEl && cartDataEl.dataset.totalWeight) {
+            return parseFloat(cartDataEl.dataset.totalWeight) || 1;
+        }
+
+        // Fallback: calculate from visible items if available
+        const itemWeights = document.querySelectorAll('[data-item-weight]');
+        let totalWeight = 0;
+
+        itemWeights.forEach(item => {
+            const weight = parseFloat(item.dataset.itemWeight) || 0;
+            const quantity = parseInt(item.dataset.itemQuantity) || 1;
+            totalWeight += weight * quantity;
+        });
+
+        // Return calculated weight or default 1kg
+        return totalWeight > 0 ? totalWeight : 1;
     }
 
     /**
@@ -302,8 +317,16 @@
     function calculateCartValue() {
         const subtotalEl = document.getElementById('order-subtotal');
         if (subtotalEl) {
-            return parseFloat(subtotalEl.dataset.value || subtotalEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+            const value = parseFloat(subtotalEl.dataset.value || subtotalEl.textContent.replace(/[^0-9.]/g, ''));
+            return value || 0;
         }
+
+        // Try alternative methods
+        const totalEl = document.querySelector('[data-cart-total]');
+        if (totalEl) {
+            return parseFloat(totalEl.dataset.cartTotal) || 0;
+        }
+
         return 0;
     }
 

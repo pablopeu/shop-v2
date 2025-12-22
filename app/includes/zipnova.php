@@ -535,6 +535,135 @@ function zipnova_log($event, $data = []) {
 }
 
 /**
+ * Calcula peso total desde productos del carrito
+ * @param array $cart_items Items del carrito con información de productos
+ * @return float Peso total en kg
+ */
+function zipnova_calculate_cart_weight($cart_items) {
+    $total_weight = 0;
+    $config = zipnova_get_config();
+    $default_weight = $config['default_package']['weight'] ?? 1;
+
+    foreach ($cart_items as $item) {
+        $quantity = $item['quantity'] ?? 1;
+        $product_weight = 0;
+
+        // Intentar obtener peso del producto
+        if (isset($item['weight']) && $item['weight'] > 0) {
+            $product_weight = (float)$item['weight'];
+        } elseif (isset($item['product_id'])) {
+            // Cargar producto completo si solo tenemos el ID
+            require_once __DIR__ . '/products.php';
+            $product = get_product_by_id($item['product_id']);
+            if ($product && isset($product['weight']) && $product['weight'] > 0) {
+                $product_weight = (float)$product['weight'];
+            }
+        }
+
+        // Si no hay peso definido, usar peso por defecto
+        if ($product_weight === 0) {
+            $product_weight = $default_weight;
+        }
+
+        $total_weight += $product_weight * $quantity;
+    }
+
+    // Mínimo 0.1kg
+    return max(0.1, $total_weight);
+}
+
+/**
+ * Calcula dimensiones del paquete desde productos del carrito
+ * @param array $cart_items Items del carrito con información de productos
+ * @return array Array con length, width, height en cm
+ */
+function zipnova_calculate_cart_dimensions($cart_items) {
+    $config = zipnova_get_config();
+    $default_dims = $config['default_package'];
+
+    $max_length = 0;
+    $max_width = 0;
+    $total_height = 0;
+
+    foreach ($cart_items as $item) {
+        $quantity = $item['quantity'] ?? 1;
+        $product_length = 0;
+        $product_width = 0;
+        $product_height = 0;
+
+        // Intentar obtener dimensiones del producto
+        if (isset($item['length']) && isset($item['width']) && isset($item['height'])) {
+            $product_length = (float)$item['length'];
+            $product_width = (float)$item['width'];
+            $product_height = (float)$item['height'];
+        } elseif (isset($item['product_id'])) {
+            // Cargar producto completo si solo tenemos el ID
+            require_once __DIR__ . '/products.php';
+            $product = get_product_by_id($item['product_id']);
+            if ($product) {
+                $product_length = (float)($product['length'] ?? 0);
+                $product_width = (float)($product['width'] ?? 0);
+                $product_height = (float)($product['height'] ?? 0);
+            }
+        }
+
+        // Si no hay dimensiones, usar defaults
+        if ($product_length === 0) {
+            $product_length = $default_dims['length'];
+            $product_width = $default_dims['width'];
+            $product_height = $default_dims['height'];
+        }
+
+        // Acumular dimensiones
+        $max_length = max($max_length, $product_length);
+        $max_width = max($max_width, $product_width);
+        $total_height += $product_height * $quantity; // Apilar productos
+    }
+
+    return [
+        'length' => max(1, $max_length),
+        'width' => max(1, $max_width),
+        'height' => max(1, $total_height)
+    ];
+}
+
+/**
+ * Calcula valor declarado desde productos del carrito
+ * @param array $cart_items Items del carrito
+ * @return float Valor total declarado
+ */
+function zipnova_calculate_cart_value($cart_items) {
+    $total_value = 0;
+
+    foreach ($cart_items as $item) {
+        $quantity = $item['quantity'] ?? 1;
+        $price = $item['final_price_ars'] ?? $item['price_ars'] ?? 0;
+        $total_value += $price * $quantity;
+    }
+
+    return max(0, $total_value);
+}
+
+/**
+ * Construye paquetes para Zipnova desde el carrito
+ * @param array $cart_items Items del carrito
+ * @return array Array de paquetes para la API de Zipnova
+ */
+function zipnova_build_packages_from_cart($cart_items) {
+    $weight = zipnova_calculate_cart_weight($cart_items);
+    $dimensions = zipnova_calculate_cart_dimensions($cart_items);
+    $declared_value = zipnova_calculate_cart_value($cart_items);
+
+    return [[
+        'weight' => $weight,
+        'length' => $dimensions['length'],
+        'width' => $dimensions['width'],
+        'height' => $dimensions['height'],
+        'declared_value' => $declared_value
+    ]];
+}
+
+/**
  * Prueba la conexión con Zipnova
  */
 function zipnova_test_connection() {
