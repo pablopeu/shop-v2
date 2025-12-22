@@ -18,15 +18,15 @@
     },
 
     "colors": {
-        "primary": "#667eea",
-        "primary_dark": "#5568d3",
-        "primary_light": "#7e96ff",
-        "secondary": "#f093fb",
-        "accent": "#4facfe",
-        "success": "#00d2ff",
+        "primary": "#005461",
+        "primary_dark": "#003d47",
+        "primary_light": "#006b7b",
+        "secondary": "#018790",
+        "accent": "#00B7B5",
+        "success": "#00B7B5",
         "warning": "#ffaa00",
-        "error": "#ff6b9d",
-        "info": "#667eea",
+        "error": "#e63946",
+        "info": "#018790",
         "text": "#2d3748",
         "background": "#ffffff"
     },
