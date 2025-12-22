@@ -281,7 +281,7 @@ $current_page = $_GET['page'] ?? 'index';
                 <span>📦 Envíos</span>
                 <span class="menu-arrow" id="arrow-envios">▶</span>
             </div>
-            <ul class="submenu <?php echo in_array($current_page, ['envios-pendientes', 'envios-archivo']) ? 'open' : ''; ?>"
+            <ul class="submenu <?php echo in_array($current_page, ['envios-pendientes', 'envios-archivo', 'shipping-list', 'config-shipping']) ? 'open' : ''; ?>"
                 id="submenu-envios">
                 <li>
                     <a href="<?php echo url('/admin/?page=envios-pendientes'); ?>"
@@ -290,9 +290,21 @@ $current_page = $_GET['page'] ?? 'index';
                     </a>
                 </li>
                 <li>
+                    <a href="<?php echo url('/admin/?page=shipping-list'); ?>"
+                       class="<?php echo $current_page === 'shipping-list' ? 'active' : ''; ?>">
+                        🚚 Logística Zipnova
+                    </a>
+                </li>
+                <li>
                     <a href="<?php echo url('/admin/?page=envios-archivo'); ?>"
                        class="<?php echo $current_page === 'envios-archivo' ? 'active' : ''; ?>">
                         📦 Archivo
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo url('/admin/?page=config-shipping'); ?>"
+                       class="<?php echo $current_page === 'config-shipping' ? 'active' : ''; ?>">
+                        ⚙️ Configuración de Logística
                     </a>
                 </li>
             </ul>
@@ -451,10 +463,10 @@ $current_page = $_GET['page'] ?? 'index';
                 <!-- Medios de Pago -->
                 <li>
                     <div class="menu-item" data-action="toggleSubmenu" data-menu-id="payment">
-                        <span>💳 Medios de Pago y Envíos</span>
+                        <span>💳 Medios de Pago</span>
                         <span class="menu-arrow" id="arrow-payment">▶</span>
                     </div>
-                    <ul class="submenu <?php echo in_array($current_page, ['config-payment', 'config-moneda', 'reprocesar-pago-mp', 'config-shipping']) ? 'open' : ''; ?>"
+                    <ul class="submenu <?php echo in_array($current_page, ['config-payment', 'config-moneda', 'reprocesar-pago-mp']) ? 'open' : ''; ?>"
                         id="submenu-payment">
                         <li>
                             <a href="<?php echo url('/admin/?page=config-payment'); ?>"
@@ -466,12 +478,6 @@ $current_page = $_GET['page'] ?? 'index';
                             <a href="<?php echo url('/admin/?page=config-moneda'); ?>"
                                class="<?php echo $current_page === 'config-moneda' ? 'active' : ''; ?>">
                                 💱 Moneda y Cambio
-                            </a>
-                        </li>
-                        <li>
-                            <a href="<?php echo url('/admin/?page=config-shipping'); ?>"
-                               class="<?php echo $current_page === 'config-shipping' ? 'active' : ''; ?>">
-                                📦 Envíos (Zipnova)
                             </a>
                         </li>
                         <li>

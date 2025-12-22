@@ -238,14 +238,22 @@ if ($action === 'track' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  * Webhook endpoint to receive updates from Zipnova
  */
 if ($action === 'webhook' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once APP_PATH . '/includes/email.php';
+    require_once APP_PATH . '/includes/telegram.php';
+
     // Get raw POST data
     $payload = file_get_contents('php://input');
     $signature = $_SERVER['HTTP_X_ZIPNOVA_SIGNATURE'] ?? '';
 
-    // Verify webhook signature
-    if (!zipnova_webhook_verify($payload, $signature)) {
-        zipnova_log('Webhook Rejected', ['reason' => 'Invalid signature']);
-        send_json_response(['success' => false, 'error' => 'Invalid signature'], 403);
+    // Verify webhook signature if secret is configured
+    $config = zipnova_get_config();
+    $webhook_secret = $config['options']['webhook_secret'] ?? '';
+
+    if (!empty($webhook_secret)) {
+        if (!zipnova_webhook_verify($payload, $signature)) {
+            zipnova_log('Webhook Rejected', ['reason' => 'Invalid signature']);
+            send_json_response(['success' => false, 'error' => 'Invalid signature'], 403);
+        }
     }
 
     // Parse webhook data
@@ -257,13 +265,15 @@ if ($action === 'webhook' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Process webhook
-    $event_type = $data['event'] ?? '';
+    $event_type = $data['event'] ?? 'status_update';
     $shipment_id = $data['shipment_id'] ?? '';
+    $tracking_id = $data['tracking_id'] ?? $shipment_id;
     $new_status = $data['status'] ?? '';
 
     zipnova_log('Webhook Received', [
         'event' => $event_type,
         'shipment_id' => $shipment_id,
+        'tracking_id' => $tracking_id,
         'status' => $new_status
     ]);
 
@@ -274,12 +284,92 @@ if ($action === 'webhook' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             'updated_at' => date('Y-m-d H:i:s'),
             'webhook_data' => $data
         ]);
+    }
 
-        // TODO: Enviar notificación al cliente si el estado cambió
-        // TODO: Actualizar la orden relacionada
+    // Update order shipping status
+    if ($tracking_id && $new_status) {
+        $updated = update_shipping_status_by_tracking($tracking_id, $new_status, $data);
+
+        if ($updated) {
+            // Find the order to send notification
+            $orders = get_all_orders();
+            $order = null;
+
+            foreach ($orders as $o) {
+                if (isset($o['shipping']['tracking_id']) && $o['shipping']['tracking_id'] === $tracking_id) {
+                    $order = $o;
+                    break;
+                }
+            }
+
+            if ($order) {
+                // Send email notification to customer
+                send_shipping_status_notification($order, $new_status);
+
+                zipnova_log('Notification Sent', [
+                    'order_number' => $order['order_number'],
+                    'customer_email' => $order['customer_email'],
+                    'new_status' => $new_status
+                ]);
+            }
+        }
     }
 
     send_json_response(['success' => true, 'message' => 'Webhook processed']);
+}
+
+/**
+ * Send shipping status notification to customer
+ */
+function send_shipping_status_notification($order, $new_status) {
+    $status_messages = [
+        'pending' => 'Tu envío está siendo procesado',
+        'in_transit' => 'Tu pedido está en camino',
+        'out_for_delivery' => 'Tu pedido está en reparto',
+        'delivered' => 'Tu pedido ha sido entregado',
+        'failed' => 'Hubo un problema con tu envío',
+        'returned' => 'Tu envío está siendo devuelto',
+        'cancelled' => 'Tu envío ha sido cancelado'
+    ];
+
+    $subject = $status_messages[$new_status] ?? 'Actualización de tu envío';
+    $tracking_id = $order['shipping']['tracking_id'] ?? '';
+    $order_number = $order['order_number'];
+
+    $body = "
+    <h2>{$subject}</h2>
+    <p>Hola {$order['customer_name']},</p>
+    <p>Te informamos que el estado de tu envío ha cambiado.</p>
+    <p><strong>Orden:</strong> {$order_number}</p>
+    <p><strong>Estado:</strong> {$subject}</p>
+    ";
+
+    if (!empty($tracking_id)) {
+        $tracking_url = url('/tracking?id=' . urlencode($tracking_id));
+        $body .= "<p><strong>Tracking ID:</strong> {$tracking_id}</p>";
+        $body .= "<p><a href='{$tracking_url}'>Ver seguimiento completo</a></p>";
+    }
+
+    $body .= "<p>Gracias por tu compra.</p>";
+
+    // Send email
+    send_email(
+        $order['customer_email'],
+        $subject . ' - Orden ' . $order_number,
+        $body
+    );
+
+    // Send Telegram notification if configured
+    if (!empty($order['telegram_chat_id'])) {
+        $telegram_message = "📦 *Actualización de envío*\n\n";
+        $telegram_message .= "Orden: {$order_number}\n";
+        $telegram_message .= "Estado: {$subject}\n";
+        if (!empty($tracking_id)) {
+            $telegram_message .= "Tracking: {$tracking_id}\n";
+        }
+
+        send_telegram_notification($order['telegram_chat_id'], $telegram_message);
+    }
 }
 
 /**
