@@ -1426,23 +1426,20 @@ function generate_theme($data, $original_config = null) {
                 'border_style' => $data['form_border_style'] ?? 'solid',
                 'focus_ring' => $data['form_focus_ring'] ?? true,
                 'glow_effect' => $data['form_glow_effect'] ?? false
+            ],
+            // product_view: siempre incluir (permite editar desde generador)
+            'product_view' => [
+                'gallery_layout' => $data['product_gallery_layout'] ?? 'thumbnails-bottom',
+                'image_size' => $data['product_image_size'] ?? 'medium',
+                'thumbnail_size' => $data['product_thumbnail_size'] ?? 'medium',
+                'show_breadcrumb' => $data['product_show_breadcrumb'] ?? true,
+                'show_share' => $data['product_show_share'] ?? true,
+                'show_sku' => $data['product_show_sku'] ?? true,
+                'show_stock' => $data['product_show_stock'] ?? true,
+                'show_nav_buttons' => $data['product_show_nav_buttons'] ?? true,
+                'show_image_counter' => $data['product_show_image_counter'] ?? true
             ]
-        ] + (
-            // product_view: solo si existe en original O si es theme nuevo
-            $original_config === null || isset($original_config['components']['product_view']) ? [
-                'product_view' => [
-                    'gallery_layout' => $data['product_gallery_layout'] ?? 'thumbnails-bottom',
-                    'image_size' => $data['product_image_size'] ?? 'medium',
-                    'thumbnail_size' => $data['product_thumbnail_size'] ?? 'medium',
-                    'show_breadcrumb' => $data['product_show_breadcrumb'] ?? true,
-                    'show_share' => $data['product_show_share'] ?? true,
-                    'show_sku' => $data['product_show_sku'] ?? true,
-                    'show_stock' => $data['product_show_stock'] ?? true,
-                    'show_nav_buttons' => $data['product_show_nav_buttons'] ?? true,
-                    'show_image_counter' => $data['product_show_image_counter'] ?? true
-                ]
-            ] : []
-        ),
+        ],
 
         'layout' => [
             'container_width' => $data['container_width'] ?? '1200px',
