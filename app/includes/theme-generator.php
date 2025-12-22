@@ -366,6 +366,21 @@ function generate_variables_css($config) {
     $css .= "    --color-white: #ffffff;\n";
     $css .= "    --color-black: #000000;\n\n";
 
+    // === COLORES ADICIONALES ===
+    $css .= "    /* Promociones y Descuentos */\n";
+    $css .= "    --color-promo: #e63946;\n";
+    $css .= "    --color-promo-dark: #c62828;\n";
+    $css .= "    --color-promo-light: #ff6b6b;\n\n";
+
+    $css .= "    /* Colores Específicos */\n";
+    $css .= "    --color-whatsapp: #25D366;\n";
+    $css .= "    --color-primary-alt: " . $primary_variants['light'] . ";\n";
+    $css .= "    --color-orange: #ffaa00;\n";
+    $css .= "    --color-orange-light: #ffc133;\n";
+    $css .= "    --color-orange-dark: #e69500;\n";
+    $css .= "    --color-orange-bg: #fff7e6;\n";
+    $css .= "    --color-yellow: #ffd93d;\n\n";
+
     // === TIPOGRAFÍA ===
     $css .= "    /* Tipografía */\n";
     $font_family = $config['typography']['font_family'] ?? 'sans-serif';
@@ -385,7 +400,8 @@ function generate_variables_css($config) {
     $css .= "    --font-weight-normal: 400;\n";
     $css .= "    --font-weight-medium: 500;\n";
     $css .= "    --font-weight-semibold: 600;\n";
-    $css .= "    --font-weight-bold: 700;\n\n";
+    $css .= "    --font-weight-bold: 700;\n";
+    $css .= "    --font-weight-extrabold: 800;\n\n";
 
     $line_height = $config['typography']['line_height'] ?? '1.5';
     $css .= "    --line-height-tight: 1.2;\n";
@@ -401,7 +417,8 @@ function generate_variables_css($config) {
     $css .= "    --spacing-lg: " . (int)($base_unit * 2.33) . "px;\n";
     $css .= "    --spacing-xl: " . (int)($base_unit * 3) . "px;\n";
     $css .= "    --spacing-2xl: " . (int)($base_unit * 4) . "px;\n";
-    $css .= "    --spacing-3xl: " . (int)($base_unit * 5.33) . "px;\n\n";
+    $css .= "    --spacing-3xl: " . (int)($base_unit * 5.33) . "px;\n";
+    $css .= "    --spacing-4xl: " . (int)($base_unit * 6.67) . "px;\n\n";
 
     // === BORDES ===
     $css .= "    /* Bordes */\n";
@@ -431,7 +448,7 @@ function generate_variables_css($config) {
 
     // === SOMBRAS ===
     $css .= "    /* Sombras */\n";
-    $shadow_style = $config['components']['cards']['shadow'] ?? 'subtle';
+    $shadow_style = $config['features']['shadow_style'] ?? 'subtle';
 
     if ($shadow_style === 'none' || $shadow_style === false) {
         $css .= "    --shadow-sm: none;\n";
@@ -459,11 +476,56 @@ function generate_variables_css($config) {
         $css .= "    --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.4);\n\n";
     }
 
+    // Sombras con efectos de brillo (glow)
+    $css .= "    /* Sombras con Glow */\n";
+    $css .= "    --shadow-glow: 0 0 20px rgba({$primary_variants['rgb']}, 0.5);\n";
+    $css .= "    --shadow-glow-secondary: 0 0 20px rgba({$secondary_variants['rgb']}, 0.5);\n";
+    $css .= "    --shadow-glow-cyan: 0 0 20px rgba(0, 183, 181, 0.5);\n";
+    $css .= "    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);\n\n";
+
     // === TRANSICIONES ===
     $css .= "    /* Transiciones */\n";
     $css .= "    --transition-fast: 0.2s ease;\n";
     $css .= "    --transition-base: 0.4s ease;\n";
-    $css .= "    --transition-slow: 0.6s ease;\n\n";
+    $css .= "    --transition-slow: 0.6s ease;\n";
+    $css .= "    --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);\n\n";
+
+    // === GRADIENTES ===
+    if ($config['features']['gradient_effects'] ?? false) {
+        $css .= "    /* Gradientes */\n";
+        $css .= "    --gradient-primary: linear-gradient(135deg, {$config['colors']['primary']} 0%, {$primary_variants['light']} 100%);\n";
+        $css .= "    --gradient-secondary: linear-gradient(135deg, {$config['colors']['secondary']} 0%, {$secondary_variants['light']} 100%);\n";
+        $css .= "    --gradient-accent: linear-gradient(135deg, {$config['colors']['accent']} 0%, {$accent_variants['light']} 100%);\n";
+        $css .= "    --gradient-rainbow: linear-gradient(135deg, {$config['colors']['primary']} 0%, {$config['colors']['secondary']} 50%, {$config['colors']['accent']} 100%);\n";
+        $css .= "    --gradient-ocean: linear-gradient(135deg, {$primary_variants['dark']} 0%, {$config['colors']['primary']} 50%, {$config['colors']['secondary']} 100%);\n";
+        $css .= "    --gradient-teal: linear-gradient(135deg, {$config['colors']['secondary']} 0%, {$config['colors']['accent']} 100%);\n\n";
+    }
+
+    // === GLASSMORPHISM ===
+    if ($config['features']['glassmorphism'] ?? false) {
+        $css .= "    /* Glassmorphism */\n";
+        $css .= "    --blur-sm: 4px;\n";
+        $css .= "    --blur-md: 12px;\n";
+        $css .= "    --blur-lg: 24px;\n";
+        $css .= "    --blur-xl: 40px;\n";
+        $css .= "    --glass-bg: rgba(255, 255, 255, 0.7);\n";
+        $css .= "    --glass-border: rgba(255, 255, 255, 0.3);\n\n";
+
+        $css .= "    /* Gradientes overlay para glassmorphism */\n";
+        $css .= "    --gradient-glass: linear-gradient(135deg,\n";
+        $css .= "        rgba(255, 255, 255, 0.8) 0%,\n";
+        $css .= "        rgba(255, 255, 255, 0.5) 100%);\n";
+        $css .= "    --gradient-glass-hover: linear-gradient(135deg,\n";
+        $css .= "        rgba(255, 255, 255, 0.9) 0%,\n";
+        $css .= "        rgba(255, 255, 255, 0.7) 100%);\n\n";
+    }
+
+    // === TRANSFORMACIONES 3D ===
+    if ($config['features']['transform_3d'] ?? false) {
+        $css .= "    /* Transform 3D */\n";
+        $css .= "    --transform-3d-lift: translateY(-8px) rotateX(2deg);\n";
+        $css .= "    --transform-3d-tilt: perspective(1000px) rotateY(-5deg);\n\n";
+    }
 
     // === LAYOUT ===
     $css .= "    /* Layout */\n";
@@ -487,7 +549,20 @@ function generate_variables_css($config) {
     $css .= "    --z-modal-backdrop: 400;\n";
     $css .= "    --z-modal: 500;\n";
     $css .= "    --z-popover: 600;\n";
-    $css .= "    --z-tooltip: 700;\n";
+    $css .= "    --z-tooltip: 700;\n\n";
+
+    // === FOOTER ===
+    $footer_bg = $config['footer']['background_color'] ?? '#2d3748';
+    $footer_text = $config['footer']['text_color'] ?? '#ffffff';
+    $css .= "    /* Footer Distributed */\n";
+    $css .= "    --color-footer-bg: {$footer_bg};\n";
+    $css .= "    --color-footer-icon-bg: #4a5568;\n";
+    $css .= "    --color-footer-link: {$config['colors']['primary']};\n";
+    $css .= "    --color-footer-text-muted: #a0aec0;\n\n";
+
+    // === MERCADOPAGO ===
+    $css .= "    /* MercadoPago */\n";
+    $css .= "    --color-mp-blue: #009ee3;\n";
 
     $css .= "}\n";
 
@@ -1294,31 +1369,23 @@ function generate_theme($data, $original_config = null) {
         ];
     }
 
-    // Generar o copiar variables.css y theme.css
+    // SIEMPRE regenerar variables.css (contiene todos los valores modificables)
+    $variables_css = generate_variables_css($config);
+    if (file_put_contents($theme_dir . '/variables.css', $variables_css) === false) {
+        return [
+            'success' => false,
+            'message' => 'Error al guardar variables.css'
+        ];
+    }
+
+    // theme.css: Copiar del original si existe (preservar efectos personalizados)
+    // o generar básico si es theme nuevo
     if ($original_config !== null) {
-        // EDITANDO THEME EXISTENTE: Copiar archivos CSS originales
         $original_slug = $original_config['slug'] ?? null;
         if ($original_slug) {
-            $original_theme_dir = PUBLIC_PATH . "/assets/themes/{$original_slug}";
-
-            // Copiar variables.css original
-            $original_variables = $original_theme_dir . '/variables.css';
-            if (file_exists($original_variables)) {
-                if (!copy($original_variables, $theme_dir . '/variables.css')) {
-                    return [
-                        'success' => false,
-                        'message' => 'Error al copiar variables.css original'
-                    ];
-                }
-            } else {
-                // Si no existe, generar uno básico
-                $variables_css = generate_variables_css($config);
-                file_put_contents($theme_dir . '/variables.css', $variables_css);
-            }
-
-            // Copiar theme.css original
-            $original_theme_css = $original_theme_dir . '/theme.css';
+            $original_theme_css = PUBLIC_PATH . "/assets/themes/{$original_slug}/theme.css";
             if (file_exists($original_theme_css)) {
+                // Copiar theme.css original (preserva efectos personalizados)
                 if (!copy($original_theme_css, $theme_dir . '/theme.css')) {
                     return [
                         'success' => false,
@@ -1326,21 +1393,13 @@ function generate_theme($data, $original_config = null) {
                     ];
                 }
             } else {
-                // Si no existe, generar uno básico
+                // No existe theme.css original, generar básico
                 $theme_css = generate_theme_css_basic($config);
                 file_put_contents($theme_dir . '/theme.css', $theme_css);
             }
         }
     } else {
-        // THEME NUEVO: Generar archivos CSS desde cero
-        $variables_css = generate_variables_css($config);
-        if (file_put_contents($theme_dir . '/variables.css', $variables_css) === false) {
-            return [
-                'success' => false,
-                'message' => 'Error al guardar variables.css'
-            ];
-        }
-
+        // Theme nuevo: generar theme.css básico
         $theme_css = generate_theme_css_basic($config);
         if (file_put_contents($theme_dir . '/theme.css', $theme_css) === false) {
             return [
