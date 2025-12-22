@@ -1281,8 +1281,8 @@ function generate_theme($data, $original_config = null) {
             'accessibility' => 'wcag-aa'
         ],
 
-        'tags' => ['custom', 'generado', 'personalizado'],
-        'created_at' => date('Y-m-d'),
+        'tags' => $original_config['tags'] ?? ['custom', 'generado', 'personalizado'],
+        'created_at' => $original_config['created_at'] ?? date('Y-m-d'),
         'updated_at' => date('Y-m-d')
     ];
 
