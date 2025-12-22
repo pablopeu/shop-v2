@@ -1099,3 +1099,43 @@ html {
     background-clip: initial !important;
     color: white !important;
 }
+
+/* ========================================
+   BREADCRUMB - Horizontal layout
+   ======================================== */
+
+.breadcrumb {
+    margin-bottom: var(--spacing-md, 16px);
+}
+
+.breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumb li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.breadcrumb a {
+    color: var(--color-primary, #005461);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.breadcrumb a:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: var(--color-text-light, #999);
+    user-select: none;
+}
