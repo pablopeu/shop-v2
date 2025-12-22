@@ -1270,17 +1270,28 @@ function generate_theme_css_basic($config) {
     $css .= "    display: flex;\n";
     $css .= "    flex-direction: row-reverse;\n";
     $css .= "    gap: 16px;\n";
+    $css .= "    align-items: flex-start;\n";
     $css .= "}\n\n";
 
     $css .= ".product-gallery.thumbnails-left .product-thumbnails {\n";
     $css .= "    display: flex;\n";
     $css .= "    flex-direction: column;\n";
     $css .= "    gap: 12px;\n";
-    $css .= "    max-width: 100px;\n";
+    $css .= "    flex-shrink: 0;\n";
+    $css .= "    width: 100px;\n";
     $css .= "}\n\n";
 
     $css .= ".product-gallery.thumbnails-left .main-image-container {\n";
     $css .= "    flex: 1;\n";
+    $css .= "    min-width: 0;\n";
+    $css .= "    max-width: 100%;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-left .main-image-container img {\n";
+    $css .= "    width: 100%;\n";
+    $css .= "    height: auto;\n";
+    $css .= "    max-height: 600px;\n";
+    $css .= "    object-fit: contain;\n";
     $css .= "}\n\n";
 
     // Thumbnails Right
@@ -1288,17 +1299,28 @@ function generate_theme_css_basic($config) {
     $css .= "    display: flex;\n";
     $css .= "    flex-direction: row;\n";
     $css .= "    gap: 16px;\n";
+    $css .= "    align-items: flex-start;\n";
     $css .= "}\n\n";
 
     $css .= ".product-gallery.thumbnails-right .product-thumbnails {\n";
     $css .= "    display: flex;\n";
     $css .= "    flex-direction: column;\n";
     $css .= "    gap: 12px;\n";
-    $css .= "    max-width: 100px;\n";
+    $css .= "    flex-shrink: 0;\n";
+    $css .= "    width: 100px;\n";
     $css .= "}\n\n";
 
     $css .= ".product-gallery.thumbnails-right .main-image-container {\n";
     $css .= "    flex: 1;\n";
+    $css .= "    min-width: 0;\n";
+    $css .= "    max-width: 100%;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-right .main-image-container img {\n";
+    $css .= "    width: 100%;\n";
+    $css .= "    height: auto;\n";
+    $css .= "    max-height: 600px;\n";
+    $css .= "    object-fit: contain;\n";
     $css .= "}\n\n";
 
     // Mobile: always use bottom layout
