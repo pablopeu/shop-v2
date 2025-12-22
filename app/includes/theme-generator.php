@@ -211,6 +211,7 @@ function map_colors_intelligently($colors) {
  */
 function validate_theme_input($slug, $name, $colors, $original_slug = '') {
     $errors = [];
+    $warnings = [];
 
     // Validar slug
     if (empty($slug)) {
@@ -245,17 +246,18 @@ function validate_theme_input($slug, $name, $colors, $original_slug = '') {
         }
     }
 
-    // Warning si el contraste es bajo (no bloquea, solo advierte)
+    // Warning si el contraste es bajo (NO bloquea el guardado, solo advierte)
     if (!empty($colors['primary']) && !empty($colors['background'])) {
         $contrast = calculate_contrast_ratio($colors['primary'], $colors['background']);
         if ($contrast < 4.5) {
-            $errors[] = "⚠️ Warning: El contraste entre primary y background es bajo ({$contrast}:1). Se recomienda >= 4.5:1 para accesibilidad";
+            $warnings[] = "El contraste entre primary y background es bajo ({$contrast}:1). Se recomienda >= 4.5:1 para accesibilidad";
         }
     }
 
     return [
         'valid' => empty($errors),
-        'errors' => $errors
+        'errors' => $errors,
+        'warnings' => $warnings
     ];
 }
 
@@ -364,6 +366,21 @@ function generate_variables_css($config) {
     $css .= "    --color-white: #ffffff;\n";
     $css .= "    --color-black: #000000;\n\n";
 
+    // === COLORES ADICIONALES ===
+    $css .= "    /* Promociones y Descuentos */\n";
+    $css .= "    --color-promo: #e63946;\n";
+    $css .= "    --color-promo-dark: #c62828;\n";
+    $css .= "    --color-promo-light: #ff6b6b;\n\n";
+
+    $css .= "    /* Colores Específicos */\n";
+    $css .= "    --color-whatsapp: #25D366;\n";
+    $css .= "    --color-primary-alt: " . $primary_variants['light'] . ";\n";
+    $css .= "    --color-orange: #ffaa00;\n";
+    $css .= "    --color-orange-light: #ffc133;\n";
+    $css .= "    --color-orange-dark: #e69500;\n";
+    $css .= "    --color-orange-bg: #fff7e6;\n";
+    $css .= "    --color-yellow: #ffd93d;\n\n";
+
     // === TIPOGRAFÍA ===
     $css .= "    /* Tipografía */\n";
     $font_family = $config['typography']['font_family'] ?? 'sans-serif';
@@ -371,97 +388,235 @@ function generate_variables_css($config) {
     $css .= "    --font-family-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, {$font_family};\n";
     $css .= "    --font-family-mono: 'SF Mono', Monaco, Consolas, monospace;\n\n";
 
-    $css .= "    --font-size-xs: 12px;\n";
-    $css .= "    --font-size-sm: 14px;\n";
-    $css .= "    --font-size-base: {$config['typography']['base_size']};\n";
-    $css .= "    --font-size-lg: 18px;\n";
-    $css .= "    --font-size-xl: 22px;\n";
-    $css .= "    --font-size-2xl: 28px;\n";
-    $css .= "    --font-size-3xl: 36px;\n";
-    $css .= "    --font-size-4xl: 52px;\n\n";
+    // Font sizes - leer del theme.json o usar defaults
+    $font_sizes = $config['typography']['font_sizes'] ?? [
+        'xs' => '12px', 'sm' => '14px', 'base' => '16px', 'lg' => '18px',
+        'xl' => '22px', '2xl' => '28px', '3xl' => '36px', '4xl' => '52px'
+    ];
+    foreach ($font_sizes as $size => $value) {
+        $css .= "    --font-size-{$size}: {$value};\n";
+    }
+    $css .= "\n";
 
-    $css .= "    --font-weight-normal: 400;\n";
-    $css .= "    --font-weight-medium: 500;\n";
-    $css .= "    --font-weight-semibold: 600;\n";
-    $css .= "    --font-weight-bold: 700;\n\n";
+    // Font weights - leer del theme.json o usar defaults
+    $font_weights = $config['typography']['font_weights'] ?? [
+        'normal' => '400', 'medium' => '500', 'semibold' => '600',
+        'bold' => '700', 'extrabold' => '800'
+    ];
+    foreach ($font_weights as $weight => $value) {
+        $css .= "    --font-weight-{$weight}: {$value};\n";
+    }
+    $css .= "\n";
 
-    $line_height = $config['typography']['line_height'] ?? '1.5';
-    $css .= "    --line-height-tight: 1.2;\n";
-    $css .= "    --line-height-normal: {$line_height};\n";
-    $css .= "    --line-height-relaxed: 1.8;\n\n";
+    // Line heights - leer del theme.json o usar defaults
+    $line_heights = $config['typography']['line_heights'] ?? [
+        'tight' => '1.2', 'normal' => '1.5', 'relaxed' => '1.8'
+    ];
+    foreach ($line_heights as $height => $value) {
+        $css .= "    --line-height-{$height}: {$value};\n";
+    }
+    $css .= "\n";
 
     // === ESPACIADO ===
     $css .= "    /* Espaciado */\n";
-    $base_unit = (int)str_replace('px', '', $config['spacing']['base_unit'] ?? '12px');
-    $css .= "    --spacing-xs: " . (int)($base_unit * 0.5) . "px;\n";
-    $css .= "    --spacing-sm: {$base_unit}px;\n";
-    $css .= "    --spacing-md: " . (int)($base_unit * 1.67) . "px;\n";
-    $css .= "    --spacing-lg: " . (int)($base_unit * 2.33) . "px;\n";
-    $css .= "    --spacing-xl: " . (int)($base_unit * 3) . "px;\n";
-    $css .= "    --spacing-2xl: " . (int)($base_unit * 4) . "px;\n";
-    $css .= "    --spacing-3xl: " . (int)($base_unit * 5.33) . "px;\n\n";
+
+    // Leer spacing del theme.json (valores custom o generados desde base_unit)
+    if (isset($config['spacing']['values'])) {
+        // Usar valores custom del theme.json
+        $spacing_values = $config['spacing']['values'];
+        foreach ($spacing_values as $size => $value) {
+            $css .= "    --spacing-{$size}: {$value};\n";
+        }
+    } else {
+        // Generar desde base_unit (fallback para themes viejos)
+        $base_unit = (int)str_replace('px', '', $config['spacing']['base_unit'] ?? '12px');
+        $css .= "    --spacing-xs: " . (int)($base_unit * 0.5) . "px;\n";
+        $css .= "    --spacing-sm: {$base_unit}px;\n";
+        $css .= "    --spacing-md: " . (int)($base_unit * 1.67) . "px;\n";
+        $css .= "    --spacing-lg: " . (int)($base_unit * 2.33) . "px;\n";
+        $css .= "    --spacing-xl: " . (int)($base_unit * 3) . "px;\n";
+        $css .= "    --spacing-2xl: " . (int)($base_unit * 4) . "px;\n";
+        $css .= "    --spacing-3xl: " . (int)($base_unit * 5.33) . "px;\n";
+        $css .= "    --spacing-4xl: " . (int)($base_unit * 6.67) . "px;\n";
+    }
+    $css .= "\n";
 
     // === BORDES ===
     $css .= "    /* Bordes */\n";
-    // Activar border-radius si CUALQUIERA de cards o buttons lo requiere
-    $cards_rounded = $config['components']['cards']['rounded'] ?? false;
-    $buttons_rounded = $config['components']['buttons']['rounded'] ?? false;
-    $any_rounded = $cards_rounded || $buttons_rounded;
 
-    if ($any_rounded) {
-        $css .= "    --border-radius-none: 0;\n";
-        $css .= "    --border-radius-sm: 2px;\n";
-        $css .= "    --border-radius-md: 4px;\n";
-        $css .= "    --border-radius-lg: 8px;\n";
-        $css .= "    --border-radius-xl: 12px;\n";
-        $css .= "    --border-radius-full: 9999px;\n\n";
+    // Border radius - leer del theme.json o usar defaults
+    if (isset($config['borders']['radius'])) {
+        $border_radius = $config['borders']['radius'];
+        foreach ($border_radius as $size => $value) {
+            $css .= "    --border-radius-{$size}: {$value};\n";
+        }
     } else {
-        $css .= "    --border-radius-none: 0;\n";
-        $css .= "    --border-radius-sm: 0;\n";
-        $css .= "    --border-radius-md: 0;\n";
-        $css .= "    --border-radius-lg: 0;\n";
-        $css .= "    --border-radius-xl: 0;\n";
-        $css .= "    --border-radius-full: 0;\n\n";
-    }
+        // Fallback: generar según si es rounded o no
+        $cards_rounded = $config['components']['cards']['rounded'] ?? false;
+        $buttons_rounded = $config['components']['buttons']['rounded'] ?? false;
+        $any_rounded = $cards_rounded || $buttons_rounded;
 
-    $css .= "    --border-width: 1px;\n";
-    $css .= "    --border-width-thick: 2px;\n\n";
+        if ($any_rounded) {
+            $css .= "    --border-radius-none: 0;\n";
+            $css .= "    --border-radius-sm: 2px;\n";
+            $css .= "    --border-radius-md: 4px;\n";
+            $css .= "    --border-radius-lg: 8px;\n";
+            $css .= "    --border-radius-xl: 12px;\n";
+            $css .= "    --border-radius-2xl: 16px;\n";
+            $css .= "    --border-radius-full: 9999px;\n";
+        } else {
+            $css .= "    --border-radius-none: 0;\n";
+            $css .= "    --border-radius-sm: 0;\n";
+            $css .= "    --border-radius-md: 0;\n";
+            $css .= "    --border-radius-lg: 0;\n";
+            $css .= "    --border-radius-xl: 0;\n";
+            $css .= "    --border-radius-2xl: 0;\n";
+            $css .= "    --border-radius-full: 0;\n";
+        }
+    }
+    $css .= "\n";
+
+    // Border width - leer del theme.json o usar defaults
+    if (isset($config['borders']['width'])) {
+        $border_width = $config['borders']['width'];
+        $css .= "    --border-width: {$border_width['default']};\n";
+        $css .= "    --border-width-thick: {$border_width['thick']};\n";
+        if (isset($border_width['bold'])) {
+            $css .= "    --border-width-bold: {$border_width['bold']};\n";
+        }
+    } else {
+        $css .= "    --border-width: 1px;\n";
+        $css .= "    --border-width-thick: 2px;\n";
+    }
+    $css .= "\n";
 
     // === SOMBRAS ===
     $css .= "    /* Sombras */\n";
-    $shadow_style = $config['components']['cards']['shadow'] ?? 'subtle';
 
-    if ($shadow_style === 'none' || $shadow_style === false) {
-        $css .= "    --shadow-sm: none;\n";
-        $css .= "    --shadow-md: none;\n";
-        $css .= "    --shadow-lg: none;\n";
-        $css .= "    --shadow-xl: none;\n";
-        $css .= "    --shadow-2xl: none;\n\n";
-    } elseif ($shadow_style === 'subtle') {
-        $css .= "    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);\n";
-        $css .= "    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);\n";
-        $css .= "    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);\n";
-        $css .= "    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.18);\n";
-        $css .= "    --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.25);\n\n";
-    } elseif ($shadow_style === 'medium') {
-        $css .= "    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.12);\n";
-        $css .= "    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);\n";
-        $css .= "    --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.18);\n";
-        $css .= "    --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.22);\n";
-        $css .= "    --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.3);\n\n";
-    } else { // deep
-        $css .= "    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.15);\n";
-        $css .= "    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.2);\n";
-        $css .= "    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.25);\n";
-        $css .= "    --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.3);\n";
-        $css .= "    --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.4);\n\n";
+    // Leer shadows del theme.json si están disponibles
+    if (isset($config['effects']['shadows'])) {
+        // Usar valores custom del theme.json
+        $shadows = $config['effects']['shadows'];
+        if (isset($shadows['xs'])) {
+            $css .= "    --shadow-xs: {$shadows['xs']};\n";
+        }
+        if (isset($shadows['sm'])) {
+            $css .= "    --shadow-sm: {$shadows['sm']};\n";
+        }
+        if (isset($shadows['md'])) {
+            $css .= "    --shadow-md: {$shadows['md']};\n";
+        }
+        if (isset($shadows['lg'])) {
+            $css .= "    --shadow-lg: {$shadows['lg']};\n";
+        }
+        if (isset($shadows['xl'])) {
+            $css .= "    --shadow-xl: {$shadows['xl']};\n";
+        }
+        if (isset($shadows['2xl'])) {
+            $css .= "    --shadow-2xl: {$shadows['2xl']};\n";
+        }
+        $css .= "\n";
+    } else {
+        // Fallback para themes viejos: generar desde shadow_style
+        $shadow_style = $config['features']['shadow_style'] ?? 'subtle';
+
+        if ($shadow_style === 'none' || $shadow_style === false) {
+            $css .= "    --shadow-sm: none;\n";
+            $css .= "    --shadow-md: none;\n";
+            $css .= "    --shadow-lg: none;\n";
+            $css .= "    --shadow-xl: none;\n";
+            $css .= "    --shadow-2xl: none;\n\n";
+        } elseif ($shadow_style === 'subtle') {
+            $css .= "    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);\n";
+            $css .= "    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);\n";
+            $css .= "    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);\n";
+            $css .= "    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.18);\n";
+            $css .= "    --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.25);\n\n";
+        } elseif ($shadow_style === 'medium') {
+            $css .= "    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.12);\n";
+            $css .= "    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);\n";
+            $css .= "    --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.18);\n";
+            $css .= "    --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.22);\n";
+            $css .= "    --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.3);\n\n";
+        } else { // deep
+            $css .= "    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.15);\n";
+            $css .= "    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.2);\n";
+            $css .= "    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.25);\n";
+            $css .= "    --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.3);\n";
+            $css .= "    --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.4);\n\n";
+        }
     }
+
+    // Sombras con efectos de brillo (glow)
+    $css .= "    /* Sombras con Glow */\n";
+    $css .= "    --shadow-glow: 0 0 20px rgba({$primary_variants['rgb']}, 0.5);\n";
+    $css .= "    --shadow-glow-secondary: 0 0 20px rgba({$secondary_variants['rgb']}, 0.5);\n";
+    $css .= "    --shadow-glow-cyan: 0 0 20px rgba(0, 183, 181, 0.5);\n";
+    $css .= "    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);\n\n";
 
     // === TRANSICIONES ===
     $css .= "    /* Transiciones */\n";
     $css .= "    --transition-fast: 0.2s ease;\n";
     $css .= "    --transition-base: 0.4s ease;\n";
-    $css .= "    --transition-slow: 0.6s ease;\n\n";
+    $css .= "    --transition-slow: 0.6s ease;\n";
+    $css .= "    --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);\n\n";
+
+    // === GRADIENTES ===
+    if ($config['features']['gradient_effects'] ?? false) {
+        $css .= "    /* Gradientes */\n";
+        $css .= "    --gradient-primary: linear-gradient(135deg, {$config['colors']['primary']} 0%, {$primary_variants['light']} 100%);\n";
+        $css .= "    --gradient-secondary: linear-gradient(135deg, {$config['colors']['secondary']} 0%, {$secondary_variants['light']} 100%);\n";
+        $css .= "    --gradient-accent: linear-gradient(135deg, {$config['colors']['accent']} 0%, {$accent_variants['light']} 100%);\n";
+        $css .= "    --gradient-rainbow: linear-gradient(135deg, {$config['colors']['primary']} 0%, {$config['colors']['secondary']} 50%, {$config['colors']['accent']} 100%);\n";
+        $css .= "    --gradient-ocean: linear-gradient(135deg, {$primary_variants['dark']} 0%, {$config['colors']['primary']} 50%, {$config['colors']['secondary']} 100%);\n";
+        $css .= "    --gradient-teal: linear-gradient(135deg, {$config['colors']['secondary']} 0%, {$config['colors']['accent']} 100%);\n\n";
+    }
+
+    // === GLASSMORPHISM ===
+    if ($config['features']['glassmorphism'] ?? false) {
+        $css .= "    /* Glassmorphism */\n";
+
+        // Leer blur del theme.json si está disponible
+        if (isset($config['effects']['blur'])) {
+            $blur = $config['effects']['blur'];
+            if (isset($blur['sm'])) {
+                $css .= "    --blur-sm: {$blur['sm']};\n";
+            }
+            if (isset($blur['md'])) {
+                $css .= "    --blur-md: {$blur['md']};\n";
+            }
+            if (isset($blur['lg'])) {
+                $css .= "    --blur-lg: {$blur['lg']};\n";
+            }
+            if (isset($blur['xl'])) {
+                $css .= "    --blur-xl: {$blur['xl']};\n";
+            }
+        } else {
+            // Fallback para themes viejos
+            $css .= "    --blur-sm: 4px;\n";
+            $css .= "    --blur-md: 12px;\n";
+            $css .= "    --blur-lg: 24px;\n";
+            $css .= "    --blur-xl: 40px;\n";
+        }
+
+        $css .= "    --glass-bg: rgba(255, 255, 255, 0.7);\n";
+        $css .= "    --glass-border: rgba(255, 255, 255, 0.3);\n\n";
+
+        $css .= "    /* Gradientes overlay para glassmorphism */\n";
+        $css .= "    --gradient-glass: linear-gradient(135deg,\n";
+        $css .= "        rgba(255, 255, 255, 0.8) 0%,\n";
+        $css .= "        rgba(255, 255, 255, 0.5) 100%);\n";
+        $css .= "    --gradient-glass-hover: linear-gradient(135deg,\n";
+        $css .= "        rgba(255, 255, 255, 0.9) 0%,\n";
+        $css .= "        rgba(255, 255, 255, 0.7) 100%);\n\n";
+    }
+
+    // === TRANSFORMACIONES 3D ===
+    if ($config['features']['transform_3d'] ?? false) {
+        $css .= "    /* Transform 3D */\n";
+        $css .= "    --transform-3d-lift: translateY(-8px) rotateX(2deg);\n";
+        $css .= "    --transform-3d-tilt: perspective(1000px) rotateY(-5deg);\n\n";
+    }
 
     // === LAYOUT ===
     $css .= "    /* Layout */\n";
@@ -485,7 +640,20 @@ function generate_variables_css($config) {
     $css .= "    --z-modal-backdrop: 400;\n";
     $css .= "    --z-modal: 500;\n";
     $css .= "    --z-popover: 600;\n";
-    $css .= "    --z-tooltip: 700;\n";
+    $css .= "    --z-tooltip: 700;\n\n";
+
+    // === FOOTER ===
+    $footer_bg = $config['footer']['background_color'] ?? '#2d3748';
+    $footer_text = $config['footer']['text_color'] ?? '#ffffff';
+    $css .= "    /* Footer Distributed */\n";
+    $css .= "    --color-footer-bg: {$footer_bg};\n";
+    $css .= "    --color-footer-icon-bg: #4a5568;\n";
+    $css .= "    --color-footer-link: {$config['colors']['primary']};\n";
+    $css .= "    --color-footer-text-muted: #a0aec0;\n\n";
+
+    // === MERCADOPAGO ===
+    $css .= "    /* MercadoPago */\n";
+    $css .= "    --color-mp-blue: #009ee3;\n";
 
     $css .= "}\n";
 
@@ -519,9 +687,27 @@ function generate_theme_css_basic($config) {
 
     // === HEADINGS ===
     $css .= "/* Headings */\n";
+
+    // Usar heading_weight del config o default a bold
+    $heading_weight = $config['typography']['heading_weight'] ?? '700';
+    $weight_name = 'bold'; // default
+
+    // Mapear valores numéricos a nombres
+    $weight_map = [
+        '400' => 'normal',
+        '500' => 'medium',
+        '600' => 'semibold',
+        '700' => 'bold',
+        '800' => 'extrabold'
+    ];
+
+    if (isset($weight_map[$heading_weight])) {
+        $weight_name = $weight_map[$heading_weight];
+    }
+
     $css .= "h1, h2, h3, h4, h5, h6 {\n";
     $css .= "    font-family: var(--font-family-heading);\n";
-    $css .= "    font-weight: var(--font-weight-semibold);\n";
+    $css .= "    font-weight: var(--font-weight-{$weight_name});\n";
     $css .= "    line-height: var(--line-height-tight);\n";
     $css .= "    color: var(--color-text-dark);\n";
     $css .= "    margin-bottom: var(--spacing-md);\n";
@@ -646,7 +832,7 @@ function generate_theme_css_basic($config) {
     if ($btn_width !== 'auto') {
         $css .= "    width: {$width_value};\n";
     }
-    $css .= "    font-weight: var(--font-weight-medium);\n";
+    $css .= "    font-weight: var(--font-weight-semibold);\n";
     $css .= "    transition: var(--transition-base);\n";
     $css .= "    cursor: pointer;\n";
     $css .= "    display: inline-block;\n";
@@ -663,11 +849,12 @@ function generate_theme_css_basic($config) {
 
     // Ocultar iconos si está configurado
     if ($btn_icon === 'hide') {
-        $css .= "/* Ocultar iconos en botones */\n";
-        $css .= ".btn-buy::before, .btn-fav::before,\n";
-        $css .= ".btn-add-cart .cart-icon,\n";
-        $css .= "button[data-action=\"addToCart\"]::before {\n";
-        $css .= "    display: none !important;\n";
+        $css .= "/* Ocultar iconos en botones (ocultar emojis) */\n";
+        $css .= "button[data-action=\"addToCart\"],\n";
+        $css .= "button[data-action=\"viewProduct\"] {\n";
+        $css .= "    overflow: hidden !important;\n";
+        $css .= "    text-indent: -20px !important;\n";
+        $css .= "    padding-left: calc(var(--spacing-lg) + 20px) !important;\n";
         $css .= "}\n\n";
     }
 
@@ -994,6 +1181,249 @@ function generate_theme_css_basic($config) {
     $css .= "    }\n";
     $css .= "}\n\n";
 
+    // === HEADER Y CONTAINER GLASSMORPHISM ===
+    $css .= "/* =================================\n";
+    $css .= "   HEADER & CONTAINERS 3D\n";
+    $css .= "   ================================= */\n\n";
+
+    // Header con glassmorphism y sombra
+    $css .= ".header {\n";
+    $css .= "    background: rgba(255, 255, 255, 0.85);\n";
+    $css .= "    backdrop-filter: blur(var(--blur-md, 16px));\n";
+    $css .= "    -webkit-backdrop-filter: blur(var(--blur-md, 16px));\n";
+    $css .= "    border-bottom: 1px solid rgba(255, 255, 255, 0.3);\n";
+    $css .= "    box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));\n";
+    $css .= "    position: relative;\n";
+    $css .= "}\n\n";
+
+    // Product container con glassmorphism
+    $css .= ".product-container {\n";
+    $css .= "    background: rgba(255, 255, 255, 0.7);\n";
+    $css .= "    backdrop-filter: blur(var(--blur-md, 16px));\n";
+    $css .= "    -webkit-backdrop-filter: blur(var(--blur-md, 16px));\n";
+    $css .= "    border: 1px solid rgba(255, 255, 255, 0.3);\n";
+    $css .= "    border-radius: var(--border-radius-2xl, 32px);\n";
+    $css .= "    padding: var(--spacing-2xl, 48px);\n";
+    $css .= "    box-shadow: var(--shadow-2xl, 0 20px 48px rgba(0, 0, 0, 0.25));\n";
+    $css .= "}\n\n";
+
+    // Breadcrumb en línea horizontal
+    $css .= ".breadcrumb {\n";
+    $css .= "    margin-bottom: var(--spacing-md, 16px);\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb ol {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-wrap: wrap;\n";
+    $css .= "    align-items: center;\n";
+    $css .= "    gap: 8px;\n";
+    $css .= "    list-style: none;\n";
+    $css .= "    margin: 0;\n";
+    $css .= "    padding: 0;\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb li {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    align-items: center;\n";
+    $css .= "    gap: 8px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb a {\n";
+    $css .= "    color: var(--color-primary, #005461);\n";
+    $css .= "    text-decoration: none;\n";
+    $css .= "    transition: opacity 0.2s;\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb a:hover {\n";
+    $css .= "    opacity: 0.7;\n";
+    $css .= "    text-decoration: underline;\n";
+    $css .= "}\n\n";
+
+    $css .= ".breadcrumb-separator {\n";
+    $css .= "    color: var(--color-text-light, #999);\n";
+    $css .= "    user-select: none;\n";
+    $css .= "}\n\n";
+
+    // === PRODUCT GALLERY LAYOUTS ===
+    $css .= "/* =================================\n";
+    $css .= "   PRODUCT GALLERY LAYOUTS\n";
+    $css .= "   ================================= */\n\n";
+
+    // Estilos para contenedor de imagen principal (dinámico desde config)
+    $gallery_config = $config['components']['product_gallery'] ?? [];
+
+    // Main image border
+    $main_border_width = $gallery_config['main_image_border_width'] ?? '2px';
+    $main_border_style = $gallery_config['main_image_border_style'] ?? 'glassmorphism';
+    $main_shadow = $gallery_config['main_image_shadow'] ?? 'deep';
+    $main_radius = $gallery_config['main_image_border_radius'] ?? 'xl';
+
+    $css .= ".main-image-container {\n";
+
+    // Border dinámico
+    if ($main_border_width !== '0px') {
+        if ($main_border_style === 'glassmorphism') {
+            $css .= "    border: {$main_border_width} solid rgba(255, 255, 255, 0.3);\n";
+            $css .= "    background: rgba(255, 255, 255, 0.7);\n";
+            $css .= "    backdrop-filter: blur(10px);\n";
+        } else {
+            $css .= "    border: {$main_border_width} solid var(--color-border, #e0e0e0);\n";
+        }
+    }
+
+    // Border radius
+    $css .= "    border-radius: var(--border-radius-{$main_radius}, 24px);\n";
+
+    // Shadow dinámico
+    $shadow_values = [
+        'none' => 'none',
+        'subtle' => 'var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.1))',
+        'medium' => 'var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.2))',
+        'deep' => 'var(--shadow-xl, 0 24px 48px rgba(0, 0, 0, 0.3))'
+    ];
+    $css .= "    box-shadow: " . ($shadow_values[$main_shadow] ?? $shadow_values['deep']) . ";\n";
+
+    $css .= "    position: relative;\n";
+    $css .= "    overflow: hidden;\n";
+    $css .= "}\n\n";
+
+    // Estilos para thumbnails (dinámico desde config)
+    $thumb_border_width = $gallery_config['thumbnail_border_width'] ?? '3px';
+    $thumb_radius = $gallery_config['thumbnail_border_radius'] ?? 'md';
+    $thumb_hover_effect = $gallery_config['thumbnail_hover_effect'] ?? 'scale';
+    $thumb_opacity = $gallery_config['thumbnail_opacity_inactive'] ?? '0.6';
+
+    $css .= ".thumbnail {\n";
+
+    // Border
+    if ($thumb_border_width !== '0px') {
+        $css .= "    border: {$thumb_border_width} solid var(--color-border, #e0e0e0);\n";
+    }
+
+    $css .= "    border-radius: var(--border-radius-{$thumb_radius}, 12px);\n";
+    $css .= "    transition: all var(--transition-base, 0.3s ease);\n";
+    $css .= "    opacity: {$thumb_opacity};\n";
+    $css .= "    cursor: pointer;\n";
+    $css .= "    overflow: hidden;\n";
+    $css .= "}\n\n";
+
+    $css .= ".thumbnail:hover {\n";
+    $css .= "    opacity: 1;\n";
+    $css .= "    border-color: var(--color-primary, #005461);\n";
+
+    // Hover effect dinámico
+    if ($thumb_hover_effect === 'scale') {
+        $css .= "    transform: scale(1.05);\n";
+    } elseif ($thumb_hover_effect === 'glow') {
+        $css .= "    box-shadow: 0 0 12px rgba(var(--color-primary-rgb, 0, 84, 97), 0.5);\n";
+    }
+
+    $css .= "}\n\n";
+
+    $css .= ".thumbnail.active {\n";
+    $css .= "    opacity: 1;\n";
+    $css .= "    border-color: var(--color-primary, #005461);\n";
+    $css .= "    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 0, 84, 97), 0.2);\n";
+    $css .= "}\n\n";
+
+    $css .= ".thumbnail img {\n";
+    $css .= "    width: 100%;\n";
+    $css .= "    height: 100%;\n";
+    $css .= "    object-fit: cover;\n";
+    $css .= "}\n\n";
+
+    // Ocultar zoom indicator (el cursor lupa es suficiente)
+    $css .= ".zoom-indicator {\n";
+    $css .= "    display: none;\n";
+    $css .= "}\n\n";
+
+    // Thumbnails Bottom (default)
+    $css .= ".product-gallery.thumbnails-bottom {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: column;\n";
+    $css .= "    gap: 16px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-bottom .product-thumbnails {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: row;\n";
+    $css .= "    gap: 12px;\n";
+    $css .= "    justify-content: center;\n";
+    $css .= "}\n\n";
+
+    // Thumbnails Left
+    $css .= ".product-gallery.thumbnails-left {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: row-reverse;\n";
+    $css .= "    gap: 16px;\n";
+    $css .= "    align-items: flex-start;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-left .product-thumbnails {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: column;\n";
+    $css .= "    gap: 12px;\n";
+    $css .= "    flex-shrink: 0;\n";
+    $css .= "    width: 100px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-left .main-image-container {\n";
+    $css .= "    flex: 1;\n";
+    $css .= "    min-width: 0;\n";
+    $css .= "    max-width: 100%;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-left .main-image-container img {\n";
+    $css .= "    width: 100%;\n";
+    $css .= "    height: auto;\n";
+    $css .= "    max-height: 600px;\n";
+    $css .= "    object-fit: contain;\n";
+    $css .= "}\n\n";
+
+    // Thumbnails Right
+    $css .= ".product-gallery.thumbnails-right {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: row;\n";
+    $css .= "    gap: 16px;\n";
+    $css .= "    align-items: flex-start;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-right .product-thumbnails {\n";
+    $css .= "    display: flex;\n";
+    $css .= "    flex-direction: column;\n";
+    $css .= "    gap: 12px;\n";
+    $css .= "    flex-shrink: 0;\n";
+    $css .= "    width: 100px;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-right .main-image-container {\n";
+    $css .= "    flex: 1;\n";
+    $css .= "    min-width: 0;\n";
+    $css .= "    max-width: 100%;\n";
+    $css .= "}\n\n";
+
+    $css .= ".product-gallery.thumbnails-right .main-image-container img {\n";
+    $css .= "    width: 100%;\n";
+    $css .= "    height: auto;\n";
+    $css .= "    max-height: 600px;\n";
+    $css .= "    object-fit: contain;\n";
+    $css .= "}\n\n";
+
+    // Mobile: always use bottom layout
+    $css .= "@media (max-width: 768px) {\n";
+    $css .= "    .product-gallery.thumbnails-left,\n";
+    $css .= "    .product-gallery.thumbnails-right {\n";
+    $css .= "        flex-direction: column !important;\n";
+    $css .= "    }\n\n";
+
+    $css .= "    .product-gallery.thumbnails-left .product-thumbnails,\n";
+    $css .= "    .product-gallery.thumbnails-right .product-thumbnails {\n";
+    $css .= "        flex-direction: row !important;\n";
+    $css .= "        max-width: none !important;\n";
+    $css .= "        justify-content: center;\n";
+    $css .= "    }\n";
+    $css .= "}\n\n";
+
     return $css;
 }
 
@@ -1140,9 +1570,10 @@ function delete_theme($slug) {
  * Crea directorio, theme.json, variables.css y theme.css
  *
  * @param array $data Datos del formulario
+ * @param array|null $original_config Theme.json original si estamos editando
  * @return array ['success' => bool, 'message' => string, 'slug' => string]
  */
-function generate_theme($data) {
+function generate_theme($data, $original_config = null) {
     $slug = $data['slug'];
     $theme_dir = PUBLIC_PATH . "/assets/themes/{$slug}";
 
@@ -1167,16 +1598,19 @@ function generate_theme($data) {
 
         'features' => [
             'dark_mode' => false,
-            'animations' => 'smooth',
+            'animations' => $data['animations'] ?? 'smooth',
             'border_style' => $data['card_rounded'] ? 'rounded' : 'sharp',
             'shadow_style' => $data['card_shadow'] ?? 'subtle',
-            'color_scheme' => 'custom'
+            'color_scheme' => $data['color_scheme'] ?? 'custom',
+            'glassmorphism' => $data['glassmorphism'] ?? false,
+            'gradient_effects' => $data['gradient_effects'] ?? false,
+            'transform_3d' => $data['transform_3d'] ?? false
         ],
 
         'colors' => [
             'primary' => $data['color_primary'],
-            'primary_dark' => generate_color_variants($data['color_primary'])['dark'],
-            'primary_light' => generate_color_variants($data['color_primary'])['light'],
+            'primary_dark' => !empty($data['color_primary_dark']) ? $data['color_primary_dark'] : generate_color_variants($data['color_primary'])['dark'],
+            'primary_light' => !empty($data['color_primary_light']) ? $data['color_primary_light'] : generate_color_variants($data['color_primary'])['light'],
             'secondary' => $data['color_secondary'],
             'accent' => $data['color_accent'] ?? '#4facfe',
             'success' => $data['color_success'] ?? '#2e7d32',
@@ -1187,44 +1621,74 @@ function generate_theme($data) {
             'background' => $data['color_background']
         ],
 
-        'typography' => [
-            'font_family' => $data['font_family'] ?? 'sans-serif',
-            'font_family_heading' => $data['font_family'] ?? 'sans-serif',
-            'heading_weight' => '600',
-            'base_size' => $data['font_size'] ?? '16px',
-            'line_height' => $data['line_height'] ?? '1.5'
-        ],
+        'typography' => array_merge(
+            [
+                'font_family' => $data['font_family'] ?? 'sans-serif',
+                'font_family_heading' => $data['font_family_heading'] ?? 'sans-serif',
+                'heading_weight' => $data['heading_weight'] ?? '600',
+                'base_size' => $data['font_size'] ?? '16px',
+                'line_height' => $data['line_height'] ?? '1.5'
+            ],
+            // Preservar configuración completa del original si existe
+            isset($original_config['typography']['font_sizes']) ? ['font_sizes' => $original_config['typography']['font_sizes']] : [],
+            isset($original_config['typography']['font_weights']) ? ['font_weights' => $original_config['typography']['font_weights']] : [],
+            isset($original_config['typography']['line_heights']) ? ['line_heights' => $original_config['typography']['line_heights']] : []
+        ),
 
-        'spacing' => [
-            'base_unit' => '12px',
-            'scale' => 'proportional'
-        ],
+        'spacing' => array_merge(
+            [
+                'base_unit' => $data['base_unit'] ?? '12px',
+                'scale' => $data['spacing_scale'] ?? 'proportional'
+            ],
+            // Preservar valores custom del original si existen
+            isset($original_config['spacing']['values']) ? ['values' => $original_config['spacing']['values']] : []
+        ),
+
+        // Preservar borders del original si existe
+        'borders' => $original_config['borders'] ?? [],
+
+        // Preservar effects del original si existe
+        'effects' => $original_config['effects'] ?? [],
 
         'components' => [
-            'buttons' => [
-                'style' => $data['button_style'] ?? 'solid',
-                'rounded' => $data['button_rounded'] ?? false,
-                'shadow' => $data['button_shadow'] ?? false,
-                'height' => $data['button_height'] ?? 'normal',
-                'width' => $data['button_width'] ?? 'auto',
-                'icon' => $data['button_icon'] ?? 'show',
-                'hover' => $data['button_hover'] ?? 'lift'
-            ],
-            'cards' => [
-                'border' => $data['card_border'] ?? true,
-                'shadow' => $data['card_shadow'] ?? 'subtle',
-                'rounded' => $data['card_rounded'] ?? false,
-                'hover_effect' => $data['card_hover'] ?? 'glow',
-                'buttons' => $data['card_buttons'] ?? 'show',
-                'buttons_position' => $data['card_buttons_position'] ?? 'center',
-                'buttons_spacing' => $data['card_buttons_spacing'] ?? 'normal',
-                'buttons_vertical_spacing' => $data['card_buttons_vertical_spacing'] ?? 'normal'
-            ],
+            'buttons' => array_merge(
+                // Base: campos siempre presentes
+                [
+                    'style' => $data['button_style'] ?? 'solid',
+                    'rounded' => $data['button_rounded'] ?? false,
+                    'shadow' => $data['button_shadow'] ?? false,
+                    'transform' => $data['transform_3d'] ?? false
+                ],
+                // Opcionales: solo si existen en original O si son theme nuevo
+                $original_config === null || isset($original_config['components']['buttons']['height']) ? ['height' => $data['button_height'] ?? 'normal'] : [],
+                $original_config === null || isset($original_config['components']['buttons']['width']) ? ['width' => $data['button_width'] ?? 'auto'] : [],
+                $original_config === null || isset($original_config['components']['buttons']['icon']) ? ['icon' => $data['button_icon'] ?? 'show'] : [],
+                $original_config === null || isset($original_config['components']['buttons']['hover']) ? ['hover' => $data['button_hover'] ?? 'lift'] : []
+            ),
+            'cards' => array_merge(
+                // Campos base
+                [
+                    'border' => $data['card_border'] ?? true,
+                    'shadow' => !empty($data['card_shadow']) && $data['card_shadow'] !== 'none',
+                    'rounded' => $data['card_rounded'] ?? false,
+                    'hover_effect' => $data['card_hover'] ?? 'glow',
+                    'glassmorphism' => $data['glassmorphism'] ?? false
+                ],
+                // Opcionales: solo si existen en original O si es theme nuevo
+                $original_config === null || isset($original_config['components']['cards']['buttons']) ? [
+                    'buttons' => $data['card_buttons'] ?? 'show',
+                    'buttons_position' => $data['card_buttons_position'] ?? 'center',
+                    'buttons_spacing' => $data['card_buttons_spacing'] ?? 'normal',
+                    'buttons_vertical_spacing' => $data['card_buttons_vertical_spacing'] ?? 'normal'
+                ] : []
+            ),
             'forms' => [
                 'style' => 'modern',
-                'border_style' => 'solid',
-                'focus_ring' => true
+                'border_style' => $data['form_border_style'] ?? 'solid',
+                'focus_ring' => $data['form_focus_ring'] ?? true,
+                'glow_effect' => $data['form_glow_effect'] ?? false
             ],
+            // product_view: siempre incluir (permite editar desde generador)
             'product_view' => [
                 'gallery_layout' => $data['product_gallery_layout'] ?? 'thumbnails-bottom',
                 'image_size' => $data['product_image_size'] ?? 'medium',
@@ -1235,18 +1699,28 @@ function generate_theme($data) {
                 'show_stock' => $data['product_show_stock'] ?? true,
                 'show_nav_buttons' => $data['product_show_nav_buttons'] ?? true,
                 'show_image_counter' => $data['product_show_image_counter'] ?? true
+            ],
+            'product_gallery' => [
+                'main_image_border_width' => $data['product_main_image_border_width'] ?? '2px',
+                'main_image_border_style' => $data['product_main_image_border_style'] ?? 'glassmorphism',
+                'main_image_shadow' => $data['product_main_image_shadow'] ?? 'deep',
+                'main_image_border_radius' => $data['product_main_image_border_radius'] ?? 'xl',
+                'thumbnail_border_width' => $data['product_thumbnail_border_width'] ?? '3px',
+                'thumbnail_border_radius' => $data['product_thumbnail_border_radius'] ?? 'md',
+                'thumbnail_hover_effect' => $data['product_thumbnail_hover_effect'] ?? 'scale',
+                'thumbnail_opacity_inactive' => $data['product_thumbnail_opacity_inactive'] ?? '0.6'
             ]
         ],
 
         'layout' => [
-            'container_width' => '1200px',
-            'grid_gap' => '28px',
-            'sidebar_width' => '300px'
+            'container_width' => $data['container_width'] ?? '1200px',
+            'grid_gap' => $data['grid_gap'] ?? '28px',
+            'sidebar_width' => $data['sidebar_width'] ?? '300px'
         ],
 
         'footer' => [
-            'background_color' => '#292c2f',
-            'text_color' => '#ffffff'
+            'background_color' => $data['footer_bg_color'] ?? '#292c2f',
+            'text_color' => $data['footer_text_color'] ?? '#ffffff'
         ],
 
         'compatibility' => [
@@ -1257,8 +1731,8 @@ function generate_theme($data) {
             'accessibility' => 'wcag-aa'
         ],
 
-        'tags' => ['custom', 'generado', 'personalizado'],
-        'created_at' => date('Y-m-d'),
+        'tags' => $original_config['tags'] ?? ['custom', 'generado', 'personalizado'],
+        'created_at' => $original_config['created_at'] ?? date('Y-m-d'),
         'updated_at' => date('Y-m-d')
     ];
 
@@ -1270,7 +1744,7 @@ function generate_theme($data) {
         ];
     }
 
-    // Generar variables.css
+    // SIEMPRE regenerar variables.css (contiene todos los valores modificables)
     $variables_css = generate_variables_css($config);
     if (file_put_contents($theme_dir . '/variables.css', $variables_css) === false) {
         return [
@@ -1279,13 +1753,85 @@ function generate_theme($data) {
         ];
     }
 
-    // Generar theme.css
-    $theme_css = generate_theme_css_basic($config);
-    if (file_put_contents($theme_dir . '/theme.css', $theme_css) === false) {
-        return [
-            'success' => false,
-            'message' => 'Error al guardar theme.css'
-        ];
+    // theme.css: Copiar del original si existe (preservar efectos personalizados)
+    // o generar básico si es theme nuevo
+    if ($original_config !== null) {
+        $original_slug = $original_config['slug'] ?? null;
+        if ($original_slug) {
+            $original_theme_css = PUBLIC_PATH . "/assets/themes/{$original_slug}/theme.css";
+            if (file_exists($original_theme_css)) {
+                // Copiar theme.css original (preserva efectos personalizados)
+                $dest_file = $theme_dir . '/theme.css';
+
+                // Verificar si el directorio de destino existe y es escribible
+                if (!is_dir($theme_dir)) {
+                    return [
+                        'success' => false,
+                        'message' => 'Error: el directorio del theme no existe'
+                    ];
+                }
+
+                if (!is_writable($theme_dir)) {
+                    return [
+                        'success' => false,
+                        'message' => 'Error: el directorio del theme no tiene permisos de escritura'
+                    ];
+                }
+
+                // Verificar que el archivo origen es legible
+                if (!is_readable($original_theme_css)) {
+                    return [
+                        'success' => false,
+                        'message' => 'Error: no se puede leer theme.css original (permisos)'
+                    ];
+                }
+
+                // Si el archivo destino existe, intentar eliminarlo
+                if (file_exists($dest_file)) {
+                    @unlink($dest_file);
+                }
+
+                // Método 1: Intentar copy()
+                $copied = @copy($original_theme_css, $dest_file);
+
+                // Método 2 (fallback): Si copy() falla, usar file_get_contents/put_contents
+                if (!$copied) {
+                    $content = @file_get_contents($original_theme_css);
+                    if ($content !== false) {
+                        $written = @file_put_contents($dest_file, $content);
+                        if ($written !== false) {
+                            $copied = true; // Éxito con método alternativo
+                        }
+                    }
+                }
+
+                // Método 3 (último fallback): Si todo falla, generar CSS básico
+                if (!$copied) {
+                    $theme_css = generate_theme_css_basic($config);
+                    if (file_put_contents($dest_file, $theme_css) === false) {
+                        return [
+                            'success' => false,
+                            'message' => 'Error: no se pudo generar theme.css (permisos de escritura)'
+                        ];
+                    }
+                    // Advertencia en lugar de error
+                    $copy_warning = 'Nota: Se generó CSS básico (no se pudo copiar theme.css original)';
+                }
+            } else {
+                // No existe theme.css original, generar básico
+                $theme_css = generate_theme_css_basic($config);
+                file_put_contents($theme_dir . '/theme.css', $theme_css);
+            }
+        }
+    } else {
+        // Theme nuevo: generar theme.css básico
+        $theme_css = generate_theme_css_basic($config);
+        if (file_put_contents($theme_dir . '/theme.css', $theme_css) === false) {
+            return [
+                'success' => false,
+                'message' => 'Error al guardar theme.css'
+            ];
+        }
     }
 
     // Establecer permisos
@@ -1294,9 +1840,15 @@ function generate_theme($data) {
     chmod($theme_dir . '/variables.css', 0644);
     chmod($theme_dir . '/theme.css', 0644);
 
+    // Construir mensaje de éxito con posibles advertencias
+    $success_message = "Theme '{$data['name']}' generado exitosamente";
+    if (isset($copy_warning)) {
+        $success_message .= "<br><br>⚠️ {$copy_warning}";
+    }
+
     return [
         'success' => true,
-        'message' => "Theme '{$data['name']}' generado exitosamente",
+        'message' => $success_message,
         'slug' => $slug
     ];
 }

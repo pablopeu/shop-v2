@@ -46,6 +46,33 @@ $form_values = [
     'product_show_stock' => true,
     'product_show_nav_buttons' => true,
     'product_show_image_counter' => true,
+    // Estilos de galería
+    'product_main_image_border_width' => '2px',
+    'product_main_image_border_style' => 'glassmorphism',
+    'product_main_image_shadow' => 'deep',
+    'product_main_image_border_radius' => 'xl',
+    'product_thumbnail_border_width' => '3px',
+    'product_thumbnail_border_radius' => 'md',
+    'product_thumbnail_hover_effect' => 'scale',
+    'product_thumbnail_opacity_inactive' => '0.6',
+    // Efectos visuales
+    'animations' => 'smooth',
+    'glassmorphism' => false,
+    'gradient_effects' => false,
+    'transform_3d' => false,
+    // Tipografía avanzada
+    'font_family_heading' => 'sans-serif',
+    'heading_weight' => '600',
+    // Spacing
+    'base_unit' => '12px',
+    'spacing_scale' => 'proportional',
+    // Layout
+    'container_width' => '1200px',
+    'grid_gap' => '28px',
+    'sidebar_width' => '300px',
+    // Footer
+    'footer_bg_color' => '#292c2f',
+    'footer_text_color' => '#ffffff',
 ];
 
 // Si viene de redirect después de guardar, cargar el theme
@@ -62,22 +89,50 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'slug' => $edit_config['slug'] ?? '',
             'description' => $edit_config['description'] ?? '',
             'author' => $edit_config['author'] ?? 'Shop Team',
+
+            // Colores principales
             'color_primary' => $edit_config['colors']['primary'] ?? '#000000',
             'color_secondary' => $edit_config['colors']['secondary'] ?? '#d4af37',
             'color_accent' => $edit_config['colors']['accent'] ?? '#4facfe',
             'color_text' => $edit_config['colors']['text'] ?? '#1a1a1a',
             'color_background' => $edit_config['colors']['background'] ?? '#ffffff',
+
+            // Variantes de primary (NUEVO)
+            'color_primary_dark' => $edit_config['colors']['primary_dark'] ?? '',
+            'color_primary_light' => $edit_config['colors']['primary_light'] ?? '',
+
+            // Colores de estado
+            'color_success' => $edit_config['colors']['success'] ?? '#2e7d32',
+            'color_warning' => $edit_config['colors']['warning'] ?? '#f57c00',
+            'color_error' => $edit_config['colors']['error'] ?? '#c62828',
+            'color_info' => $edit_config['colors']['info'] ?? '#1565c0',
+
+            // Tipografía base
+            'font_family' => $edit_config['typography']['font_family'] ?? 'sans-serif',
+            'font_size' => $edit_config['typography']['base_size'] ?? '16px',
+            'line_height' => $edit_config['typography']['line_height'] ?? '1.5',
+
+            // Cards
+            'card_border' => $edit_config['components']['cards']['border'] ?? false,
+            'card_shadow' => $edit_config['features']['shadow_style'] ?? 'subtle',
+            'card_rounded' => ($edit_config['features']['border_style'] ?? 'sharp') === 'rounded',
+            'card_hover' => $edit_config['components']['cards']['hover_effect'] ?? 'glow',
             'card_buttons' => $edit_config['components']['cards']['buttons'] ?? 'show',
             'card_buttons_position' => $edit_config['components']['cards']['buttons_position'] ?? 'center',
             'card_buttons_spacing' => $edit_config['components']['cards']['buttons_spacing'] ?? 'normal',
             'card_buttons_vertical_spacing' => $edit_config['components']['cards']['buttons_vertical_spacing'] ?? 'normal',
+
+            // Buttons
             'button_style' => $edit_config['components']['buttons']['style'] ?? 'solid',
             'button_rounded' => $edit_config['components']['buttons']['rounded'] ?? false,
             'button_shadow' => $edit_config['components']['buttons']['shadow'] ?? false,
+            'button_transform' => $edit_config['components']['buttons']['transform'] ?? false,
             'button_height' => $edit_config['components']['buttons']['height'] ?? 'normal',
             'button_width' => $edit_config['components']['buttons']['width'] ?? 'auto',
             'button_icon' => $edit_config['components']['buttons']['icon'] ?? 'show',
             'button_hover' => $edit_config['components']['buttons']['hover'] ?? 'lift',
+
+            // Vista de Producto
             'product_gallery_layout' => $edit_config['components']['product_view']['gallery_layout'] ?? 'thumbnails-bottom',
             'product_image_size' => $edit_config['components']['product_view']['image_size'] ?? 'medium',
             'product_thumbnail_size' => $edit_config['components']['product_view']['thumbnail_size'] ?? 'medium',
@@ -87,6 +142,47 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'product_show_stock' => $edit_config['components']['product_view']['show_stock'] ?? true,
             'product_show_nav_buttons' => $edit_config['components']['product_view']['show_nav_buttons'] ?? true,
             'product_show_image_counter' => $edit_config['components']['product_view']['show_image_counter'] ?? true,
+
+            // Estilos de Galería
+            'product_main_image_border_width' => $edit_config['components']['product_gallery']['main_image_border_width'] ?? '2px',
+            'product_main_image_border_style' => $edit_config['components']['product_gallery']['main_image_border_style'] ?? 'glassmorphism',
+            'product_main_image_shadow' => $edit_config['components']['product_gallery']['main_image_shadow'] ?? 'deep',
+            'product_main_image_border_radius' => $edit_config['components']['product_gallery']['main_image_border_radius'] ?? 'xl',
+            'product_thumbnail_border_width' => $edit_config['components']['product_gallery']['thumbnail_border_width'] ?? '3px',
+            'product_thumbnail_border_radius' => $edit_config['components']['product_gallery']['thumbnail_border_radius'] ?? 'md',
+            'product_thumbnail_hover_effect' => $edit_config['components']['product_gallery']['thumbnail_hover_effect'] ?? 'scale',
+            'product_thumbnail_opacity_inactive' => $edit_config['components']['product_gallery']['thumbnail_opacity_inactive'] ?? '0.6',
+
+            // Efectos visuales
+            'animations' => $edit_config['features']['animations'] ?? 'smooth',
+            'glassmorphism' => $edit_config['features']['glassmorphism'] ?? false,
+            'gradient_effects' => $edit_config['features']['gradient_effects'] ?? false,
+            'transform_3d' => $edit_config['features']['transform_3d'] ?? false,
+            'color_scheme' => $edit_config['features']['color_scheme'] ?? 'custom',
+
+            // Forms (NUEVO)
+            'form_border_style' => $edit_config['components']['forms']['border_style'] ?? 'solid',
+            'form_focus_ring' => $edit_config['components']['forms']['focus_ring'] ?? true,
+            'form_glow_effect' => $edit_config['components']['forms']['glow_effect'] ?? false,
+
+            // Tipografía avanzada
+            'font_family_heading' => $edit_config['typography']['font_family_heading'] ?? 'sans-serif',
+            'heading_weight' => $edit_config['typography']['heading_weight'] ?? '600',
+
+            // Spacing
+            'base_unit' => $edit_config['spacing']['base_unit'] ?? '12px',
+            'spacing_scale' => $edit_config['spacing']['scale'] ?? 'proportional',
+
+            // Layout
+            'container_width' => $edit_config['layout']['container_width'] ?? '1200px',
+            'grid_gap' => $edit_config['layout']['grid_gap'] ?? '28px',
+            'sidebar_width' => $edit_config['layout']['sidebar_width'] ?? '300px',
+
+            // Footer
+            'footer_bg_color' => $edit_config['footer']['background_color'] ?? '#292c2f',
+            'footer_text_color' => $edit_config['footer']['text_color'] ?? '#ffffff',
+
+            // Original slug para edición
             'original_slug' => $edit_config['slug'] ?? '',
         ];
 
@@ -114,6 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'color_accent' => sanitize_input($_POST['color_accent'] ?? '#4facfe'),
             'color_text' => sanitize_input($_POST['color_text'] ?? '#1a1a1a'),
             'color_background' => sanitize_input($_POST['color_background'] ?? '#ffffff'),
+            'color_primary_dark' => sanitize_input($_POST['color_primary_dark'] ?? ''),
+            'color_primary_light' => sanitize_input($_POST['color_primary_light'] ?? ''),
             'color_success' => sanitize_input($_POST['color_success'] ?? '#2e7d32'),
             'color_warning' => sanitize_input($_POST['color_warning'] ?? '#f57c00'),
             'color_error' => sanitize_input($_POST['color_error'] ?? '#c62828'),
@@ -152,7 +250,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'product_show_sku' => isset($_POST['product_show_sku']),
             'product_show_stock' => isset($_POST['product_show_stock']),
             'product_show_nav_buttons' => isset($_POST['product_show_nav_buttons']),
-            'product_show_image_counter' => isset($_POST['product_show_image_counter'])
+            'product_show_image_counter' => isset($_POST['product_show_image_counter']),
+
+            // Estilos de Galería
+            'product_main_image_border_width' => sanitize_input($_POST['product_main_image_border_width'] ?? '2px'),
+            'product_main_image_border_style' => sanitize_input($_POST['product_main_image_border_style'] ?? 'glassmorphism'),
+            'product_main_image_shadow' => sanitize_input($_POST['product_main_image_shadow'] ?? 'deep'),
+            'product_main_image_border_radius' => sanitize_input($_POST['product_main_image_border_radius'] ?? 'xl'),
+            'product_thumbnail_border_width' => sanitize_input($_POST['product_thumbnail_border_width'] ?? '3px'),
+            'product_thumbnail_border_radius' => sanitize_input($_POST['product_thumbnail_border_radius'] ?? 'md'),
+            'product_thumbnail_hover_effect' => sanitize_input($_POST['product_thumbnail_hover_effect'] ?? 'scale'),
+            'product_thumbnail_opacity_inactive' => sanitize_input($_POST['product_thumbnail_opacity_inactive'] ?? '0.6'),
+
+            // Efectos Visuales
+            'animations' => sanitize_input($_POST['animations'] ?? 'smooth'),
+            'glassmorphism' => isset($_POST['glassmorphism']),
+            'gradient_effects' => isset($_POST['gradient_effects']),
+            'transform_3d' => isset($_POST['transform_3d']),
+            'color_scheme' => sanitize_input($_POST['color_scheme'] ?? 'custom'),
+
+            // Componentes: Forms
+            'form_border_style' => sanitize_input($_POST['form_border_style'] ?? 'solid'),
+            'form_focus_ring' => isset($_POST['form_focus_ring']),
+            'form_glow_effect' => isset($_POST['form_glow_effect']),
+
+            // Tipografía Avanzada
+            'font_family_heading' => sanitize_input($_POST['font_family_heading'] ?? 'sans-serif'),
+            'heading_weight' => sanitize_input($_POST['heading_weight'] ?? '600'),
+
+            // Spacing
+            'base_unit' => sanitize_input($_POST['base_unit'] ?? '12px'),
+            'spacing_scale' => sanitize_input($_POST['spacing_scale'] ?? 'proportional'),
+
+            // Layout
+            'container_width' => sanitize_input($_POST['container_width'] ?? '1200px'),
+            'grid_gap' => sanitize_input($_POST['grid_gap'] ?? '28px'),
+            'sidebar_width' => sanitize_input($_POST['sidebar_width'] ?? '300px'),
+
+            // Footer
+            'footer_bg_color' => sanitize_input($_POST['footer_bg_color'] ?? '#292c2f'),
+            'footer_text_color' => sanitize_input($_POST['footer_text_color'] ?? '#ffffff')
         ];
 
         // Validar (pasar original_slug si estamos editando un theme existente)
@@ -166,11 +303,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
         if (!$validation['valid']) {
             $error = implode('<br>', $validation['errors']);
         } else {
-            // Generar theme
-            $result = generate_theme($data);
+            // Cargar theme original si estamos editando
+            $original_config = null;
+            if (!empty($original_slug)) {
+                $original_theme_path = PUBLIC_PATH . "/assets/themes/{$original_slug}/theme.json";
+                if (file_exists($original_theme_path)) {
+                    $original_config = json_decode(file_get_contents($original_theme_path), true);
+                }
+            }
+
+            // Generar theme (pasando config original si existe)
+            $result = generate_theme($data, $original_config);
 
             if ($result['success']) {
+                // Mensaje de éxito base
                 $message = $result['message'];
+
+                // Agregar warnings si existen (no bloquean el guardado)
+                if (!empty($validation['warnings'])) {
+                    $message .= '<br><br>⚠️ <strong>Advertencias:</strong><br>' . implode('<br>', $validation['warnings']);
+                }
+
                 $saved_theme_slug = $result['slug'];
                 log_admin_action('theme_generated', $_SESSION['username'], [
                     'slug' => $result['slug'],
@@ -314,11 +467,14 @@ $site_config = read_json(APP_PATH . '/config/site.json');
 // Cargar paletas populares desde el archivo JSON
 $paletas_file = PUBLIC_PATH . '/assets/data/paletas-populares.json';
 $paletas_json = '[]'; // Default vacío
+$paletas_array = []; // Array para contar
 if (file_exists($paletas_file)) {
     $paletas_content = file_get_contents($paletas_file);
     // Validar que sea JSON válido
-    if (json_decode($paletas_content) !== null) {
+    $decoded = json_decode($paletas_content, true);
+    if ($decoded !== null) {
         $paletas_json = $paletas_content;
+        $paletas_array = $decoded;
     }
 }
 
@@ -551,6 +707,60 @@ $user = get_logged_user();
             font-size: 12px;
             line-height: 1.4;
         }
+
+        /* Tabs de navegación */
+        .tabs-navigation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            margin-bottom: -2px;
+        }
+
+        .tab-button:hover {
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive tabs */
+        @media (max-width: 768px) {
+            .tabs-navigation {
+                gap: 4px;
+            }
+
+            .tab-button {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
     </style>
 
     <!-- Admin Common Responsive Styles -->
@@ -562,16 +772,7 @@ $user = get_logged_user();
     <div class="main-content">
         <?php include APP_PATH . '/includes/admin/header.php'; ?>
 
-        <h1 style="margin-bottom: 24px;">✨ Generador de Themes</h1>
-
-        <!-- Info Box -->
-        <div class="info-box">
-            <p>
-                <strong>ℹ️ Crea themes personalizados para tu tienda</strong><br>
-                Define colores, tipografía y estilos de componentes. El sistema generará automáticamente
-                todos los archivos CSS necesarios con más de 150 variables personalizadas.
-            </p>
-        </div>
+        <h1 style="margin-bottom: 20px;">✨ Generador de Themes</h1>
 
         <!-- Mensajes -->
         <?php if ($message): ?>
@@ -598,146 +799,64 @@ $user = get_logged_user();
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                 <input type="hidden" name="original_slug" id="original-slug" value="<?php echo htmlspecialchars($form_values['original_slug'] ?? ''); ?>">
 
-                <!-- Método de Creación -->
-                <div class="card card-full" style="margin-bottom: 20px;">
-                    <div class="card-title">
-                        🎨 Método de Creación
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label style="display: block; margin-bottom: 12px; font-weight: 500; color: #555;">Elige cómo crear tu theme:</label>
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="creation_method" value="new" checked data-onchange="toggleCreationMethod">
-                                Nuevo desde cero
-                            </label>
-                            <label>
-                                <input type="radio" name="creation_method" value="palette" data-onchange="toggleCreationMethod">
-                                Importar paleta de ColorHunt
-                            </label>
-                            <label>
-                                <input type="radio" name="creation_method" value="edit" data-onchange="toggleCreationMethod">
-                                Editar theme existente
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Importar Paleta de ColorHunt -->
-                <div class="card card-full" id="palette-import" style="display: none; margin-bottom: 20px;">
-                    <div class="card-title">
-                        🎨 Importar Paleta de ColorHunt
-                    </div>
-
-                    <!-- Opción 1: Paletas Populares -->
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
-                            ⭐ Opción 1: Paletas Populares
-                        </h3>
-                        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
-                            Selecciona una de las 114 paletas más populares de ColorHunt:
-                        </p>
-
-                        <!-- Loading state -->
-                        <div id="palettes-loading" style="text-align: center; padding: 20px; color: #999;">
-                            ⏳ Cargando paletas populares...
-                        </div>
-
-                        <!-- Grid de paletas -->
-                        <div id="palettes-grid" style="display: none; max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa;">
-                            <!-- Las paletas se cargarán aquí dinámicamente -->
-                        </div>
-
-                        <!-- Botón de Preview debajo de paletas -->
-                        <div style="text-align: center; margin-top: 15px;">
-                            <button type="button" data-action="showPreview" class="btn-preview" style="background: #667eea; color: white; padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                                👁️ Preview del Theme
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Separador -->
-                    <div style="border-top: 2px dashed #e0e0e0; margin: 30px 0; position: relative;">
-                        <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: #999; font-size: 13px;">
-                            O
-                        </span>
-                    </div>
-
-                    <!-- Opción 2: Paleta Personalizada -->
-                    <div>
-                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
-                            ✏️ Opción 2: Paleta Personalizada
-                        </h3>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
-                            <!-- Explicación a la izquierda -->
-                            <div class="info-box">
-                                <p style="font-size: 13px;">
-                                    <strong>ℹ️ Cómo usar:</strong><br>
-                                    1. Ve a <a href="https://colorhunt.co" target="_blank" rel="noopener" style="color: #667eea; text-decoration: underline;">ColorHunt.co</a><br>
-                                    2. Elige una paleta que te guste (debe tener 4 colores)<br>
-                                    3. Haz click en el ícono de copiar (📋) en la paleta<br>
-                                    4. Pega directamente aquí los 4 colores
-                                </p>
+                <!-- Método y Selector - Una línea en desktop -->
+                <div class="card card-full" style="margin-bottom: 12px; padding: 12px 16px;">
+                    <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                        <!-- Método -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <label style="font-weight: 500; color: #555; font-size: 14px; margin: 0; white-space: nowrap;">🎨 Método:</label>
+                            <div class="radio-group" style="margin: 0; display: flex; gap: 16px;">
+                                <label style="white-space: nowrap;">
+                                    <input type="radio" name="creation_method" value="edit" checked data-onchange="toggleCreationMethod">
+                                    Modificar existente
+                                </label>
+                                <label style="white-space: nowrap;">
+                                    <input type="radio" name="creation_method" value="new" data-onchange="toggleCreationMethod">
+                                    Crear nuevo
+                                </label>
                             </div>
+                        </div>
 
-                            <!-- Campo de texto a la derecha -->
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label for="palette-colors" style="font-size: 13px; margin-bottom: 8px;">Pega los 4 colores aquí</label>
-                                <textarea id="palette-colors" rows="5" style="font-family: monospace; font-size: 14px; line-height: 1.8; width: 100%;" placeholder="#005461
-#018790
-#00B7B5
-#F4F4F4"></textarea>
-                                <small class="helper-text">El sistema detectará automáticamente los 4 colores.</small>
+                        <!-- Selector de theme (solo visible cuando método=edit) -->
+                        <div id="edit-theme-inline" style="display: none; flex: 1; min-width: 300px;">
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <select id="edit-theme-select" style="flex: 1; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px;">
+                                    <option value="">-- Selecciona un theme --</option>
+                                    <?php foreach ($available_themes as $slug => $theme): ?>
+                                        <option value="<?php echo htmlspecialchars($slug); ?>">
+                                            <?php echo htmlspecialchars($theme['name']); ?> (<?php echo htmlspecialchars($slug); ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="button" data-action="loadThemeForEdit" class="btn-save" style="padding: 8px 20px; white-space: nowrap;">
+                                    📥 Cargar
+                                </button>
                             </div>
                         </div>
                     </div>
-
-                    <div style="text-align: center; margin-top: 16px;">
-                        <button type="button" data-action="mapPalette" class="btn-save">
-                            🎨 Aplicar Mapeo Inteligente
-                        </button>
-                    </div>
-
-                    <small class="helper-text" style="display: block; text-align: center; margin-top: 12px;">
-                        El sistema mapeará automáticamente los colores a primary, secondary, accent, background y text con validación de contraste WCAG.
-                    </small>
                 </div>
 
-                <!-- Editar Theme Existente -->
-                <div class="card card-full" id="edit-theme" style="display: none; margin-bottom: 20px;">
-                    <div class="card-title">
-                        ✏️ Editar Theme Existente
-                    </div>
-
-                    <div class="info-box" style="margin-bottom: 20px;">
-                        <p>
-                            <strong>ℹ️ Cómo funciona:</strong><br>
-                            Selecciona un theme existente para cargarlo en el formulario.<br>
-                            Modifica lo que necesites y regenera el theme (se sobrescribirá el original).
-                        </p>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit-theme-select">Selecciona el theme a editar</label>
-                        <select id="edit-theme-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
-                            <option value="">-- Selecciona un theme --</option>
-                            <?php foreach ($available_themes as $slug => $theme): ?>
-                                <option value="<?php echo htmlspecialchars($slug); ?>">
-                                    <?php echo htmlspecialchars($theme['name']); ?> (<?php echo htmlspecialchars($slug); ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <small class="helper-text">El theme seleccionado se cargará en el formulario para editarlo</small>
-                    </div>
-
-                    <div style="text-align: center; margin-top: 16px;">
-                        <button type="button" data-action="loadThemeForEdit" class="btn-save">
-                            📥 Cargar Theme
-                        </button>
-                    </div>
+                <!-- Tabs de Navegación -->
+                <div class="tabs-navigation">
+                    <button type="button" class="tab-button active" data-tab="general">
+                        📝 Información General
+                    </button>
+                    <button type="button" class="tab-button" data-tab="colors">
+                        🎨 Colores y Efectos
+                    </button>
+                    <button type="button" class="tab-button" data-tab="typography">
+                        ✍️ Tipografía y Layout
+                    </button>
+                    <button type="button" class="tab-button" data-tab="components">
+                        🎛️ Componentes
+                    </button>
+                    <button type="button" class="tab-button" data-tab="product">
+                        🖼️ Vista de Producto
+                    </button>
                 </div>
 
+                <!-- Tab 1: Información General -->
+                <div class="tab-content active" id="tab-general">
                 <!-- Grid: Información Básica + Tipografía -->
                 <div class="cards-grid">
                     <!-- Información Básica -->
@@ -820,58 +939,38 @@ $user = get_logged_user();
                         </div>
                     </div>
                 </div>
-
-                <!-- Actualizar Paleta (solo visible al editar theme) -->
-                <div class="card card-full" id="edit-palette-section" style="display: none; margin-bottom: 20px;">
-                    <div class="card-title">
-                        🎨 Actualizar Paleta de Colores (Opcional)
-                    </div>
-
-                    <div class="info-box" style="margin-bottom: 20px;">
-                        <p style="font-size: 14px;">
-                            <strong>💡 Puedes:</strong><br>
-                            • Seleccionar una paleta popular de ColorHunt para actualizar los colores<br>
-                            • O saltar esta sección y editar los colores manualmente más abajo
-                        </p>
-                    </div>
-
-                    <!-- Selector de paletas populares -->
-                    <div style="margin-bottom: 20px;">
-                        <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #2c3e50;">
-                            ⭐ Paletas Populares de ColorHunt
-                        </h3>
-
-                        <!-- Loading state -->
-                        <div id="edit-palettes-loading" style="text-align: center; padding: 20px; color: #999; display: none;">
-                            ⏳ Cargando paletas...
-                        </div>
-
-                        <!-- Grid de paletas -->
-                        <div id="edit-palettes-grid" style="display: none; max-height: 350px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; background: #fafafa;">
-                            <!-- Las paletas se cargarán aquí dinámicamente -->
-                        </div>
-
-                        <!-- Botón de Preview -->
-                        <div style="text-align: center; margin-top: 15px; display: none;" id="edit-preview-btn-container">
-                            <button type="button" data-action="showPreview" class="btn-preview" style="background: #667eea; color: white; padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                                👁️ Preview del Theme
-                            </button>
-                        </div>
-                    </div>
-
-                    <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 2px dashed #dee2e6;">
-                        <p style="font-size: 13px; color: #666; margin: 0;">
-                            💡 <strong>Tip:</strong> Si no quieres usar presets, simplemente edita los colores manualmente en la sección de abajo
-                        </p>
-                    </div>
                 </div>
+                <!-- Fin Tab 1: Información General -->
 
+                <!-- Tab 2: Colores y Efectos -->
+                <div class="tab-content" id="tab-colors">
                 <!-- Grid: Colores (ancho completo) -->
                 <div class="cards-grid">
                     <!-- Colores -->
                     <div class="card card-full" id="colors-section">
                     <div class="card-title">
                         🎨 Colores
+                    </div>
+
+                    <!-- Selector de Paletas Populares -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #444;">Paletas Populares</h4>
+                            <span style="font-size: 12px; color: #888;">(<?php echo count($paletas_array); ?> paletas disponibles)</span>
+                        </div>
+                        <div id="popular-palettes-grid" style="
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                            gap: 12px;
+                            max-height: 300px;
+                            overflow-y: auto;
+                            padding: 4px;
+                            background: #f9f9f9;
+                            border-radius: 8px;
+                            border: 1px solid #e0e0e0;
+                        ">
+                            <!-- Las paletas se cargan dinámicamente aquí -->
+                        </div>
                     </div>
 
                     <div class="color-grid">
@@ -923,6 +1022,32 @@ $user = get_logged_user();
 
                     <details style="margin-top: 20px;">
                         <summary style="cursor: pointer; font-weight: 500; color: #667eea;">
+                            Variantes de Primary (Opcional)
+                        </summary>
+
+                        <div class="color-grid" style="margin-top: 16px;">
+                            <div class="form-group">
+                                <label>Primary Dark</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" name="color_primary_dark" value="<?php echo htmlspecialchars(($form_values['color_primary_dark'] ?? '') ?: '#000000'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary_dark'] ?? ''); ?>" readonly>
+                                </div>
+                                <small class="helper-text">Variante oscura (auto si vacío)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Primary Light</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" name="color_primary_light" value="<?php echo htmlspecialchars(($form_values['color_primary_light'] ?? '') ?: '#ffffff'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_primary_light'] ?? ''); ?>" readonly>
+                                </div>
+                                <small class="helper-text">Variante clara (auto si vacío)</small>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details style="margin-top: 20px;">
+                        <summary style="cursor: pointer; font-weight: 500; color: #667eea;">
                             Colores de Estado (Opcional)
                         </summary>
 
@@ -930,39 +1055,255 @@ $user = get_logged_user();
                             <div class="form-group">
                                 <label>Success</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_success" value="#2e7d32">
-                                    <input type="text" value="#2e7d32" readonly>
+                                    <input type="color" name="color_success" value="<?php echo htmlspecialchars($form_values['color_success'] ?? '#2e7d32'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_success'] ?? '#2e7d32'); ?>" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label>Warning</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_warning" value="#f57c00">
-                                    <input type="text" value="#f57c00" readonly>
+                                    <input type="color" name="color_warning" value="<?php echo htmlspecialchars($form_values['color_warning'] ?? '#f57c00'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_warning'] ?? '#f57c00'); ?>" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label>Error</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_error" value="#c62828">
-                                    <input type="text" value="#c62828" readonly>
+                                    <input type="color" name="color_error" value="<?php echo htmlspecialchars($form_values['color_error'] ?? '#c62828'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_error'] ?? '#c62828'); ?>" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label>Info</label>
                                 <div class="color-input-wrapper">
-                                    <input type="color" name="color_info" value="#1565c0">
-                                    <input type="text" value="#1565c0" readonly>
+                                    <input type="color" name="color_info" value="<?php echo htmlspecialchars($form_values['color_info'] ?? '#1565c0'); ?>">
+                                    <input type="text" value="<?php echo htmlspecialchars($form_values['color_info'] ?? '#1565c0'); ?>" readonly>
                                 </div>
                             </div>
                         </div>
                     </details>
                 </div>
+
+                <!-- Efectos Visuales -->
+                <div class="card card-full" style="margin-top: 20px;">
+                    <div class="card-title">
+                        ✨ Efectos Visuales
+                    </div>
+
+                    <div class="form-group">
+                        <label>Animaciones</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="animations" value="none" <?php echo ($form_values['animations'] ?? 'smooth') === 'none' ? 'checked' : ''; ?>>
+                                Sin animaciones
+                            </label>
+                            <label>
+                                <input type="radio" name="animations" value="smooth" <?php echo ($form_values['animations'] ?? 'smooth') === 'smooth' ? 'checked' : ''; ?>>
+                                Suaves
+                            </label>
+                            <label>
+                                <input type="radio" name="animations" value="fluid" <?php echo ($form_values['animations'] ?? 'smooth') === 'fluid' ? 'checked' : ''; ?>>
+                                Fluidas
+                            </label>
+                        </div>
+                        <small class="helper-text">Estilo de animaciones en hover y transiciones</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 8px;">Efectos Especiales</label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="glassmorphism" <?php echo ($form_values['glassmorphism'] ?? false) ? 'checked' : ''; ?>>
+                                Glassmorphism (efecto vidrio)
+                            </label>
+                            <label>
+                                <input type="checkbox" name="gradient_effects" <?php echo ($form_values['gradient_effects'] ?? false) ? 'checked' : ''; ?>>
+                                Efectos de gradiente
+                            </label>
+                            <label>
+                                <input type="checkbox" name="transform_3d" <?php echo ($form_values['transform_3d'] ?? false) ? 'checked' : ''; ?>>
+                                Transformaciones 3D
+                            </label>
+                        </div>
+                        <small class="helper-text">Efectos visuales avanzados para componentes</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Esquema de Color</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="color_scheme" value="custom" <?php echo ($form_values['color_scheme'] ?? 'custom') === 'custom' ? 'checked' : ''; ?>>
+                                Personalizado
+                            </label>
+                            <label>
+                                <input type="radio" name="color_scheme" value="vibrant" <?php echo ($form_values['color_scheme'] ?? 'custom') === 'vibrant' ? 'checked' : ''; ?>>
+                                Vibrante
+                            </label>
+                            <label>
+                                <input type="radio" name="color_scheme" value="pastel" <?php echo ($form_values['color_scheme'] ?? 'custom') === 'pastel' ? 'checked' : ''; ?>>
+                                Pastel
+                            </label>
+                            <label>
+                                <input type="radio" name="color_scheme" value="monochrome" <?php echo ($form_values['color_scheme'] ?? 'custom') === 'monochrome' ? 'checked' : ''; ?>>
+                                Monocromático
+                            </label>
+                        </div>
+                        <small class="helper-text">Categoría del esquema de colores del theme</small>
+                    </div>
+                </div>
+                </div>
+                </div>
+                <!-- Fin Tab 2: Colores y Efectos -->
+
+                <!-- Tab 3: Tipografía y Layout -->
+                <div class="tab-content" id="tab-typography">
+                <div class="cards-grid">
+                    <!-- Tipografía Avanzada -->
+                    <div class="card">
+                        <div class="card-title">
+                            ✍️ Tipografía Avanzada
+                        </div>
+
+                        <div class="form-group">
+                            <label>Familia de Fuente para Headings</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="font_family_heading" value="sans-serif" <?php echo ($form_values['font_family_heading'] ?? 'sans-serif') === 'sans-serif' ? 'checked' : ''; ?>>
+                                    Sans-serif
+                                </label>
+                                <label>
+                                    <input type="radio" name="font_family_heading" value="serif" <?php echo ($form_values['font_family_heading'] ?? 'sans-serif') === 'serif' ? 'checked' : ''; ?>>
+                                    Serif
+                                </label>
+                                <label>
+                                    <input type="radio" name="font_family_heading" value="monospace" <?php echo ($form_values['font_family_heading'] ?? 'sans-serif') === 'monospace' ? 'checked' : ''; ?>>
+                                    Monospace
+                                </label>
+                            </div>
+                            <small class="helper-text">Fuente para títulos y encabezados</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="heading_weight">Peso de Headings</label>
+                            <select name="heading_weight" id="heading_weight">
+                                <option value="400" <?php echo ($form_values['heading_weight'] ?? '600') === '400' ? 'selected' : ''; ?>>400 (Normal)</option>
+                                <option value="500" <?php echo ($form_values['heading_weight'] ?? '600') === '500' ? 'selected' : ''; ?>>500 (Medium)</option>
+                                <option value="600" <?php echo ($form_values['heading_weight'] ?? '600') === '600' ? 'selected' : ''; ?>>600 (Semibold)</option>
+                                <option value="700" <?php echo ($form_values['heading_weight'] ?? '600') === '700' ? 'selected' : ''; ?>>700 (Bold)</option>
+                                <option value="800" <?php echo ($form_values['heading_weight'] ?? '600') === '800' ? 'selected' : ''; ?>>800 (Extra Bold)</option>
+                            </select>
+                            <small class="helper-text">Grosor de los títulos</small>
+                        </div>
+                    </div>
+
+                    <!-- Espaciado -->
+                    <div class="card">
+                        <div class="card-title">
+                            📐 Espaciado
+                        </div>
+
+                        <div class="form-group">
+                            <label for="base_unit">Unidad Base</label>
+                            <select name="base_unit" id="base_unit">
+                                <option value="8px" <?php echo ($form_values['base_unit'] ?? '12px') === '8px' ? 'selected' : ''; ?>>8px (Compacto)</option>
+                                <option value="12px" <?php echo ($form_values['base_unit'] ?? '12px') === '12px' ? 'selected' : ''; ?>>12px (Normal)</option>
+                                <option value="16px" <?php echo ($form_values['base_unit'] ?? '12px') === '16px' ? 'selected' : ''; ?>>16px (Espacioso)</option>
+                                <option value="20px" <?php echo ($form_values['base_unit'] ?? '12px') === '20px' ? 'selected' : ''; ?>>20px (Extra espacioso)</option>
+                            </select>
+                            <small class="helper-text">Unidad base para cálculo de espacios</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Escala de Espaciado</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="spacing_scale" value="proportional" <?php echo ($form_values['spacing_scale'] ?? 'proportional') === 'proportional' ? 'checked' : ''; ?>>
+                                    Proporcional
+                                </label>
+                                <label>
+                                    <input type="radio" name="spacing_scale" value="geometric" <?php echo ($form_values['spacing_scale'] ?? 'proportional') === 'geometric' ? 'checked' : ''; ?>>
+                                    Geométrica
+                                </label>
+                            </div>
+                            <small class="helper-text">Cómo escalan los espacios (xs, sm, md, lg, xl)</small>
+                        </div>
+                    </div>
                 </div>
 
+                <div class="cards-grid" style="margin-top: 20px;">
+                    <!-- Layout -->
+                    <div class="card">
+                        <div class="card-title">
+                            📏 Layout
+                        </div>
+
+                        <div class="form-group">
+                            <label for="container_width">Ancho del Contenedor</label>
+                            <select name="container_width" id="container_width">
+                                <option value="1140px" <?php echo ($form_values['container_width'] ?? '1200px') === '1140px' ? 'selected' : ''; ?>>1140px (Estándar)</option>
+                                <option value="1200px" <?php echo ($form_values['container_width'] ?? '1200px') === '1200px' ? 'selected' : ''; ?>>1200px (Normal)</option>
+                                <option value="1320px" <?php echo ($form_values['container_width'] ?? '1200px') === '1320px' ? 'selected' : ''; ?>>1320px (Ancho)</option>
+                                <option value="1440px" <?php echo ($form_values['container_width'] ?? '1200px') === '1440px' ? 'selected' : ''; ?>>1440px (Extra ancho)</option>
+                            </select>
+                            <small class="helper-text">Ancho máximo del contenido</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="grid_gap">Espacio entre Columnas</label>
+                            <select name="grid_gap" id="grid_gap">
+                                <option value="16px" <?php echo ($form_values['grid_gap'] ?? '28px') === '16px' ? 'selected' : ''; ?>>16px (Compacto)</option>
+                                <option value="24px" <?php echo ($form_values['grid_gap'] ?? '28px') === '24px' ? 'selected' : ''; ?>>24px (Ajustado)</option>
+                                <option value="28px" <?php echo ($form_values['grid_gap'] ?? '28px') === '28px' ? 'selected' : ''; ?>>28px (Normal)</option>
+                                <option value="32px" <?php echo ($form_values['grid_gap'] ?? '28px') === '32px' ? 'selected' : ''; ?>>32px (Espacioso)</option>
+                                <option value="40px" <?php echo ($form_values['grid_gap'] ?? '28px') === '40px' ? 'selected' : ''; ?>>40px (Muy espacioso)</option>
+                            </select>
+                            <small class="helper-text">Espacio entre columnas en grids</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sidebar_width">Ancho del Sidebar</label>
+                            <select name="sidebar_width" id="sidebar_width">
+                                <option value="250px" <?php echo ($form_values['sidebar_width'] ?? '300px') === '250px' ? 'selected' : ''; ?>>250px (Estrecho)</option>
+                                <option value="300px" <?php echo ($form_values['sidebar_width'] ?? '300px') === '300px' ? 'selected' : ''; ?>>300px (Normal)</option>
+                                <option value="350px" <?php echo ($form_values['sidebar_width'] ?? '300px') === '350px' ? 'selected' : ''; ?>>350px (Ancho)</option>
+                            </select>
+                            <small class="helper-text">Ancho de sidebars y columnas secundarias</small>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card">
+                        <div class="card-title">
+                            🦶 Footer
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color de Fondo</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" name="footer_bg_color" value="<?php echo htmlspecialchars($form_values['footer_bg_color'] ?? '#292c2f'); ?>">
+                                <input type="text" name="footer_bg_color_text" value="<?php echo htmlspecialchars($form_values['footer_bg_color'] ?? '#292c2f'); ?>" readonly>
+                            </div>
+                            <small class="helper-text">Color de fondo del footer</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color de Texto</label>
+                            <div class="color-input-wrapper">
+                                <input type="color" name="footer_text_color" value="<?php echo htmlspecialchars($form_values['footer_text_color'] ?? '#ffffff'); ?>">
+                                <input type="text" name="footer_text_color_text" value="<?php echo htmlspecialchars($form_values['footer_text_color'] ?? '#ffffff'); ?>" readonly>
+                            </div>
+                            <small class="helper-text">Color del texto en el footer</small>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <!-- Fin Tab 3 -->
+
+                <!-- Tab 4: Componentes -->
+                <div class="tab-content" id="tab-components">
                 <!-- Grid: Cards + Buttons -->
                 <div class="cards-grid">
                     <!-- Componentes: Cards -->
@@ -1121,6 +1462,10 @@ $user = get_logged_user();
                                     <input type="radio" name="button_style" value="outline" <?php echo ($form_values['button_style'] ?? 'solid') === 'outline' ? 'checked' : ''; ?>>
                                     Outline
                                 </label>
+                                <label>
+                                    <input type="radio" name="button_style" value="gradient" <?php echo ($form_values['button_style'] ?? 'solid') === 'gradient' ? 'checked' : ''; ?>>
+                                    Gradiente
+                                </label>
                             </div>
                         </div>
 
@@ -1214,6 +1559,49 @@ $user = get_logged_user();
                         </div>
                     </div>
 
+                    <!-- Componentes: Forms -->
+                    <div class="card card-full" style="margin-top: 20px;">
+                        <div class="card-title">
+                            📝 Componentes: Formularios
+                        </div>
+
+                        <div class="form-group">
+                            <label>Estilo de Bordes</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="form_border_style" value="solid" <?php echo ($form_values['form_border_style'] ?? 'solid') === 'solid' ? 'checked' : ''; ?>>
+                                    Sólido
+                                </label>
+                                <label>
+                                    <input type="radio" name="form_border_style" value="rounded" <?php echo ($form_values['form_border_style'] ?? 'solid') === 'rounded' ? 'checked' : ''; ?>>
+                                    Redondeado
+                                </label>
+                            </div>
+                            <small class="helper-text">Estilo de bordes para inputs y formularios</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px;">Efectos</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" name="form_focus_ring" <?php echo ($form_values['form_focus_ring'] ?? true) ? 'checked' : ''; ?>>
+                                    Anillo de foco (focus ring)
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="form_glow_effect" <?php echo ($form_values['form_glow_effect'] ?? false) ? 'checked' : ''; ?>>
+                                    Efecto de brillo (glow)
+                                </label>
+                            </div>
+                            <small class="helper-text">Efectos visuales en inputs cuando reciben foco</small>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <!-- Fin Tab 4: Componentes -->
+
+                <!-- Tab 5: Vista de Producto -->
+                <div class="tab-content" id="tab-product">
+                <div class="cards-grid">
                     <!-- Componentes: Vista Producto -->
                     <div class="card">
                         <div class="card-title">
@@ -1315,7 +1703,188 @@ $user = get_logged_user();
                             <small class="helper-text">Indicador de imagen actual</small>
                         </div>
                     </div>
+
+                    <!-- Estilos de Galería -->
+                    <div class="card">
+                        <div class="card-title">
+                            🎨 Estilos de Galería
+                        </div>
+
+                        <h4 style="margin-top: 0; color: var(--color-text-dark); font-size: 14px;">Imagen Principal</h4>
+
+                        <div class="form-group">
+                            <label>Grosor de Borde</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_main_image_border_width" value="0px" <?php echo ($form_values['product_main_image_border_width'] ?? '2px') === '0px' ? 'checked' : ''; ?>>
+                                    Sin borde
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_width" value="1px" <?php echo ($form_values['product_main_image_border_width'] ?? '2px') === '1px' ? 'checked' : ''; ?>>
+                                    Delgado (1px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_width" value="2px" <?php echo ($form_values['product_main_image_border_width'] ?? '2px') === '2px' ? 'checked' : ''; ?>>
+                                    Normal (2px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_width" value="3px" <?php echo ($form_values['product_main_image_border_width'] ?? '2px') === '3px' ? 'checked' : ''; ?>>
+                                    Grueso (3px)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Estilo de Borde</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_main_image_border_style" value="normal" <?php echo ($form_values['product_main_image_border_style'] ?? 'glassmorphism') === 'normal' ? 'checked' : ''; ?>>
+                                    Sólido
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_style" value="glassmorphism" <?php echo ($form_values['product_main_image_border_style'] ?? 'glassmorphism') === 'glassmorphism' ? 'checked' : ''; ?>>
+                                    Glassmorphism
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sombra</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_main_image_shadow" value="none" <?php echo ($form_values['product_main_image_shadow'] ?? 'deep') === 'none' ? 'checked' : ''; ?>>
+                                    Sin sombra
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_shadow" value="subtle" <?php echo ($form_values['product_main_image_shadow'] ?? 'deep') === 'subtle' ? 'checked' : ''; ?>>
+                                    Sutil
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_shadow" value="medium" <?php echo ($form_values['product_main_image_shadow'] ?? 'deep') === 'medium' ? 'checked' : ''; ?>>
+                                    Media
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_shadow" value="deep" <?php echo ($form_values['product_main_image_shadow'] ?? 'deep') === 'deep' ? 'checked' : ''; ?>>
+                                    Profunda
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Borde Redondeado</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_main_image_border_radius" value="sm" <?php echo ($form_values['product_main_image_border_radius'] ?? 'xl') === 'sm' ? 'checked' : ''; ?>>
+                                    Pequeño (8px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_radius" value="md" <?php echo ($form_values['product_main_image_border_radius'] ?? 'xl') === 'md' ? 'checked' : ''; ?>>
+                                    Mediano (12px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_radius" value="lg" <?php echo ($form_values['product_main_image_border_radius'] ?? 'xl') === 'lg' ? 'checked' : ''; ?>>
+                                    Grande (16px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_main_image_border_radius" value="xl" <?php echo ($form_values['product_main_image_border_radius'] ?? 'xl') === 'xl' ? 'checked' : ''; ?>>
+                                    Extra Grande (24px)
+                                </label>
+                            </div>
+                        </div>
+
+                        <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--color-border-light);">
+
+                        <h4 style="margin-top: 0; color: var(--color-text-dark); font-size: 14px;">Thumbnails (Miniaturas)</h4>
+
+                        <div class="form-group">
+                            <label>Grosor de Borde</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_width" value="0px" <?php echo ($form_values['product_thumbnail_border_width'] ?? '3px') === '0px' ? 'checked' : ''; ?>>
+                                    Sin borde
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_width" value="1px" <?php echo ($form_values['product_thumbnail_border_width'] ?? '3px') === '1px' ? 'checked' : ''; ?>>
+                                    Delgado (1px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_width" value="2px" <?php echo ($form_values['product_thumbnail_border_width'] ?? '3px') === '2px' ? 'checked' : ''; ?>>
+                                    Normal (2px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_width" value="3px" <?php echo ($form_values['product_thumbnail_border_width'] ?? '3px') === '3px' ? 'checked' : ''; ?>>
+                                    Grueso (3px)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Borde Redondeado</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_radius" value="sm" <?php echo ($form_values['product_thumbnail_border_radius'] ?? 'md') === 'sm' ? 'checked' : ''; ?>>
+                                    Pequeño (8px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_radius" value="md" <?php echo ($form_values['product_thumbnail_border_radius'] ?? 'md') === 'md' ? 'checked' : ''; ?>>
+                                    Mediano (12px)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_border_radius" value="lg" <?php echo ($form_values['product_thumbnail_border_radius'] ?? 'md') === 'lg' ? 'checked' : ''; ?>>
+                                    Grande (16px)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Efecto Hover</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_hover_effect" value="none" <?php echo ($form_values['product_thumbnail_hover_effect'] ?? 'scale') === 'none' ? 'checked' : ''; ?>>
+                                    Sin efecto
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_hover_effect" value="scale" <?php echo ($form_values['product_thumbnail_hover_effect'] ?? 'scale') === 'scale' ? 'checked' : ''; ?>>
+                                    Escala (1.05x)
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_hover_effect" value="glow" <?php echo ($form_values['product_thumbnail_hover_effect'] ?? 'scale') === 'glow' ? 'checked' : ''; ?>>
+                                    Brillo
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Opacidad Inactivo</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="0.3" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '0.3' ? 'checked' : ''; ?>>
+                                    30%
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="0.5" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '0.5' ? 'checked' : ''; ?>>
+                                    50%
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="0.6" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '0.6' ? 'checked' : ''; ?>>
+                                    60%
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="0.8" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '0.8' ? 'checked' : ''; ?>>
+                                    80%
+                                </label>
+                                <label>
+                                    <input type="radio" name="product_thumbnail_opacity_inactive" value="1.0" <?php echo ($form_values['product_thumbnail_opacity_inactive'] ?? '0.6') === '1.0' ? 'checked' : ''; ?>>
+                                    100%
+                                </label>
+                            </div>
+                            <small class="helper-text">Opacidad de thumbnails no seleccionados</small>
+                        </div>
+                    </div>
                 </div>
+                </div>
+                </div>
+                <!-- Fin Tab 5: Vista de Producto -->
 
                 <!-- Botones de acción -->
                 <div style="margin-top: 32px; text-align: center; display: flex; gap: 16px; justify-content: center;">
@@ -1331,8 +1900,53 @@ $user = get_logged_user();
 
     <!-- JavaScript -->
     <script nonce="<?= csp_nonce() ?>">
-        // Paletas populares cargadas desde PHP (evita restricción .htaccess en archivos .json)
+        // Paletas populares cargadas desde PHP
         const POPULAR_PALETTES = <?php echo $paletas_json; ?>;
+
+        // ===== SISTEMA DE TABS =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+
+                    // Remover active de todos los botones y contenidos
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Agregar active al botón clickeado y su contenido
+                    this.classList.add('active');
+                    const targetContent = document.getElementById('tab-' + targetTab);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+
+            // Restaurar tab guardado después de submit
+            const savedTab = localStorage.getItem('themeGenLastTab');
+            if (savedTab) {
+                const savedTabButton = document.querySelector(`.tab-button[data-tab="${savedTab}"]`);
+                if (savedTabButton) {
+                    savedTabButton.click();
+                    localStorage.removeItem('themeGenLastTab'); // Limpiar después de usar
+                }
+            }
+
+            // Mostrar selector de theme si "Modificar existente" está seleccionado por defecto
+            const editRadio = document.querySelector('input[name="creation_method"][value="edit"]');
+            if (editRadio && editRadio.checked) {
+                const editDiv = document.getElementById('edit-theme-inline');
+                if (editDiv) {
+                    editDiv.style.display = 'block';
+                }
+            }
+
+            // Renderizar paletas populares
+            renderPalettesGrid();
+        });
 
         // Auto-generar slug desde nombre
         function generateSlug(event, element, params) {
@@ -1349,339 +1963,16 @@ $user = get_logged_user();
         // Toggle método de creación
         function toggleCreationMethod(event, element, params) {
             const value = element.value;
-            const paletteDiv = document.getElementById('palette-import');
-            const editDiv = document.getElementById('edit-theme');
+            const editDiv = document.getElementById('edit-theme-inline');
 
-            // Ocultar todos
-            paletteDiv.style.display = 'none';
-            editDiv.style.display = 'none';
-
-            // Mostrar el seleccionado
-            if (value === 'palette') {
-                paletteDiv.style.display = 'block';
-            } else if (value === 'edit') {
+            // Mostrar selector inline solo si es editar
+            if (value === 'edit') {
                 editDiv.style.display = 'block';
+            } else {
+                editDiv.style.display = 'none';
             }
         }
 
-        // Mapear paleta de ColorHunt
-        function mapPalette(event, element, params) {
-            event.preventDefault();
-
-            // Obtener el texto del textarea
-            const paletteText = document.getElementById('palette-colors').value.trim();
-
-            if (!paletteText) {
-                showModal({
-                    title: 'Error',
-                    message: 'Por favor pega los 4 colores de ColorHunt',
-                    icon: '⚠️',
-                    confirmType: 'danger'
-                });
-                return;
-            }
-
-            // Extraer todos los colores hex del texto (formato #RRGGBB)
-            const hexPattern = /#[a-fA-F0-9]{6}/g;
-            const colors = paletteText.match(hexPattern);
-
-            // Validar que sean exactamente 4 colores
-            if (!colors || colors.length !== 4) {
-                showModal({
-                    title: 'Error de Formato',
-                    message: `Se encontraron ${colors ? colors.length : 0} colores. Necesitas exactamente 4 colores en formato #RRGGBB`,
-                    icon: '⚠️',
-                    confirmType: 'danger'
-                });
-                return;
-            }
-
-            // Mostrar loading en el botón
-            const btn = event.target;
-            const originalText = btn.textContent;
-            btn.textContent = '⏳ Mapeando...';
-            btn.disabled = true;
-
-            // Enviar petición AJAX
-            fetch('<?php echo url('/admin/?page=generador-themes&action=map_palette'); ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ colors: colors })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.textContent = originalText;
-                btn.disabled = false;
-
-                if (data.success) {
-                    // Poblar inputs de color
-                    document.getElementById('color-primary').value = data.colors.primary;
-                    document.getElementById('color-secondary').value = data.colors.secondary;
-                    document.getElementById('color-accent').value = data.colors.accent;
-                    document.getElementById('color-background').value = data.colors.background;
-                    document.getElementById('color-text').value = data.colors.text;
-
-                    // Sincronizar text inputs
-                    document.querySelector('#color-primary').parentElement.querySelector('input[type="text"]').value = data.colors.primary;
-                    document.querySelector('#color-secondary').parentElement.querySelector('input[type="text"]').value = data.colors.secondary;
-                    document.querySelector('#color-accent').parentElement.querySelector('input[type="text"]').value = data.colors.accent;
-                    document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = data.colors.background;
-                    document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = data.colors.text;
-
-                    showModal({
-                        title: 'Éxito',
-                        message: '✅ Paleta mapeada exitosamente con contraste WCAG validado',
-                        icon: '🎨',
-                        confirmType: 'success'
-                    });
-                } else {
-                    showModal({
-                        title: 'Error',
-                        message: data.message,
-                        icon: '⚠️',
-                        confirmType: 'danger'
-                    });
-                }
-            })
-            .catch(error => {
-                btn.textContent = originalText;
-                btn.disabled = false;
-
-                showModal({
-                    title: 'Error de Red',
-                    message: 'Error al conectar con el servidor: ' + error,
-                    icon: '⚠️',
-                    confirmType: 'danger'
-                });
-            });
-        }
-
-        // Cargar paletas populares
-        let popularPalettes = [];
-
-        function loadPopularPalettes() {
-            const loadingDiv = document.getElementById('palettes-loading');
-            const gridDiv = document.getElementById('palettes-grid');
-
-            // Usar paletas cargadas desde PHP
-            try {
-                if (!POPULAR_PALETTES || POPULAR_PALETTES.length === 0) {
-                    throw new Error('No hay paletas disponibles');
-                }
-
-                popularPalettes = POPULAR_PALETTES;
-
-                // Ocultar loading, mostrar grid
-                loadingDiv.style.display = 'none';
-                gridDiv.style.display = 'grid';
-
-                // Renderizar paletas
-                renderPalettesGrid(POPULAR_PALETTES);
-            } catch (error) {
-                loadingDiv.innerHTML = '❌ Error al cargar paletas populares';
-                console.error('Error loading palettes:', error);
-            }
-        }
-
-        function renderPalettesGrid(palettes) {
-            const gridDiv = document.getElementById('palettes-grid');
-
-            // Crear grid responsivo
-            gridDiv.style.display = 'grid';
-            gridDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-            gridDiv.style.gap = '12px';
-
-            // Renderizar cada paleta
-            palettes.forEach(palette => {
-                const paletteCard = document.createElement('div');
-                paletteCard.className = 'palette-card';
-                paletteCard.setAttribute('data-action', 'selectPopularPalette');
-                paletteCard.setAttribute('data-palette-id', palette.id);
-                paletteCard.style.cursor = 'pointer';
-                paletteCard.style.borderRadius = '8px';
-                paletteCard.style.overflow = 'hidden';
-                paletteCard.style.border = '2px solid transparent';
-                paletteCard.style.transition = 'all 0.2s';
-                paletteCard.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-
-                // Crear los 4 cuadros de colores
-                paletteCard.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; height: 80px;">
-                        <div style="background: ${palette.colors[0]};"></div>
-                        <div style="background: ${palette.colors[1]};"></div>
-                        <div style="background: ${palette.colors[2]};"></div>
-                        <div style="background: ${palette.colors[3]};"></div>
-                    </div>
-                    <div style="background: white; padding: 6px; text-align: center; font-size: 11px; color: #666;">
-                        #${palette.id}
-                    </div>
-                `;
-
-                // Hover effect
-                paletteCard.addEventListener('mouseenter', function() {
-                    this.style.borderColor = '#667eea';
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-                });
-
-                paletteCard.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('selected')) {
-                        this.style.borderColor = 'transparent';
-                        this.style.transform = 'translateY(0)';
-                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                    }
-                });
-
-                gridDiv.appendChild(paletteCard);
-            });
-        }
-
-        function selectPopularPalette(event, element, params) {
-            const paletteId = parseInt(params?.paletteId);
-            if (!paletteId) return;
-
-            // Encontrar la paleta
-            const palette = popularPalettes.find(p => p.id === paletteId);
-            if (!palette) return;
-
-            // Remover selección anterior (en ambos grids)
-            document.querySelectorAll('.palette-card, .palette-card-edit').forEach(card => {
-                card.classList.remove('selected');
-                card.style.borderColor = 'transparent';
-                card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            });
-
-            // Marcar como seleccionada
-            element.classList.add('selected');
-            element.style.borderColor = '#667eea';
-            element.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.5)';
-
-            // Aplicar colores mapeados directamente (ya vienen procesados del JSON)
-            const mapped = palette.mapped;
-
-            document.getElementById('color-primary').value = mapped.primary;
-            document.getElementById('color-secondary').value = mapped.secondary;
-            document.getElementById('color-accent').value = mapped.accent;
-            document.getElementById('color-background').value = mapped.background;
-            document.getElementById('color-text').value = mapped.text;
-
-            // Sincronizar text inputs
-            document.querySelector('#color-primary').parentElement.querySelector('input[type="text"]').value = mapped.primary;
-            document.querySelector('#color-secondary').parentElement.querySelector('input[type="text"]').value = mapped.secondary;
-            document.querySelector('#color-accent').parentElement.querySelector('input[type="text"]').value = mapped.accent;
-            document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = mapped.background;
-            document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = mapped.text;
-
-            // Scroll al formulario de colores para que el usuario vea los cambios
-            document.getElementById('colors-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // Cargar paletas en sección de edición
-        function loadEditPalettes() {
-            const loadingDiv = document.getElementById('edit-palettes-loading');
-            const gridDiv = document.getElementById('edit-palettes-grid');
-            const previewBtnContainer = document.getElementById('edit-preview-btn-container');
-
-            // Usar paletas cargadas desde PHP
-            try {
-                if (!POPULAR_PALETTES || POPULAR_PALETTES.length === 0) {
-                    throw new Error('No hay paletas disponibles');
-                }
-
-                popularPalettes = POPULAR_PALETTES;
-
-                // Ocultar loading, mostrar grid y botón preview
-                loadingDiv.style.display = 'none';
-                gridDiv.style.display = 'grid';
-                previewBtnContainer.style.display = 'block';
-
-                // Renderizar paletas
-                renderEditPalettesGrid(POPULAR_PALETTES);
-            } catch (error) {
-                loadingDiv.innerHTML = '❌ Error al cargar paletas';
-                console.error('Error loading edit palettes:', error);
-            }
-        }
-
-        function renderEditPalettesGrid(palettes) {
-            const gridDiv = document.getElementById('edit-palettes-grid');
-
-            // Limpiar grid
-            gridDiv.innerHTML = '';
-
-            // Configurar grid
-            gridDiv.style.display = 'grid';
-            gridDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-            gridDiv.style.gap = '12px';
-
-            // Renderizar cada paleta
-            palettes.forEach(palette => {
-                const paletteCard = document.createElement('div');
-                paletteCard.className = 'palette-card-edit';
-                paletteCard.setAttribute('data-action', 'selectPopularPalette');
-                paletteCard.setAttribute('data-palette-id', palette.id);
-                paletteCard.style.cursor = 'pointer';
-                paletteCard.style.borderRadius = '8px';
-                paletteCard.style.overflow = 'hidden';
-                paletteCard.style.border = '2px solid transparent';
-                paletteCard.style.transition = 'all 0.2s';
-                paletteCard.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-
-                // Crear los 4 cuadros de colores
-                paletteCard.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; height: 80px;">
-                        <div style="background: ${palette.colors[0]};"></div>
-                        <div style="background: ${palette.colors[1]};"></div>
-                        <div style="background: ${palette.colors[2]};"></div>
-                        <div style="background: ${palette.colors[3]};"></div>
-                    </div>
-                    <div style="background: white; padding: 6px; text-align: center; font-size: 11px; color: #666;">
-                        #${palette.id}
-                    </div>
-                `;
-
-                // Hover effect
-                paletteCard.addEventListener('mouseenter', function() {
-                    this.style.borderColor = '#667eea';
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-                });
-
-                paletteCard.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('selected')) {
-                        this.style.borderColor = 'transparent';
-                        this.style.transform = 'translateY(0)';
-                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                    }
-                });
-
-                gridDiv.appendChild(paletteCard);
-            });
-        }
-
-        // Cargar paletas cuando se muestra la sección
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cargar paletas al inicio si la sección de palette está visible
-            const paletteImport = document.getElementById('palette-import');
-            if (paletteImport && paletteImport.style.display !== 'none') {
-                loadPopularPalettes();
-            }
-        });
-
-        // También cargar cuando se cambia a método de creación "palette"
-        const creationMethodRadios = document.querySelectorAll('[name="creation_method"]');
-        creationMethodRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.value === 'palette') {
-                    // Solo cargar si aún no se han cargado
-                    if (popularPalettes.length === 0) {
-                        loadPopularPalettes();
-                    }
-                }
-            });
-        });
 
         // Sincronizar color picker con text input
         document.querySelectorAll('.color-input-wrapper').forEach(wrapper => {
@@ -2058,22 +2349,61 @@ $user = get_logged_user();
                     document.querySelector('#color-background').parentElement.querySelector('input[type="text"]').value = config.colors.background;
                     document.querySelector('#color-text').parentElement.querySelector('input[type="text"]').value = config.colors.text;
 
-                    // Poblar tipografía
+                    // Variantes de primary
+                    if (config.colors.primary_dark) {
+                        document.querySelector('[name="color_primary_dark"]').value = config.colors.primary_dark;
+                        document.querySelector('[name="color_primary_dark"]').parentElement.querySelector('input[type="text"]').value = config.colors.primary_dark;
+                    }
+                    if (config.colors.primary_light) {
+                        document.querySelector('[name="color_primary_light"]').value = config.colors.primary_light;
+                        document.querySelector('[name="color_primary_light"]').parentElement.querySelector('input[type="text"]').value = config.colors.primary_light;
+                    }
+
+                    // Colores de estado
+                    if (config.colors.success) {
+                        document.querySelector('[name="color_success"]').value = config.colors.success;
+                        document.querySelector('[name="color_success"]').parentElement.querySelector('input[type="text"]').value = config.colors.success;
+                    }
+                    if (config.colors.warning) {
+                        document.querySelector('[name="color_warning"]').value = config.colors.warning;
+                        document.querySelector('[name="color_warning"]').parentElement.querySelector('input[type="text"]').value = config.colors.warning;
+                    }
+                    if (config.colors.error) {
+                        document.querySelector('[name="color_error"]').value = config.colors.error;
+                        document.querySelector('[name="color_error"]').parentElement.querySelector('input[type="text"]').value = config.colors.error;
+                    }
+                    if (config.colors.info) {
+                        document.querySelector('[name="color_info"]').value = config.colors.info;
+                        document.querySelector('[name="color_info"]').parentElement.querySelector('input[type="text"]').value = config.colors.info;
+                    }
+
+                    // Poblar tipografía base
                     const fontFamily = config.typography?.font_family || 'sans-serif';
                     document.querySelector(`[name="font_family"][value="${fontFamily}"]`)?.click();
 
                     document.querySelector('[name="font_size"]').value = config.typography?.base_size || '16px';
                     document.querySelector('[name="line_height"]').value = config.typography?.line_height || '1.5';
 
+                    // Poblar tipografía avanzada
+                    const fontFamilyHeading = config.typography?.font_family_heading || 'sans-serif';
+                    document.querySelector(`[name="font_family_heading"][value="${fontFamilyHeading}"]`)?.click();
+
+                    // heading_weight es un select, no radio
+                    const headingWeight = config.typography?.heading_weight || '600';
+                    const headingWeightSelect = document.querySelector('[name="heading_weight"]');
+                    if (headingWeightSelect) headingWeightSelect.value = headingWeight;
+
                     // Poblar cards
                     const cardBorder = document.querySelector('[name="card_border"]');
                     if (cardBorder) cardBorder.checked = config.components?.cards?.border || false;
 
-                    const cardShadow = config.components?.cards?.shadow || 'subtle';
+                    // Shadow style viene de features, no de components.cards
+                    const cardShadow = config.features?.shadow_style || 'subtle';
                     document.querySelector(`[name="card_shadow"][value="${cardShadow}"]`)?.click();
 
+                    // Rounded viene de features.border_style
                     const cardRounded = document.querySelector('[name="card_rounded"]');
-                    if (cardRounded) cardRounded.checked = config.components?.cards?.rounded || false;
+                    if (cardRounded) cardRounded.checked = (config.features?.border_style === 'rounded');
 
                     const cardHover = config.components?.cards?.hover_effect || 'glow';
                     document.querySelector(`[name="card_hover"][value="${cardHover}"]`)?.click();
@@ -2112,6 +2442,100 @@ $user = get_logged_user();
 
                     const buttonHover = config.components?.buttons?.hover || 'lift';
                     document.querySelector(`[name="button_hover"][value="${buttonHover}"]`)?.click();
+
+                    // Poblar efectos visuales
+                    const animations = config.features?.animations || 'smooth';
+                    document.querySelector(`[name="animations"][value="${animations}"]`)?.click();
+
+                    const glassmorphism = document.querySelector('[name="glassmorphism"]');
+                    if (glassmorphism) glassmorphism.checked = config.features?.glassmorphism || false;
+
+                    const gradientEffects = document.querySelector('[name="gradient_effects"]');
+                    if (gradientEffects) gradientEffects.checked = config.features?.gradient_effects || false;
+
+                    const transform3d = document.querySelector('[name="transform_3d"]');
+                    if (transform3d) transform3d.checked = config.features?.transform_3d || false;
+
+                    const colorScheme = config.features?.color_scheme || 'custom';
+                    document.querySelector(`[name="color_scheme"][value="${colorScheme}"]`)?.click();
+
+                    // Poblar spacing
+                    document.querySelector('[name="base_unit"]').value = config.spacing?.base_unit || '12px';
+
+                    const spacingScale = config.spacing?.scale || 'proportional';
+                    document.querySelector(`[name="spacing_scale"][value="${spacingScale}"]`)?.click();
+
+                    // Poblar layout
+                    document.querySelector('[name="container_width"]').value = config.layout?.container_width || '1200px';
+                    document.querySelector('[name="grid_gap"]').value = config.layout?.grid_gap || '28px';
+                    document.querySelector('[name="sidebar_width"]').value = config.layout?.sidebar_width || '300px';
+
+                    // Poblar footer
+                    document.querySelector('[name="footer_bg_color"]').value = config.footer?.background_color || '#292c2f';
+                    document.querySelector('[name="footer_text_color"]').value = config.footer?.text_color || '#ffffff';
+
+                    // Poblar vista de producto
+                    const galleryLayout = config.components?.product_view?.gallery_layout || 'thumbnails-bottom';
+                    document.querySelector(`[name="product_gallery_layout"][value="${galleryLayout}"]`)?.click();
+
+                    const imageSize = config.components?.product_view?.image_size || 'medium';
+                    document.querySelector(`[name="product_image_size"][value="${imageSize}"]`)?.click();
+
+                    const thumbnailSize = config.components?.product_view?.thumbnail_size || 'medium';
+                    document.querySelector(`[name="product_thumbnail_size"][value="${thumbnailSize}"]`)?.click();
+
+                    const showBreadcrumb = document.querySelector('[name="product_show_breadcrumb"]');
+                    if (showBreadcrumb) showBreadcrumb.checked = config.components?.product_view?.show_breadcrumb !== false;
+
+                    const showShare = document.querySelector('[name="product_show_share"]');
+                    if (showShare) showShare.checked = config.components?.product_view?.show_share !== false;
+
+                    const showSku = document.querySelector('[name="product_show_sku"]');
+                    if (showSku) showSku.checked = config.components?.product_view?.show_sku !== false;
+
+                    const showStock = document.querySelector('[name="product_show_stock"]');
+                    if (showStock) showStock.checked = config.components?.product_view?.show_stock !== false;
+
+                    const showNavButtons = document.querySelector('[name="product_show_nav_buttons"]');
+                    if (showNavButtons) showNavButtons.checked = config.components?.product_view?.show_nav_buttons !== false;
+
+                    const showImageCounter = document.querySelector('[name="product_show_image_counter"]');
+                    if (showImageCounter) showImageCounter.checked = config.components?.product_view?.show_image_counter !== false;
+
+                    // Poblar estilos de galería
+                    const mainImageBorderWidth = config.components?.product_gallery?.main_image_border_width || '2px';
+                    document.querySelector(`[name="product_main_image_border_width"][value="${mainImageBorderWidth}"]`)?.click();
+
+                    const mainImageBorderStyle = config.components?.product_gallery?.main_image_border_style || 'glassmorphism';
+                    document.querySelector(`[name="product_main_image_border_style"][value="${mainImageBorderStyle}"]`)?.click();
+
+                    const mainImageShadow = config.components?.product_gallery?.main_image_shadow || 'deep';
+                    document.querySelector(`[name="product_main_image_shadow"][value="${mainImageShadow}"]`)?.click();
+
+                    const mainImageBorderRadius = config.components?.product_gallery?.main_image_border_radius || 'xl';
+                    document.querySelector(`[name="product_main_image_border_radius"][value="${mainImageBorderRadius}"]`)?.click();
+
+                    const thumbnailBorderWidth = config.components?.product_gallery?.thumbnail_border_width || '3px';
+                    document.querySelector(`[name="product_thumbnail_border_width"][value="${thumbnailBorderWidth}"]`)?.click();
+
+                    const thumbnailBorderRadius = config.components?.product_gallery?.thumbnail_border_radius || 'md';
+                    document.querySelector(`[name="product_thumbnail_border_radius"][value="${thumbnailBorderRadius}"]`)?.click();
+
+                    const thumbnailHoverEffect = config.components?.product_gallery?.thumbnail_hover_effect || 'scale';
+                    document.querySelector(`[name="product_thumbnail_hover_effect"][value="${thumbnailHoverEffect}"]`)?.click();
+
+                    const thumbnailOpacityInactive = config.components?.product_gallery?.thumbnail_opacity_inactive || '0.6';
+                    document.querySelector(`[name="product_thumbnail_opacity_inactive"][value="${thumbnailOpacityInactive}"]`)?.click();
+
+                    // Poblar forms
+                    const formBorderStyle = config.components?.forms?.border_style || 'solid';
+                    document.querySelector(`[name="form_border_style"][value="${formBorderStyle}"]`)?.click();
+
+                    const formFocusRing = document.querySelector('[name="form_focus_ring"]');
+                    if (formFocusRing) formFocusRing.checked = config.components?.forms?.focus_ring !== false;
+
+                    const formGlowEffect = document.querySelector('[name="form_glow_effect"]');
+                    if (formGlowEffect) formGlowEffect.checked = config.components?.forms?.glow_effect || false;
 
                     // Mostrar sección de actualizar paleta
                     const editPaletteSection = document.getElementById('edit-palette-section');
@@ -2185,9 +2609,12 @@ $user = get_logged_user();
                 if (editRadio) {
                     editRadio.checked = true;
 
-                    // Ocultar secciones de otros métodos
-                    document.getElementById('palette-import').style.display = 'none';
-                    document.getElementById('edit-theme').style.display = 'block';
+                    // Ocultar secciones de otros métodos (si existen)
+                    const paletteImport = document.getElementById('palette-import');
+                    if (paletteImport) paletteImport.style.display = 'none';
+
+                    const editTheme = document.getElementById('edit-theme');
+                    if (editTheme) editTheme.style.display = 'block';
                 }
 
                 // Mostrar sección de actualizar paleta
@@ -2266,14 +2693,253 @@ $user = get_logged_user();
             });
         }
 
+        // ===== PALETAS POPULARES =====
+
+        // Renderizar grid de paletas populares
+        function renderPalettesGrid() {
+            const grid = document.getElementById('popular-palettes-grid');
+            if (!grid || !POPULAR_PALETTES || POPULAR_PALETTES.length === 0) return;
+
+            grid.innerHTML = '';
+
+            POPULAR_PALETTES.forEach((palette, index) => {
+                const paletteCard = document.createElement('div');
+                paletteCard.style.cssText = `
+                    background: white;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    padding: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                `;
+
+                // Crear mini preview con los 5 colores
+                const colorsPreview = document.createElement('div');
+                colorsPreview.style.cssText = `
+                    display: grid;
+                    grid-template-columns: repeat(5, 1fr);
+                    gap: 3px;
+                    height: 40px;
+                    border-radius: 4px;
+                    overflow: hidden;
+                `;
+
+                const colors = [
+                    palette.mapped?.primary || palette.primary,
+                    palette.mapped?.secondary || palette.secondary,
+                    palette.mapped?.accent || palette.accent,
+                    palette.mapped?.text || palette.text,
+                    palette.mapped?.background || palette.background
+                ];
+
+                colors.forEach(color => {
+                    const colorSquare = document.createElement('div');
+                    colorSquare.style.cssText = `
+                        background: ${color};
+                        border: 1px solid rgba(0,0,0,0.1);
+                    `;
+                    colorsPreview.appendChild(colorSquare);
+                });
+
+                paletteCard.appendChild(colorsPreview);
+
+                // Agregar nombre de la paleta si existe
+                if (palette.name) {
+                    const paletteName = document.createElement('div');
+                    paletteName.textContent = palette.name;
+                    paletteName.style.cssText = `
+                        font-size: 11px;
+                        color: #666;
+                        text-align: center;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    `;
+                    paletteCard.appendChild(paletteName);
+                }
+
+                // Hover effect
+                paletteCard.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#667eea';
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.2)';
+                });
+
+                paletteCard.addEventListener('mouseleave', function() {
+                    this.style.borderColor = '#e0e0e0';
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+
+                // Click para seleccionar paleta
+                paletteCard.addEventListener('click', function() {
+                    selectPopularPalette(palette);
+                });
+
+                grid.appendChild(paletteCard);
+            });
+        }
+
+        // Seleccionar y aplicar una paleta popular
+        function selectPopularPalette(palette) {
+            // Aplicar colores a los inputs (soporta formato con y sin .mapped)
+            const colors = palette.mapped || palette;
+            const colorMappings = {
+                'color-primary': colors.primary,
+                'color-secondary': colors.secondary,
+                'color-accent': colors.accent,
+                'color-text': colors.text,
+                'color-background': colors.background
+            };
+
+            Object.entries(colorMappings).forEach(([inputId, color]) => {
+                const colorInput = document.getElementById(inputId);
+                const wrapper = colorInput?.closest('.color-input-wrapper');
+                const textInput = wrapper?.querySelector('input[type="text"]');
+
+                if (colorInput && textInput && color) {
+                    colorInput.value = color;
+                    textInput.value = color;
+
+                    // Disparar evento change para que se detecte el cambio
+                    colorInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+
+            // Mostrar feedback visual
+            showModal({
+                title: '✓ Paleta Aplicada',
+                message: palette.name ? `Paleta "${palette.name}" aplicada correctamente` : 'Paleta aplicada correctamente',
+                icon: '🎨'
+            });
+        }
+
         // Exportar funciones para event delegation
         window.generateSlug = generateSlug;
         window.toggleCreationMethod = toggleCreationMethod;
-        window.mapPalette = mapPalette;
-        window.selectPopularPalette = selectPopularPalette;
         window.loadThemeForEdit = loadThemeForEdit;
         window.showPreview = showPreview;
         window.activateTheme = activateTheme;
+        window.renderPalettesGrid = renderPalettesGrid;
+        window.selectPopularPalette = selectPopularPalette;
+
+        // ===== DETECCIÓN DE CAMBIOS EN FORMULARIO =====
+        let formInitialState = null;
+        let formHasChanges = false;
+        let allowNavigation = false;
+
+        // Capturar estado inicial del formulario
+        function captureFormState() {
+            const form = document.getElementById('theme-generator-form');
+            if (!form) return null;
+
+            const formData = new FormData(form);
+            const state = {};
+
+            // Capturar todos los campos del formulario
+            for (let [key, value] of formData.entries()) {
+                state[key] = value;
+            }
+
+            // Capturar también color pickers (pueden no estar en FormData si no cambiaron)
+            const colorInputs = form.querySelectorAll('input[type="color"]');
+            colorInputs.forEach(input => {
+                state[input.id] = input.value;
+            });
+
+            // Capturar textareas
+            const textareas = form.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                state[textarea.id || textarea.name] = textarea.value;
+            });
+
+            return JSON.stringify(state);
+        }
+
+        // Verificar si hay cambios en el formulario
+        function checkFormChanges() {
+            if (!formInitialState) return false;
+
+            const currentState = captureFormState();
+            formHasChanges = (formInitialState !== currentState);
+            return formHasChanges;
+        }
+
+        // Confirmar navegación si hay cambios
+        function confirmNavigation(callback) {
+            if (!formHasChanges || allowNavigation) {
+                callback();
+                return;
+            }
+
+            showModal({
+                title: 'Cambios sin guardar',
+                message: '¿Deseas salir sin guardar los cambios en el theme?',
+                icon: '⚠️',
+                confirmType: 'danger',
+                onConfirm: function() {
+                    allowNavigation = true;
+                    callback();
+                }
+            });
+        }
+
+        // Inicializar detección de cambios cuando carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('theme-generator-form');
+            if (!form) return;
+
+            // Capturar estado inicial después de un pequeño delay (para que carguen todos los campos)
+            setTimeout(() => {
+                formInitialState = captureFormState();
+            }, 500);
+
+            // Detectar cambios en todos los campos
+            form.addEventListener('input', checkFormChanges);
+            form.addEventListener('change', checkFormChanges);
+
+            // Interceptar submit del formulario para permitir navegación
+            form.addEventListener('submit', function(e) {
+                // Al hacer submit, permitir que la página se recargue sin confirmación
+                allowNavigation = true;
+                formHasChanges = false;
+
+                // Guardar el tab activo para restaurarlo después del submit
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab) {
+                    localStorage.setItem('themeGenLastTab', activeTab.dataset.tab);
+                }
+            });
+
+            // Interceptar navegación en links del sidebar
+            document.querySelectorAll('.admin-sidebar a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (formHasChanges && !allowNavigation) {
+                        e.preventDefault();
+                        const href = this.href;
+                        confirmNavigation(() => {
+                            window.location.href = href;
+                        });
+                    }
+                });
+            });
+
+            // NOTA: No usamos beforeunload porque solo puede mostrar alerts nativos del navegador
+            // En su lugar, solo interceptamos clicks en links del sidebar (arriba) con el modal reutilizable
+        });
+
+        // Marcar como guardado exitosamente después de submit AJAX
+        function markFormAsSaved() {
+            formInitialState = captureFormState();
+            formHasChanges = false;
+            allowNavigation = false;
+        }
+
+        // Exportar función para que otros scripts puedan usarla
+        window.markFormAsSaved = markFormAsSaved;
     </script>
 
     <!-- Modal Component -->
