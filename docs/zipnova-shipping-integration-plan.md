@@ -32,17 +32,25 @@ Implementar la funcionalidad completa de envíos/logística en el sistema de e-c
 ## 2. Documentación de la API de Zipnova
 
 ### 2.1 URLs Base
-- **Sandbox:** `https://sandbox.zipnova.com.ar/api/v1`
-- **Producción:** `https://api.zipnova.com.ar/api/v1`
+- **Argentina (Producción):** `https://api.zipnova.com.ar/v2/`
+- **Chile:** `https://api.zipnova.cl/v2/`
+- **México:** `https://api.zipnova.com.mx/v2/`
+
+**Nota:** No existe URL de sandbox separada. Se usa la misma URL de producción.
 
 ### 2.2 Autenticación
 - **Método:** HTTP Basic Authentication
 - **Credenciales:** API Token (usuario) y API Secret (contraseña)
-- **Headers requeridos:**
-  ```
-  Authorization: Basic {base64(api_token:api_secret)}
-  Content-Type: application/json
-  ```
+- **Generar credenciales:** Configuración > Integraciones > Gestionar credenciales y webhooks
+
+**Headers requeridos:**
+```
+Accept: application/json
+Authorization: Basic {base64(api_token:api_secret)}
+Content-Type: application/json
+```
+
+**Versión actual de API:** v2
 
 ### 2.3 Endpoints Principales
 

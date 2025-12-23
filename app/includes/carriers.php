@@ -109,7 +109,10 @@ function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth
     $base_url = zipnova_get_api_url();
     $url = $base_url . $endpoint;
 
-    $headers = ['Content-Type: application/json'];
+    $headers = [
+        'Accept: application/json',
+        'Content-Type: application/json'
+    ];
 
     if ($use_auth) {
         // Verificar que las credenciales estén configuradas
