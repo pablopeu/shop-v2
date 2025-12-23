@@ -2427,6 +2427,11 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
     <!-- Event Delegation System for CSP -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
 
+    <!-- Define BASE_PATH for frontend JS -->
+    <script nonce="<?= csp_nonce() ?>">
+        window.BASE_PATH = '<?php echo htmlspecialchars(get_base_path()); ?>';
+    </script>
+
     <!-- Shipping Module (Zipnova Integration) -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shipping.js'); ?>"></script>
 </body>
