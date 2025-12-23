@@ -2439,7 +2439,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
     <!-- Define BASE_PATH for frontend JS -->
     <script nonce="<?= csp_nonce() ?>">
-        window.BASE_PATH = '<?php echo htmlspecialchars(get_base_path()); ?>';
+        window.BASE_PATH = '<?php echo htmlspecialchars($config['base_path'] ?? ''); ?>';
     </script>
 
     <!-- Shipping Module (Zipnova Integration) -->
