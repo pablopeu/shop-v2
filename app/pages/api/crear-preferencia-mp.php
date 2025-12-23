@@ -131,10 +131,28 @@ try {
             continue;
         }
 
+        // Calcular precio unitario (final_price es el total, dividimos por quantity)
+        $unit_price = (float) ($item['final_price'] ?? $item['price']);
+        if ($item['quantity'] > 1) {
+            $unit_price = $unit_price / $item['quantity'];
+        }
+
         $items[] = [
             'title' => $item['name'],
             'quantity' => (int) $item['quantity'],
-            'unit_price' => (float) ($item['final_price'] ?? $item['price']),
+            'unit_price' => $unit_price,
+            'currency_id' => $order['currency'] === 'USD' ? 'USD' : 'ARS'
+        ];
+    }
+
+    // Agregar costo de envío como un item separado si existe
+    $shipping_cost = (float)($order['shipping_cost'] ?? 0);
+    if ($shipping_cost > 0) {
+        $shipping_service_name = $order['shipping']['service_name'] ?? 'Envío';
+        $items[] = [
+            'title' => '🚚 ' . $shipping_service_name,
+            'quantity' => 1,
+            'unit_price' => $shipping_cost,
             'currency_id' => $order['currency'] === 'USD' ? 'USD' : 'ARS'
         ];
     }

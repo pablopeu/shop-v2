@@ -389,6 +389,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     // If no errors, create order
     if (empty($errors)) {
 
+        // Get shipping data from form
+        $shipping_cost = floatval($_POST['shipping_cost'] ?? 0);
+        $shipping_service_id = sanitize_input($_POST['shipping_service_id'] ?? '');
+        $shipping_estimated_days = sanitize_input($_POST['shipping_estimated_days'] ?? '');
+
+        // Calculate final total including shipping
+        $total_with_shipping = $total + $shipping_cost;
+
         // Prepare order items
         $order_items = [];
         foreach ($cart_items as $item) {
@@ -409,7 +417,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             'discount_promotion' => ($selected_currency === 'USD') ? $promotion_discount_usd : $promotion_discount_ars,
             'discount_coupon' => ($selected_currency === 'USD') ? $coupon_discount_usd : $coupon_discount_ars,
             'coupon_code' => $coupon_code,
-            'total' => $total,
+            'shipping_cost' => $shipping_cost,
+            'shipping_service_id' => $shipping_service_id,
+            'shipping_estimated_days' => $shipping_estimated_days,
+            'total' => $total_with_shipping,
             'payment_method' => $payment_method,
             'shipping_address' => $shipping_address,
             'customer_name' => $customer_name,
@@ -1742,6 +1753,11 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 <?php endforeach; ?>
 
                 <div class="summary-totals">
+                    <!-- Subtotal (base para JavaScript) -->
+                    <div class="summary-row" style="display: none;">
+                        <span id="order-subtotal" data-value="<?php echo $total; ?>"><?php echo format_price($total, $selected_currency); ?></span>
+                    </div>
+
                     <?php
                     // Show promotion discount
                     $display_promotion_discount = ($selected_currency === 'USD') ? $promotion_discount_usd : $promotion_discount_ars;
@@ -1760,9 +1776,15 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     </div>
                     <?php endif; ?>
 
+                    <!-- Costo de envío (dinámico) -->
+                    <div class="summary-row summary-row-shipping" id="shipping-cost-row" style="display: none;">
+                        <span>🚚 Envío:</span>
+                        <span id="shipping-cost" data-value="0">$0</span>
+                    </div>
+
                     <div class="summary-row total">
                         <span>Total:</span>
-                        <span><?php echo format_price($total, $selected_currency); ?></span>
+                        <span id="order-total" data-value="<?php echo $total; ?>"><?php echo format_price($total, $selected_currency); ?></span>
                     </div>
                 </div>
 

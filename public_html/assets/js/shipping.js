@@ -302,8 +302,20 @@ console.log('📦 shipping.js: Archivo cargado');
 
         // Try to find shipping cost display element
         const shippingCostEl = document.getElementById('shipping-cost');
+        const shippingCostRow = document.getElementById('shipping-cost-row');
+
         if (shippingCostEl) {
             shippingCostEl.textContent = formatCurrency(cost);
+            shippingCostEl.dataset.value = cost;
+        }
+
+        // Show/hide shipping row based on cost
+        if (shippingCostRow) {
+            if (cost > 0) {
+                shippingCostRow.style.display = 'flex';
+            } else {
+                shippingCostRow.style.display = 'none';
+            }
         }
 
         // Trigger total recalculation
