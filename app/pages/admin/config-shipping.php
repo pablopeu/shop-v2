@@ -10,12 +10,16 @@ $message = '';
 $error = '';
 
 // Test connection
+$test_response_json = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['test_connection'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido';
     } else {
         require_once APP_PATH . '/includes/carriers.php';
         $test_result = zipnova_test_connection();
+
+        // Guardar respuesta completa para mostrar en modal
+        $test_response_json = json_encode($test_result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
         if ($test_result['success']) {
             $message = $test_result['message'] . ' (Modo: ' . $test_result['mode'] . ')';
@@ -755,6 +759,26 @@ $provincias = [
         </form>
     </div>
 
+    <!-- Modal para mostrar respuesta de Zipnova -->
+    <div id="responseModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 8px; padding: 24px; max-width: 800px; max-height: 80vh; width: 90%; display: flex; flex-direction: column;">
+            <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #333;">📋 Respuesta de Zipnova API</h3>
+
+            <div style="flex: 1; overflow: auto; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 16px; margin-bottom: 16px;">
+                <pre id="responseContent" style="margin: 0; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.5; color: #333; white-space: pre-wrap; word-wrap: break-word;"></pre>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button onclick="copyResponse()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                    📋 Copiar al portapapeles
+                </button>
+                <button onclick="closeModal()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                    ✕ Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script nonce="<?= csp_nonce() ?>">
         function copyWebhookUrl() {
             const url = "<?php echo $webhook_url; ?>";
@@ -764,6 +788,42 @@ $provincias = [
                 console.error('Error al copiar:', err);
             });
         }
+
+        function showResponseModal(jsonResponse) {
+            const modal = document.getElementById('responseModal');
+            const content = document.getElementById('responseContent');
+            content.textContent = jsonResponse;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('responseModal');
+            modal.style.display = 'none';
+        }
+
+        function copyResponse() {
+            const content = document.getElementById('responseContent').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                alert('✅ Respuesta copiada al portapapeles');
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                alert('❌ Error al copiar al portapapeles');
+            });
+        }
+
+        // Cerrar modal al hacer click fuera del contenido
+        document.getElementById('responseModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Mostrar modal si hay respuesta de test
+        <?php if ($test_response_json !== null): ?>
+        window.addEventListener('DOMContentLoaded', function() {
+            showResponseModal(<?php echo json_encode($test_response_json); ?>);
+        });
+        <?php endif; ?>
     </script>
 </body>
 </html>
