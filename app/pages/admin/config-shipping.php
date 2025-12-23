@@ -340,11 +340,7 @@ $provincias = [
         <?php endif; ?>
 
         <div class="alert-box">
-            <strong>🚚 Configuración de Logística</strong>
-            <p>1. Obtené tus credenciales de API en el panel de Zipnova</p>
-            <p>2. Configurá tus credenciales y datos de origen</p>
-            <p>3. Probá la conexión antes de habilitar el sistema</p>
-            <p>4. Configurá el webhook en Zipnova con la URL proporcionada abajo</p>
+            <strong>🚚 Configuración de Logística:</strong> Obtené tus credenciales en el panel de Zipnova (Configuración → Integraciones), configurá tus datos de origen, probá la conexión y configurá el webhook con la URL proporcionada abajo.
         </div>
 
         <form method="POST" action="">
