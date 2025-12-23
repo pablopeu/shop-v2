@@ -769,10 +769,10 @@ $provincias = [
             </div>
 
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                <button onclick="copyResponse()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                <button id="copyResponseBtn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;">
                     📋 Copiar al portapapeles
                 </button>
-                <button onclick="closeModal()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                <button id="closeModalBtn" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;">
                     ✕ Cerrar
                 </button>
             </div>
@@ -811,19 +811,35 @@ $provincias = [
             });
         }
 
-        // Cerrar modal al hacer click fuera del contenido
-        document.getElementById('responseModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // Mostrar modal si hay respuesta de test
-        <?php if ($test_response_json !== null): ?>
+        // Inicializar event listeners cuando el DOM esté listo
         window.addEventListener('DOMContentLoaded', function() {
+            // Event listener para botón de copiar
+            const copyBtn = document.getElementById('copyResponseBtn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', copyResponse);
+            }
+
+            // Event listener para botón de cerrar
+            const closeBtn = document.getElementById('closeModalBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeModal);
+            }
+
+            // Cerrar modal al hacer click fuera del contenido
+            const modal = document.getElementById('responseModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal();
+                    }
+                });
+            }
+
+            // Mostrar modal si hay respuesta de test
+            <?php if ($test_response_json !== null): ?>
             showResponseModal(<?php echo json_encode($test_response_json); ?>);
+            <?php endif; ?>
         });
-        <?php endif; ?>
     </script>
 </body>
 </html>
