@@ -14,8 +14,8 @@
         "token_expires_at": null
       },
       "api_urls": {
-        "sandbox": "https://sandbox.zipnova.com/api/v1",
-        "production": "https://api.zipnova.com/api/v1"
+        "sandbox": "https://sandbox.zipnova.com.ar/api/v1",
+        "production": "https://api.zipnova.com.ar/api/v1"
       },
       "origin": {
         "name": "",
