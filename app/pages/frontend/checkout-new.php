@@ -442,6 +442,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             setcookie('checkout_country_code', $country_code, $cookie_expiry, $cookie_path);
             setcookie('checkout_phone', $customer_phone, $cookie_expiry, $cookie_path);
 
+            // Save delivery method
+            $delivery_method = $_POST['delivery_method'] ?? 'pickup';
+            setcookie('checkout_delivery_method', $delivery_method, $cookie_expiry, $cookie_path);
+
             // Save shipping address if provided
             if ($shipping_address) {
                 setcookie('checkout_address', $shipping_address['address'], $cookie_expiry, $cookie_path);
@@ -512,6 +516,7 @@ $saved_country_code = $_COOKIE['checkout_country_code'] ?? '+54';
 $saved_phone = $_COOKIE['checkout_phone'] ?? '';
 $saved_telegram = $_COOKIE['checkout_telegram'] ?? '';
 $saved_contact_pref = $_COOKIE['checkout_contact_pref'] ?? '';
+$saved_delivery_method = $_COOKIE['checkout_delivery_method'] ?? '';
 $saved_address = $_COOKIE['checkout_address'] ?? '';
 $saved_city = $_COOKIE['checkout_city'] ?? '';
 $saved_postal_code = $_COOKIE['checkout_postal_code'] ?? '';
@@ -1488,7 +1493,8 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <label>Método de entrega *</label>
                                 <div class="radio-group">
                                     <label class="radio-option">
-                                        <input type="radio" name="delivery_method" value="pickup" required>
+                                        <input type="radio" name="delivery_method" value="pickup"
+                                               <?php echo ($saved_delivery_method === 'pickup' || empty($saved_delivery_method)) ? 'checked' : ''; ?> required>
                                         <div>
                                             <strong>🏪 Retiro en persona</strong>
                                             <p class="option-description">Coordinaremos lugar y horario</p>
@@ -1496,6 +1502,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     </label>
                                     <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
                                         <input type="radio" name="delivery_method" value="shipping"
+                                               <?php echo $saved_delivery_method === 'shipping' ? 'checked' : ''; ?>
                                                <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
                                         <div>
                                             <strong>📦 Envío a domicilio</strong>
@@ -1896,6 +1903,9 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             const shippingFields = document.getElementById('shipping-fields');
             shippingFields.classList.toggle('hidden', method !== 'shipping');
         }
+
+        // Initial validation for delivery method (shows shipping fields if saved method is 'shipping')
+        validateStep2();
 
         // Step 3: Payment validation
         document.querySelectorAll('input[name="payment_method"]').forEach(radio => {

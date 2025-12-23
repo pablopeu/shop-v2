@@ -180,10 +180,24 @@ function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth
     ]);
 
     if ($response === false) {
+        // Guardar error en archivo JSON separado
+        zipnova_save_response_json($endpoint, $method, [
+            'request' => $data,
+            'error' => $curl_error,
+            'http_code' => 0
+        ]);
         return ['success' => false, 'error' => 'Error de conexión: ' . $curl_error];
     }
 
     $result = json_decode($response, true);
+
+    // Guardar respuesta completa en archivo JSON separado para debug
+    zipnova_save_response_json($endpoint, $method, [
+        'request' => $data,
+        'response' => $result,
+        'http_code' => $http_code,
+        'raw_response' => $response
+    ]);
 
     if ($http_code >= 200 && $http_code < 300) {
         return ['success' => true, 'data' => $result];
@@ -301,11 +315,13 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
         }
     }
 
+    // Log detallado con la respuesta completa para debug
     zipnova_log('Quote Request', [
         'success' => $result['success'],
         'destination' => $destination['zipcode'] ?? $destination['postal_code'] ?? 'N/A',
         'items_count' => count($items),
-        'declared_value' => $declared_value
+        'declared_value' => $declared_value,
+        'full_response' => $result  // <-- RESPUESTA COMPLETA PARA DEBUG
     ]);
 
     return $result;
@@ -498,7 +514,8 @@ function zipnova_get_all_shipments($filter = []) {
  * Log de eventos de Zipnova
  */
 function zipnova_log($event, $data = []) {
-    $logs_dir = __DIR__ . '/../logs/zipnova';
+    // Usar ruta absoluta desde la raíz del proyecto
+    $logs_dir = dirname(dirname(__DIR__)) . '/logs/zipnova';
     if (!is_dir($logs_dir)) {
         mkdir($logs_dir, 0755, true);
     }
@@ -513,6 +530,44 @@ function zipnova_log($event, $data = []) {
     );
 
     file_put_contents($log_file, $log_entry, FILE_APPEND);
+}
+
+/**
+ * Guarda respuesta de API en archivo JSON separado para debug
+ * @param string $endpoint El endpoint llamado (ej: '/shipments/quote')
+ * @param string $method El método HTTP usado (GET, POST, etc)
+ * @param array $data Array con request, response, http_code, etc
+ */
+function zipnova_save_response_json($endpoint, $method, $data) {
+    // Usar ruta absoluta desde la raíz del proyecto
+    $logs_dir = dirname(dirname(__DIR__)) . '/logs/zipnova-responses';
+    if (!is_dir($logs_dir)) {
+        mkdir($logs_dir, 0755, true);
+    }
+
+    // Generar nombre de archivo con timestamp y endpoint
+    $timestamp = date('Y-m-d_H-i-s');
+    $endpoint_name = trim(str_replace('/', '_', $endpoint), '_');
+    $filename = sprintf('%s_%s_%s.json', $timestamp, $endpoint_name, $method);
+    $filepath = $logs_dir . '/' . $filename;
+
+    // Preparar datos completos para el log
+    $log_data = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'endpoint' => $endpoint,
+        'method' => $method,
+        'http_code' => $data['http_code'] ?? 0,
+        'request' => $data['request'] ?? null,
+        'response' => $data['response'] ?? null,
+        'error' => $data['error'] ?? null,
+        'raw_response' => $data['raw_response'] ?? null
+    ];
+
+    // Guardar con formato legible
+    file_put_contents(
+        $filepath,
+        json_encode($log_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+    );
 }
 
 /**
