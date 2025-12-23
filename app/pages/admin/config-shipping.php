@@ -628,9 +628,10 @@ $provincias = [
                     </div>
 
                     <div class="form-group">
-                        <label>Peso (kg)</label>
-                        <input type="number" step="0.1" name="default_weight"
-                               value="<?php echo $shipping_config['default_package']['weight'] ?? 1; ?>">
+                        <label>Peso (gramos)</label>
+                        <input type="number" step="10" name="default_weight" min="10"
+                               value="<?php echo $shipping_config['default_package']['weight'] ?? 1000; ?>">
+                        <small>Peso por defecto en gramos (mínimo: 10g)</small>
                     </div>
 
                     <div class="form-row">
