@@ -733,6 +733,20 @@ $user = get_logged_user();
                         </select>
                     </div>
 
+                    <div class="filter-group">
+                        <label for="carrier">Carrier</label>
+                        <select id="carrier" name="carrier">
+                            <option value="all" <?php echo $filter_carrier === 'all' ? 'selected' : ''; ?>>Todos</option>
+                            <option value="manual" <?php echo $filter_carrier === 'manual' ? 'selected' : ''; ?>>Manual</option>
+                            <?php foreach ($available_carriers as $tag => $carrier): ?>
+                                <option value="<?php echo htmlspecialchars($tag); ?>"
+                                        <?php echo $filter_carrier === $tag ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($carrier['name'] ?? $tag); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
                     <button type="submit" class="btn btn-primary">Filtrar</button>
 
                     <button type="button" class="btn btn-primary" data-action="exportSelected" data-format="csv">
@@ -785,6 +799,7 @@ $user = get_logged_user();
                                 <th>Total USD</th>
                                 <th>Cotiz. $</th>
                                 <th>Estado</th>
+                                <th>Carrier</th>
                                 <th>Entrega</th>
                                 <th>Acciones</th>
                             </tr>
@@ -841,16 +856,19 @@ $user = get_logged_user();
                                             <small><?php echo number_format($exchange_rate, 2, ',', '.'); ?></small>
                                         </td>
                                         <td>
-                                            <span class="badge <?php echo $order['status']; ?>">
-                                                <?php
-                                                    $status_labels = [
-                                                        'cobrada' => 'Cobrada',
-                                                        'enviada' => 'Enviada',
-                                                        'entregada' => 'Entregada'
-                                                    ];
-                                                    echo $status_labels[$order['status']] ?? $order['status'];
-                                                ?>
-                                            </span>
+                                            <?php echo render_shipping_status($order['shipping'] ?? null); ?>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $carrier = $order['shipping']['carrier'] ?? null;
+                                            if ($carrier) {
+                                                $carrier_name = get_carrier_name($carrier);
+                                                echo '<span class="carrier-badge">' . htmlspecialchars($carrier) . '</span><br>';
+                                                echo '<small style="color: #666;">' . htmlspecialchars($carrier_name) . '</small>';
+                                            } else {
+                                                echo '<span style="color: #999;">Manual</span>';
+                                            }
+                                            ?>
                                         </td>
                                         <td>
                                             <span class="badge <?php echo $order['delivery_method'] ?? 'pickup'; ?>">
