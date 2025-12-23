@@ -120,10 +120,10 @@
 
         try {
             console.log('📦 Calculando peso y valor:', { weight, declaredValue });
-            console.log('🌐 Llamando a API:', window.BASE_PATH + '/api/shipping?action=quotes');
+            console.log('🌐 Llamando a API:', window.BASE_PATH + '/api/?endpoint=shipping&action=quotes');
 
             // Call API
-            const response = await fetch(window.BASE_PATH + '/api/shipping?action=quotes', {
+            const response = await fetch(window.BASE_PATH + '/api/?endpoint=shipping&action=quotes', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

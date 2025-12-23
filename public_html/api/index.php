@@ -93,6 +93,9 @@ $endpoints_map = [
     // Admin Operations
     'update-exchange-rate' => APP_PATH . '/pages/api/update-exchange-rate.php',
     'update-products-order' => APP_PATH . '/pages/api/update-products-order.php',
+
+    // Shipping (Zipnova Integration)
+    'shipping' => APP_PATH . '/pages/api/shipping.php',
 ];
 
 // Verificar que el endpoint existe
