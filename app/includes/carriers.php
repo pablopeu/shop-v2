@@ -311,6 +311,30 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
     $result = zipnova_api_request('/shipments/quote', 'POST', $request_data);
 
     if ($result['success']) {
+        // Transformar respuesta de Zipnova al formato esperado por el frontend
+        if (isset($result['data']['all_results']) && is_array($result['data']['all_results'])) {
+            $quotes = [];
+            foreach ($result['data']['all_results'] as $zipnova_quote) {
+                $delivery_min = $zipnova_quote['delivery_time']['min'] ?? 0;
+                $delivery_max = $zipnova_quote['delivery_time']['max'] ?? 0;
+                $estimated_days = $delivery_min > 0 && $delivery_max > 0
+                    ? $delivery_min . '-' . $delivery_max
+                    : 'A confirmar';
+
+                $quotes[] = [
+                    'service_id' => $zipnova_quote['service_type']['code'] ?? 'unknown',
+                    'service_name' => ($zipnova_quote['carrier']['name'] ?? 'Carrier') . ' - ' . ($zipnova_quote['service_type']['name'] ?? 'Service'),
+                    'cost' => (float)($zipnova_quote['amounts']['price_incl_tax'] ?? 0),
+                    'estimated_days' => $estimated_days,
+                    'carrier_name' => $zipnova_quote['carrier']['name'] ?? '',
+                    'carrier_logo' => $zipnova_quote['carrier']['logo'] ?? '',
+                    'logistic_type' => $zipnova_quote['logistic_type'] ?? '',
+                    'service_type_code' => $zipnova_quote['service_type']['code'] ?? ''
+                ];
+            }
+            $result['data']['quotes'] = $quotes;
+        }
+
         // Aplicar margen de costo si está configurado
         $margin = $config['options']['shipping_cost_margin'] ?? 0;
         if ($margin > 0 && isset($result['data']['quotes'])) {
