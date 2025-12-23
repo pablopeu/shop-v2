@@ -8,7 +8,7 @@ if (!defined('APP_ENTRY_POINT')) {
     die('Direct access not permitted');
 }
 
-require_once APP_PATH . '/includes/zipnova.php';
+require_once APP_PATH . '/includes/carriers.php';
 
 // Helper to send JSON response
 function send_json_response($data, $status_code = 200) {

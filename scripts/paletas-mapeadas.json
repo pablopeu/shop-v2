@@ -1,0 +1,1826 @@
+[
+    {
+        "id": 1,
+        "colors": [
+            "#ff0000",
+            "#950101",
+            "#3d0000",
+            "#000000"
+        ],
+        "mapped": {
+            "primary": "#3d0000",
+            "secondary": "#950101",
+            "accent": "#950101",
+            "text": "#000000",
+            "background": "#ffffff"
+        }
+    },
+    {
+        "id": 2,
+        "colors": [
+            "#ffde7d",
+            "#f6416c",
+            "#f8f3d4",
+            "#00b8a9"
+        ],
+        "mapped": {
+            "primary": "#00b8a9",
+            "secondary": "#ffde7d",
+            "accent": "#f6416c",
+            "text": "#000000",
+            "background": "#f8f3d4"
+        }
+    },
+    {
+        "id": 3,
+        "colors": [
+            "#93b1a6",
+            "#5c8374",
+            "#183d3d",
+            "#040d12"
+        ],
+        "mapped": {
+            "primary": "#183d3d",
+            "secondary": "#5c8374",
+            "accent": "#5c8374",
+            "text": "#040d12",
+            "background": "#ffffff"
+        }
+    },
+    {
+        "id": 4,
+        "colors": [
+            "#eaeaea",
+            "#ff2e63",
+            "#252a34",
+            "#08d9d6"
+        ],
+        "mapped": {
+            "primary": "#ff2e63",
+            "secondary": "#08d9d6",
+            "accent": "#08d9d6",
+            "text": "#252a34",
+            "background": "#eaeaea"
+        }
+    },
+    {
+        "id": 5,
+        "colors": [
+            "#2c74b3",
+            "#205295",
+            "#144272",
+            "#0a2647"
+        ],
+        "mapped": {
+            "primary": "#144272",
+            "secondary": "#205295",
+            "accent": "#205295",
+            "text": "#0a2647",
+            "background": "#ffffff"
+        }
+    },
+    {
+        "id": 6,
+        "colors": [
+            "#fbfada",
+            "#adbc9f",
+            "#436850",
+            "#12372a"
+        ],
+        "mapped": {
+            "primary": "#436850",
+            "secondary": "#adbc9f",
+            "accent": "#adbc9f",
+            "text": "#12372a",
+            "background": "#fbfada"
+        }
+    },
+    {
+        "id": 7,
+        "colors": [
+            "#ddf2fd",
+            "#9bbec8",
+            "#427d9d",
+            "#164863"
+        ],
+        "mapped": {
+            "primary": "#427d9d",
+            "secondary": "#9bbec8",
+            "accent": "#9bbec8",
+            "text": "#164863",
+            "background": "#ddf2fd"
+        }
+    },
+    {
+        "id": 8,
+        "colors": [
+            "#b1d0e0",
+            "#6998ab",
+            "#406882",
+            "#1a374d"
+        ],
+        "mapped": {
+            "primary": "#406882",
+            "secondary": "#6998ab",
+            "accent": "#6998ab",
+            "text": "#1a374d",
+            "background": "#b1d0e0"
+        }
+    },
+    {
+        "id": 9,
+        "colors": [
+            "#bbe1fa",
+            "#3282b8",
+            "#0f4c75",
+            "#1b262c"
+        ],
+        "mapped": {
+            "primary": "#0f4c75",
+            "secondary": "#3282b8",
+            "accent": "#3282b8",
+            "text": "#1b262c",
+            "background": "#bbe1fa"
+        }
+    },
+    {
+        "id": 10,
+        "colors": [
+            "#d7fbe8",
+            "#9df3c4",
+            "#62d2a2",
+            "#1fab89"
+        ],
+        "mapped": {
+            "primary": "#62d2a2",
+            "secondary": "#9df3c4",
+            "accent": "#1fab89",
+            "text": "#000000",
+            "background": "#d7fbe8"
+        }
+    },
+    {
+        "id": 11,
+        "colors": [
+            "#14ffec",
+            "#0d7377",
+            "#323232",
+            "#212121"
+        ],
+        "mapped": {
+            "primary": "#323232",
+            "secondary": "#0d7377",
+            "accent": "#0d7377",
+            "text": "#212121",
+            "background": "#14ffec"
+        }
+    },
+    {
+        "id": 12,
+        "colors": [
+            "#eeeeee",
+            "#00adb5",
+            "#393e46",
+            "#222831"
+        ],
+        "mapped": {
+            "primary": "#393e46",
+            "secondary": "#00adb5",
+            "accent": "#00adb5",
+            "text": "#222831",
+            "background": "#eeeeee"
+        }
+    },
+    {
+        "id": 13,
+        "colors": [
+            "#eeeeee",
+            "#ffd369",
+            "#393e46",
+            "#222831"
+        ],
+        "mapped": {
+            "primary": "#393e46",
+            "secondary": "#ffd369",
+            "accent": "#ffd369",
+            "text": "#222831",
+            "background": "#eeeeee"
+        }
+    },
+    {
+        "id": 14,
+        "colors": [
+            "#dde6ed",
+            "#9db2bf",
+            "#526d82",
+            "#27374d"
+        ],
+        "mapped": {
+            "primary": "#526d82",
+            "secondary": "#9db2bf",
+            "accent": "#9db2bf",
+            "text": "#27374d",
+            "background": "#dde6ed"
+        }
+    },
+    {
+        "id": 15,
+        "colors": [
+            "#53354a",
+            "#903749",
+            "#e84545",
+            "#2b2e4a"
+        ],
+        "mapped": {
+            "primary": "#53354a",
+            "secondary": "#903749",
+            "accent": "#903749",
+            "text": "#2b2e4a",
+            "background": "#ffffff"
+        }
+    },
+    {
+        "id": 16,
+        "colors": [
+            "#e7f6f2",
+            "#a5c9ca",
+            "#395b64",
+            "#2c3333"
+        ],
+        "mapped": {
+            "primary": "#395b64",
+            "secondary": "#a5c9ca",
+            "accent": "#a5c9ca",
+            "text": "#2c3333",
+            "background": "#e7f6f2"
+        }
+    },
+    {
+        "id": 17,
+        "colors": [
+            "#dcd7c9",
+            "#a27b5c",
+            "#3f4e4f",
+            "#2c3639"
+        ],
+        "mapped": {
+            "primary": "#3f4e4f",
+            "secondary": "#a27b5c",
+            "accent": "#a27b5c",
+            "text": "#2c3639",
+            "background": "#dcd7c9"
+        }
+    },
+    {
+        "id": 18,
+        "colors": [
+            "#ffd460",
+            "#f07b3f",
+            "#ea5455",
+            "#2d4059"
+        ],
+        "mapped": {
+            "primary": "#ea5455",
+            "secondary": "#f07b3f",
+            "accent": "#f07b3f",
+            "text": "#2d4059",
+            "background": "#ffd460"
+        }
+    },
+    {
+        "id": 19,
+        "colors": [
+            "#fc5185",
+            "#f5f5f5",
+            "#3fc1c9",
+            "#364f6b"
+        ],
+        "mapped": {
+            "primary": "#fc5185",
+            "secondary": "#3fc1c9",
+            "accent": "#3fc1c9",
+            "text": "#364f6b",
+            "background": "#f5f5f5"
+        }
+    },
+    {
+        "id": 20,
+        "colors": [
+            "#eae7b1",
+            "#a6bb8d",
+            "#61876e",
+            "#3c6255"
+        ],
+        "mapped": {
+            "primary": "#61876e",
+            "secondary": "#a6bb8d",
+            "accent": "#a6bb8d",
+            "text": "#3c6255",
+            "background": "#eae7b1"
+        }
+    },
+    {
+        "id": 21,
+        "colors": [
+            "#abedd8",
+            "#46cdcf",
+            "#3d84a8",
+            "#48466d"
+        ],
+        "mapped": {
+            "primary": "#3d84a8",
+            "secondary": "#46cdcf",
+            "accent": "#46cdcf",
+            "text": "#48466d",
+            "background": "#abedd8"
+        }
+    },
+    {
+        "id": 22,
+        "colors": [
+            "#b99470",
+            "#fefae0",
+            "#a9b388",
+            "#5f6f52"
+        ],
+        "mapped": {
+            "primary": "#b99470",
+            "secondary": "#a9b388",
+            "accent": "#a9b388",
+            "text": "#5f6f52",
+            "background": "#fefae0"
+        }
+    },
+    {
+        "id": 23,
+        "colors": [
+            "#d0c9c0",
+            "#efead8",
+            "#6d8b74",
+            "#5f7161"
+        ],
+        "mapped": {
+            "primary": "#6d8b74",
+            "secondary": "#d0c9c0",
+            "accent": "#5f7161",
+            "text": "#000000",
+            "background": "#efead8"
+        }
+    },
+    {
+        "id": 24,
+        "colors": [
+            "#eee9da",
+            "#bdcdd6",
+            "#93bfcf",
+            "#6096b4"
+        ],
+        "mapped": {
+            "primary": "#93bfcf",
+            "secondary": "#bdcdd6",
+            "accent": "#6096b4",
+            "text": "#000000",
+            "background": "#eee9da"
+        }
+    },
+    {
+        "id": 25,
+        "colors": [
+            "#fcdec0",
+            "#e5b299",
+            "#b4846c",
+            "#7d5a50"
+        ],
+        "mapped": {
+            "primary": "#b4846c",
+            "secondary": "#e5b299",
+            "accent": "#e5b299",
+            "text": "#7d5a50",
+            "background": "#fcdec0"
+        }
+    },
+    {
+        "id": 26,
+        "colors": [
+            "#ffead2",
+            "#dbdfea",
+            "#acb1d6",
+            "#8294c4"
+        ],
+        "mapped": {
+            "primary": "#acb1d6",
+            "secondary": "#dbdfea",
+            "accent": "#8294c4",
+            "text": "#000000",
+            "background": "#ffead2"
+        }
+    },
+    {
+        "id": 27,
+        "colors": [
+            "#f5ebeb",
+            "#e4d0d0",
+            "#d5b4b4",
+            "#867070"
+        ],
+        "mapped": {
+            "primary": "#d5b4b4",
+            "secondary": "#e4d0d0",
+            "accent": "#867070",
+            "text": "#000000",
+            "background": "#f5ebeb"
+        }
+    },
+    {
+        "id": 28,
+        "colors": [
+            "#f1dec9",
+            "#c8b6a6",
+            "#a4907c",
+            "#8d7b68"
+        ],
+        "mapped": {
+            "primary": "#a4907c",
+            "secondary": "#c8b6a6",
+            "accent": "#8d7b68",
+            "text": "#000000",
+            "background": "#f1dec9"
+        }
+    },
+    {
+        "id": 29,
+        "colors": [
+            "#e5e1da",
+            "#fbf9f1",
+            "#aad7d9",
+            "#92c7cf"
+        ],
+        "mapped": {
+            "primary": "#aad7d9",
+            "secondary": "#e5e1da",
+            "accent": "#92c7cf",
+            "text": "#000000",
+            "background": "#fbf9f1"
+        }
+    },
+    {
+        "id": 30,
+        "colors": [
+            "#ffe3e3",
+            "#e4d8dc",
+            "#c9ccd5",
+            "#93b5c6"
+        ],
+        "mapped": {
+            "primary": "#c9ccd5",
+            "secondary": "#e4d8dc",
+            "accent": "#93b5c6",
+            "text": "#000000",
+            "background": "#ffe3e3"
+        }
+    },
+    {
+        "id": 31,
+        "colors": [
+            "#f1f0e8",
+            "#eee0c9",
+            "#adc4ce",
+            "#96b6c5"
+        ],
+        "mapped": {
+            "primary": "#adc4ce",
+            "secondary": "#eee0c9",
+            "accent": "#96b6c5",
+            "text": "#000000",
+            "background": "#f1f0e8"
+        }
+    },
+    {
+        "id": 32,
+        "colors": [
+            "#967e76",
+            "#d7c0ae",
+            "#eee3cb",
+            "#9babb8"
+        ],
+        "mapped": {
+            "primary": "#9babb8",
+            "secondary": "#d7c0ae",
+            "accent": "#967e76",
+            "text": "#000000",
+            "background": "#eee3cb"
+        }
+    },
+    {
+        "id": 33,
+        "colors": [
+            "#e3cdc1",
+            "#f6e6cb",
+            "#e7d4b5",
+            "#a0937d"
+        ],
+        "mapped": {
+            "primary": "#e3cdc1",
+            "secondary": "#e7d4b5",
+            "accent": "#a0937d",
+            "text": "#000000",
+            "background": "#f6e6cb"
+        }
+    },
+    {
+        "id": 34,
+        "colors": [
+            "#ffc3a1",
+            "#f0997d",
+            "#d3756b",
+            "#a75d5d"
+        ],
+        "mapped": {
+            "primary": "#d3756b",
+            "secondary": "#f0997d",
+            "accent": "#a75d5d",
+            "text": "#000000",
+            "background": "#ffc3a1"
+        }
+    },
+    {
+        "id": 35,
+        "colors": [
+            "#ffc3a1",
+            "#f0997d",
+            "#d3756b",
+            "#a75d5d"
+        ],
+        "mapped": {
+            "primary": "#d3756b",
+            "secondary": "#f0997d",
+            "accent": "#a75d5d",
+            "text": "#000000",
+            "background": "#ffc3a1"
+        }
+    },
+    {
+        "id": 36,
+        "colors": [
+            "#ffffd2",
+            "#fcbad3",
+            "#aa96da",
+            "#a8d8ea"
+        ],
+        "mapped": {
+            "primary": "#fcbad3",
+            "secondary": "#a8d8ea",
+            "accent": "#aa96da",
+            "text": "#000000",
+            "background": "#ffffd2"
+        }
+    },
+    {
+        "id": 37,
+        "colors": [
+            "#675d50",
+            "#abc4aa",
+            "#f3deba",
+            "#a9907e"
+        ],
+        "mapped": {
+            "primary": "#a9907e",
+            "secondary": "#abc4aa",
+            "accent": "#abc4aa",
+            "text": "#675d50",
+            "background": "#f3deba"
+        }
+    },
+    {
+        "id": 38,
+        "colors": [
+            "#fffbe9",
+            "#e3caa5",
+            "#ceab93",
+            "#ad8b73"
+        ],
+        "mapped": {
+            "primary": "#ceab93",
+            "secondary": "#e3caa5",
+            "accent": "#ad8b73",
+            "text": "#000000",
+            "background": "#fffbe9"
+        }
+    },
+    {
+        "id": 39,
+        "colors": [
+            "#eef1ff",
+            "#d2daff",
+            "#aac4ff",
+            "#b1b2ff"
+        ],
+        "mapped": {
+            "primary": "#aac4ff",
+            "secondary": "#d2daff",
+            "accent": "#b1b2ff",
+            "text": "#000000",
+            "background": "#eef1ff"
+        }
+    },
+    {
+        "id": 40,
+        "colors": [
+            "#e5ddc5",
+            "#f1eedc",
+            "#bed7dc",
+            "#b3c8cf"
+        ],
+        "mapped": {
+            "primary": "#bed7dc",
+            "secondary": "#e5ddc5",
+            "accent": "#b3c8cf",
+            "text": "#000000",
+            "background": "#f1eedc"
+        }
+    },
+    {
+        "id": 41,
+        "colors": [
+            "#f2efe5",
+            "#e3e1d9",
+            "#c7c8cc",
+            "#b4b4b8"
+        ],
+        "mapped": {
+            "primary": "#c7c8cc",
+            "secondary": "#e3e1d9",
+            "accent": "#b4b4b8",
+            "text": "#000000",
+            "background": "#f2efe5"
+        }
+    },
+    {
+        "id": 42,
+        "colors": [
+            "#eed3d9",
+            "#f5e8dd",
+            "#ccd3ca",
+            "#b5c0d0"
+        ],
+        "mapped": {
+            "primary": "#ccd3ca",
+            "secondary": "#eed3d9",
+            "accent": "#b5c0d0",
+            "text": "#000000",
+            "background": "#f5e8dd"
+        }
+    },
+    {
+        "id": 43,
+        "colors": [
+            "#f38ba0",
+            "#ffbcbc",
+            "#edf6e5",
+            "#b5eaea"
+        ],
+        "mapped": {
+            "primary": "#ffbcbc",
+            "secondary": "#b5eaea",
+            "accent": "#f38ba0",
+            "text": "#000000",
+            "background": "#edf6e5"
+        }
+    },
+    {
+        "id": 44,
+        "colors": [
+            "#967e76",
+            "#d7c0ae",
+            "#eee3cb",
+            "#b7c4cf"
+        ],
+        "mapped": {
+            "primary": "#b7c4cf",
+            "secondary": "#d7c0ae",
+            "accent": "#967e76",
+            "text": "#000000",
+            "background": "#eee3cb"
+        }
+    },
+    {
+        "id": 45,
+        "colors": [
+            "#99ddcc",
+            "#f6f6f6",
+            "#ffe2e2",
+            "#bad7df"
+        ],
+        "mapped": {
+            "primary": "#bad7df",
+            "secondary": "#ffe2e2",
+            "accent": "#99ddcc",
+            "text": "#000000",
+            "background": "#f6f6f6"
+        }
+    },
+    {
+        "id": 46,
+        "colors": [
+            "#f1f1f6",
+            "#e1ccec",
+            "#c9b6e4",
+            "#be9fe1"
+        ],
+        "mapped": {
+            "primary": "#c9b6e4",
+            "secondary": "#e1ccec",
+            "accent": "#be9fe1",
+            "text": "#000000",
+            "background": "#f1f1f6"
+        }
+    },
+    {
+        "id": 47,
+        "colors": [
+            "#f8f6f4",
+            "#e3f4f4",
+            "#d2e9e9",
+            "#c4dfdf"
+        ],
+        "mapped": {
+            "primary": "#d2e9e9",
+            "secondary": "#e3f4f4",
+            "accent": "#c4dfdf",
+            "text": "#000000",
+            "background": "#f8f6f4"
+        }
+    },
+    {
+        "id": 48,
+        "colors": [
+            "#faedcd",
+            "#fefae0",
+            "#e9edc9",
+            "#ccd5ae"
+        ],
+        "mapped": {
+            "primary": "#e9edc9",
+            "secondary": "#faedcd",
+            "accent": "#ccd5ae",
+            "text": "#000000",
+            "background": "#fefae0"
+        }
+    },
+    {
+        "id": 49,
+        "colors": [
+            "#0f1035",
+            "#365486",
+            "#7fc7d9",
+            "#dcf2f1"
+        ],
+        "mapped": {
+            "primary": "#365486",
+            "secondary": "#7fc7d9",
+            "accent": "#7fc7d9",
+            "text": "#0f1035",
+            "background": "#dcf2f1"
+        }
+    },
+    {
+        "id": 50,
+        "colors": [
+            "#f05454",
+            "#30475e",
+            "#222831",
+            "#dddddd"
+        ],
+        "mapped": {
+            "primary": "#30475e",
+            "secondary": "#f05454",
+            "accent": "#f05454",
+            "text": "#222831",
+            "background": "#dddddd"
+        }
+    },
+    {
+        "id": 51,
+        "colors": [
+            "#8ec3b0",
+            "#9ed5c5",
+            "#bcead5",
+            "#def5e5"
+        ],
+        "mapped": {
+            "primary": "#9ed5c5",
+            "secondary": "#bcead5",
+            "accent": "#8ec3b0",
+            "text": "#000000",
+            "background": "#def5e5"
+        }
+    },
+    {
+        "id": 52,
+        "colors": [
+            "#cca8e9",
+            "#c3bef0",
+            "#cadefc",
+            "#defcf9"
+        ],
+        "mapped": {
+            "primary": "#c3bef0",
+            "secondary": "#cadefc",
+            "accent": "#cca8e9",
+            "text": "#000000",
+            "background": "#defcf9"
+        }
+    },
+    {
+        "id": 53,
+        "colors": [
+            "#99bc85",
+            "#bfd8af",
+            "#d4e7c5",
+            "#e1f0da"
+        ],
+        "mapped": {
+            "primary": "#bfd8af",
+            "secondary": "#d4e7c5",
+            "accent": "#99bc85",
+            "text": "#000000",
+            "background": "#e1f0da"
+        }
+    },
+    {
+        "id": 54,
+        "colors": [
+            "#311d3f",
+            "#522546",
+            "#88304e",
+            "#e23e57"
+        ],
+        "mapped": {
+            "primary": "#522546",
+            "secondary": "#88304e",
+            "accent": "#88304e",
+            "text": "#311d3f",
+            "background": "#ffffff"
+        }
+    },
+    {
+        "id": 55,
+        "colors": [
+            "#311d3f",
+            "#522546",
+            "#88304e",
+            "#e23e57"
+        ],
+        "mapped": {
+            "primary": "#522546",
+            "secondary": "#88304e",
+            "accent": "#88304e",
+            "text": "#311d3f",
+            "background": "#ffffff"
+        }
+    },
+    {
+        "id": 56,
+        "colors": [
+            "#71c9ce",
+            "#a6e3e9",
+            "#cbf1f5",
+            "#e3fdfd"
+        ],
+        "mapped": {
+            "primary": "#a6e3e9",
+            "secondary": "#cbf1f5",
+            "accent": "#71c9ce",
+            "text": "#000000",
+            "background": "#e3fdfd"
+        }
+    },
+    {
+        "id": 57,
+        "colors": [
+            "#40514e",
+            "#11999e",
+            "#30e3ca",
+            "#e4f9f5"
+        ],
+        "mapped": {
+            "primary": "#11999e",
+            "secondary": "#30e3ca",
+            "accent": "#30e3ca",
+            "text": "#40514e",
+            "background": "#e4f9f5"
+        }
+    },
+    {
+        "id": 58,
+        "colors": [
+            "#285430",
+            "#5f8d4e",
+            "#a4be7b",
+            "#e5d9b6"
+        ],
+        "mapped": {
+            "primary": "#5f8d4e",
+            "secondary": "#a4be7b",
+            "accent": "#a4be7b",
+            "text": "#285430",
+            "background": "#e5d9b6"
+        }
+    },
+    {
+        "id": 59,
+        "colors": [
+            "#eae0da",
+            "#f7f5eb",
+            "#a0c3d2",
+            "#eac7c7"
+        ],
+        "mapped": {
+            "primary": "#eac7c7",
+            "secondary": "#eae0da",
+            "accent": "#a0c3d2",
+            "text": "#000000",
+            "background": "#f7f5eb"
+        }
+    },
+    {
+        "id": 60,
+        "colors": [
+            "#40513b",
+            "#609966",
+            "#9dc08b",
+            "#edf1d6"
+        ],
+        "mapped": {
+            "primary": "#609966",
+            "secondary": "#9dc08b",
+            "accent": "#9dc08b",
+            "text": "#40513b",
+            "background": "#edf1d6"
+        }
+    },
+    {
+        "id": 61,
+        "colors": [
+            "#1b1717",
+            "#630000",
+            "#810000",
+            "#eeebdd"
+        ],
+        "mapped": {
+            "primary": "#630000",
+            "secondary": "#810000",
+            "accent": "#810000",
+            "text": "#1b1717",
+            "background": "#eeebdd"
+        }
+    },
+    {
+        "id": 62,
+        "colors": [
+            "#4b6587",
+            "#c8c6c6",
+            "#f7f6f2",
+            "#f0e5cf"
+        ],
+        "mapped": {
+            "primary": "#c8c6c6",
+            "secondary": "#f0e5cf",
+            "accent": "#f0e5cf",
+            "text": "#4b6587",
+            "background": "#f7f6f2"
+        }
+    },
+    {
+        "id": 63,
+        "colors": [
+            "#576f72",
+            "#7d9d9c",
+            "#e4dccf",
+            "#f0ebe3"
+        ],
+        "mapped": {
+            "primary": "#7d9d9c",
+            "secondary": "#e4dccf",
+            "accent": "#e4dccf",
+            "text": "#576f72",
+            "background": "#f0ebe3"
+        }
+    },
+    {
+        "id": 64,
+        "colors": [
+            "#596e79",
+            "#c7b198",
+            "#dfd3c3",
+            "#f0ece3"
+        ],
+        "mapped": {
+            "primary": "#c7b198",
+            "secondary": "#dfd3c3",
+            "accent": "#dfd3c3",
+            "text": "#596e79",
+            "background": "#f0ece3"
+        }
+    },
+    {
+        "id": 65,
+        "colors": [
+            "#1e2022",
+            "#52616b",
+            "#c9d6df",
+            "#f0f5f9"
+        ],
+        "mapped": {
+            "primary": "#52616b",
+            "secondary": "#c9d6df",
+            "accent": "#c9d6df",
+            "text": "#1e2022",
+            "background": "#f0f5f9"
+        }
+    },
+    {
+        "id": 66,
+        "colors": [
+            "#9ba4b4",
+            "#394867",
+            "#14274e",
+            "#f1f6f9"
+        ],
+        "mapped": {
+            "primary": "#394867",
+            "secondary": "#9ba4b4",
+            "accent": "#9ba4b4",
+            "text": "#14274e",
+            "background": "#f1f6f9"
+        }
+    },
+    {
+        "id": 67,
+        "colors": [
+            "#9ba4b5",
+            "#212a3e",
+            "#394867",
+            "#f1f6f9"
+        ],
+        "mapped": {
+            "primary": "#394867",
+            "secondary": "#9ba4b5",
+            "accent": "#9ba4b5",
+            "text": "#212a3e",
+            "background": "#f1f6f9"
+        }
+    },
+    {
+        "id": 68,
+        "colors": [
+            "#748da6",
+            "#9cb4cc",
+            "#d3cedf",
+            "#f2d7d9"
+        ],
+        "mapped": {
+            "primary": "#9cb4cc",
+            "secondary": "#d3cedf",
+            "accent": "#748da6",
+            "text": "#000000",
+            "background": "#f2d7d9"
+        }
+    },
+    {
+        "id": 69,
+        "colors": [
+            "#95e1d3",
+            "#eaffd0",
+            "#fce38a",
+            "#f38181"
+        ],
+        "mapped": {
+            "primary": "#95e1d3",
+            "secondary": "#fce38a",
+            "accent": "#f38181",
+            "text": "#000000",
+            "background": "#eaffd0"
+        }
+    },
+    {
+        "id": 70,
+        "colors": [
+            "#776b5d",
+            "#b0a695",
+            "#ebe3d5",
+            "#f3eeea"
+        ],
+        "mapped": {
+            "primary": "#b0a695",
+            "secondary": "#ebe3d5",
+            "accent": "#ebe3d5",
+            "text": "#776b5d",
+            "background": "#f3eeea"
+        }
+    },
+    {
+        "id": 71,
+        "colors": [
+            "#424874",
+            "#a6b1e1",
+            "#dcd6f7",
+            "#f4eeff"
+        ],
+        "mapped": {
+            "primary": "#a6b1e1",
+            "secondary": "#dcd6f7",
+            "accent": "#dcd6f7",
+            "text": "#424874",
+            "background": "#f4eeff"
+        }
+    },
+    {
+        "id": 72,
+        "colors": [
+            "#424874",
+            "#a6b1e1",
+            "#dcd6f7",
+            "#f4eeff"
+        ],
+        "mapped": {
+            "primary": "#a6b1e1",
+            "secondary": "#dcd6f7",
+            "accent": "#dcd6f7",
+            "text": "#424874",
+            "background": "#f4eeff"
+        }
+    },
+    {
+        "id": 73,
+        "colors": [
+            "#495464",
+            "#bbbfca",
+            "#e8e8e8",
+            "#f4f4f2"
+        ],
+        "mapped": {
+            "primary": "#bbbfca",
+            "secondary": "#e8e8e8",
+            "accent": "#e8e8e8",
+            "text": "#495464",
+            "background": "#f4f4f2"
+        }
+    },
+    {
+        "id": 74,
+        "colors": [
+            "#e6a4b4",
+            "#f3d7ca",
+            "#fff8e3",
+            "#f5eee6"
+        ],
+        "mapped": {
+            "primary": "#f3d7ca",
+            "secondary": "#f5eee6",
+            "accent": "#e6a4b4",
+            "text": "#000000",
+            "background": "#fff8e3"
+        }
+    },
+    {
+        "id": 75,
+        "colors": [
+            "#7895b2",
+            "#aebdca",
+            "#e8dfca",
+            "#f5efe6"
+        ],
+        "mapped": {
+            "primary": "#aebdca",
+            "secondary": "#e8dfca",
+            "accent": "#7895b2",
+            "text": "#000000",
+            "background": "#f5efe6"
+        }
+    },
+    {
+        "id": 76,
+        "colors": [
+            "#213555",
+            "#4f709c",
+            "#d8c4b6",
+            "#f5efe7"
+        ],
+        "mapped": {
+            "primary": "#4f709c",
+            "secondary": "#d8c4b6",
+            "accent": "#d8c4b6",
+            "text": "#213555",
+            "background": "#f5efe7"
+        }
+    },
+    {
+        "id": 77,
+        "colors": [
+            "#45474b",
+            "#495e57",
+            "#f4ce14",
+            "#f5f7f8"
+        ],
+        "mapped": {
+            "primary": "#495e57",
+            "secondary": "#f4ce14",
+            "accent": "#f4ce14",
+            "text": "#45474b",
+            "background": "#f5f7f8"
+        }
+    },
+    {
+        "id": 78,
+        "colors": [
+            "#355c7d",
+            "#6c5b7b",
+            "#c06c84",
+            "#f67280"
+        ],
+        "mapped": {
+            "primary": "#6c5b7b",
+            "secondary": "#c06c84",
+            "accent": "#c06c84",
+            "text": "#355c7d",
+            "background": "#ffffff"
+        }
+    },
+    {
+        "id": 79,
+        "colors": [
+            "#146c94",
+            "#19a7ce",
+            "#afd3e2",
+            "#f6f1f1"
+        ],
+        "mapped": {
+            "primary": "#19a7ce",
+            "secondary": "#afd3e2",
+            "accent": "#afd3e2",
+            "text": "#146c94",
+            "background": "#f6f1f1"
+        }
+    },
+    {
+        "id": 80,
+        "colors": [
+            "#4682a9",
+            "#749bc2",
+            "#91c8e4",
+            "#f6f4eb"
+        ],
+        "mapped": {
+            "primary": "#749bc2",
+            "secondary": "#91c8e4",
+            "accent": "#4682a9",
+            "text": "#000000",
+            "background": "#f6f4eb"
+        }
+    },
+    {
+        "id": 81,
+        "colors": [
+            "#ffefef",
+            "#f3d0d7",
+            "#f0ebe3",
+            "#f6f5f2"
+        ],
+        "mapped": {
+            "primary": "#f0ebe3",
+            "secondary": "#ffefef",
+            "accent": "#f3d0d7",
+            "text": "#000000",
+            "background": "#f6f5f2"
+        }
+    },
+    {
+        "id": 82,
+        "colors": [
+            "#276678",
+            "#1687a7",
+            "#d3e0ea",
+            "#f6f5f5"
+        ],
+        "mapped": {
+            "primary": "#1687a7",
+            "secondary": "#d3e0ea",
+            "accent": "#d3e0ea",
+            "text": "#276678",
+            "background": "#f6f5f5"
+        }
+    },
+    {
+        "id": 83,
+        "colors": [
+            "#aaaaaa",
+            "#ffc7c7",
+            "#ffe2e2",
+            "#f6f6f6"
+        ],
+        "mapped": {
+            "primary": "#ffc7c7",
+            "secondary": "#ffe2e2",
+            "accent": "#aaaaaa",
+            "text": "#000000",
+            "background": "#f6f6f6"
+        }
+    },
+    {
+        "id": 84,
+        "colors": [
+            "#769fcd",
+            "#b9d7ea",
+            "#d6e6f2",
+            "#f7fbfc"
+        ],
+        "mapped": {
+            "primary": "#b9d7ea",
+            "secondary": "#d6e6f2",
+            "accent": "#769fcd",
+            "text": "#000000",
+            "background": "#f7fbfc"
+        }
+    },
+    {
+        "id": 85,
+        "colors": [
+            "#798777",
+            "#a2b29f",
+            "#bdd2b6",
+            "#f8ede3"
+        ],
+        "mapped": {
+            "primary": "#a2b29f",
+            "secondary": "#bdd2b6",
+            "accent": "#798777",
+            "text": "#000000",
+            "background": "#f8ede3"
+        }
+    },
+    {
+        "id": 86,
+        "colors": [
+            "#7d6e83",
+            "#d0b8a8",
+            "#dfd3c3",
+            "#f8ede3"
+        ],
+        "mapped": {
+            "primary": "#d0b8a8",
+            "secondary": "#dfd3c3",
+            "accent": "#7d6e83",
+            "text": "#000000",
+            "background": "#f8ede3"
+        }
+    },
+    {
+        "id": 87,
+        "colors": [
+            "#85586f",
+            "#d0b8a8",
+            "#dfd3c3",
+            "#f8ede3"
+        ],
+        "mapped": {
+            "primary": "#d0b8a8",
+            "secondary": "#dfd3c3",
+            "accent": "#dfd3c3",
+            "text": "#85586f",
+            "background": "#f8ede3"
+        }
+    },
+    {
+        "id": 88,
+        "colors": [
+            "#6a2c70",
+            "#b83b5e",
+            "#f08a5d",
+            "#f9ed69"
+        ],
+        "mapped": {
+            "primary": "#b83b5e",
+            "secondary": "#f08a5d",
+            "accent": "#f08a5d",
+            "text": "#6a2c70",
+            "background": "#f9ed69"
+        }
+    },
+    {
+        "id": 89,
+        "colors": [
+            "#f2bed1",
+            "#fdcedf",
+            "#f8e8ee",
+            "#f9f5f6"
+        ],
+        "mapped": {
+            "primary": "#fdcedf",
+            "secondary": "#f8e8ee",
+            "accent": "#f2bed1",
+            "text": "#000000",
+            "background": "#f9f5f6"
+        }
+    },
+    {
+        "id": 90,
+        "colors": [
+            "#112d4e",
+            "#3f72af",
+            "#dbe2ef",
+            "#f9f7f7"
+        ],
+        "mapped": {
+            "primary": "#3f72af",
+            "secondary": "#dbe2ef",
+            "accent": "#dbe2ef",
+            "text": "#112d4e",
+            "background": "#f9f7f7"
+        }
+    },
+    {
+        "id": 91,
+        "colors": [
+            "#435334",
+            "#9eb384",
+            "#cedebd",
+            "#faf1e4"
+        ],
+        "mapped": {
+            "primary": "#9eb384",
+            "secondary": "#cedebd",
+            "accent": "#cedebd",
+            "text": "#435334",
+            "background": "#faf1e4"
+        }
+    },
+    {
+        "id": 92,
+        "colors": [
+            "#1e212d",
+            "#b68973",
+            "#eabf9f",
+            "#faf3e0"
+        ],
+        "mapped": {
+            "primary": "#b68973",
+            "secondary": "#eabf9f",
+            "accent": "#eabf9f",
+            "text": "#1e212d",
+            "background": "#faf3e0"
+        }
+    },
+    {
+        "id": 93,
+        "colors": [
+            "#c58940",
+            "#e5ba73",
+            "#faeab1",
+            "#faf8f1"
+        ],
+        "mapped": {
+            "primary": "#e5ba73",
+            "secondary": "#faeab1",
+            "accent": "#c58940",
+            "text": "#000000",
+            "background": "#faf8f1"
+        }
+    },
+    {
+        "id": 94,
+        "colors": [
+            "#aee1e1",
+            "#d3e0dc",
+            "#ece2e1",
+            "#fcd1d1"
+        ],
+        "mapped": {
+            "primary": "#fcd1d1",
+            "secondary": "#d3e0dc",
+            "accent": "#aee1e1",
+            "text": "#000000",
+            "background": "#ece2e1"
+        }
+    },
+    {
+        "id": 95,
+        "colors": [
+            "#f5c6aa",
+            "#f8e2cf",
+            "#fdf6f0",
+            "#fcd8d4"
+        ],
+        "mapped": {
+            "primary": "#fcd8d4",
+            "secondary": "#f8e2cf",
+            "accent": "#f5c6aa",
+            "text": "#000000",
+            "background": "#fdf6f0"
+        }
+    },
+    {
+        "id": 96,
+        "colors": [
+            "#df7861",
+            "#ecb390",
+            "#d4e2d4",
+            "#fcf8e8"
+        ],
+        "mapped": {
+            "primary": "#ecb390",
+            "secondary": "#d4e2d4",
+            "accent": "#df7861",
+            "text": "#000000",
+            "background": "#fcf8e8"
+        }
+    },
+    {
+        "id": 97,
+        "colors": [
+            "#cdbba7",
+            "#dad0c2",
+            "#f4dfd0",
+            "#fdefef"
+        ],
+        "mapped": {
+            "primary": "#dad0c2",
+            "secondary": "#f4dfd0",
+            "accent": "#cdbba7",
+            "text": "#000000",
+            "background": "#fdefef"
+        }
+    },
+    {
+        "id": 98,
+        "colors": [
+            "#99a799",
+            "#adc2a9",
+            "#d3e4cd",
+            "#fef5ed"
+        ],
+        "mapped": {
+            "primary": "#adc2a9",
+            "secondary": "#d3e4cd",
+            "accent": "#99a799",
+            "text": "#000000",
+            "background": "#fef5ed"
+        }
+    },
+    {
+        "id": 99,
+        "colors": [
+            "#dba39a",
+            "#f0dbdb",
+            "#f5ebe0",
+            "#fefcf3"
+        ],
+        "mapped": {
+            "primary": "#f0dbdb",
+            "secondary": "#f5ebe0",
+            "accent": "#dba39a",
+            "text": "#000000",
+            "background": "#fefcf3"
+        }
+    },
+    {
+        "id": 100,
+        "colors": [
+            "#52734d",
+            "#91c788",
+            "#ddffbc",
+            "#feffde"
+        ],
+        "mapped": {
+            "primary": "#91c788",
+            "secondary": "#ddffbc",
+            "accent": "#ddffbc",
+            "text": "#52734d",
+            "background": "#feffde"
+        }
+    },
+    {
+        "id": 101,
+        "colors": [
+            "#ffe8e8",
+            "#ffdcdc",
+            "#ffb4b4",
+            "#ff9292"
+        ],
+        "mapped": {
+            "primary": "#ffb4b4",
+            "secondary": "#ffdcdc",
+            "accent": "#ff9292",
+            "text": "#000000",
+            "background": "#ffe8e8"
+        }
+    },
+    {
+        "id": 102,
+        "colors": [
+            "#61c0bf",
+            "#bbded6",
+            "#fae3d9",
+            "#ffb6b9"
+        ],
+        "mapped": {
+            "primary": "#ffb6b9",
+            "secondary": "#bbded6",
+            "accent": "#61c0bf",
+            "text": "#000000",
+            "background": "#fae3d9"
+        }
+    },
+    {
+        "id": 103,
+        "colors": [
+            "#ff8dc7",
+            "#ffacc7",
+            "#ffddd2",
+            "#ffb9b9"
+        ],
+        "mapped": {
+            "primary": "#ffacc7",
+            "secondary": "#ffb9b9",
+            "accent": "#ff8dc7",
+            "text": "#000000",
+            "background": "#ffddd2"
+        }
+    },
+    {
+        "id": 104,
+        "colors": [
+            "#8785a2",
+            "#f6f6f6",
+            "#ffe2e2",
+            "#ffc7c7"
+        ],
+        "mapped": {
+            "primary": "#ffc7c7",
+            "secondary": "#ffe2e2",
+            "accent": "#8785a2",
+            "text": "#000000",
+            "background": "#f6f6f6"
+        }
+    },
+    {
+        "id": 105,
+        "colors": [
+            "#a5dee5",
+            "#e0f9b5",
+            "#fefdca",
+            "#ffcfdf"
+        ],
+        "mapped": {
+            "primary": "#ffcfdf",
+            "secondary": "#e0f9b5",
+            "accent": "#a5dee5",
+            "text": "#000000",
+            "background": "#fefdca"
+        }
+    },
+    {
+        "id": 106,
+        "colors": [
+            "#aacb73",
+            "#cde990",
+            "#ffffe8",
+            "#ffd4d4"
+        ],
+        "mapped": {
+            "primary": "#ffd4d4",
+            "secondary": "#cde990",
+            "accent": "#aacb73",
+            "text": "#000000",
+            "background": "#ffffe8"
+        }
+    },
+    {
+        "id": 107,
+        "colors": [
+            "#8675a9",
+            "#c3aed6",
+            "#efbbcf",
+            "#ffd5cd"
+        ],
+        "mapped": {
+            "primary": "#c3aed6",
+            "secondary": "#efbbcf",
+            "accent": "#8675a9",
+            "text": "#000000",
+            "background": "#ffd5cd"
+        }
+    },
+    {
+        "id": 108,
+        "colors": [
+            "#c6dce4",
+            "#daeaf1",
+            "#f2d1d1",
+            "#ffe6e6"
+        ],
+        "mapped": {
+            "primary": "#f2d1d1",
+            "secondary": "#daeaf1",
+            "accent": "#c6dce4",
+            "text": "#000000",
+            "background": "#ffe6e6"
+        }
+    },
+    {
+        "id": 109,
+        "colors": [
+            "#bf9270",
+            "#e3b7a0",
+            "#edcdbb",
+            "#ffeddb"
+        ],
+        "mapped": {
+            "primary": "#e3b7a0",
+            "secondary": "#edcdbb",
+            "accent": "#bf9270",
+            "text": "#000000",
+            "background": "#ffeddb"
+        }
+    },
+    {
+        "id": 110,
+        "colors": [
+            "#febbcc",
+            "#ffcccc",
+            "#ffddcc",
+            "#ffeecc"
+        ],
+        "mapped": {
+            "primary": "#ffcccc",
+            "secondary": "#ffddcc",
+            "accent": "#febbcc",
+            "text": "#000000",
+            "background": "#ffeecc"
+        }
+    },
+    {
+        "id": 111,
+        "colors": [
+            "#850e35",
+            "#ee6983",
+            "#ffc4c4",
+            "#fff5e4"
+        ],
+        "mapped": {
+            "primary": "#ee6983",
+            "secondary": "#ffc4c4",
+            "accent": "#ffc4c4",
+            "text": "#850e35",
+            "background": "#fff5e4"
+        }
+    },
+    {
+        "id": 112,
+        "colors": [
+            "#ff9494",
+            "#ffd1d1",
+            "#ffe3e1",
+            "#fff5e4"
+        ],
+        "mapped": {
+            "primary": "#ffd1d1",
+            "secondary": "#ffe3e1",
+            "accent": "#ff9494",
+            "text": "#000000",
+            "background": "#fff5e4"
+        }
+    },
+    {
+        "id": 113,
+        "colors": [
+            "#b2b8a3",
+            "#f4c7ab",
+            "#deedf0",
+            "#fff5eb"
+        ],
+        "mapped": {
+            "primary": "#f4c7ab",
+            "secondary": "#deedf0",
+            "accent": "#b2b8a3",
+            "text": "#000000",
+            "background": "#fff5eb"
+        }
+    },
+    {
+        "id": 114,
+        "colors": [
+            "#594545",
+            "#815b5b",
+            "#9e7676",
+            "#fff8ea"
+        ],
+        "mapped": {
+            "primary": "#815b5b",
+            "secondary": "#9e7676",
+            "accent": "#9e7676",
+            "text": "#594545",
+            "background": "#fff8ea"
+        }
+    }
+]

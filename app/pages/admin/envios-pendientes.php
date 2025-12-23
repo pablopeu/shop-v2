@@ -15,6 +15,10 @@ $page_title = 'Envíos Pendientes';
 $currency_config = read_json(APP_PATH . '/config/currency.json');
 $csrf_token = generate_csrf_token();
 
+// Get available carriers for filter
+require_once APP_PATH . '/includes/carriers.php';
+$available_carriers = get_all_carriers();
+
 // Handle actions
 $message = '';
 $error = '';
@@ -92,6 +96,7 @@ $shipping_orders = array_filter($all_orders, function($order) {
 // Apply filters
 $filter_status = $_GET['filter'] ?? 'all';
 $filter_delivery = $_GET['delivery'] ?? 'all';
+$filter_carrier = $_GET['carrier'] ?? 'all';
 $search_query = $_GET['search'] ?? '';
 
 // Apply status filter
@@ -112,6 +117,17 @@ if ($filter_delivery === 'pickup') {
     $orders = array_filter($orders, fn($o) => ($o['delivery_method'] ?? 'pickup') === 'pickup');
 } elseif ($filter_delivery === 'shipping') {
     $orders = array_filter($orders, fn($o) => ($o['delivery_method'] ?? 'pickup') === 'shipping');
+}
+
+// Apply carrier filter
+if ($filter_carrier !== 'all') {
+    if ($filter_carrier === 'manual') {
+        // Orders without carrier (manual shipping)
+        $orders = array_filter($orders, fn($o) => empty($o['shipping']['carrier'] ?? null));
+    } else {
+        // Orders with specific carrier
+        $orders = array_filter($orders, fn($o) => ($o['shipping']['carrier'] ?? null) === $filter_carrier);
+    }
 }
 
 // Apply search filter

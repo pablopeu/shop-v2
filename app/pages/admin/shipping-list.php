@@ -5,7 +5,7 @@
  */
 
 require_admin();
-require_once APP_PATH . '/includes/zipnova.php';
+require_once APP_PATH . '/includes/carriers.php';
 require_once APP_PATH . '/includes/orders.php';
 
 $message = '';

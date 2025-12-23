@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['test_connection'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido';
     } else {
-        require_once APP_PATH . '/includes/zipnova.php';
+        require_once APP_PATH . '/includes/carriers.php';
         $test_result = zipnova_test_connection();
 
         if ($test_result['success']) {
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido';
     } else {
-        require_once APP_PATH . '/includes/zipnova.php';
+        require_once APP_PATH . '/includes/carriers.php';
 
         $config = zipnova_get_config();
         if (!$config) {
@@ -107,7 +107,7 @@ if (isset($_SESSION['shipping_config_message'])) {
     unset($_SESSION['shipping_config_message']);
 }
 
-require_once APP_PATH . '/includes/zipnova.php';
+require_once APP_PATH . '/includes/carriers.php';
 $shipping_config = zipnova_get_config();
 $page_title = 'Configuración de Logística';
 $csrf_token = generate_csrf_token();
