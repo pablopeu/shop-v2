@@ -47,6 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
         $config['mode'] = $_POST['zipnova_mode'] ?? 'sandbox';
 
         // Credentials
+        if (!empty($_POST['zipnova_account_id'])) {
+            $config['credentials']['account_id'] = sanitize_input($_POST['zipnova_account_id']);
+        }
         if (!empty($_POST['zipnova_client_id'])) {
             $config['credentials']['client_id'] = sanitize_input($_POST['zipnova_client_id']);
         }
@@ -56,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
 
         // Origin configuration
         $config['origin'] = [
+            'origin_id' => sanitize_input($_POST['origin_id'] ?? ''),
             'name' => sanitize_input($_POST['origin_name'] ?? ''),
             'address' => sanitize_input($_POST['origin_address'] ?? ''),
             'city' => sanitize_input($_POST['origin_city'] ?? ''),
@@ -427,6 +431,16 @@ $provincias = [
                     </div>
 
                     <div class="form-group">
+                        <label>Account ID</label>
+                        <input type="text" name="zipnova_account_id"
+                               value="<?php echo htmlspecialchars($shipping_config['credentials']['account_id'] ?? ''); ?>"
+                               placeholder="3355">
+                        <div class="help-text">
+                            ID de tu cuenta en Zipnova (lo encontrás en tu panel de Zipnova)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label>API Token</label>
                         <input type="text" name="zipnova_client_id"
                                value="<?php echo htmlspecialchars($shipping_config['credentials']['client_id'] ?? ''); ?>"
@@ -453,7 +467,18 @@ $provincias = [
                         📍 Dirección de Origen
                     </div>
                     <div class="card-description">
-                        Dirección desde donde se envían los productos
+                        Dirección desde donde se envían los productos. Creá primero la ubicación en tu panel de Zipnova.
+                    </div>
+
+                    <div class="form-group">
+                        <label>Origin ID</label>
+                        <input type="text" name="origin_id"
+                               value="<?php echo htmlspecialchars($shipping_config['origin']['origin_id'] ?? ''); ?>"
+                               placeholder="9323"
+                               required>
+                        <div class="help-text">
+                            ID de la ubicación de origen configurada en Zipnova (lo encontrás en Configuración → Ubicaciones)
+                        </div>
                     </div>
 
                     <div class="form-group">

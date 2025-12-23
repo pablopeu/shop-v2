@@ -233,47 +233,60 @@ function zipnova_authenticate() {
  * @param array $packages Array de paquetes con weight, length, width, height, declared_value
  * @return array Resultado con cotizaciones disponibles
  */
-function zipnova_get_quotes($origin, $destination, $packages) {
+function zipnova_get_quotes($destination, $items, $declared_value = null) {
     $config = zipnova_get_config();
 
     if (!$config || !$config['enabled']) {
         return ['success' => false, 'error' => 'Zipnova no está habilitado'];
     }
 
-    // Usar origen por defecto si no se proporciona
-    if (empty($origin)) {
-        $origin = [
-            'postal_code' => $config['origin']['postal_code'],
-            'city' => $config['origin']['city'],
-            'province' => $config['origin']['province'],
-            'country' => $config['origin']['country']
+    // Validar que existan account_id y origin_id
+    $account_id = $config['credentials']['account_id'] ?? '';
+    $origin_id = $config['origin']['origin_id'] ?? '';
+
+    if (empty($account_id)) {
+        return ['success' => false, 'error' => 'Account ID no configurado'];
+    }
+
+    if (empty($origin_id)) {
+        return ['success' => false, 'error' => 'Origin ID no configurado'];
+    }
+
+    // Calcular declared_value si no se proporciona
+    if ($declared_value === null) {
+        $declared_value = 0;
+        foreach ($items as $item) {
+            $declared_value += ($item['declared_value'] ?? 0);
+        }
+    }
+
+    // Formatear items según estructura de Zipnova
+    $formatted_items = [];
+    foreach ($items as $item) {
+        $formatted_items[] = [
+            'sku' => $item['sku'] ?? 'PROD-' . uniqid(),
+            'weight' => (int)($item['weight'] ?? $config['default_package']['weight']),
+            'height' => (int)($item['height'] ?? $config['default_package']['height']),
+            'width' => (int)($item['width'] ?? $config['default_package']['width']),
+            'length' => (int)($item['length'] ?? $config['default_package']['length']),
+            'description' => $item['description'] ?? 'Producto',
+            'classification_id' => (int)($item['classification_id'] ?? 1)
         ];
     }
 
-    // Aplicar dimensiones por defecto si no se proporcionan
-    foreach ($packages as &$package) {
-        if (!isset($package['weight'])) {
-            $package['weight'] = $config['default_package']['weight'];
-        }
-        if (!isset($package['length'])) {
-            $package['length'] = $config['default_package']['length'];
-        }
-        if (!isset($package['width'])) {
-            $package['width'] = $config['default_package']['width'];
-        }
-        if (!isset($package['height'])) {
-            $package['height'] = $config['default_package']['height'];
-        }
-    }
-
     $request_data = [
-        'origin' => $origin,
-        'destination' => $destination,
-        'packages' => $packages
+        'account_id' => $account_id,
+        'origin_id' => $origin_id,
+        'declared_value' => (float)$declared_value,
+        'items' => $formatted_items,
+        'destination' => [
+            'city' => $destination['city'] ?? '',
+            'state' => $destination['state'] ?? $destination['province'] ?? '',
+            'zipcode' => $destination['zipcode'] ?? $destination['postal_code'] ?? ''
+        ]
     ];
 
-    // Zipnova API usa PUT para cotizaciones, no POST
-    $result = zipnova_api_request('/shipments/quotes', 'PUT', $request_data);
+    $result = zipnova_api_request('/shipments/quote', 'POST', $request_data);
 
     if ($result['success']) {
         // Aplicar margen de costo si está configurado
@@ -648,20 +661,21 @@ function zipnova_test_connection() {
     // Esto validará las credenciales con HTTP Basic Auth
     $config = zipnova_get_config();
     $test_quote = zipnova_get_quotes(
-        null, // usar origen por defecto
         [
-            'postal_code' => '5000',
             'city' => 'Córdoba',
-            'province' => 'Córdoba',
-            'country' => 'AR'
+            'state' => 'Córdoba',
+            'zipcode' => '5000'
         ],
         [[
-            'weight' => 1,
-            'length' => 20,
-            'width' => 15,
+            'sku' => 'TEST-001',
+            'weight' => 100,
             'height' => 10,
-            'declared_value' => 1000
-        ]]
+            'width' => 10,
+            'length' => 10,
+            'description' => 'Producto de prueba',
+            'classification_id' => 1
+        ]],
+        1000 // declared_value
     );
 
     if ($test_quote['success']) {

@@ -7,6 +7,7 @@
       "enabled": false,
       "mode": "sandbox",
       "credentials": {
+        "account_id": "",
         "client_id": "",
         "client_secret": "",
         "access_token": "",
@@ -18,6 +19,7 @@
         "production": "https://api.zipnova.com.ar/v2"
       },
       "origin": {
+        "origin_id": "",
         "name": "",
         "address": "",
         "city": "",
