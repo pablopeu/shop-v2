@@ -61,7 +61,7 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     // Formatear items según API v2 de Zipnova
     $items = [[
         'sku' => 'CART-ITEM',
-        'weight' => (int)($weight > 0 ? $weight : 100), // gramos
+        'weight' => (int)($weight > 0 ? ($weight * 1000) : 100), // convertir kg a gramos
         'height' => 10,
         'width' => 10,
         'length' => 10,
@@ -150,7 +150,7 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $items = [[
             'sku' => 'CART-ITEM',
-            'weight' => (int)($weight > 0 ? $weight : 100), // gramos
+            'weight' => (int)($weight > 0 ? ($weight * 1000) : 100), // convertir kg a gramos
             'height' => 10,
             'width' => 10,
             'length' => 10,
