@@ -13,6 +13,7 @@
 
     // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔧 Shipping module: DOMContentLoaded event fired');
         initShippingHandlers();
     });
 
@@ -20,10 +21,19 @@
      * Initialize event handlers
      */
     function initShippingHandlers() {
+        console.log('🔧 initShippingHandlers() called');
+        console.log('🔧 window.BASE_PATH:', window.BASE_PATH);
+
         // Get quote button
         const getQuoteBtn = document.getElementById('get-shipping-quote');
+        console.log('🔧 Button element:', getQuoteBtn);
+
         if (getQuoteBtn) {
+            console.log('✅ Button found! Adding event listener...');
             getQuoteBtn.addEventListener('click', handleGetQuote);
+            console.log('✅ Event listener added successfully');
+        } else {
+            console.error('❌ Button with id="get-shipping-quote" NOT FOUND!');
         }
 
         // Auto-quote when postal code changes and has enough data
