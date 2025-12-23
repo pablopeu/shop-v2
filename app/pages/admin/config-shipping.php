@@ -803,11 +803,30 @@ $provincias = [
 
         function copyResponse() {
             const content = document.getElementById('responseContent').textContent;
+            const btn = document.getElementById('copyResponseBtn');
+            const originalText = btn.innerHTML;
+            const originalBg = btn.style.background;
+
             navigator.clipboard.writeText(content).then(() => {
-                alert('✅ Respuesta copiada al portapapeles');
+                // Cambiar a estado "copiado"
+                btn.innerHTML = '✓ Copiado';
+                btn.style.background = '#218838';
+
+                // Restaurar después de 2 segundos
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = originalBg;
+                }, 2000);
             }).catch(err => {
                 console.error('Error al copiar:', err);
-                alert('❌ Error al copiar al portapapeles');
+                // Mostrar error en el botón
+                btn.innerHTML = '✗ Error';
+                btn.style.background = '#dc3545';
+
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = originalBg;
+                }, 2000);
             });
         }
 
