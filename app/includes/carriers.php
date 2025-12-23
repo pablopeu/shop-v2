@@ -98,6 +98,7 @@ function zipnova_get_api_url() {
 
 /**
  * Realiza una petición HTTP a la API de Zipnova
+ * Usa HTTP Basic Authentication con API Token y API Secret
  */
 function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth = true) {
     $config = zipnova_get_config();
@@ -111,24 +112,18 @@ function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth
     $headers = ['Content-Type: application/json'];
 
     if ($use_auth) {
-        // Verificar si el token está disponible y no ha expirado
-        if (empty($config['credentials']['access_token'])) {
-            return ['success' => false, 'error' => 'No hay token de acceso configurado'];
+        // Verificar que las credenciales estén configuradas
+        $api_token = $config['credentials']['client_id'] ?? '';
+        $api_secret = $config['credentials']['client_secret'] ?? '';
+
+        if (empty($api_token) || empty($api_secret)) {
+            return ['success' => false, 'error' => 'API Token y API Secret no están configurados'];
         }
 
-        // Verificar expiración del token
-        if (isset($config['credentials']['token_expires_at']) &&
-            $config['credentials']['token_expires_at'] !== null &&
-            time() >= $config['credentials']['token_expires_at']) {
-            // Intentar refrescar el token
-            $refresh_result = zipnova_refresh_token();
-            if (!$refresh_result['success']) {
-                return ['success' => false, 'error' => 'Token expirado y no se pudo renovar'];
-            }
-            $config = zipnova_get_config(); // Recargar config con nuevo token
-        }
-
-        $headers[] = 'Authorization: Bearer ' . $config['credentials']['access_token'];
+        // HTTP Basic Authentication
+        // Usuario: API Token, Contraseña: API Secret
+        $auth = base64_encode($api_token . ':' . $api_secret);
+        $headers[] = 'Authorization: Basic ' . $auth;
     }
 
     $timeout = $config['options']['timeout_seconds'] ?? 30;
@@ -200,8 +195,9 @@ function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth
 }
 
 /**
- * Autenticación OAuth 2.0
- * Obtiene un access token usando client credentials
+ * Verifica las credenciales de API
+ * Nota: Con HTTP Basic Auth no se necesita obtener tokens,
+ * las credenciales se envían en cada request
  */
 function zipnova_authenticate() {
     $config = zipnova_get_config();
@@ -209,107 +205,21 @@ function zipnova_authenticate() {
         return ['success' => false, 'error' => 'Configuración no encontrada'];
     }
 
-    $client_id = $config['credentials']['client_id'] ?? '';
-    $client_secret = $config['credentials']['client_secret'] ?? '';
+    $api_token = $config['credentials']['client_id'] ?? '';
+    $api_secret = $config['credentials']['client_secret'] ?? '';
 
-    if (empty($client_id) || empty($client_secret)) {
-        return ['success' => false, 'error' => 'Credenciales no configuradas'];
+    if (empty($api_token) || empty($api_secret)) {
+        return ['success' => false, 'error' => 'API Token y API Secret no configurados'];
     }
 
-    // Realizar request de autenticación (sin usar zipnova_api_request)
-    $base_url = zipnova_get_api_url();
-    $url = $base_url . '/oauth/token';
+    // Con HTTP Basic Auth, simplemente verificamos que las credenciales existan
+    // La validación real ocurre cuando hacemos requests a la API
+    zipnova_log('Credentials Check', ['api_token' => substr($api_token, 0, 10) . '...']);
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        'grant_type' => 'client_credentials',
-        'client_id' => $client_id,
-        'client_secret' => $client_secret
-    ]));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($response === false || $http_code !== 200) {
-        zipnova_log('Authentication Failed', ['http_code' => $http_code]);
-        return ['success' => false, 'error' => 'Error de autenticación'];
-    }
-
-    $result = json_decode($response, true);
-
-    if (isset($result['access_token'])) {
-        // Actualizar configuración con el nuevo token
-        $config['credentials']['access_token'] = $result['access_token'];
-        $config['credentials']['refresh_token'] = $result['refresh_token'] ?? '';
-        $config['credentials']['token_expires_at'] = time() + ($result['expires_in'] ?? 3600);
-
-        zipnova_save_config($config);
-        zipnova_log('Authentication Success', ['expires_in' => $result['expires_in']]);
-
-        return ['success' => true, 'data' => $result];
-    }
-
-    return ['success' => false, 'error' => 'Token no recibido'];
-}
-
-/**
- * Refresca el token de acceso usando el refresh token
- */
-function zipnova_refresh_token() {
-    $config = zipnova_get_config();
-    if (!$config) {
-        return ['success' => false, 'error' => 'Configuración no encontrada'];
-    }
-
-    $refresh_token = $config['credentials']['refresh_token'] ?? '';
-
-    if (empty($refresh_token)) {
-        // Si no hay refresh token, intentar autenticación completa
-        return zipnova_authenticate();
-    }
-
-    $base_url = zipnova_get_api_url();
-    $url = $base_url . '/oauth/token';
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        'grant_type' => 'refresh_token',
-        'refresh_token' => $refresh_token
-    ]));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($response === false || $http_code !== 200) {
-        // Si falla el refresh, intentar autenticación completa
-        zipnova_log('Token Refresh Failed', ['http_code' => $http_code]);
-        return zipnova_authenticate();
-    }
-
-    $result = json_decode($response, true);
-
-    if (isset($result['access_token'])) {
-        $config['credentials']['access_token'] = $result['access_token'];
-        $config['credentials']['refresh_token'] = $result['refresh_token'] ?? $refresh_token;
-        $config['credentials']['token_expires_at'] = time() + ($result['expires_in'] ?? 3600);
-
-        zipnova_save_config($config);
-        zipnova_log('Token Refreshed', ['expires_in' => $result['expires_in']]);
-
-        return ['success' => true, 'data' => $result];
-    }
-
-    return ['success' => false, 'error' => 'No se pudo refrescar el token'];
+    return [
+        'success' => true,
+        'message' => 'Credenciales configuradas. Se validarán en cada request con HTTP Basic Auth.'
+    ];
 }
 
 /**
@@ -717,21 +627,21 @@ function zipnova_build_packages_from_cart($cart_items) {
 }
 
 /**
- * Prueba la conexión con Zipnova
+ * Prueba la conexión con Zipnova usando HTTP Basic Auth
  */
 function zipnova_test_connection() {
-    // Primero intentar autenticarse
-    $auth_result = zipnova_authenticate();
+    // Verificar que las credenciales estén configuradas
+    $auth_check = zipnova_authenticate();
 
-    if (!$auth_result['success']) {
+    if (!$auth_check['success']) {
         return [
             'success' => false,
-            'error' => 'Error de autenticación: ' . $auth_result['error']
+            'error' => $auth_check['error']
         ];
     }
 
-    // Intentar hacer una petición simple (puede ser un endpoint de health check)
-    // Si no existe, podemos intentar obtener cotizaciones con datos de prueba
+    // Probar la conexión con una cotización de prueba
+    // Esto validará las credenciales con HTTP Basic Auth
     $config = zipnova_get_config();
     $test_quote = zipnova_get_quotes(
         null, // usar origen por defecto
@@ -753,7 +663,7 @@ function zipnova_test_connection() {
     if ($test_quote['success']) {
         return [
             'success' => true,
-            'message' => 'Conexión exitosa con Zipnova',
+            'message' => 'Conexión exitosa con Zipnova usando HTTP Basic Auth',
             'mode' => $config['mode'],
             'api_url' => zipnova_get_api_url()
         ];

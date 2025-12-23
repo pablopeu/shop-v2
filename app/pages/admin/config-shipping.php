@@ -437,35 +437,30 @@ $provincias = [
                         🔐 Credenciales de API
                     </div>
                     <div class="card-description">
-                        Credenciales de autenticación OAuth 2.0 para Zipnova
+                        Para generar tus credenciales ingresa a: <strong>Configuración → Integraciones → Gestionar credenciales y webhooks</strong> en tu cuenta de Zipnova.
+                        <br><br>
+                        Las requests utilizan <strong>autenticación básica HTTP</strong>.
                     </div>
 
                     <div class="form-group">
-                        <label>Client ID</label>
+                        <label>API Token</label>
                         <input type="text" name="zipnova_client_id"
                                value="<?php echo htmlspecialchars($shipping_config['credentials']['client_id'] ?? ''); ?>"
-                               placeholder="client_id_xxx">
-                        <div class="help-text">ID de cliente proporcionado por Zipnova</div>
+                               placeholder="token_xxxxxxxxxx">
+                        <div class="help-text">
+                            <strong>Usuario de autenticación básica:</strong> Copia el API Token generado en Zipnova
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Client Secret</label>
+                        <label>API Secret</label>
                         <input type="password" name="zipnova_client_secret"
                                value="<?php echo htmlspecialchars($shipping_config['credentials']['client_secret'] ?? ''); ?>"
-                               placeholder="secret_xxx">
-                        <div class="help-text">Secreto de cliente (se guarda de forma segura)</div>
-                    </div>
-
-                    <?php if (!empty($shipping_config['credentials']['access_token'])): ?>
-                        <div class="form-group">
-                            <span class="status-badge status-enabled">✓ Token Activo</span>
-                            <?php if (isset($shipping_config['credentials']['token_expires_at'])): ?>
-                                <div class="help-text">
-                                    Expira: <?php echo date('d/m/Y H:i', $shipping_config['credentials']['token_expires_at']); ?>
-                                </div>
-                            <?php endif; ?>
+                               placeholder="secret_xxxxxxxxxx">
+                        <div class="help-text">
+                            <strong>Contraseña de autenticación básica:</strong> Copia el API Secret generado en Zipnova (se guarda de forma segura)
                         </div>
-                    <?php endif; ?>
+                    </div>
                 </div>
 
                 <!-- Configuración de Origen -->
