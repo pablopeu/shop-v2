@@ -42,20 +42,26 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         send_json_response(['success' => false, 'error' => 'Código postal requerido'], 400);
     }
 
+    // Formatear destino según API v2 de Zipnova
     $destination = [
-        'postal_code' => $postal_code,
-        'city' => $city,
-        'province' => $province,
-        'country' => $country
+        'city' => $city ?: 'Ciudad',
+        'state' => $province ?: 'Provincia',
+        'zipcode' => $postal_code
     ];
 
-    $packages = [[
-        'weight' => $weight > 0 ? $weight : 1,
-        'declared_value' => $declared_value
+    // Formatear items según API v2 de Zipnova
+    $items = [[
+        'sku' => 'CART-ITEM',
+        'weight' => (int)($weight > 0 ? $weight : 100), // gramos
+        'height' => 10,
+        'width' => 10,
+        'length' => 10,
+        'description' => 'Producto del carrito',
+        'classification_id' => 1
     ]];
 
     // Check cache
-    $cache_key = 'quote_' . md5(json_encode($destination) . json_encode($packages));
+    $cache_key = 'quote_' . md5(json_encode($destination) . json_encode($items) . $declared_value);
     $cache_file = __DIR__ . '/../../data/cache/' . $cache_key . '.json';
     $config = zipnova_get_config();
     $cache_minutes = $config['options']['cache_quotes_minutes'] ?? 5;
@@ -65,8 +71,8 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         send_json_response($cached_data);
     }
 
-    // Get quotes from Zipnova
-    $result = zipnova_get_quotes(null, $destination, $packages);
+    // Get quotes from Zipnova con nueva firma
+    $result = zipnova_get_quotes($destination, $items, (float)$declared_value);
 
     if ($result['success']) {
         // Save to cache
@@ -107,21 +113,53 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         send_json_response(['success' => false, 'error' => $validation['error']], 400);
     }
 
-    $destination = $data['destination'];
+    $destination_raw = $data['destination'];
     $packages = $data['packages'] ?? [];
 
-    // If no packages provided, use defaults
+    // Formatear destino según API v2
+    $destination = [
+        'city' => $destination_raw['city'] ?? 'Ciudad',
+        'state' => $destination_raw['state'] ?? $destination_raw['province'] ?? 'Provincia',
+        'zipcode' => $destination_raw['zipcode'] ?? $destination_raw['postal_code'] ?? ''
+    ];
+
+    // Convertir packages a items según API v2
+    $items = [];
+    $total_declared_value = 0;
+
     if (empty($packages)) {
+        // Si no hay packages, usar valores por defecto
         $weight = (float)($data['weight'] ?? 0);
         $declared_value = (float)($data['declared_value'] ?? 0);
-        $packages = [[
-            'weight' => $weight > 0 ? $weight : 1,
-            'declared_value' => $declared_value
+        $total_declared_value = $declared_value;
+
+        $items = [[
+            'sku' => 'CART-ITEM',
+            'weight' => (int)($weight > 0 ? $weight : 100), // gramos
+            'height' => 10,
+            'width' => 10,
+            'length' => 10,
+            'description' => 'Producto del carrito',
+            'classification_id' => 1
         ]];
+    } else {
+        // Convertir cada package a item
+        foreach ($packages as $pkg) {
+            $items[] = [
+                'sku' => $pkg['sku'] ?? 'ITEM-' . uniqid(),
+                'weight' => (int)($pkg['weight'] ?? 100),
+                'height' => (int)($pkg['height'] ?? 10),
+                'width' => (int)($pkg['width'] ?? 10),
+                'length' => (int)($pkg['length'] ?? 10),
+                'description' => $pkg['description'] ?? 'Producto',
+                'classification_id' => (int)($pkg['classification_id'] ?? 1)
+            ];
+            $total_declared_value += (float)($pkg['declared_value'] ?? 0);
+        }
     }
 
     // Check cache
-    $cache_key = 'quote_' . md5(json_encode($destination) . json_encode($packages));
+    $cache_key = 'quote_' . md5(json_encode($destination) . json_encode($items) . $total_declared_value);
     $cache_file = __DIR__ . '/../../data/cache/' . $cache_key . '.json';
     $config = zipnova_get_config();
     $cache_minutes = $config['options']['cache_quotes_minutes'] ?? 5;
@@ -131,8 +169,8 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         send_json_response($cached_data);
     }
 
-    // Get quotes from Zipnova
-    $result = zipnova_get_quotes(null, $destination, $packages);
+    // Get quotes from Zipnova con nueva firma
+    $result = zipnova_get_quotes($destination, $items, $total_declared_value);
 
     if ($result['success']) {
         // Save to cache
