@@ -272,7 +272,8 @@ function zipnova_get_quotes($origin, $destination, $packages) {
         'packages' => $packages
     ];
 
-    $result = zipnova_api_request('/shipments/quotes', 'POST', $request_data);
+    // Zipnova API usa PUT para cotizaciones, no POST
+    $result = zipnova_api_request('/shipments/quotes', 'PUT', $request_data);
 
     if ($result['success']) {
         // Aplicar margen de costo si está configurado
