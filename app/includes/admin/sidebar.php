@@ -281,18 +281,12 @@ $current_page = $_GET['page'] ?? 'index';
                 <span>📦 Envíos</span>
                 <span class="menu-arrow" id="arrow-envios">▶</span>
             </div>
-            <ul class="submenu <?php echo in_array($current_page, ['envios-pendientes', 'envios-archivo', 'shipping-list']) ? 'open' : ''; ?>"
+            <ul class="submenu <?php echo in_array($current_page, ['envios-pendientes', 'envios-archivo']) ? 'open' : ''; ?>"
                 id="submenu-envios">
                 <li>
                     <a href="<?php echo url('/admin/?page=envios-pendientes'); ?>"
                        class="<?php echo $current_page === 'envios-pendientes' ? 'active' : ''; ?>">
                         📋 Gestión de envíos
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo url('/admin/?page=shipping-list'); ?>"
-                       class="<?php echo $current_page === 'shipping-list' ? 'active' : ''; ?>">
-                        🚚 Logística
                     </a>
                 </li>
                 <li>
