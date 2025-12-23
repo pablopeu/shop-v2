@@ -403,7 +403,6 @@ $provincias = [
                         <?php else: ?>
                             <span class="status-badge status-disabled">DESHABILITADO</span>
                         <?php endif; ?>
-                        - Modo: <strong><?php echo strtoupper($shipping_config['mode']); ?></strong>
                     </div>
 
                     <div class="form-group">
@@ -411,20 +410,9 @@ $provincias = [
                             <input type="checkbox" name="zipnova_enabled" <?php echo $shipping_config['enabled'] ? 'checked' : ''; ?>>
                             <span>Habilitar integración con Zipnova</span>
                         </label>
+                        <div class="help-text">Usa la API de producción de Zipnova (https://api.zipnova.com.ar/v2/)</div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Modo de Operación</label>
-                        <select name="zipnova_mode">
-                            <option value="sandbox" <?php echo $shipping_config['mode'] === 'sandbox' ? 'selected' : ''; ?>>
-                                Sandbox (Pruebas)
-                            </option>
-                            <option value="production" <?php echo $shipping_config['mode'] === 'production' ? 'selected' : ''; ?>>
-                                Producción
-                            </option>
-                        </select>
-                        <div class="help-text">En modo Sandbox las transacciones son de prueba</div>
-                    </div>
+                    <input type="hidden" name="zipnova_mode" value="production">
                 </div>
 
                 <!-- Credenciales -->
