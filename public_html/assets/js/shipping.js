@@ -3,8 +3,12 @@
  * Handles shipping quote requests and selection
  */
 
+console.log('📦 shipping.js: Archivo cargado');
+
 (function() {
     'use strict';
+
+    console.log('📦 shipping.js: IIFE ejecutándose');
 
     // State
     let selectedShippingService = null;
