@@ -80,16 +80,26 @@
      * Handle get quote button click
      */
     async function handleGetQuote() {
+        console.log('🚀 handleGetQuote() llamado');
+
         // Validate required fields
         const postalCode = document.getElementById('shipping_postal_code').value.trim();
         const city = document.getElementById('shipping_city').value.trim();
         const province = document.getElementById('shipping_province').value;
         const country = document.getElementById('shipping_country').value;
 
+        console.log('📍 Datos de envío:', { postalCode, city, province, country });
+
         if (!postalCode || !city || !province) {
             showError('Por favor completá todos los campos de dirección');
             return;
         }
+
+        // Cambiar texto del botón
+        const button = document.getElementById('get-shipping-quote');
+        const originalText = button.textContent;
+        button.textContent = '⏳ Cotizando...';
+        button.disabled = true;
 
         // Show loading
         showLoading(true);
@@ -109,6 +119,9 @@
         };
 
         try {
+            console.log('📦 Calculando peso y valor:', { weight, declaredValue });
+            console.log('🌐 Llamando a API:', window.BASE_PATH + '/api/shipping?action=quotes');
+
             // Call API
             const response = await fetch(window.BASE_PATH + '/api/shipping?action=quotes', {
                 method: 'POST',
@@ -122,19 +135,34 @@
                 })
             });
 
+            console.log('📡 Response status:', response.status);
             const result = await response.json();
+            console.log('📄 Response data:', result);
 
             if (result.success && result.data && result.data.quotes) {
                 shippingQuotes = result.data.quotes;
+                console.log('✅ Cotizaciones recibidas:', shippingQuotes.length);
                 displayQuotes(shippingQuotes);
+
+                // Cambiar texto del botón con el costo
+                if (shippingQuotes.length > 0) {
+                    const minCost = Math.min(...shippingQuotes.map(q => q.cost || 0));
+                    button.textContent = `💰 Desde ${formatCurrency(minCost)}`;
+                } else {
+                    button.textContent = originalText;
+                }
             } else {
+                console.error('❌ Error en respuesta:', result.error);
                 showError(result.error || 'No se pudieron obtener cotizaciones de envío');
+                button.textContent = originalText;
             }
         } catch (error) {
-            console.error('Error getting shipping quotes:', error);
+            console.error('❌ Error getting shipping quotes:', error);
             showError('Error al obtener cotizaciones. Por favor intenta nuevamente.');
+            button.textContent = originalText;
         } finally {
             showLoading(false);
+            button.disabled = false;
         }
     }
 

@@ -248,9 +248,17 @@ function zipnova_authenticate() {
  * @return array Resultado con cotizaciones disponibles
  */
 function zipnova_get_quotes($destination, $items, $declared_value = null) {
+    // Log al inicio para confirmar que se llama la función
+    zipnova_log('zipnova_get_quotes CALLED', [
+        'destination' => $destination,
+        'items_count' => count($items),
+        'declared_value' => $declared_value
+    ]);
+
     $config = zipnova_get_config();
 
     if (!$config || !$config['enabled']) {
+        zipnova_log('zipnova_get_quotes ERROR', ['error' => 'Zipnova no está habilitado']);
         return ['success' => false, 'error' => 'Zipnova no está habilitado'];
     }
 
