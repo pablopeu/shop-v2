@@ -65,14 +65,23 @@ Content-Type: application/json
 ### 1. Cotizar Envíos
 **Documentación:** https://docs.zipnova.com/envios/recursos-api/envios/cotizar-envios
 
-**Endpoint:** `/shipments/quotes`
-**Métodos soportados:** GET, HEAD, PUT
-**Nota:** POST NO está soportado según error del sistema
+**Endpoint:** `PENDIENTE DE VERIFICAR`
+**Opciones posibles:**
+- `/shipments/quotes` - ERROR: resource not found
+- `/shipments/quote` (singular)
+- `/quotes`
+- `/shipment-quotes`
+
+**Métodos probados:**
+- POST: No soportado
+- PUT: Resource not found
 
 **Parámetros requeridos:**
 - Account ID
 - Valor declarado del envío
 - Detalles de paquetes e items
+
+**TODO:** Verificar endpoint correcto en panel de Zipnova o documentación oficial
 
 ### 2. Crear Envíos
 **Documentación:** https://docs.zipnova.com/envios/recursos-api/crear-envios
