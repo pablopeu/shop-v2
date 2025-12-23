@@ -226,11 +226,11 @@ function zipnova_authenticate() {
 }
 
 /**
- * Cotiza envíos
+ * Cotiza envíos usando API v2 de Zipnova
  *
- * @param array $origin Datos de origen (postal_code, city, province, country)
- * @param array $destination Datos de destino
- * @param array $packages Array de paquetes con weight, length, width, height, declared_value
+ * @param array $destination Datos de destino (city, state, zipcode)
+ * @param array $items Array de items con sku, weight, height, width, length, description, classification_id
+ * @param float|null $declared_value Valor declarado total (se calcula automáticamente si es null)
  * @return array Resultado con cotizaciones disponibles
  */
 function zipnova_get_quotes($destination, $items, $declared_value = null) {
@@ -303,8 +303,9 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
 
     zipnova_log('Quote Request', [
         'success' => $result['success'],
-        'destination' => $destination['postal_code'] ?? 'N/A',
-        'packages_count' => count($packages)
+        'destination' => $destination['zipcode'] ?? $destination['postal_code'] ?? 'N/A',
+        'items_count' => count($items),
+        'declared_value' => $declared_value
     ]);
 
     return $result;
