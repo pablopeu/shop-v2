@@ -34,7 +34,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
 
         $config = zipnova_get_config();
         if (!$config) {
-            $config = json_decode(file_get_contents(APP_PATH . '/config/shipping.json'), true)['zipnova'];
+            // Inicializar config vacío si no existe
+            $config = [
+                'tag' => 'ZNVA',
+                'name' => 'Zipnova',
+                'type' => 'zipnova',
+                'enabled' => false,
+                'mode' => 'production',
+                'credentials' => [
+                    'account_id' => '',
+                    'client_id' => '',
+                    'client_secret' => ''
+                ],
+                'api_urls' => [
+                    'sandbox' => 'https://api.zipnova.com.ar/v2',
+                    'production' => 'https://api.zipnova.com.ar/v2'
+                ],
+                'origin' => [
+                    'origin_id' => '',
+                    'name' => '',
+                    'address' => '',
+                    'city' => '',
+                    'province' => '',
+                    'postal_code' => '',
+                    'country' => 'AR',
+                    'phone' => '',
+                    'email' => ''
+                ],
+                'default_package' => [
+                    'weight' => 1,
+                    'length' => 20,
+                    'width' => 15,
+                    'height' => 10
+                ],
+                'options' => [
+                    'webhook_secret' => '',
+                    'auto_create_shipment' => true,
+                    'shipping_cost_margin' => 0,
+                    'cache_quotes_minutes' => 5,
+                    'timeout_seconds' => 30,
+                    'max_retries' => 3
+                ],
+                'enabled_services' => [
+                    'standard' => true,
+                    'express' => true,
+                    'same_day' => false
+                ]
+            ];
         }
 
         // Update carrier metadata
@@ -44,18 +90,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
 
         // Update configuration
         $config['enabled'] = isset($_POST['zipnova_enabled']);
-        $config['mode'] = $_POST['zipnova_mode'] ?? 'sandbox';
+        $config['mode'] = $_POST['zipnova_mode'] ?? 'production';
 
-        // Credentials
-        if (!empty($_POST['zipnova_account_id'])) {
-            $config['credentials']['account_id'] = sanitize_input($_POST['zipnova_account_id']);
+        // Preservar api_urls si no están en el config
+        if (!isset($config['api_urls'])) {
+            $config['api_urls'] = [
+                'sandbox' => 'https://api.zipnova.com.ar/v2',
+                'production' => 'https://api.zipnova.com.ar/v2'
+            ];
         }
-        if (!empty($_POST['zipnova_client_id'])) {
-            $config['credentials']['client_id'] = sanitize_input($_POST['zipnova_client_id']);
+
+        // Preservar estructura de credentials
+        if (!isset($config['credentials'])) {
+            $config['credentials'] = [];
         }
-        if (!empty($_POST['zipnova_client_secret'])) {
-            $config['credentials']['client_secret'] = sanitize_input($_POST['zipnova_client_secret']);
-        }
+
+        // Credentials - siempre actualizar, incluso si están vacíos
+        $config['credentials']['account_id'] = sanitize_input($_POST['zipnova_account_id'] ?? '');
+        $config['credentials']['client_id'] = sanitize_input($_POST['zipnova_client_id'] ?? '');
+        $config['credentials']['client_secret'] = sanitize_input($_POST['zipnova_client_secret'] ?? '');
 
         // Origin configuration
         $config['origin'] = [
@@ -78,11 +131,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
             'height' => (float)($_POST['default_height'] ?? 10)
         ];
 
+        // Preservar estructura de options
+        if (!isset($config['options'])) {
+            $config['options'] = [];
+        }
+
         // Options
         $config['options']['auto_create_shipment'] = isset($_POST['auto_create_shipment']);
         $config['options']['shipping_cost_margin'] = (float)($_POST['shipping_cost_margin'] ?? 0);
         $config['options']['cache_quotes_minutes'] = (int)($_POST['cache_quotes_minutes'] ?? 5);
         $config['options']['webhook_secret'] = sanitize_input($_POST['webhook_secret'] ?? '');
+
+        // Preservar valores que no están en el formulario
+        $config['options']['timeout_seconds'] = $config['options']['timeout_seconds'] ?? 30;
+        $config['options']['max_retries'] = $config['options']['max_retries'] ?? 3;
 
         // Enabled services
         $config['enabled_services'] = [
