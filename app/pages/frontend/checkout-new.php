@@ -336,11 +336,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $needs_shipping = ($delivery_method === 'shipping');
 
     if ($needs_shipping) {
-        $address = sanitize_input($_POST['address'] ?? '');
-        $city = sanitize_input($_POST['city'] ?? '');
-        $postal_code = sanitize_input($_POST['postal_code'] ?? '');
-        $state = sanitize_input($_POST['state'] ?? '');
-        $country = sanitize_input($_POST['country'] ?? '');
+        $address = sanitize_input($_POST['shipping_address'] ?? '');
+        $city = sanitize_input($_POST['shipping_city'] ?? '');
+        $postal_code = sanitize_input($_POST['shipping_postal_code'] ?? '');
+        $state = sanitize_input($_POST['shipping_province'] ?? '');
+        $country = sanitize_input($_POST['shipping_country'] ?? '');
 
         if (empty($address)) {
             $errors[] = 'La dirección es requerida para envío';
@@ -1808,30 +1808,15 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     </div>
 
                     <?php
-                    // Mostrar sección "Ahorraste" solo si hay descuentos
+                    // Mostrar "Ahorraste" en una sola línea si hay descuentos
                     $display_promotion_discount = ($selected_currency === 'USD') ? $promotion_discount_usd : $promotion_discount_ars;
-                    $has_savings = ($display_promotion_discount > 0 || $coupon_discount > 0);
+                    $total_savings = $display_promotion_discount + $coupon_discount;
 
-                    if ($has_savings):
+                    if ($total_savings > 0):
                     ?>
-                    <div class="summary-savings">
-                        <div class="summary-row savings-header">
-                            <span style="color: #4CAF50; font-weight: 600;">💰 Ahorraste:</span>
-                        </div>
-
-                        <?php if ($display_promotion_discount > 0): ?>
-                        <div class="summary-row summary-row-promo" style="padding-left: 1rem;">
-                            <span>Promociones:</span>
-                            <span style="color: #4CAF50;">-<?php echo format_price($display_promotion_discount, $selected_currency); ?></span>
-                        </div>
-                        <?php endif; ?>
-
-                        <?php if ($coupon_discount > 0): ?>
-                        <div class="summary-row summary-row-coupon" style="padding-left: 1rem;">
-                            <span>Cupones:</span>
-                            <span style="color: #4CAF50;">-<?php echo format_price($coupon_discount, $selected_currency); ?></span>
-                        </div>
-                        <?php endif; ?>
+                    <div class="summary-row" style="color: #4CAF50;">
+                        <span>💰 Ahorraste:</span>
+                        <span><strong><?php echo format_price($total_savings, $selected_currency); ?></strong></span>
                     </div>
                     <?php endif; ?>
 
