@@ -1801,29 +1801,37 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 <?php endforeach; ?>
 
                 <div class="summary-totals">
-                    <!-- Subtotal de productos -->
+                    <!-- Subtotal = suma de artículos CON descuentos aplicados -->
                     <div class="summary-row">
-                        <span>Subtotal productos:</span>
-                        <span>
-                            <?php echo format_price(($selected_currency === 'USD') ? $subtotal_usd : $subtotal_ars, $selected_currency); ?>
-                        </span>
+                        <span><strong>Subtotal:</strong></span>
+                        <span><strong><?php echo format_price($total, $selected_currency); ?></strong></span>
                     </div>
 
                     <?php
-                    // Show promotion discount
+                    // Mostrar sección "Ahorraste" solo si hay descuentos
                     $display_promotion_discount = ($selected_currency === 'USD') ? $promotion_discount_usd : $promotion_discount_ars;
-                    if ($display_promotion_discount > 0):
-                    ?>
-                    <div class="summary-row summary-row-promo">
-                        <span>🎉 Descuento Promoción:</span>
-                        <span>-<?php echo format_price($display_promotion_discount, $selected_currency); ?></span>
-                    </div>
-                    <?php endif; ?>
+                    $has_savings = ($display_promotion_discount > 0 || $coupon_discount > 0);
 
-                    <?php if ($coupon_discount > 0): ?>
-                    <div class="summary-row summary-row-coupon">
-                        <span>🎫 Cupón (<?php echo htmlspecialchars($coupon_code); ?>):</span>
-                        <span>-<?php echo format_price($coupon_discount, $selected_currency); ?></span>
+                    if ($has_savings):
+                    ?>
+                    <div class="summary-savings">
+                        <div class="summary-row savings-header">
+                            <span style="color: #4CAF50; font-weight: 600;">💰 Ahorraste:</span>
+                        </div>
+
+                        <?php if ($display_promotion_discount > 0): ?>
+                        <div class="summary-row summary-row-promo" style="padding-left: 1rem;">
+                            <span>Promociones:</span>
+                            <span style="color: #4CAF50;">-<?php echo format_price($display_promotion_discount, $selected_currency); ?></span>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if ($coupon_discount > 0): ?>
+                        <div class="summary-row summary-row-coupon" style="padding-left: 1rem;">
+                            <span>Cupones:</span>
+                            <span style="color: #4CAF50;">-<?php echo format_price($coupon_discount, $selected_currency); ?></span>
+                        </div>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
 
@@ -1833,12 +1841,12 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                         <span id="shipping-cost" data-value="0">$0</span>
                     </div>
 
-                    <!-- Total base (con descuentos pero sin envío) - oculto para JS -->
+                    <!-- Total base (subtotal con descuentos) - oculto para JS -->
                     <input type="hidden" id="order-subtotal" data-value="<?php echo $total; ?>">
 
                     <div class="summary-row total">
-                        <span>Total:</span>
-                        <span id="order-total" data-value="<?php echo $total; ?>"><?php echo format_price($total, $selected_currency); ?></span>
+                        <span><strong>Total:</strong></span>
+                        <span id="order-total" data-value="<?php echo $total; ?>"><strong><?php echo format_price($total, $selected_currency); ?></strong></span>
                     </div>
                 </div>
 
