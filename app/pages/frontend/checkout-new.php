@@ -1211,7 +1211,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         .summary-totals {
             margin-top: 1.5rem;
             padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .summary-row {
