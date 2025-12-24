@@ -2032,6 +2032,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
         function validateStep2() {
             const method = document.querySelector('input[name="delivery_method"]:checked').value;
+            const step2 = document.getElementById('step-2');
 
             // Show/hide shipping fields
             const shippingFields = document.getElementById('shipping-fields');
@@ -2045,6 +2046,11 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 markStepCompleted(2);
                 unlockNextStep(2);
             } else if (method === 'shipping') {
+                // Asegurar que el paso permanezca abierto para mostrar campos de envío
+                if (!step2.classList.contains('active')) {
+                    step2.classList.add('active');
+                }
+
                 if (shippingQuoteSelected) {
                     // Cotización ya seleccionada
                     const selectedQuote = document.querySelector('input[name="shipping_method_quote"]:checked');
