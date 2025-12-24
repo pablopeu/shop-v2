@@ -1801,9 +1801,12 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 <?php endforeach; ?>
 
                 <div class="summary-totals">
-                    <!-- Subtotal (base para JavaScript) -->
-                    <div class="summary-row" style="display: none;">
-                        <span id="order-subtotal" data-value="<?php echo $total; ?>"><?php echo format_price($total, $selected_currency); ?></span>
+                    <!-- Subtotal de productos -->
+                    <div class="summary-row">
+                        <span>Subtotal productos:</span>
+                        <span>
+                            <?php echo format_price(($selected_currency === 'USD') ? $subtotal_usd : $subtotal_ars, $selected_currency); ?>
+                        </span>
                     </div>
 
                     <?php
@@ -1829,6 +1832,9 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                         <span>🚚 Envío:</span>
                         <span id="shipping-cost" data-value="0">$0</span>
                     </div>
+
+                    <!-- Total base (con descuentos pero sin envío) - oculto para JS -->
+                    <input type="hidden" id="order-subtotal" data-value="<?php echo $total; ?>">
 
                     <div class="summary-row total">
                         <span>Total:</span>
