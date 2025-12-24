@@ -1892,12 +1892,58 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
         // Step management
         let completedSteps = new Set();
+        let shippingQuoteSelected = false;
+
+        // Show tooltip for locked steps
+        function showLockedStepTooltip(stepNumber) {
+            const step = document.getElementById(`step-${stepNumber}`);
+            const header = step.querySelector('.step-header');
+
+            // Create tooltip if it doesn't exist
+            let tooltip = header.querySelector('.locked-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'locked-tooltip';
+                tooltip.style.cssText = `
+                    position: absolute;
+                    top: -35px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #333;
+                    color: white;
+                    padding: 0.5rem 1rem;
+                    border-radius: 4px;
+                    font-size: 0.75rem;
+                    white-space: nowrap;
+                    z-index: 1000;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                `;
+
+                let message = '';
+                if (stepNumber === 2) message = 'Completá tus datos personales primero';
+                else if (stepNumber === 3) message = 'Seleccioná el método de entrega primero';
+                else if (stepNumber === 4) message = 'Seleccioná el método de pago primero';
+
+                tooltip.textContent = message;
+                header.style.position = 'relative';
+                header.appendChild(tooltip);
+            }
+
+            // Show tooltip
+            tooltip.style.opacity = '1';
+            setTimeout(() => {
+                tooltip.style.opacity = '0';
+            }, 2000);
+        }
 
         function toggleStep(stepNumber) {
             const step = document.getElementById(`step-${stepNumber}`);
 
-            // No permitir abrir si está locked
+            // Mostrar tooltip y no permitir abrir si está locked
             if (step.classList.contains('locked')) {
+                showLockedStepTooltip(stepNumber);
                 return;
             }
 
@@ -1925,12 +1971,33 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             updateBuyButton();
         }
 
+        function markStepIncomplete(stepNumber) {
+            const step = document.getElementById(`step-${stepNumber}`);
+            step.classList.remove('completed');
+            completedSteps.delete(stepNumber);
+
+            // Lock subsequent steps
+            for (let i = stepNumber + 1; i <= 4; i++) {
+                const nextStep = document.getElementById(`step-${i}`);
+                if (nextStep) {
+                    nextStep.classList.add('locked');
+                    nextStep.classList.remove('completed');
+                    completedSteps.delete(i);
+                }
+            }
+
+            updateBuyButton();
+        }
+
         function updateBuyButton() {
             const button = document.getElementById('final-buy-button');
             const buttonMobile = document.getElementById('final-buy-button-mobile');
             if (completedSteps.size === 4) {
                 button.disabled = false;
                 if (buttonMobile) buttonMobile.disabled = false;
+            } else {
+                button.disabled = true;
+                if (buttonMobile) buttonMobile.disabled = true;
             }
         }
 
@@ -1965,14 +2032,42 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
         function validateStep2() {
             const method = document.querySelector('input[name="delivery_method"]:checked').value;
-            document.getElementById('step-2-summary').textContent = method === 'pickup' ? '🏪 Retiro en persona' : '📦 Envío a domicilio';
-            markStepCompleted(2);
-            unlockNextStep(2);
 
             // Show/hide shipping fields
             const shippingFields = document.getElementById('shipping-fields');
             shippingFields.classList.toggle('hidden', method !== 'shipping');
+
+            // Solo completar paso si:
+            // - Es pickup (no requiere cotización)
+            // - Es shipping Y se ha seleccionado una cotización
+            if (method === 'pickup') {
+                document.getElementById('step-2-summary').textContent = '🏪 Retiro en persona';
+                markStepCompleted(2);
+                unlockNextStep(2);
+            } else if (method === 'shipping') {
+                if (shippingQuoteSelected) {
+                    // Cotización ya seleccionada
+                    const selectedQuote = document.querySelector('input[name="shipping_method_quote"]:checked');
+                    if (selectedQuote) {
+                        const cost = selectedQuote.dataset.cost || '0';
+                        const days = selectedQuote.dataset.days || '';
+                        document.getElementById('step-2-summary').textContent = `📦 Envío (${days} días)`;
+                        markStepCompleted(2);
+                        unlockNextStep(2);
+                    }
+                } else {
+                    // Envío seleccionado pero sin cotización
+                    document.getElementById('step-2-summary').textContent = '📦 Envío (cotización pendiente)';
+                    markStepIncomplete(2);
+                }
+            }
         }
+
+        // Listen for shipping quote selection
+        document.addEventListener('shippingSelected', function(e) {
+            shippingQuoteSelected = true;
+            validateStep2(); // Re-validate to complete step
+        });
 
         // Initial validation for delivery method (shows shipping fields if saved method is 'shipping')
         validateStep2();
