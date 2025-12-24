@@ -40,17 +40,8 @@ console.log('📦 shipping.js: Archivo cargado');
             console.error('❌ Button with id="get-shipping-quote" NOT FOUND!');
         }
 
-        // Auto-quote when postal code changes and has enough data
-        const postalCodeInput = document.getElementById('shipping_postal_code');
-        const cityInput = document.getElementById('shipping_city');
-        const provinceSelect = document.getElementById('shipping_province');
-
-        if (postalCodeInput && cityInput && provinceSelect) {
-            // Add event listeners for auto-quote
-            postalCodeInput.addEventListener('blur', maybeAutoQuote);
-            cityInput.addEventListener('blur', maybeAutoQuote);
-            provinceSelect.addEventListener('change', maybeAutoQuote);
-        }
+        // Auto-quote disabled - user must click the button manually
+        // (removed event listeners for auto-quote)
 
         // Listen to delivery method changes
         const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
@@ -76,19 +67,6 @@ console.log('📦 shipping.js: Archivo cargado');
         }
     }
 
-    /**
-     * Maybe auto-quote if all required fields are filled
-     */
-    function maybeAutoQuote() {
-        const postalCode = document.getElementById('shipping_postal_code').value.trim();
-        const city = document.getElementById('shipping_city').value.trim();
-        const province = document.getElementById('shipping_province').value;
-
-        if (postalCode && city && province) {
-            // Auto quote after a short delay
-            setTimeout(handleGetQuote, 500);
-        }
-    }
 
     /**
      * Handle get quote button click

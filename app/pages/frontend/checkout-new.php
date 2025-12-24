@@ -891,6 +891,32 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             gap: 0.5rem;
         }
 
+        /* Scroll para cotizaciones de envío cuando hay muchas opciones */
+        #shipping-quotes {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        /* Estilos del scrollbar para cotizaciones */
+        #shipping-quotes::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #shipping-quotes::-webkit-scrollbar-track {
+            background: var(--checkout-bg-secondary);
+            border-radius: 4px;
+        }
+
+        #shipping-quotes::-webkit-scrollbar-thumb {
+            background: var(--checkout-border);
+            border-radius: 4px;
+        }
+
+        #shipping-quotes::-webkit-scrollbar-thumb:hover {
+            background: var(--checkout-accent);
+        }
+
         .radio-option {
             display: flex;
             align-items: flex-start;
