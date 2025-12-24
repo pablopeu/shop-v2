@@ -175,11 +175,45 @@ console.log('📦 shipping.js: Archivo cargado');
             return;
         }
 
-        // Create radio options for each quote
-        quotes.forEach((quote, index) => {
-            const option = createQuoteOption(quote, index);
-            quotesContainer.appendChild(option);
-        });
+        const INITIAL_DISPLAY = 4;
+        let showingAll = false;
+
+        // Function to render quotes
+        function renderQuotes(showAll) {
+            quotesContainer.innerHTML = '';
+
+            const quotesToShow = showAll ? quotes : quotes.slice(0, INITIAL_DISPLAY);
+
+            quotesToShow.forEach((quote, index) => {
+                const option = createQuoteOption(quote, index);
+                quotesContainer.appendChild(option);
+            });
+
+            // Add "Ver más" button if there are more than INITIAL_DISPLAY quotes
+            if (quotes.length > INITIAL_DISPLAY) {
+                const btnContainer = document.createElement('div');
+                btnContainer.style.textAlign = 'center';
+                btnContainer.style.marginTop = '0.75rem';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-secondary';
+                btn.style.padding = '0.5rem 1.5rem';
+                btn.style.fontSize = '0.875rem';
+                btn.textContent = showAll ? `▲ Ver menos (mostrando ${quotes.length})` : `▼ Ver más opciones (${quotes.length - INITIAL_DISPLAY} más)`;
+
+                btn.onclick = () => {
+                    showingAll = !showingAll;
+                    renderQuotes(showingAll);
+                };
+
+                btnContainer.appendChild(btn);
+                quotesContainer.appendChild(btnContainer);
+            }
+        }
+
+        // Initial render
+        renderQuotes(false);
 
         // Show quotes container
         quotesWrapper.classList.remove('hidden');

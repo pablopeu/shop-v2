@@ -240,6 +240,70 @@ function zipnova_authenticate() {
 }
 
 /**
+ * Parsea una duración en formato ISO 8601 a días
+ * Ejemplo: "P2DT10H" = 2 días, 10 horas → 3 días (redondeado)
+ *
+ * @param string $duration Duración en formato ISO 8601 (ej: "P2DT10H1S")
+ * @return int Número de días (redondeado hacia arriba si hay horas)
+ */
+function parse_iso8601_duration_to_days($duration) {
+    if (empty($duration) || !is_string($duration)) {
+        return 0;
+    }
+
+    // Pattern para parsear ISO 8601 duration
+    // Formato: P[n]Y[n]M[n]DT[n]H[n]M[n]S
+    $pattern = '/P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?/';
+
+    if (!preg_match($pattern, $duration, $matches)) {
+        return 0;
+    }
+
+    $days = isset($matches[3]) && $matches[3] !== '' ? (int)$matches[3] : 0;
+    $hours = isset($matches[4]) && $matches[4] !== '' ? (int)$matches[4] : 0;
+
+    // Si hay horas, redondear al día siguiente
+    if ($hours > 0) {
+        $days += 1;
+    }
+
+    return $days;
+}
+
+/**
+ * Calcula el rango de días de entrega desde los tiempos ISO 8601
+ * Usa los nuevos campos 'times.total' en lugar de 'min'/'max' deprecados
+ *
+ * @param array $delivery_time Objeto delivery_time de Zipnova
+ * @return string Rango de días (ej: "3-5") o "A confirmar"
+ */
+function calculate_delivery_days($delivery_time) {
+    // Priorizar nuevos campos ISO 8601
+    if (isset($delivery_time['times']['total'])) {
+        $min_duration = $delivery_time['times']['total']['min'] ?? '';
+        $max_duration = $delivery_time['times']['total']['max'] ?? '';
+
+        $min_days = parse_iso8601_duration_to_days($min_duration);
+        $max_days = parse_iso8601_duration_to_days($max_duration);
+
+        if ($min_days > 0 && $max_days > 0) {
+            return $min_days . '-' . $max_days;
+        } elseif ($min_days > 0) {
+            return (string)$min_days;
+        }
+    }
+
+    // Fallback a campos deprecados si no hay nuevos datos
+    $min = $delivery_time['min'] ?? 0;
+    $max = $delivery_time['max'] ?? 0;
+    if ($min > 0 && $max > 0) {
+        return $min . '-' . $max;
+    }
+
+    return 'A confirmar';
+}
+
+/**
  * Cotiza envíos usando API v2 de Zipnova
  *
  * @param array $destination Datos de destino (city, state, zipcode)
@@ -315,11 +379,9 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
         if (isset($result['data']['all_results']) && is_array($result['data']['all_results'])) {
             $quotes = [];
             foreach ($result['data']['all_results'] as $zipnova_quote) {
-                $delivery_min = $zipnova_quote['delivery_time']['min'] ?? 0;
-                $delivery_max = $zipnova_quote['delivery_time']['max'] ?? 0;
-                $estimated_days = $delivery_min > 0 && $delivery_max > 0
-                    ? $delivery_min . '-' . $delivery_max
-                    : 'A confirmar';
+                // Usar nueva función que parsea tiempos ISO 8601
+                $delivery_time = $zipnova_quote['delivery_time'] ?? [];
+                $estimated_days = calculate_delivery_days($delivery_time);
 
                 $quotes[] = [
                     'service_id' => $zipnova_quote['service_type']['code'] ?? 'unknown',

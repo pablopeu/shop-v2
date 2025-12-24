@@ -917,6 +917,28 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             background: var(--checkout-accent);
         }
 
+        /* Tarjetas de cotizaciones más compactas */
+        #shipping-quotes .radio-option {
+            padding: 0.625rem 0.875rem;
+            gap: 0.75rem;
+        }
+
+        #shipping-quotes .radio-option strong {
+            font-size: 0.875rem;
+            line-height: 1.3;
+        }
+
+        #shipping-quotes .radio-option .option-description {
+            font-size: 0.75rem;
+            margin-top: 0.15rem;
+            line-height: 1.4;
+        }
+
+        #shipping-quotes .radio-option .option-description strong {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
         .radio-option {
             display: flex;
             align-items: flex-start;
