@@ -2230,6 +2230,20 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 `;
             });
 
+            // AGREGAR COSTO DE ENVÍO AL TOTAL
+            const shippingCostEl = document.getElementById('shipping_cost');
+            const shippingCost = parseFloat(shippingCostEl ? shippingCostEl.value : 0) || 0;
+
+            if (shippingCost > 0) {
+                itemsHTML += `
+                    <div class="mp-item-row">
+                        <span>🚚 Envío</span>
+                        <span>$${parseFloat(shippingCost).toFixed(2)}</span>
+                    </div>
+                `;
+                cartTotal += shippingCost;
+            }
+
             // Mostrar modal
             document.getElementById('mp-order-number').textContent = '(Pendiente de confirmación)';
             document.getElementById('mp-order-items').innerHTML = itemsHTML;
