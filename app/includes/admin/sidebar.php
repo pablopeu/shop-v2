@@ -277,7 +277,7 @@ $current_page = $_GET['page'] ?? 'index';
 
         <!-- Envíos -->
         <li>
-            <div class="menu-item" data-action="toggleSubmenu" data-menu-id="envios" data-redirect-url="<?php echo url('/admin/?page=envios-pendientes'); ?>">
+            <div class="menu-item" data-action="toggleSubmenu" data-menu-id="envios">
                 <span>📦 Envíos</span>
                 <span class="menu-arrow" id="arrow-envios">▶</span>
             </div>
@@ -357,7 +357,7 @@ $current_page = $_GET['page'] ?? 'index';
                 <span>⚙️ Configuracion</span>
                 <span class="menu-arrow" id="arrow-configuraciones">▶</span>
             </div>
-            <ul class="submenu config-container <?php echo in_array($current_page, ['config-sistema', 'config-rutas-sistema', 'config-backup', 'config-sitio', 'config-dashboard', 'config-themes', 'generador-themes', 'config-hero', 'config-carrusel', 'config-footer', 'config-payment', 'config-moneda', 'reprocesar-pago-mp', 'notificaciones', 'config-analytics']) ? 'open' : ''; ?>" id="submenu-configuraciones">
+            <ul class="submenu config-container <?php echo in_array($current_page, ['config-sistema', 'config-rutas-sistema', 'config-backup', 'config-sitio', 'config-dashboard', 'config-themes', 'generador-themes', 'config-hero', 'config-carrusel', 'config-footer', 'config-payment', 'config-moneda', 'reprocesar-pago-mp', 'config-shipping', 'notificaciones', 'config-analytics']) ? 'open' : ''; ?>" id="submenu-configuraciones">
                 <!-- Sistema -->
                 <li>
                     <div class="menu-item" data-action="toggleSubmenu" data-menu-id="config-sistema-group">
@@ -475,6 +475,13 @@ $current_page = $_GET['page'] ?? 'index';
                             </a>
                         </li>
                     </ul>
+                </li>
+                <!-- Logística -->
+                <li>
+                    <a href="<?php echo url('/admin/?page=config-shipping'); ?>"
+                       class="<?php echo $current_page === 'config-shipping' ? 'active' : ''; ?>">
+                        🚚 Logística
+                    </a>
                 </li>
                 <!-- Email y Notificaciones -->
                 <li>

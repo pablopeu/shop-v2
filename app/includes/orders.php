@@ -93,6 +93,59 @@ function generate_order_number() {
 }
 
 /**
+ * Build shipping data structure from order data
+ * @param array $order_data Order data
+ * @return array|null Shipping data or null
+ */
+function build_shipping_data($order_data) {
+    // If delivery method is pickup, no shipping data needed
+    if (($order_data['delivery_method'] ?? 'pickup') === 'pickup') {
+        return null;
+    }
+
+    // Build shipping address
+    $shipping_address = null;
+    if (isset($order_data['shipping_address'])) {
+        if (is_array($order_data['shipping_address'])) {
+            $shipping_address = $order_data['shipping_address'];
+        } else {
+            // Legacy format - single string
+            $shipping_address = [
+                'street' => $order_data['shipping_address'],
+                'city' => $order_data['shipping_city'] ?? '',
+                'province' => $order_data['shipping_province'] ?? '',
+                'postal_code' => $order_data['shipping_postal_code'] ?? '',
+                'country' => $order_data['shipping_country'] ?? 'AR',
+                'notes' => $order_data['shipping_notes'] ?? ''
+            ];
+        }
+    }
+
+    return [
+        'method' => $order_data['shipping_service_id'] ?? 'standard',
+        'service_name' => $order_data['shipping_service_name'] ?? 'Envío estándar',
+        'cost' => (float)($order_data['shipping_cost'] ?? 0),
+        'address' => $shipping_address,
+        'estimated_delivery' => $order_data['shipping_estimated_days'] ?? null,
+
+        // Multi-carrier fields
+        'carrier' => null,                    // Tag del carrier (ZNVA, etc.)
+        'carrier_shipment_id' => null,        // ID del envío en el carrier
+        'carrier_status' => null,             // Estado raw del carrier API
+
+        // Backward compatibility
+        'zipnova_shipment_id' => null,        // Legacy field (deprecated)
+        'tracking_id' => null,                // Tracking ID público
+
+        // Estado base del sistema
+        'status' => 'pendiente',              // Estado base universal
+        'created_at' => null,
+        'updated_at' => null,
+        'history' => []
+    ];
+}
+
+/**
  * Create new order
  * @param array $order_data Order data
  * @return array Created order with ID or error
@@ -173,6 +226,7 @@ function create_order($order_data) {
         'telegram_chat_id' => $order_data['telegram_chat_id'] ?? null,
         'delivery_method' => $order_data['delivery_method'] ?? 'pickup',
         'notes' => $order_data['notes'] ?? '',
+        'shipping' => build_shipping_data($order_data),
         'emails_sent' => [
             'confirmation' => false,
             'status_update' => false
@@ -574,4 +628,192 @@ function restore_archived_order($order_id) {
 
     // Save both files
     return write_json($orders_file, $orders_data) && write_json($archived_file, $archived_data);
+}
+
+/**
+ * Create shipment in Zipnova for an order
+ * @param string $order_id Order ID
+ * @return array Result with success status
+ */
+function create_zipnova_shipment_for_order($order_id) {
+    require_once __DIR__ . '/zipnova.php';
+
+    // Check if Zipnova is enabled and configured to auto-create
+    $config = zipnova_get_config();
+    if (!$config || !$config['enabled'] || !($config['options']['auto_create_shipment'] ?? false)) {
+        return ['success' => false, 'error' => 'Zipnova no está habilitado o auto-creación desactivada'];
+    }
+
+    // Get order
+    $order = get_order_by_id($order_id);
+    if (!$order) {
+        return ['success' => false, 'error' => 'Orden no encontrada'];
+    }
+
+    // Check if order has shipping data
+    if (!isset($order['shipping']) || !$order['shipping']) {
+        return ['success' => false, 'error' => 'La orden no tiene datos de envío'];
+    }
+
+    // Check if shipment already created (check both new and legacy fields)
+    if (!empty($order['shipping']['carrier_shipment_id']) || !empty($order['shipping']['zipnova_shipment_id'])) {
+        return ['success' => false, 'error' => 'El envío ya fue creado en Zipnova'];
+    }
+
+    // Build shipment data
+    $shipment_data = [
+        'service_id' => $order['shipping']['method'],
+        'destination' => [
+            'name' => $order['customer_name'],
+            'address' => $order['shipping']['address']['street'],
+            'city' => $order['shipping']['address']['city'],
+            'province' => $order['shipping']['address']['province'],
+            'postal_code' => $order['shipping']['address']['postal_code'],
+            'country' => $order['shipping']['address']['country'],
+            'phone' => $order['customer_phone'],
+            'email' => $order['customer_email']
+        ],
+        'customer' => [
+            'name' => $order['customer_name'],
+            'email' => $order['customer_email'],
+            'phone' => $order['customer_phone']
+        ],
+        'reference' => $order['order_number'],
+        'packages' => [[
+            'declared_value' => $order['total']
+        ]]
+    ];
+
+    // Create shipment in Zipnova
+    $result = zipnova_create_shipment($shipment_data);
+
+    if ($result['success']) {
+        // Update order with shipment info
+        $shipment_id = $result['data']['id'] ?? null;
+        $tracking_id = $result['data']['tracking_id'] ?? $shipment_id;
+        $carrier_status = $result['data']['status'] ?? 'pending';
+
+        // Get carrier tag from config
+        $carrier_tag = $config['tag'] ?? 'ZNVA';
+
+        // Map carrier status to base status
+        $base_status = map_carrier_status_to_base('zipnova', $carrier_status);
+
+        update_order_shipping_info($order_id, [
+            // Multi-carrier fields
+            'carrier' => $carrier_tag,
+            'carrier_shipment_id' => $shipment_id,
+            'carrier_status' => $carrier_status,
+
+            // Legacy backward compatibility
+            'zipnova_shipment_id' => $shipment_id,
+            'tracking_id' => $tracking_id,
+
+            // Base status
+            'status' => $base_status,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    return $result;
+}
+
+/**
+ * Update order shipping information
+ * @param string $order_id Order ID
+ * @param array $shipping_info Shipping info to update
+ * @return bool Success status
+ */
+function update_order_shipping_info($order_id, $shipping_info) {
+    $orders_file = __DIR__ . '/../data/orders.json';
+    $data = read_json($orders_file);
+
+    if (!isset($data['orders'])) {
+        return false;
+    }
+
+    foreach ($data['orders'] as &$order) {
+        if ($order['id'] === $order_id) {
+            if (!isset($order['shipping'])) {
+                $order['shipping'] = [];
+            }
+
+            // Update shipping fields
+            foreach ($shipping_info as $key => $value) {
+                $order['shipping'][$key] = $value;
+            }
+
+            // Update timestamp
+            $order['shipping']['updated_at'] = date('Y-m-d H:i:s');
+
+            // Add to history
+            if (!isset($order['shipping']['history'])) {
+                $order['shipping']['history'] = [];
+            }
+            $order['shipping']['history'][] = [
+                'date' => date('Y-m-d H:i:s'),
+                'updates' => $shipping_info
+            ];
+
+            return write_json($orders_file, $data);
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Update shipping status from webhook
+ * @param string $tracking_id Tracking ID
+ * @param string $new_status New status
+ * @param array $extra_data Extra data from webhook
+ * @return bool Success status
+ */
+function update_shipping_status_by_tracking($tracking_id, $new_status, $extra_data = []) {
+    $orders_file = __DIR__ . '/../data/orders.json';
+    $data = read_json($orders_file);
+
+    if (!isset($data['orders'])) {
+        return false;
+    }
+
+    foreach ($data['orders'] as &$order) {
+        if (isset($order['shipping']['tracking_id']) && $order['shipping']['tracking_id'] === $tracking_id) {
+            // Get carrier type to map status correctly
+            $carrier = $order['shipping']['carrier'] ?? null;
+            $carrier_type = 'zipnova'; // Default, can be extended later
+
+            if ($carrier) {
+                require_once __DIR__ . '/zipnova.php';
+                $carrier_config = get_carrier_config($carrier);
+                $carrier_type = $carrier_config['type'] ?? 'zipnova';
+            }
+
+            // Save raw carrier status
+            $order['shipping']['carrier_status'] = $new_status;
+
+            // Map to base status
+            require_once __DIR__ . '/zipnova.php';
+            $base_status = map_carrier_status_to_base($carrier_type, $new_status);
+            $order['shipping']['status'] = $base_status;
+            $order['shipping']['updated_at'] = date('Y-m-d H:i:s');
+
+            // Add to history
+            if (!isset($order['shipping']['history'])) {
+                $order['shipping']['history'] = [];
+            }
+            $order['shipping']['history'][] = [
+                'date' => date('Y-m-d H:i:s'),
+                'carrier_status' => $new_status,
+                'status' => $base_status,
+                'data' => $extra_data
+            ];
+
+            // TODO: Send notification to customer about status change
+
+            return write_json($orders_file, $data);
+        }
+    }
+
+    return false;
 }

@@ -1,0 +1,7 @@
+{
+  "name": "Shop v2 - Zipnova Integration",
+  "docs": [
+    "~/shop-v2/zipnova/*.md"
+  ],
+  "instructions": "Usa la documentación de Zipnova Envíos en ~/shop-v2/zipnova/ para generar código de integración API. Prioriza crear-envios.md, cotizar-envios.md y urls-y-autenticacion.md."
+}

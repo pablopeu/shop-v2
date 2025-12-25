@@ -105,6 +105,11 @@ function validate_api_input($data, $schema) {
                 $actual_type = 'int';
             }
 
+            // Normalizar 'object' a 'array' (JSON objects se decodifican como arrays asociativos)
+            if ($expected_type === 'object' && $actual_type === 'array') {
+                $actual_type = 'object'; // Aceptar array asociativo como object
+            }
+
             if ($actual_type !== $expected_type) {
                 return [
                     'valid' => false,

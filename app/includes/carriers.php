@@ -1,0 +1,931 @@
+<?php
+/**
+ * Zipnova Shipping Integration
+ *
+ * Funciones para integración con la API de Zipnova
+ * Documentación: /zipnova/
+ */
+
+if (!defined('APP_ENTRY_POINT')) {
+    die('Acceso directo no permitido');
+}
+
+/**
+ * Carga la configuración de un carrier específico
+ * @param string $carrier_tag Tag del carrier (ej: 'ZNVA')
+ * @return array|null Configuración del carrier
+ */
+function get_carrier_config($carrier_tag = 'ZNVA') {
+    $config_file = __DIR__ . '/../config/shipping.json';
+    if (!file_exists($config_file)) {
+        return null;
+    }
+    $config = json_decode(file_get_contents($config_file), true);
+
+    // Try new multi-carrier structure first
+    if (isset($config['carriers'][$carrier_tag])) {
+        return $config['carriers'][$carrier_tag];
+    }
+
+    // Backward compatibility: try legacy structure
+    if ($carrier_tag === 'ZNVA' && isset($config['zipnova'])) {
+        return $config['zipnova'];
+    }
+
+    return null;
+}
+
+/**
+ * Carga la configuración de Zipnova (backward compatibility)
+ */
+function zipnova_get_config() {
+    return get_carrier_config('ZNVA');
+}
+
+/**
+ * Guarda la configuración de un carrier
+ * @param string $carrier_tag Tag del carrier
+ * @param array $carrier_config Configuración del carrier
+ * @return int|false Bytes written or false on failure
+ */
+function save_carrier_config($carrier_tag, $carrier_config) {
+    $config_file = __DIR__ . '/../config/shipping.json';
+    $config = file_exists($config_file)
+        ? json_decode(file_get_contents($config_file), true)
+        : ['carriers' => []];
+
+    // Initialize carriers array if not exists
+    if (!isset($config['carriers'])) {
+        $config['carriers'] = [];
+    }
+
+    // Save to new structure
+    $config['carriers'][$carrier_tag] = $carrier_config;
+
+    return file_put_contents($config_file, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+/**
+ * Guarda la configuración de Zipnova (backward compatibility)
+ */
+function zipnova_save_config($zipnova_config) {
+    return save_carrier_config('ZNVA', $zipnova_config);
+}
+
+/**
+ * Obtiene todos los carriers configurados
+ * @return array Array de carriers con sus configs
+ */
+function get_all_carriers() {
+    $config_file = __DIR__ . '/../config/shipping.json';
+    if (!file_exists($config_file)) {
+        return [];
+    }
+    $config = json_decode(file_get_contents($config_file), true);
+    return $config['carriers'] ?? [];
+}
+
+/**
+ * Obtiene la URL base de la API según el modo (sandbox/production)
+ */
+function zipnova_get_api_url() {
+    $config = zipnova_get_config();
+    if (!$config) return null;
+
+    $mode = $config['mode'] ?? 'sandbox';
+    return $config['api_urls'][$mode] ?? $config['api_urls']['sandbox'];
+}
+
+/**
+ * Realiza una petición HTTP a la API de Zipnova
+ * Usa HTTP Basic Authentication con API Token y API Secret
+ */
+function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth = true) {
+    $config = zipnova_get_config();
+    if (!$config) {
+        return ['success' => false, 'error' => 'Configuración de Zipnova no encontrada'];
+    }
+
+    $base_url = zipnova_get_api_url();
+    $url = $base_url . $endpoint;
+
+    $headers = [
+        'Accept: application/json',
+        'Content-Type: application/json'
+    ];
+
+    if ($use_auth) {
+        // Verificar que las credenciales estén configuradas
+        $api_token = $config['credentials']['client_id'] ?? '';
+        $api_secret = $config['credentials']['client_secret'] ?? '';
+
+        if (empty($api_token) || empty($api_secret)) {
+            return ['success' => false, 'error' => 'API Token y API Secret no están configurados'];
+        }
+
+        // HTTP Basic Authentication
+        // Usuario: API Token, Contraseña: API Secret
+        $auth = base64_encode($api_token . ':' . $api_secret);
+        $headers[] = 'Authorization: Basic ' . $auth;
+    }
+
+    $timeout = $config['options']['timeout_seconds'] ?? 30;
+    $max_retries = $config['options']['max_retries'] ?? 3;
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+
+    if ($method === 'POST') {
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    } elseif ($method === 'PUT') {
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    } elseif ($method === 'DELETE') {
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    }
+
+    // Retry logic
+    $retries = 0;
+    $response = false;
+    $http_code = 0;
+
+    while ($retries < $max_retries) {
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($response !== false && $http_code < 500) {
+            break; // Éxito o error del cliente (no reintentar)
+        }
+
+        $retries++;
+        if ($retries < $max_retries) {
+            sleep(pow(2, $retries)); // Exponential backoff
+        }
+    }
+
+    $curl_error = curl_error($ch);
+    curl_close($ch);
+
+    // Log de la request
+    zipnova_log('API Request', [
+        'method' => $method,
+        'endpoint' => $endpoint,
+        'http_code' => $http_code,
+        'retries' => $retries,
+        'success' => $response !== false
+    ]);
+
+    if ($response === false) {
+        // Guardar error en archivo JSON separado
+        zipnova_save_response_json($endpoint, $method, [
+            'request' => $data,
+            'error' => $curl_error,
+            'http_code' => 0
+        ]);
+        return ['success' => false, 'error' => 'Error de conexión: ' . $curl_error];
+    }
+
+    $result = json_decode($response, true);
+
+    // Guardar respuesta completa en archivo JSON separado para debug
+    zipnova_save_response_json($endpoint, $method, [
+        'request' => $data,
+        'response' => $result,
+        'http_code' => $http_code,
+        'raw_response' => $response
+    ]);
+
+    if ($http_code >= 200 && $http_code < 300) {
+        return ['success' => true, 'data' => $result];
+    } else {
+        return [
+            'success' => false,
+            'error' => $result['message'] ?? 'Error desconocido',
+            'http_code' => $http_code,
+            'details' => $result
+        ];
+    }
+}
+
+/**
+ * Verifica las credenciales de API
+ * Nota: Con HTTP Basic Auth no se necesita obtener tokens,
+ * las credenciales se envían en cada request
+ */
+function zipnova_authenticate() {
+    $config = zipnova_get_config();
+    if (!$config) {
+        return ['success' => false, 'error' => 'Configuración no encontrada'];
+    }
+
+    $api_token = $config['credentials']['client_id'] ?? '';
+    $api_secret = $config['credentials']['client_secret'] ?? '';
+
+    if (empty($api_token) || empty($api_secret)) {
+        return ['success' => false, 'error' => 'API Token y API Secret no configurados'];
+    }
+
+    // Con HTTP Basic Auth, simplemente verificamos que las credenciales existan
+    // La validación real ocurre cuando hacemos requests a la API
+    zipnova_log('Credentials Check', ['api_token' => substr($api_token, 0, 10) . '...']);
+
+    return [
+        'success' => true,
+        'message' => 'Credenciales configuradas. Se validarán en cada request con HTTP Basic Auth.'
+    ];
+}
+
+/**
+ * Parsea una duración en formato ISO 8601 a días
+ * Ejemplo: "P2DT10H" = 2 días, 10 horas → 3 días (redondeado)
+ *
+ * @param string $duration Duración en formato ISO 8601 (ej: "P2DT10H1S")
+ * @return int Número de días (redondeado hacia arriba si hay horas)
+ */
+function parse_iso8601_duration_to_days($duration) {
+    if (empty($duration) || !is_string($duration)) {
+        return 0;
+    }
+
+    // Pattern para parsear ISO 8601 duration
+    // Formato: P[n]Y[n]M[n]DT[n]H[n]M[n]S
+    $pattern = '/P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?/';
+
+    if (!preg_match($pattern, $duration, $matches)) {
+        return 0;
+    }
+
+    $days = isset($matches[3]) && $matches[3] !== '' ? (int)$matches[3] : 0;
+    $hours = isset($matches[4]) && $matches[4] !== '' ? (int)$matches[4] : 0;
+
+    // Si hay horas, redondear al día siguiente
+    if ($hours > 0) {
+        $days += 1;
+    }
+
+    return $days;
+}
+
+/**
+ * Calcula el rango de días de entrega desde los tiempos ISO 8601
+ * Usa los nuevos campos 'times.total' en lugar de 'min'/'max' deprecados
+ *
+ * @param array $delivery_time Objeto delivery_time de Zipnova
+ * @return string Rango de días (ej: "3-5") o "A confirmar"
+ */
+function calculate_delivery_days($delivery_time) {
+    // Priorizar nuevos campos ISO 8601
+    if (isset($delivery_time['times']['total'])) {
+        $min_duration = $delivery_time['times']['total']['min'] ?? '';
+        $max_duration = $delivery_time['times']['total']['max'] ?? '';
+
+        $min_days = parse_iso8601_duration_to_days($min_duration);
+        $max_days = parse_iso8601_duration_to_days($max_duration);
+
+        if ($min_days > 0 && $max_days > 0) {
+            return $min_days . '-' . $max_days;
+        } elseif ($min_days > 0) {
+            return (string)$min_days;
+        }
+    }
+
+    // Fallback a campos deprecados si no hay nuevos datos
+    $min = $delivery_time['min'] ?? 0;
+    $max = $delivery_time['max'] ?? 0;
+    if ($min > 0 && $max > 0) {
+        return $min . '-' . $max;
+    }
+
+    return 'A confirmar';
+}
+
+/**
+ * Cotiza envíos usando API v2 de Zipnova
+ *
+ * @param array $destination Datos de destino (city, state, zipcode)
+ * @param array $items Array de items con sku, weight, height, width, length, description, classification_id
+ * @param float|null $declared_value Valor declarado total (se calcula automáticamente si es null)
+ * @return array Resultado con cotizaciones disponibles
+ */
+function zipnova_get_quotes($destination, $items, $declared_value = null) {
+    // Log al inicio para confirmar que se llama la función
+    zipnova_log('zipnova_get_quotes CALLED', [
+        'destination' => $destination,
+        'items_count' => count($items),
+        'declared_value' => $declared_value
+    ]);
+
+    $config = zipnova_get_config();
+
+    if (!$config || !$config['enabled']) {
+        zipnova_log('zipnova_get_quotes ERROR', ['error' => 'Zipnova no está habilitado']);
+        return ['success' => false, 'error' => 'Zipnova no está habilitado'];
+    }
+
+    // Validar que existan account_id y origin_id
+    $account_id = $config['credentials']['account_id'] ?? '';
+    $origin_id = $config['origin']['origin_id'] ?? '';
+
+    if (empty($account_id)) {
+        return ['success' => false, 'error' => 'Account ID no configurado'];
+    }
+
+    if (empty($origin_id)) {
+        return ['success' => false, 'error' => 'Origin ID no configurado'];
+    }
+
+    // Calcular declared_value si no se proporciona
+    if ($declared_value === null) {
+        $declared_value = 0;
+        foreach ($items as $item) {
+            $declared_value += ($item['declared_value'] ?? 0);
+        }
+    }
+
+    // Formatear items según estructura de Zipnova
+    $formatted_items = [];
+    foreach ($items as $item) {
+        $formatted_items[] = [
+            'sku' => $item['sku'] ?? 'PROD-' . uniqid(),
+            'weight' => (int)($item['weight'] ?? $config['default_package']['weight']),
+            'height' => (int)($item['height'] ?? $config['default_package']['height']),
+            'width' => (int)($item['width'] ?? $config['default_package']['width']),
+            'length' => (int)($item['length'] ?? $config['default_package']['length']),
+            'description' => $item['description'] ?? 'Producto',
+            'classification_id' => (int)($item['classification_id'] ?? 1)
+        ];
+    }
+
+    $request_data = [
+        'account_id' => $account_id,
+        'origin_id' => $origin_id,
+        'declared_value' => (float)$declared_value,
+        'items' => $formatted_items,
+        'destination' => [
+            'city' => $destination['city'] ?? '',
+            'state' => $destination['state'] ?? $destination['province'] ?? '',
+            'zipcode' => $destination['zipcode'] ?? $destination['postal_code'] ?? ''
+        ]
+    ];
+
+    $result = zipnova_api_request('/shipments/quote', 'POST', $request_data);
+
+    if ($result['success']) {
+        // Transformar respuesta de Zipnova al formato esperado por el frontend
+        if (isset($result['data']['all_results']) && is_array($result['data']['all_results'])) {
+            $quotes = [];
+            foreach ($result['data']['all_results'] as $zipnova_quote) {
+                // Usar nueva función que parsea tiempos ISO 8601
+                $delivery_time = $zipnova_quote['delivery_time'] ?? [];
+                $estimated_days = calculate_delivery_days($delivery_time);
+
+                $quotes[] = [
+                    'service_id' => $zipnova_quote['service_type']['code'] ?? 'unknown',
+                    'service_name' => ($zipnova_quote['carrier']['name'] ?? 'Carrier') . ' - ' . ($zipnova_quote['service_type']['name'] ?? 'Service'),
+                    'cost' => (float)($zipnova_quote['amounts']['price_incl_tax'] ?? 0),
+                    'estimated_days' => $estimated_days,
+                    'carrier_name' => $zipnova_quote['carrier']['name'] ?? '',
+                    'carrier_logo' => $zipnova_quote['carrier']['logo'] ?? '',
+                    'logistic_type' => $zipnova_quote['logistic_type'] ?? '',
+                    'service_type_code' => $zipnova_quote['service_type']['code'] ?? ''
+                ];
+            }
+            $result['data']['quotes'] = $quotes;
+        }
+
+        // Aplicar margen de costo si está configurado
+        $margin = $config['options']['shipping_cost_margin'] ?? 0;
+        if ($margin > 0 && isset($result['data']['quotes'])) {
+            foreach ($result['data']['quotes'] as &$quote) {
+                if (isset($quote['cost'])) {
+                    $quote['original_cost'] = $quote['cost'];
+                    $quote['cost'] = $quote['cost'] * (1 + $margin / 100);
+                }
+            }
+        }
+    }
+
+    // Log detallado con la respuesta completa para debug
+    zipnova_log('Quote Request', [
+        'success' => $result['success'],
+        'destination' => $destination['zipcode'] ?? $destination['postal_code'] ?? 'N/A',
+        'items_count' => count($items),
+        'declared_value' => $declared_value,
+        'full_response' => $result  // <-- RESPUESTA COMPLETA PARA DEBUG
+    ]);
+
+    return $result;
+}
+
+/**
+ * Crea un envío en Zipnova
+ *
+ * @param array $shipment_data Datos del envío completos
+ * @return array Resultado con ID del envío creado
+ */
+function zipnova_create_shipment($shipment_data) {
+    $config = zipnova_get_config();
+
+    if (!$config || !$config['enabled']) {
+        return ['success' => false, 'error' => 'Zipnova no está habilitado'];
+    }
+
+    // Usar origen por defecto si no se proporciona
+    if (!isset($shipment_data['origin'])) {
+        $shipment_data['origin'] = [
+            'name' => $config['origin']['name'],
+            'address' => $config['origin']['address'],
+            'city' => $config['origin']['city'],
+            'province' => $config['origin']['province'],
+            'postal_code' => $config['origin']['postal_code'],
+            'country' => $config['origin']['country'],
+            'phone' => $config['origin']['phone'],
+            'email' => $config['origin']['email']
+        ];
+    }
+
+    $result = zipnova_api_request('/shipments', 'POST', $shipment_data);
+
+    if ($result['success']) {
+        // Guardar el envío localmente
+        $shipment_id = $result['data']['id'] ?? uniqid('shp_');
+        zipnova_save_shipment($shipment_id, [
+            'zipnova_id' => $shipment_id,
+            'reference' => $shipment_data['reference'] ?? '',
+            'status' => 'pending',
+            'created_at' => date('Y-m-d H:i:s'),
+            'data' => $result['data']
+        ]);
+    }
+
+    zipnova_log('Shipment Created', [
+        'success' => $result['success'],
+        'reference' => $shipment_data['reference'] ?? 'N/A'
+    ]);
+
+    return $result;
+}
+
+/**
+ * Consulta el estado de un envío
+ *
+ * @param string $shipment_id ID del envío en Zipnova
+ * @return array Resultado con datos del envío
+ */
+function zipnova_get_shipment($shipment_id) {
+    $result = zipnova_api_request('/shipments/' . $shipment_id, 'GET');
+
+    if ($result['success']) {
+        // Actualizar datos locales
+        zipnova_update_shipment_status($shipment_id, $result['data']);
+    }
+
+    zipnova_log('Shipment Status Check', [
+        'shipment_id' => $shipment_id,
+        'success' => $result['success']
+    ]);
+
+    return $result;
+}
+
+/**
+ * Cancela un envío
+ *
+ * @param string $shipment_id ID del envío en Zipnova
+ * @return array Resultado de la cancelación
+ */
+function zipnova_cancel_shipment($shipment_id) {
+    $result = zipnova_api_request('/shipments/' . $shipment_id . '/cancel', 'POST');
+
+    if ($result['success']) {
+        zipnova_update_shipment_status($shipment_id, ['status' => 'cancelled']);
+    }
+
+    zipnova_log('Shipment Cancelled', [
+        'shipment_id' => $shipment_id,
+        'success' => $result['success']
+    ]);
+
+    return $result;
+}
+
+/**
+ * Verifica la firma de un webhook
+ *
+ * @param string $payload JSON payload del webhook
+ * @param string $signature Firma recibida en header
+ * @return bool True si la firma es válida
+ */
+function zipnova_webhook_verify($payload, $signature) {
+    $config = zipnova_get_config();
+    if (!$config) return false;
+
+    $secret = $config['options']['webhook_secret'] ?? '';
+    if (empty($secret)) return false;
+
+    $calculated_signature = hash_hmac('sha256', $payload, $secret);
+
+    return hash_equals($calculated_signature, $signature);
+}
+
+/**
+ * Guarda un envío localmente
+ */
+function zipnova_save_shipment($shipment_id, $data) {
+    $shipments_dir = __DIR__ . '/../data/shipments';
+    if (!is_dir($shipments_dir)) {
+        mkdir($shipments_dir, 0755, true);
+    }
+
+    $file = $shipments_dir . '/' . $shipment_id . '.json';
+    return file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+/**
+ * Carga un envío local
+ */
+function zipnova_load_shipment($shipment_id) {
+    $file = __DIR__ . '/../data/shipments/' . $shipment_id . '.json';
+    if (!file_exists($file)) return null;
+
+    return json_decode(file_get_contents($file), true);
+}
+
+/**
+ * Actualiza el estado de un envío local
+ */
+function zipnova_update_shipment_status($shipment_id, $new_data) {
+    $shipment = zipnova_load_shipment($shipment_id);
+    if (!$shipment) return false;
+
+    if (isset($new_data['status'])) {
+        $shipment['status'] = $new_data['status'];
+    }
+
+    $shipment['updated_at'] = date('Y-m-d H:i:s');
+    $shipment['data'] = array_merge($shipment['data'] ?? [], $new_data);
+
+    return zipnova_save_shipment($shipment_id, $shipment);
+}
+
+/**
+ * Obtiene todos los envíos locales
+ */
+function zipnova_get_all_shipments($filter = []) {
+    $shipments_dir = __DIR__ . '/../data/shipments';
+    if (!is_dir($shipments_dir)) return [];
+
+    $files = glob($shipments_dir . '/*.json');
+    $shipments = [];
+
+    foreach ($files as $file) {
+        $shipment = json_decode(file_get_contents($file), true);
+
+        // Aplicar filtros
+        if (!empty($filter['status']) && $shipment['status'] !== $filter['status']) {
+            continue;
+        }
+        if (!empty($filter['reference']) && strpos($shipment['reference'], $filter['reference']) === false) {
+            continue;
+        }
+
+        $shipments[] = $shipment;
+    }
+
+    // Ordenar por fecha de creación (más recientes primero)
+    usort($shipments, function($a, $b) {
+        return strtotime($b['created_at']) - strtotime($a['created_at']);
+    });
+
+    return $shipments;
+}
+
+/**
+ * Log de eventos de Zipnova
+ */
+function zipnova_log($event, $data = []) {
+    // Usar ruta absoluta desde la raíz del proyecto
+    $logs_dir = dirname(dirname(__DIR__)) . '/logs/zipnova';
+    if (!is_dir($logs_dir)) {
+        mkdir($logs_dir, 0755, true);
+    }
+
+    $log_file = $logs_dir . '/' . date('Y-m-d') . '.log';
+    $timestamp = date('Y-m-d H:i:s');
+    $log_entry = sprintf(
+        "[%s] %s: %s\n",
+        $timestamp,
+        $event,
+        json_encode($data, JSON_UNESCAPED_UNICODE)
+    );
+
+    file_put_contents($log_file, $log_entry, FILE_APPEND);
+}
+
+/**
+ * Guarda respuesta de API en archivo JSON separado para debug
+ * @param string $endpoint El endpoint llamado (ej: '/shipments/quote')
+ * @param string $method El método HTTP usado (GET, POST, etc)
+ * @param array $data Array con request, response, http_code, etc
+ */
+function zipnova_save_response_json($endpoint, $method, $data) {
+    // Usar ruta absoluta desde la raíz del proyecto
+    $logs_dir = dirname(dirname(__DIR__)) . '/logs/zipnova-responses';
+    if (!is_dir($logs_dir)) {
+        mkdir($logs_dir, 0755, true);
+    }
+
+    // Generar nombre de archivo con timestamp y endpoint
+    $timestamp = date('Y-m-d_H-i-s');
+    $endpoint_name = trim(str_replace('/', '_', $endpoint), '_');
+    $filename = sprintf('%s_%s_%s.json', $timestamp, $endpoint_name, $method);
+    $filepath = $logs_dir . '/' . $filename;
+
+    // Preparar datos completos para el log
+    $log_data = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'endpoint' => $endpoint,
+        'method' => $method,
+        'http_code' => $data['http_code'] ?? 0,
+        'request' => $data['request'] ?? null,
+        'response' => $data['response'] ?? null,
+        'error' => $data['error'] ?? null,
+        'raw_response' => $data['raw_response'] ?? null
+    ];
+
+    // Guardar con formato legible
+    file_put_contents(
+        $filepath,
+        json_encode($log_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+    );
+}
+
+/**
+ * Calcula peso total desde productos del carrito
+ * @param array $cart_items Items del carrito con información de productos
+ * @return float Peso total en kg
+ */
+function zipnova_calculate_cart_weight($cart_items) {
+    $total_weight = 0;
+    $config = zipnova_get_config();
+    $default_weight = $config['default_package']['weight'] ?? 1;
+
+    foreach ($cart_items as $item) {
+        $quantity = $item['quantity'] ?? 1;
+        $product_weight = 0;
+
+        // Intentar obtener peso del producto
+        if (isset($item['weight']) && $item['weight'] > 0) {
+            $product_weight = (float)$item['weight'];
+        } elseif (isset($item['product_id'])) {
+            // Cargar producto completo si solo tenemos el ID
+            require_once __DIR__ . '/products.php';
+            $product = get_product_by_id($item['product_id']);
+            if ($product && isset($product['weight']) && $product['weight'] > 0) {
+                $product_weight = (float)$product['weight'];
+            }
+        }
+
+        // Si no hay peso definido, usar peso por defecto
+        if ($product_weight === 0) {
+            $product_weight = $default_weight;
+        }
+
+        $total_weight += $product_weight * $quantity;
+    }
+
+    // Mínimo 0.1kg
+    return max(0.1, $total_weight);
+}
+
+/**
+ * Calcula dimensiones del paquete desde productos del carrito
+ * @param array $cart_items Items del carrito con información de productos
+ * @return array Array con length, width, height en cm
+ */
+function zipnova_calculate_cart_dimensions($cart_items) {
+    $config = zipnova_get_config();
+    $default_dims = $config['default_package'];
+
+    $max_length = 0;
+    $max_width = 0;
+    $total_height = 0;
+
+    foreach ($cart_items as $item) {
+        $quantity = $item['quantity'] ?? 1;
+        $product_length = 0;
+        $product_width = 0;
+        $product_height = 0;
+
+        // Intentar obtener dimensiones del producto
+        if (isset($item['length']) && isset($item['width']) && isset($item['height'])) {
+            $product_length = (float)$item['length'];
+            $product_width = (float)$item['width'];
+            $product_height = (float)$item['height'];
+        } elseif (isset($item['product_id'])) {
+            // Cargar producto completo si solo tenemos el ID
+            require_once __DIR__ . '/products.php';
+            $product = get_product_by_id($item['product_id']);
+            if ($product) {
+                $product_length = (float)($product['length'] ?? 0);
+                $product_width = (float)($product['width'] ?? 0);
+                $product_height = (float)($product['height'] ?? 0);
+            }
+        }
+
+        // Si no hay dimensiones, usar defaults
+        if ($product_length === 0) {
+            $product_length = $default_dims['length'];
+            $product_width = $default_dims['width'];
+            $product_height = $default_dims['height'];
+        }
+
+        // Acumular dimensiones
+        $max_length = max($max_length, $product_length);
+        $max_width = max($max_width, $product_width);
+        $total_height += $product_height * $quantity; // Apilar productos
+    }
+
+    return [
+        'length' => max(1, $max_length),
+        'width' => max(1, $max_width),
+        'height' => max(1, $total_height)
+    ];
+}
+
+/**
+ * Calcula valor declarado desde productos del carrito
+ * @param array $cart_items Items del carrito
+ * @return float Valor total declarado
+ */
+function zipnova_calculate_cart_value($cart_items) {
+    $total_value = 0;
+
+    foreach ($cart_items as $item) {
+        $quantity = $item['quantity'] ?? 1;
+        $price = $item['final_price_ars'] ?? $item['price_ars'] ?? 0;
+        $total_value += $price * $quantity;
+    }
+
+    return max(0, $total_value);
+}
+
+/**
+ * Construye paquetes para Zipnova desde el carrito
+ * @param array $cart_items Items del carrito
+ * @return array Array de paquetes para la API de Zipnova
+ */
+function zipnova_build_packages_from_cart($cart_items) {
+    $weight = zipnova_calculate_cart_weight($cart_items);
+    $dimensions = zipnova_calculate_cart_dimensions($cart_items);
+    $declared_value = zipnova_calculate_cart_value($cart_items);
+
+    return [[
+        'weight' => $weight,
+        'length' => $dimensions['length'],
+        'width' => $dimensions['width'],
+        'height' => $dimensions['height'],
+        'declared_value' => $declared_value
+    ]];
+}
+
+/**
+ * Prueba la conexión con Zipnova usando HTTP Basic Auth
+ */
+function zipnova_test_connection() {
+    // Verificar que las credenciales estén configuradas
+    $auth_check = zipnova_authenticate();
+
+    if (!$auth_check['success']) {
+        return [
+            'success' => false,
+            'error' => $auth_check['error']
+        ];
+    }
+
+    // Probar la conexión con una cotización de prueba
+    // Esto validará las credenciales con HTTP Basic Auth
+    $config = zipnova_get_config();
+    $test_quote = zipnova_get_quotes(
+        [
+            'city' => 'Córdoba',
+            'state' => 'Córdoba',
+            'zipcode' => '5000'
+        ],
+        [[
+            'sku' => 'TEST-001',
+            'weight' => 100,
+            'height' => 10,
+            'width' => 10,
+            'length' => 10,
+            'description' => 'Producto de prueba',
+            'classification_id' => 1
+        ]],
+        1000 // declared_value
+    );
+
+    if ($test_quote['success']) {
+        return [
+            'success' => true,
+            'message' => 'Conexión exitosa con Zipnova usando HTTP Basic Auth',
+            'mode' => $config['mode'],
+            'api_url' => zipnova_get_api_url()
+        ];
+    } else {
+        return [
+            'success' => false,
+            'error' => 'Error al consultar API: ' . $test_quote['error']
+        ];
+    }
+}
+
+// ============================================================================
+// MULTI-CARRIER HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Mapea el estado de un carrier a un estado base del sistema
+ * @param string $carrier_type Tipo de carrier (zipnova, etc.)
+ * @param string $carrier_status Estado del carrier
+ * @return string Estado base del sistema
+ */
+function map_carrier_status_to_base($carrier_type, $carrier_status) {
+    $mappings = [
+        'zipnova' => [
+            'pending' => 'pendiente',
+            'in_transit' => 'en_transito',
+            'out_for_delivery' => 'en_reparto',
+            'delivered' => 'entregada',
+            'failed' => 'fallida',
+            'returned' => 'devuelta',
+            'cancelled' => 'cancelada'
+        ]
+    ];
+
+    if (isset($mappings[$carrier_type][$carrier_status])) {
+        return $mappings[$carrier_type][$carrier_status];
+    }
+
+    // Default fallback
+    return 'pendiente';
+}
+
+/**
+ * Obtiene el label legible para un estado base
+ * @param string $base_status Estado base del sistema
+ * @return string Label del estado
+ */
+function get_status_label($base_status) {
+    $labels = [
+        'pendiente' => 'Pendiente',
+        'en_transito' => 'En tránsito',
+        'en_reparto' => 'En reparto',
+        'entregada' => 'Entregada',
+        'fallida' => 'Fallida',
+        'devuelta' => 'Devuelta',
+        'cancelada' => 'Cancelada',
+        // Legacy states
+        'cobrada' => 'Cobrada',
+        'enviada' => 'Enviada'
+    ];
+
+    return $labels[$base_status] ?? ucfirst($base_status);
+}
+
+/**
+ * Renderiza un estado con el tag del carrier si existe
+ * @param array $shipping Objeto shipping de la orden
+ * @return string HTML del estado con badge
+ */
+function render_shipping_status($shipping) {
+    if (!$shipping) {
+        return '<span class="status-badge status-pending">Sin envío</span>';
+    }
+
+    $status = $shipping['status'] ?? 'pendiente';
+    $carrier = $shipping['carrier'] ?? null;
+    $status_label = get_status_label($status);
+
+    $class = 'status-badge status-' . str_replace('_', '-', $status);
+
+    if ($carrier) {
+        return '<span class="' . $class . '">' . htmlspecialchars($status_label) .
+               ' <span class="carrier-tag">' . htmlspecialchars($carrier) . '</span></span>';
+    }
+
+    return '<span class="' . $class . '">' . htmlspecialchars($status_label) . '</span>';
+}
+
+/**
+ * Obtiene el nombre de un carrier por su tag
+ * @param string $carrier_tag Tag del carrier
+ * @return string Nombre del carrier
+ */
+function get_carrier_name($carrier_tag) {
+    $config = get_carrier_config($carrier_tag);
+    return $config['name'] ?? $carrier_tag;
+}

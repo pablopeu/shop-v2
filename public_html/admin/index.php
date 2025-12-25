@@ -99,6 +99,7 @@ $pages_map = [
     'config-footer' => 'pages/admin/config-footer.php',
     'config-dashboard' => 'pages/admin/config-dashboard.php',
     'config-productos-heading' => 'pages/admin/config-productos-heading.php',
+    'config-shipping' => 'pages/admin/config-shipping.php',
     
     // Mantenimiento
     'config-mantenimiento' => 'pages/admin/config-mantenimiento.php',

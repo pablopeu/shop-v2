@@ -336,11 +336,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $needs_shipping = ($delivery_method === 'shipping');
 
     if ($needs_shipping) {
-        $address = sanitize_input($_POST['address'] ?? '');
-        $city = sanitize_input($_POST['city'] ?? '');
-        $postal_code = sanitize_input($_POST['postal_code'] ?? '');
-        $state = sanitize_input($_POST['state'] ?? '');
-        $country = sanitize_input($_POST['country'] ?? '');
+        $address = sanitize_input($_POST['shipping_address'] ?? '');
+        $city = sanitize_input($_POST['shipping_city'] ?? '');
+        $postal_code = sanitize_input($_POST['shipping_postal_code'] ?? '');
+        $state = sanitize_input($_POST['shipping_province'] ?? '');
+        $country = sanitize_input($_POST['shipping_country'] ?? '');
 
         if (empty($address)) {
             $errors[] = 'La dirección es requerida para envío';
@@ -389,6 +389,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     // If no errors, create order
     if (empty($errors)) {
 
+        // Get shipping data from form
+        $shipping_cost = floatval($_POST['shipping_cost'] ?? 0);
+        $shipping_service_id = sanitize_input($_POST['shipping_service_id'] ?? '');
+        $shipping_estimated_days = sanitize_input($_POST['shipping_estimated_days'] ?? '');
+
+        // Calculate final total including shipping
+        $total_with_shipping = $total + $shipping_cost;
+
         // Prepare order items
         $order_items = [];
         foreach ($cart_items as $item) {
@@ -409,7 +417,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             'discount_promotion' => ($selected_currency === 'USD') ? $promotion_discount_usd : $promotion_discount_ars,
             'discount_coupon' => ($selected_currency === 'USD') ? $coupon_discount_usd : $coupon_discount_ars,
             'coupon_code' => $coupon_code,
-            'total' => $total,
+            'shipping_cost' => $shipping_cost,
+            'shipping_service_id' => $shipping_service_id,
+            'shipping_estimated_days' => $shipping_estimated_days,
+            'total' => $total_with_shipping,
             'payment_method' => $payment_method,
             'shipping_address' => $shipping_address,
             'customer_name' => $customer_name,
@@ -441,6 +452,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             setcookie('checkout_email', $customer_email, $cookie_expiry, $cookie_path);
             setcookie('checkout_country_code', $country_code, $cookie_expiry, $cookie_path);
             setcookie('checkout_phone', $customer_phone, $cookie_expiry, $cookie_path);
+
+            // Save delivery method
+            $delivery_method = $_POST['delivery_method'] ?? 'pickup';
+            setcookie('checkout_delivery_method', $delivery_method, $cookie_expiry, $cookie_path);
 
             // Save shipping address if provided
             if ($shipping_address) {
@@ -512,6 +527,7 @@ $saved_country_code = $_COOKIE['checkout_country_code'] ?? '+54';
 $saved_phone = $_COOKIE['checkout_phone'] ?? '';
 $saved_telegram = $_COOKIE['checkout_telegram'] ?? '';
 $saved_contact_pref = $_COOKIE['checkout_contact_pref'] ?? '';
+$saved_delivery_method = $_COOKIE['checkout_delivery_method'] ?? '';
 $saved_address = $_COOKIE['checkout_address'] ?? '';
 $saved_city = $_COOKIE['checkout_city'] ?? '';
 $saved_postal_code = $_COOKIE['checkout_postal_code'] ?? '';
@@ -875,6 +891,54 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             gap: 0.5rem;
         }
 
+        /* Scroll para cotizaciones de envío cuando hay muchas opciones */
+        #shipping-quotes {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        /* Estilos del scrollbar para cotizaciones */
+        #shipping-quotes::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #shipping-quotes::-webkit-scrollbar-track {
+            background: var(--checkout-bg-secondary);
+            border-radius: 4px;
+        }
+
+        #shipping-quotes::-webkit-scrollbar-thumb {
+            background: var(--checkout-border);
+            border-radius: 4px;
+        }
+
+        #shipping-quotes::-webkit-scrollbar-thumb:hover {
+            background: var(--checkout-accent);
+        }
+
+        /* Tarjetas de cotizaciones más compactas */
+        #shipping-quotes .radio-option {
+            padding: 0.625rem 0.875rem;
+            gap: 0.75rem;
+        }
+
+        #shipping-quotes .radio-option strong {
+            font-size: 0.875rem;
+            line-height: 1.3;
+        }
+
+        #shipping-quotes .radio-option .option-description {
+            font-size: 0.75rem;
+            margin-top: 0.15rem;
+            line-height: 1.4;
+        }
+
+        #shipping-quotes .radio-option .option-description strong {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
         .radio-option {
             display: flex;
             align-items: flex-start;
@@ -1147,7 +1211,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         .summary-totals {
             margin-top: 1.5rem;
             padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .summary-row {
@@ -1488,7 +1551,8 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <label>Método de entrega *</label>
                                 <div class="radio-group">
                                     <label class="radio-option">
-                                        <input type="radio" name="delivery_method" value="pickup" required>
+                                        <input type="radio" name="delivery_method" value="pickup"
+                                               <?php echo ($saved_delivery_method === 'pickup' || empty($saved_delivery_method)) ? 'checked' : ''; ?> required>
                                         <div>
                                             <strong>🏪 Retiro en persona</strong>
                                             <p class="option-description">Coordinaremos lugar y horario</p>
@@ -1496,6 +1560,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     </label>
                                     <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
                                         <input type="radio" name="delivery_method" value="shipping"
+                                               <?php echo $saved_delivery_method === 'shipping' ? 'checked' : ''; ?>
                                                <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
                                         <div>
                                             <strong>📦 Envío a domicilio</strong>
@@ -1509,39 +1574,93 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
                             <div id="shipping-fields" class="hidden">
                                 <div class="form-group">
-                                    <label for="address">Dirección *</label>
-                                    <input type="text" id="address" name="address" placeholder="Calle y número"
-                                           value="<?php echo htmlspecialchars($_POST['address'] ?? $saved_address); ?>">
+                                    <label for="shipping_address">Dirección *</label>
+                                    <input type="text" id="shipping_address" name="shipping_address" placeholder="Calle y número"
+                                           value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="postal_code">Código Postal *</label>
-                                        <input type="text" id="postal_code" name="postal_code"
-                                               value="<?php echo htmlspecialchars($_POST['postal_code'] ?? $saved_postal_code); ?>">
+                                        <label for="shipping_postal_code">Código Postal *</label>
+                                        <input type="text" id="shipping_postal_code" name="shipping_postal_code"
+                                               value="<?php echo htmlspecialchars($_POST['shipping_postal_code'] ?? $saved_postal_code); ?>">
+                                        <small>Ingresá tu código postal para calcular el envío</small>
                                     </div>
                                     <div class="form-group">
-                                        <label for="city">Ciudad *</label>
-                                        <input type="text" id="city" name="city"
-                                               value="<?php echo htmlspecialchars($_POST['city'] ?? $saved_city); ?>">
+                                        <label for="shipping_city">Ciudad *</label>
+                                        <input type="text" id="shipping_city" name="shipping_city"
+                                               value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? $saved_city); ?>">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="shipping_province">Provincia / Estado *</label>
+                                        <select id="shipping_province" name="shipping_province">
+                                            <?php
+                                            $provincias = [
+                                                'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
+                                                'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
+                                                'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
+                                                'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
+                                                'Tierra del Fuego', 'Tucumán'
+                                            ];
+                                            $selected_province = $_POST['shipping_province'] ?? $saved_state ?? '';
+                                            ?>
+                                            <option value="">Seleccionar provincia...</option>
+                                            <?php foreach ($provincias as $provincia): ?>
+                                                <option value="<?php echo $provincia; ?>" <?php echo ($selected_province === $provincia) ? 'selected' : ''; ?>>
+                                                    <?php echo $provincia; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="shipping_country">País *</label>
+                                        <select id="shipping_country" name="shipping_country">
+                                            <?php $selected_saved_country = $_POST['shipping_country'] ?? $saved_country ?? 'AR'; ?>
+                                            <option value="AR" <?php echo ($selected_saved_country === 'AR' || $selected_saved_country === 'Argentina' || empty($selected_saved_country)) ? 'selected' : ''; ?>>Argentina</option>
+                                        </select>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="state">Provincia / Estado *</label>
-                                    <input type="text" id="state" name="state"
-                                           value="<?php echo htmlspecialchars($_POST['state'] ?? $saved_state); ?>">
+                                    <label for="shipping_notes">Referencias de entrega (opcional)</label>
+                                    <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
                                 </div>
 
+                                <!-- Botón para cotizar -->
                                 <div class="form-group">
-                                    <label for="country">País *</label>
-                                    <select id="country" name="country">
-                                        <?php $selected_saved_country = $_POST['country'] ?? $saved_country; ?>
-                                        <option value="Argentina" <?php echo ($selected_saved_country === 'Argentina' || empty($selected_saved_country)) ? 'selected' : ''; ?>>Argentina</option>
-                                        <option value="Chile" <?php echo ($selected_saved_country === 'Chile') ? 'selected' : ''; ?>>Chile</option>
-                                        <option value="Uruguay" <?php echo ($selected_saved_country === 'Uruguay') ? 'selected' : ''; ?>>Uruguay</option>
-                                    </select>
+                                    <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote">
+                                        📦 Calcular Costo de Envío
+                                    </button>
                                 </div>
+
+                                <!-- Cotizaciones de envío -->
+                                <div id="shipping-quotes-container" class="hidden">
+                                    <div class="form-group">
+                                        <label>Seleccioná tu método de envío *</label>
+                                        <div id="shipping-quotes" class="radio-group">
+                                            <!-- Las cotizaciones se cargarán aquí dinámicamente -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Loading indicator -->
+                                <div id="shipping-loading" class="hidden" style="text-align: center; padding: 1rem;">
+                                    <p>⏳ Calculando opciones de envío...</p>
+                                </div>
+
+                                <!-- Error message -->
+                                <div id="shipping-error" class="hidden alert-box" style="background: #fee; border-left-color: #c00;">
+                                    <p id="shipping-error-message"></p>
+                                </div>
+
+                                <!-- Hidden fields para guardar el método seleccionado -->
+                                <input type="hidden" id="shipping_service_id" name="shipping_service_id">
+                                <input type="hidden" id="shipping_cost" name="shipping_cost" value="0">
+                                <input type="hidden" id="shipping_estimated_days" name="shipping_estimated_days">
                             </div>
                         </div>
                     </div>
@@ -1681,27 +1800,37 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 <?php endforeach; ?>
 
                 <div class="summary-totals">
+                    <!-- Subtotal = suma de artículos CON descuentos aplicados -->
+                    <div class="summary-row">
+                        <span><strong>Subtotal:</strong></span>
+                        <span><strong><?php echo format_price($total, $selected_currency); ?></strong></span>
+                    </div>
+
                     <?php
-                    // Show promotion discount
+                    // Mostrar "Ahorraste" en una sola línea si hay descuentos
                     $display_promotion_discount = ($selected_currency === 'USD') ? $promotion_discount_usd : $promotion_discount_ars;
-                    if ($display_promotion_discount > 0):
+                    $total_savings = $display_promotion_discount + $coupon_discount;
+
+                    if ($total_savings > 0):
                     ?>
-                    <div class="summary-row summary-row-promo">
-                        <span>🎉 Descuento Promoción:</span>
-                        <span>-<?php echo format_price($display_promotion_discount, $selected_currency); ?></span>
+                    <div class="summary-row" style="color: #4CAF50;">
+                        <span>💰 Ahorraste:</span>
+                        <span><strong><?php echo format_price($total_savings, $selected_currency); ?></strong></span>
                     </div>
                     <?php endif; ?>
 
-                    <?php if ($coupon_discount > 0): ?>
-                    <div class="summary-row summary-row-coupon">
-                        <span>🎫 Cupón (<?php echo htmlspecialchars($coupon_code); ?>):</span>
-                        <span>-<?php echo format_price($coupon_discount, $selected_currency); ?></span>
+                    <!-- Costo de envío (dinámico) -->
+                    <div class="summary-row summary-row-shipping" id="shipping-cost-row" style="display: none;">
+                        <span>🚚 Envío:</span>
+                        <span id="shipping-cost" data-value="0">$0</span>
                     </div>
-                    <?php endif; ?>
+
+                    <!-- Total base (subtotal con descuentos) - oculto para JS -->
+                    <input type="hidden" id="order-subtotal" data-value="<?php echo $total; ?>">
 
                     <div class="summary-row total">
-                        <span>Total:</span>
-                        <span><?php echo format_price($total, $selected_currency); ?></span>
+                        <span><strong>Total:</strong></span>
+                        <span id="order-total" data-value="<?php echo $total; ?>"><strong><?php echo format_price($total, $selected_currency); ?></strong></span>
                     </div>
                 </div>
 
@@ -1761,12 +1890,58 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
         // Step management
         let completedSteps = new Set();
+        let shippingQuoteSelected = false;
+
+        // Show tooltip for locked steps
+        function showLockedStepTooltip(stepNumber) {
+            const step = document.getElementById(`step-${stepNumber}`);
+            const header = step.querySelector('.step-header');
+
+            // Create tooltip if it doesn't exist
+            let tooltip = header.querySelector('.locked-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'locked-tooltip';
+                tooltip.style.cssText = `
+                    position: absolute;
+                    top: -35px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #333;
+                    color: white;
+                    padding: 0.5rem 1rem;
+                    border-radius: 4px;
+                    font-size: 0.75rem;
+                    white-space: nowrap;
+                    z-index: 1000;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                `;
+
+                let message = '';
+                if (stepNumber === 2) message = 'Completá tus datos personales primero';
+                else if (stepNumber === 3) message = 'Seleccioná el método de entrega primero';
+                else if (stepNumber === 4) message = 'Seleccioná el método de pago primero';
+
+                tooltip.textContent = message;
+                header.style.position = 'relative';
+                header.appendChild(tooltip);
+            }
+
+            // Show tooltip
+            tooltip.style.opacity = '1';
+            setTimeout(() => {
+                tooltip.style.opacity = '0';
+            }, 2000);
+        }
 
         function toggleStep(stepNumber) {
             const step = document.getElementById(`step-${stepNumber}`);
 
-            // No permitir abrir si está locked
+            // Mostrar tooltip y no permitir abrir si está locked
             if (step.classList.contains('locked')) {
+                showLockedStepTooltip(stepNumber);
                 return;
             }
 
@@ -1794,12 +1969,33 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             updateBuyButton();
         }
 
+        function markStepIncomplete(stepNumber) {
+            const step = document.getElementById(`step-${stepNumber}`);
+            step.classList.remove('completed');
+            completedSteps.delete(stepNumber);
+
+            // Lock subsequent steps
+            for (let i = stepNumber + 1; i <= 4; i++) {
+                const nextStep = document.getElementById(`step-${i}`);
+                if (nextStep) {
+                    nextStep.classList.add('locked');
+                    nextStep.classList.remove('completed');
+                    completedSteps.delete(i);
+                }
+            }
+
+            updateBuyButton();
+        }
+
         function updateBuyButton() {
             const button = document.getElementById('final-buy-button');
             const buttonMobile = document.getElementById('final-buy-button-mobile');
             if (completedSteps.size === 4) {
                 button.disabled = false;
                 if (buttonMobile) buttonMobile.disabled = false;
+            } else {
+                button.disabled = true;
+                if (buttonMobile) buttonMobile.disabled = true;
             }
         }
 
@@ -1834,14 +2030,51 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
         function validateStep2() {
             const method = document.querySelector('input[name="delivery_method"]:checked').value;
-            document.getElementById('step-2-summary').textContent = method === 'pickup' ? '🏪 Retiro en persona' : '📦 Envío a domicilio';
-            markStepCompleted(2);
-            unlockNextStep(2);
+            const step2 = document.getElementById('step-2');
 
             // Show/hide shipping fields
             const shippingFields = document.getElementById('shipping-fields');
             shippingFields.classList.toggle('hidden', method !== 'shipping');
+
+            // Solo completar paso si:
+            // - Es pickup (no requiere cotización)
+            // - Es shipping Y se ha seleccionado una cotización
+            if (method === 'pickup') {
+                document.getElementById('step-2-summary').textContent = '🏪 Retiro en persona';
+                markStepCompleted(2);
+                unlockNextStep(2);
+            } else if (method === 'shipping') {
+                // Asegurar que el paso permanezca abierto para mostrar campos de envío
+                if (!step2.classList.contains('active')) {
+                    step2.classList.add('active');
+                }
+
+                if (shippingQuoteSelected) {
+                    // Cotización ya seleccionada
+                    const selectedQuote = document.querySelector('input[name="shipping_method_quote"]:checked');
+                    if (selectedQuote) {
+                        const cost = selectedQuote.dataset.cost || '0';
+                        const days = selectedQuote.dataset.days || '';
+                        document.getElementById('step-2-summary').textContent = `📦 Envío (${days} días)`;
+                        markStepCompleted(2);
+                        unlockNextStep(2);
+                    }
+                } else {
+                    // Envío seleccionado pero sin cotización
+                    document.getElementById('step-2-summary').textContent = '📦 Envío (cotización pendiente)';
+                    markStepIncomplete(2);
+                }
+            }
         }
+
+        // Listen for shipping quote selection
+        document.addEventListener('shippingSelected', function(e) {
+            shippingQuoteSelected = true;
+            validateStep2(); // Re-validate to complete step
+        });
+
+        // Initial validation for delivery method (shows shipping fields if saved method is 'shipping')
+        validateStep2();
 
         // Step 3: Payment validation
         document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
@@ -1995,6 +2228,20 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     </div>
                 `;
             });
+
+            // AGREGAR COSTO DE ENVÍO AL TOTAL
+            const shippingCostEl = document.getElementById('shipping_cost');
+            const shippingCost = parseFloat(shippingCostEl ? shippingCostEl.value : 0) || 0;
+
+            if (shippingCost > 0) {
+                itemsHTML += `
+                    <div class="mp-item-row">
+                        <span>🚚 Envío</span>
+                        <span>$${parseFloat(shippingCost).toFixed(2)}</span>
+                    </div>
+                `;
+                cartTotal += shippingCost;
+            }
 
             // Mostrar modal
             document.getElementById('mp-order-number').textContent = '(Pendiente de confirmación)';
@@ -2372,5 +2619,13 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
     <!-- Event Delegation System for CSP -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
+
+    <!-- Define BASE_PATH for frontend JS -->
+    <script nonce="<?= csp_nonce() ?>">
+        window.BASE_PATH = '<?php echo htmlspecialchars(rtrim(url('/'), '/')); ?>';
+    </script>
+
+    <!-- Shipping Module (Zipnova Integration) -->
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shipping.js'); ?>"></script>
 </body>
 </html>
