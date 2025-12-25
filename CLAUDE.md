@@ -280,10 +280,17 @@ Uses a centralized Router class with clean URLs:
 ```
 GET /                    → app/pages/frontend/home.php
 GET /producto/:slug      → app/pages/frontend/producto.php
+GET /buscar              → app/pages/frontend/buscar.php
 GET /carrito             → app/pages/frontend/carrito.php
-GET /checkout            → app/pages/frontend/checkout.php
+GET/POST /checkout       → app/pages/frontend/checkout-new.php (new vertical checkout with shipping)
+GET /checkout-return     → app/pages/frontend/checkout-return.php
 GET /favoritos           → app/pages/frontend/favoritos.php
+GET /pedido              → app/pages/frontend/pedido.php
 GET /track               → app/pages/frontend/track.php
+GET /tracking            → app/pages/frontend/tracking.php
+GET /gracias             → app/pages/frontend/gracias.php
+GET /pendiente           → app/pages/frontend/pendiente.php
+GET /preview             → app/pages/frontend/preview.php
 ```
 
 Routing is handled by `.htaccess` with `FallbackResource /shopv2/index.php`.
@@ -310,9 +317,12 @@ All data is stored in JSON files under `/app/data/`:
 - **Products**: `app/data/products.json` and individual files in `app/data/products/`
 - **Orders**: `app/data/orders.json`
 - **Archived orders**: `app/data/archived_orders.json`
+- **Shipments**: `app/data/shipments/` (shipping data per order)
 - **Coupons**: `app/data/coupons.json`
 - **Promotions**: `app/data/promotions.json`
 - **Reviews**: `app/data/reviews.json`
+- **Cache**: `app/data/cache/` (shipping quotes cache, etc.)
+- **Logs**: `app/data/webhook_log.json`, `app/data/mp_logs.json`
 
 ### File Locking
 
@@ -322,26 +332,73 @@ All JSON read/write operations use file locking via `read_json()` and `write_jso
 
 ### Core System Files (loaded in bootstrap.php)
 
-- `app/includes/functions.php` - Core utilities (JSON read/write, redirects, etc.)
-- `app/includes/security.php` - Security headers, CSRF protection
-- `app/includes/router.php` - Router class for URL routing
-- `app/includes/auth.php` - Authentication functions (`require_admin()`, session management)
-- `app/includes/products.php` - Product management functions
-- `app/includes/orders.php` - Order management functions
-- `app/includes/mercadopago.php` - MercadoPago payment integration
-- `app/includes/email.php` - Email sending functions
+**Main System Functions:**
+- `app/includes/functions.php` - Core utilities (JSON read/write, redirects, URL helpers, sanitization)
+- `app/includes/security.php` - Security headers, CSP with nonces, CSRF protection
+- `app/includes/router.php` - Router class for URL routing (frontend)
+- `app/includes/auth.php` - Authentication, session management, admin login
+- `app/includes/rate_limit.php` - Rate limiting for API endpoints
+- `app/includes/locks.php` - File locking for concurrent JSON operations
+- `app/includes/log_rotation.php` - Log rotation and cleanup
+- `app/includes/upload.php` - File upload handling and validation
+- `app/includes/api_helpers.php` - API response helpers
+- `app/includes/strings.php` - String manipulation utilities
+
+**Business Logic:**
+- `app/includes/products.php` - Product management (CRUD, stock, pricing)
+- `app/includes/orders.php` - Order management (create, update, archive)
+- `app/includes/carriers.php` - **Shipping integration (Zipnova, multi-carrier architecture)**
+- `app/includes/coupons.php` - Coupon system (validation, application)
+- `app/includes/promotions.php` - Promotions system (2x1, discounts)
+
+**External Integrations:**
+- `app/includes/mercadopago.php` - MercadoPago payment API
+- `app/includes/mp-logger.php` - MercadoPago detailed logging
+- `app/includes/email.php` - Email sending (order confirmations, notifications)
 - `app/includes/telegram.php` - Telegram bot notifications
-- `app/includes/coupons.php` - Coupon system
-- `app/includes/promotions.php` - Promotions system
+
+**Theming:**
+- `app/includes/theme-loader.php` - Dynamic theme loading
+- `app/includes/theme-generator.php` - Theme generation and customization
+
+### Admin Components (includes/admin/)
+
+- `app/includes/admin/header.php` - Admin panel header
+- `app/includes/admin/sidebar.php` - Admin panel sidebar navigation
+- `app/includes/admin/modal.php` - Reusable modal component
+- `app/includes/admin/styles.php` - Admin-specific styles
+- `app/includes/admin/admin-common-styles.php` - Common admin styles
+- `app/includes/admin/session-monitor.js` - Session timeout monitor
+- `app/includes/admin/unsaved-changes-warning.js` - Warn on unsaved changes
+- `app/includes/admin/ventas/` - Sales-specific components:
+  - `actions.php` - Sales actions (archive, export, etc.)
+  - `filters.php` - Sales filtering logic
+  - `stats.php` - Sales statistics
+  - `views.php` - Sales view renderers
+
+### Frontend Components (includes/frontend/)
+
+- `app/includes/frontend/modal.php` - Frontend modal component
+- `app/includes/frontend/breadcrumb.php` - Breadcrumb navigation
+- `app/includes/frontend/cart-panel.php` - Shopping cart panel
+- `app/includes/frontend/product-card.php` - Product card component
+- `app/includes/frontend/quantity-selector.php` - Quantity selector
+- `app/includes/frontend/review-card.php` - Product review card
+- `app/includes/frontend/favorites-panel.php` - Favorites/wishlist panel
+- `app/includes/frontend/currency-toggle.php` - Currency switcher
+- `app/includes/frontend/coupon-form.php` - Coupon input form
+- `app/includes/frontend/share-buttons.php` - Social share buttons
 
 ### HTML Components (NOT function libraries)
 
 These should be included in pages, NOT in bootstrap.php:
 
-- `app/includes/carousel.php`
-- `app/includes/mobile-menu.php`
-- `app/includes/tracking-events.php`
-- `app/includes/tracking-scripts.php`
+- `app/includes/header-frontend.php` - Frontend header
+- `app/includes/carousel.php` - Product carousel
+- `app/includes/mobile-menu.php` - Mobile menu
+- `app/includes/tracking-events.php` - Analytics events
+- `app/includes/tracking-scripts.php` - Analytics scripts
+- `app/includes/auto-update-exchange.php` - Auto-update currency rates
 
 ## Common Development Commands
 
@@ -444,12 +501,27 @@ redirect(url('/admin/'));
 
 ### Configuration Files
 
+**System Configuration:**
 - **`app/config/config.php`** - Main configuration (auto-generated, NEVER commit)
 - **`app/config/config.example.php`** - Template for config.php
-- **`app/config/paths.php`** - Path definitions
-- **`app/config/payment.json`** - Payment gateway settings
-- **`app/config/site.json`** - Site metadata
+- **`app/config/paths.php`** - Path definitions (APP_PATH, PUBLIC_PATH, DATA_PATH)
+
+**Feature Configuration (JSON):**
+- **`app/config/site.json`** - Site metadata (name, description, logo, contact)
 - **`app/config/theme.json`** - Active theme configuration
+- **`app/config/payment.json`** - MercadoPago settings (credentials, preferences)
+- **`app/config/shipping.json`** - **Shipping carriers config (Zipnova, multi-carrier)**
+- **`app/config/currency.json`** - Currency settings (primary, exchange rates)
+- **`app/config/email.json`** - Email configuration (SMTP, templates)
+- **`app/config/telegram.json`** - Telegram bot configuration
+- **`app/config/analytics.json`** - Google Analytics, Meta Pixel config
+- **`app/config/footer.json`** - Footer content and links
+- **`app/config/hero.json`** - Hero section configuration
+- **`app/config/carousel.json`** - Product carousel settings
+- **`app/config/dashboard.json`** - Admin dashboard widgets
+- **`app/config/products-heading.json`** - Products section heading
+- **`app/config/maintenance.json`** - Maintenance mode settings
+- **`app/config/strings.json`** - Multi-language strings (future i18n)
 
 ## Creating New PHP Files
 
@@ -868,25 +940,411 @@ refunded        → cancelada (stock restored)
 charged_back    → cancelada (stock restored)
 ```
 
+## Shipping Integration (Zipnova & Multi-Carrier)
+
+### Overview
+
+The system includes a **full shipping/logistics integration** with Zipnova as the primary carrier, built on an extensible **multi-carrier architecture** for future integrations (Andreani, Correo Argentino, etc.).
+
+### Key Components
+
+**Backend:**
+- **Configuration**: `app/config/shipping.json` - Multi-carrier settings
+- **Core Logic**: `app/includes/carriers.php` (931 lines) - Universal carrier integration
+- **Admin Panel**: `app/pages/admin/config-shipping.php` - Carrier configuration
+- **Shipment Management**:
+  - `app/pages/admin/envios-pendientes.php` - Pending shipments
+  - `app/pages/admin/envios-archivo.php` - Archived shipments
+- **API Endpoints**: `app/pages/api/shipping.php` - Quotes, create, track
+- **Data Storage**: `app/data/shipments/` - Per-order shipping data
+
+**Frontend:**
+- **New Checkout**: `app/pages/frontend/checkout-new.php` (2800+ lines) - Vertical layout with shipping
+- **JavaScript Module**: `public_html/assets/js/shipping.js` (500+ lines) - Frontend shipping logic
+
+**Logs:**
+- `/logs/zipnova/` - Daily event logs
+- `/logs/zipnova-responses/` - Debug JSON responses
+
+### Multi-Carrier Architecture
+
+**Carrier Identification:**
+- Carriers identified by **4-letter tags** (ZNVA for Zipnova, etc.)
+- Extensible for future carriers (ANDR, OCAS, etc.)
+
+**Universal Base Status:**
+```
+pendiente       → Shipment created, not yet dispatched
+en_transito     → In transit to destination
+en_reparto      → Out for delivery
+entregada       → Successfully delivered
+cancelada       → Cancelled by seller/customer
+rechazada       → Rejected by recipient
+devuelta        → Returned to sender
+fallida         → Delivery failed
+```
+
+**Per-Carrier Configuration:**
+```json
+{
+  "carriers": {
+    "ZNVA": {
+      "tag": "ZNVA",
+      "name": "Zipnova",
+      "type": "zipnova",
+      "enabled": false,
+      "mode": "sandbox",
+      "credentials": {
+        "account_id": "...",
+        "client_id": "...",
+        "client_secret": "..."
+      },
+      "origin": {
+        "origin_id": "...",
+        "name": "...",
+        "address": "...",
+        "city": "...",
+        "province": "...",
+        "postal_code": "...",
+        "country": "AR",
+        "phone": "...",
+        "email": "..."
+      },
+      "default_package": {
+        "weight": 500,
+        "length": 20,
+        "width": 15,
+        "height": 10
+      },
+      "options": {
+        "webhook_secret": "...",
+        "auto_create_shipment": false,
+        "shipping_cost_margin": 0,
+        "cache_quotes_minutes": 30,
+        "timeout_seconds": 30,
+        "max_retries": 3
+      },
+      "enabled_services": {
+        "standard": true,
+        "express": true,
+        "same_day": false
+      }
+    }
+  }
+}
+```
+
+### Orders Structure with Shipping
+
+New `shipping` object in orders:
+
+```json
+{
+  "shipping": {
+    "method": "standard",
+    "service_name": "Envío Estándar",
+    "cost": 2500,
+    "carrier": "ZNVA",
+    "carrier_shipment_id": "123456",
+    "carrier_status": "in_transit",
+    "tracking_id": "TRACK123",
+    "status": "en_transito",
+    "address": {
+      "name": "Juan Pérez",
+      "street": "Av. Corrientes 1234",
+      "city": "Buenos Aires",
+      "province": "Buenos Aires",
+      "postal_code": "C1043AAZ",
+      "country": "AR",
+      "phone": "+54 11 1234-5678"
+    },
+    "estimated_delivery": "3-5",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T14:20:00Z",
+    "history": [
+      {
+        "status": "pendiente",
+        "timestamp": "2024-01-15T10:30:00Z",
+        "notes": "Shipment created"
+      },
+      {
+        "status": "en_transito",
+        "timestamp": "2024-01-15T14:20:00Z",
+        "notes": "Picked up by carrier"
+      }
+    ]
+  }
+}
+```
+
+### Common Shipping Functions
+
+**Carrier Configuration:**
+```php
+get_carrier_config($carrier_tag)  // Get config for a specific carrier
+get_all_carriers()                 // List all configured carriers
+```
+
+**Zipnova API:**
+```php
+// Get shipping quotes
+zipnova_get_quotes($destination, $items, $value)
+
+// Create shipment
+zipnova_create_shipment($data)
+
+// Get shipment status
+zipnova_get_shipment($shipment_id)
+
+// Cancel shipment
+zipnova_cancel_shipment($shipment_id)
+
+// Test API connection
+zipnova_test_connection()
+```
+
+**Helper Functions:**
+```php
+// Calculate delivery time from ISO 8601 duration
+calculate_delivery_days($delivery_time)  // e.g., "P3DT2H" → "3-5 días"
+
+// Parse ISO 8601 duration to days
+parse_iso8601_duration_to_days($duration)
+
+// Build packages from cart items
+zipnova_build_packages_from_cart($cart_items)
+
+// Calculate cart metrics
+zipnova_calculate_cart_weight($cart_items)
+zipnova_calculate_cart_dimensions($cart_items)
+zipnova_calculate_cart_value($cart_items, $currency)
+
+// Status mapping
+map_carrier_status_to_base($type, $status)  // Map carrier status → base status
+get_status_label($status)                   // Get human-readable label
+
+// Render status HTML
+render_shipping_status($status)
+```
+
+**Logging:**
+```php
+zipnova_log($message, $level, $context)           // Log events
+zipnova_save_response_json($response, $endpoint)  // Save debug JSON
+```
+
+### New Vertical Checkout (`checkout-new.php`)
+
+**Features:**
+- Vertical responsive layout (2-column on desktop, stacked on mobile)
+- Step-by-step validation (blocked until previous steps complete)
+- Delivery method selection (pickup vs shipping)
+- Real-time shipping quotes from Zipnova
+- Automatic weight/dimension calculation from cart
+- Shipping cost integration in total
+- Session timeout (1 hour)
+- Multi-currency support (ARS/USD)
+- MercadoPago integration with shipping cost included
+
+**Shipping Calculation:**
+- Weight from product data or defaults (500g per item if missing)
+- Dimensions from product data or defaults (20×15×10 cm if missing)
+- Declared value = total cart value in ARS
+- Automatic package consolidation
+
+**Flow:**
+1. Select delivery method (retiro/envío)
+2. If envío → Enter shipping address
+3. Click "Cotizar Envío" → Get real-time quotes from Zipnova
+4. Select shipping service → Cost added to total
+5. Complete customer info
+6. Proceed to MercadoPago payment (includes shipping cost)
+
+### API Endpoints
+
+**Shipping API (`/api/shipping`):**
+
+```php
+// Get quotes
+GET  /api/shipping?action=quotes&postal_code=1234&city=...
+POST /api/shipping (with full address + cart data)
+
+// Create shipment
+POST /api/shipping?action=create
+
+// Track shipment
+GET  /api/shipping?action=track&id=SHIPMENT_ID
+
+// Webhook (for carrier status updates)
+POST /api/shipping (with webhook signature)
+```
+
+### Admin Shipment Management
+
+**Pending Shipments (`envios-pendientes.php`):**
+- List all pending shipments
+- Filter by status, reference, date
+- Create shipment in carrier system
+- Cancel shipment
+- View tracking details
+- Export to CSV
+
+**Archived Shipments (`envios-archivo.php`):**
+- Historical record of completed/cancelled shipments
+- Same filters and export options
+
+### Security Features
+
+**Zipnova API:**
+- HTTP Basic Authentication (client_id:client_secret)
+- Retry logic with exponential backoff (max 3 retries)
+- Request timeout (30 seconds default)
+- Rate limiting
+- Webhook signature validation
+- Detailed logging of all requests/responses
+
+**Data Validation:**
+- Address validation (required fields, postal code format)
+- Weight/dimension validation
+- Package value validation
+- Service availability checks
+
+### Future Carrier Integration
+
+The architecture is ready for:
+- **Andreani** (tag: ANDR)
+- **Correo Argentino** (tag: OCAS)
+- **DHL** (tag: DHLE)
+- Custom carriers with adapter pattern
+
+**Adding a new carrier:**
+1. Create carrier config in `shipping.json`
+2. Implement carrier-specific functions in `carriers.php`
+3. Map carrier statuses to base statuses
+4. Add to admin UI in `config-shipping.php`
+
+## API Endpoints
+
+The system exposes several API endpoints under `/api/`:
+
+### Shipping API
+- **`/api/shipping`** - Shipping operations (quotes, create, track, webhook)
+  - `?action=quotes` - Get shipping quotes
+  - `?action=create` - Create shipment
+  - `?action=track&id=ID` - Track shipment
+
+### Product API
+- **`/api/get-products`** - Get product list (with filters)
+- **`/api/update-products-order`** - Update product display order
+
+### Order API
+- **`/api/get-order`** - Get active order details
+- **`/api/get-archived-order`** - Get archived order details
+- **`/api/cancel-order`** - Cancel order
+- **`/api/export-orders`** - Export orders to CSV
+- **`/api/export-archived-orders`** - Export archived orders
+
+### Coupon & Promotion API
+- **`/api/validate-coupon`** - Validate coupon code
+- **`/api/get-promotion`** - Get active promotion details
+
+### Payment API
+- **`/api/crear-preferencia-mp`** - Create MercadoPago payment preference
+
+### Utility API
+- **`/api/sync-cart`** - Sync cart between sessions
+- **`/api/create-short-link`** - Create short link for sharing
+- **`/api/get-shared-wishlist`** - Get shared wishlist
+- **`/api/update-exchange-rate`** - Update currency exchange rate
+- **`/api/send-test-email`** - Send test email (admin)
+- **`/api/send-telegram-test`** - Send test Telegram message (admin)
+
+**API Response Format:**
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "Optional message",
+  "error": "Error message if success=false"
+}
+```
+
+**Authentication:**
+- Admin APIs require active session (`require_admin()`)
+- Public APIs use rate limiting
+- CSRF tokens for state-changing operations
+
 ## Admin Panel Structure
 
 ### Admin Pages Location
 
 All admin pages are in `app/pages/admin/`:
 
-- Dashboard: `index.php`
-- Products: `productos-listado.php`, `productos-nuevo.php`, `productos-editar.php`
-- Sales: `ventas.php`, `archivo-ventas.php`
-- Coupons: `cupones-listado.php`, `cupones-nuevo.php`, `cupones-editar.php`
-- Promotions: `promociones-listado.php`, `promociones-nuevo.php`
-- Config: `config-sitio.php`, `config-payment.php`, `config-themes.php`
+**Dashboard:**
+- `index.php` - Main dashboard with stats
+
+**Products:**
+- `productos-listado.php` - Product listing
+- `productos-nuevo.php` - Create new product
+- `productos-editar.php` - Edit product
+- `productos-archivados.php` - Archived products
+- `productos.php` - Legacy product page
+
+**Sales:**
+- `ventas.php` - Active sales/orders
+- `archivo-ventas.php` - Archived sales
+
+**Shipping:** (NEW)
+- `envios-pendientes.php` - Pending shipments management
+- `envios-archivo.php` - Archived shipments
+
+**Coupons:**
+- `cupones-listado.php` - Coupon listing
+- `cupones-nuevo.php` - Create new coupon
+- `cupones-editar.php` - Edit coupon
+- `cupones-archivados.php` - Archived coupons
+
+**Promotions:**
+- `promociones-listado.php` - Promotion listing
+- `promociones-nuevo.php` - Create new promotion
+- `promociones-editar.php` - Edit promotion
+- `promociones-archivados.php` - Archived promotions
+
+**Reviews:**
+- `reviews-listado.php` - Product reviews management
+
+**Configuration:**
+- `config-sitio.php` - Site settings (name, logo, contact)
+- `config-payment.php` - MercadoPago configuration
+- `config-shipping.php` - **Shipping carriers config (Zipnova)**
+- `config-themes.php` - Theme selection and customization
+- `config-moneda.php` - Currency settings
+- `config-analytics.php` - Analytics configuration
+- `config-carrusel.php` - Carousel settings
+- `config-dashboard.php` - Dashboard widgets
+- `config-footer.php` - Footer content
+- `config-hero.php` - Hero section
+- `config-mantenimiento.php` - Maintenance mode
+- `config-sistema.php` - System settings
+- `config-productos-heading.php` - Products section heading
+- `config-rutas-sistema.php` - System routes configuration
+- `config-limpieza-imagenes.php` - Image cleanup utilities
+- `config-backup.php` - Backup management
+
+**Utilities:**
+- `generador-themes.php` - Theme generator/customizer
+- `notificaciones.php` - Notifications management
+- `reprocesar-pago-mp.php` - Reprocess MercadoPago payment
 
 ### Admin Components
 
 - **Header**: `app/includes/admin/header.php`
+- **Sidebar**: `app/includes/admin/sidebar.php`
 - **Modal**: `app/includes/admin/modal.php`
 - **Styles**: `app/includes/admin/styles.php`
 - **Common Styles**: `app/includes/admin/admin-common-styles.php`
+- **Session Monitor**: `app/includes/admin/session-monitor.js`
+- **Unsaved Changes Warning**: `app/includes/admin/unsaved-changes-warning.js`
 
 ## Theme System
 
@@ -894,14 +1352,34 @@ Themes are located in `public_html/assets/themes/` with the following structure:
 
 ```
 themes/
-├── archivo/
-│   ├── bold/theme.json
-│   ├── elegant/theme.json
-│   └── minimal/theme.json
-└── classic/theme.json
+├── _base/                  # Base CSS variables
+├── classic/                # Classic elegant theme
+│   ├── theme.json
+│   ├── theme.css
+│   └── variables.css
+├── modern/                 # Modern minimalist theme
+│   ├── theme.json
+│   ├── theme.css
+│   └── variables.css
+├── modern-compact/         # Compact modern theme (NEW)
+│   ├── theme.json
+│   ├── theme.css
+│   └── variables.css
+└── archivo/                # Archive of multiple theme variants
+    ├── minimal/
+    ├── bold/
+    ├── elegant/
+    ├── dark/
+    ├── luxury/
+    ├── vibrant/
+    └── fresh/
 ```
 
 Active theme is set in `app/config/theme.json`.
+
+**Theme System Functions:**
+- `render_theme_css($theme_name)` - Load theme CSS dynamically
+- Theme generator available at: `admin/?page=generador-themes`
 
 ## Common Utilities
 
