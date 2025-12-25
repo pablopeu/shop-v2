@@ -293,19 +293,27 @@ export function viewOrder(orderId) {
                     ${order.status_history && order.status_history.length > 0 ?
                         order.status_history.map((change, index) => `
                             <div style="background: white; padding: 12px; margin-bottom: ${index < order.status_history.length - 1 ? '10px' : '0'}; border-radius: 4px; border-left: 3px solid ${
-                                change.status === 'pending' ? '#FFA726' :
-                                change.status === 'cobrada' ? '#4CAF50' :
-                                change.status === 'shipped' ? '#2196F3' :
-                                change.status === 'delivered' ? '#4CAF50' :
-                                change.status === 'cancelled' || change.status === 'rechazada' ? '#f44336' : '#999'
+                                change.status === 'impago' ? '#FF9800' :
+                                change.status === 'pagado' ? '#4CAF50' :
+                                change.status === 'lista_retiro' ? '#00BCD4' :
+                                change.status === 'en_transito' ? '#2196F3' :
+                                change.status === 'en_reparto' ? '#03A9F4' :
+                                change.status === 'entregada' ? '#4CAF50' :
+                                change.status === 'fallida' ? '#FF5722' :
+                                change.status === 'devuelta' ? '#9C27B0' :
+                                change.status === 'cancelada' || change.status === 'rechazada' ? '#f44336' : '#999'
                             };">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                     <span style="font-weight: 600; color: #333;">
-                                        ${change.status === 'pending' ? '⏳ Pendiente' :
-                                          change.status === 'cobrada' ? '💰 Cobrada' :
-                                          change.status === 'shipped' ? '🚚 Enviado' :
-                                          change.status === 'delivered' ? '📦 Entregado' :
-                                          change.status === 'cancelled' ? '❌ Cancelado' :
+                                        ${change.status === 'impago' ? '💵 Impago' :
+                                          change.status === 'pagado' ? '✅ Pagado' :
+                                          change.status === 'lista_retiro' ? '📋 Lista para Retiro' :
+                                          change.status === 'en_transito' ? '🚚 En Tránsito' :
+                                          change.status === 'en_reparto' ? '🚴 En Reparto' :
+                                          change.status === 'entregada' ? '📦 Entregada' :
+                                          change.status === 'fallida' ? '❌ Fallida' :
+                                          change.status === 'devuelta' ? '↩️ Devuelta' :
+                                          change.status === 'cancelada' ? '🚫 Cancelada' :
                                           change.status === 'rechazada' ? '⛔ Rechazada' :
                                           change.status}
                                     </span>
@@ -330,26 +338,38 @@ export function viewOrder(orderId) {
         <div id="tab-status" class="modal-tab-content">
             <!-- Current Status Badge -->
             <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid ${
-                order.status === 'pending' ? '#FFA726' :
-                order.status === 'cobrada' ? '#4CAF50' :
-                order.status === 'shipped' ? '#2196F3' :
-                order.status === 'delivered' ? '#4CAF50' :
-                order.status === 'cancelled' || order.status === 'rechazada' ? '#f44336' : '#999'
+                order.status === 'impago' ? '#FF9800' :
+                order.status === 'pagado' ? '#4CAF50' :
+                order.status === 'lista_retiro' ? '#00BCD4' :
+                order.status === 'en_transito' ? '#2196F3' :
+                order.status === 'en_reparto' ? '#03A9F4' :
+                order.status === 'entregada' ? '#4CAF50' :
+                order.status === 'fallida' ? '#FF5722' :
+                order.status === 'devuelta' ? '#9C27B0' :
+                order.status === 'cancelada' || order.status === 'rechazada' ? '#f44336' : '#999'
             };">
                 <label style="margin-bottom: 10px; display: block;"><strong>📊 Estado Actual:</strong></label>
                 <div style="display: inline-block;">
                     <span style="padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; color: white; background: ${
-                        order.status === 'pending' ? '#FFA726' :
-                        order.status === 'cobrada' ? '#4CAF50' :
-                        order.status === 'shipped' ? '#2196F3' :
-                        order.status === 'delivered' ? '#4CAF50' :
-                        order.status === 'cancelled' || order.status === 'rechazada' ? '#f44336' : '#999'
+                        order.status === 'impago' ? '#FF9800' :
+                        order.status === 'pagado' ? '#4CAF50' :
+                        order.status === 'lista_retiro' ? '#00BCD4' :
+                        order.status === 'en_transito' ? '#2196F3' :
+                        order.status === 'en_reparto' ? '#03A9F4' :
+                        order.status === 'entregada' ? '#4CAF50' :
+                        order.status === 'fallida' ? '#FF5722' :
+                        order.status === 'devuelta' ? '#9C27B0' :
+                        order.status === 'cancelada' || order.status === 'rechazada' ? '#f44336' : '#999'
                     };">
-                        ${order.status === 'pending' ? '⏳ Pendiente' :
-                          order.status === 'cobrada' ? '💰 Cobrada' :
-                          order.status === 'shipped' ? '🚚 Enviado' :
-                          order.status === 'delivered' ? '📦 Entregado' :
-                          order.status === 'cancelled' ? '❌ Cancelado' :
+                        ${order.status === 'impago' ? '💵 Impago' :
+                          order.status === 'pagado' ? '✅ Pagado' :
+                          order.status === 'lista_retiro' ? '📋 Lista para Retiro' :
+                          order.status === 'en_transito' ? '🚚 En Tránsito' :
+                          order.status === 'en_reparto' ? '🚴 En Reparto' :
+                          order.status === 'entregada' ? '📦 Entregada' :
+                          order.status === 'fallida' ? '❌ Fallida' :
+                          order.status === 'devuelta' ? '↩️ Devuelta' :
+                          order.status === 'cancelada' ? '🚫 Cancelada' :
                           order.status === 'rechazada' ? '⛔ Rechazada' :
                           order.status.toUpperCase()}
                     </span>
@@ -364,11 +384,22 @@ export function viewOrder(orderId) {
                 <div class="form-group">
                     <label for="status"><strong>Cambiar Estado:</strong></label>
                     <select name="status" id="status" style="font-weight: 600;">
-                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>⏳ Pendiente</option>
-                        <option value="cobrada" ${order.status === 'cobrada' ? 'selected' : ''}>💰 Cobrada</option>
-                        <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>🚚 Enviado</option>
-                        <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>📦 Entregado</option>
-                        <option value="rechazada" ${order.status === 'rechazada' ? 'selected' : ''}>⛔ Rechazada</option>
+                        <optgroup label="Estados de Pago">
+                            <option value="impago" ${order.status === 'impago' ? 'selected' : ''}>💵 Impago</option>
+                            <option value="pagado" ${order.status === 'pagado' ? 'selected' : ''}>✅ Pagado</option>
+                        </optgroup>
+                        <optgroup label="Estados de Logística">
+                            <option value="lista_retiro" ${order.status === 'lista_retiro' ? 'selected' : ''}>📋 Lista para Retiro</option>
+                            <option value="en_transito" ${order.status === 'en_transito' ? 'selected' : ''}>🚚 En Tránsito</option>
+                            <option value="en_reparto" ${order.status === 'en_reparto' ? 'selected' : ''}>🚴 En Reparto</option>
+                            <option value="entregada" ${order.status === 'entregada' ? 'selected' : ''}>📦 Entregada</option>
+                        </optgroup>
+                        <optgroup label="Estados de Problema">
+                            <option value="fallida" ${order.status === 'fallida' ? 'selected' : ''}>❌ Fallida</option>
+                            <option value="devuelta" ${order.status === 'devuelta' ? 'selected' : ''}>↩️ Devuelta</option>
+                            <option value="cancelada" ${order.status === 'cancelada' ? 'selected' : ''}>🚫 Cancelada</option>
+                            <option value="rechazada" ${order.status === 'rechazada' ? 'selected' : ''}>⛔ Rechazada</option>
+                        </optgroup>
                     </select>
                 </div>
             </form>
