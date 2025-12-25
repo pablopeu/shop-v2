@@ -514,6 +514,128 @@ function zipnova_cancel_shipment($shipment_id) {
 }
 
 /**
+ * Obtiene la etiqueta de envío (PDF o imagen)
+ *
+ * NOTA: Esta función es un stub/esqueleto pendiente de implementación
+ * cuando se obtengan las credenciales de sandbox de Zipnova.
+ *
+ * El endpoint exacto puede variar según la documentación de Zipnova.
+ * Opciones típicas:
+ * - GET /shipments/{id}/label
+ * - GET /shipments/{id}/label/pdf
+ * - GET /shipments/{id}/documents
+ *
+ * @param string $shipment_id ID del envío en Zipnova
+ * @param string $format Formato deseado: 'pdf', 'png', 'zpl' (default: 'pdf')
+ * @return array ['success' => bool, 'data' => ['label_url' => string, 'format' => string], 'error' => string]
+ */
+function zipnova_get_label($shipment_id, $format = 'pdf') {
+    // TODO: Implementar cuando se tengan credenciales de sandbox
+
+    // Validar que el envío existe
+    $shipment = zipnova_load_shipment($shipment_id);
+    if (!$shipment) {
+        zipnova_log('Label Request Failed - Shipment Not Found', [
+            'shipment_id' => $shipment_id,
+            'error' => 'Envío no encontrado'
+        ]);
+
+        return [
+            'success' => false,
+            'error' => 'Envío no encontrado'
+        ];
+    }
+
+    // Validar que el envío está en un estado que permite generar etiqueta
+    // Típicamente solo se puede generar etiqueta si el envío fue creado exitosamente
+    $valid_statuses = ['pendiente', 'en_transito', 'en_reparto'];
+    if (!in_array($shipment['status'] ?? '', $valid_statuses)) {
+        zipnova_log('Label Request Failed - Invalid Status', [
+            'shipment_id' => $shipment_id,
+            'status' => $shipment['status'] ?? 'unknown',
+            'error' => 'El envío no está en un estado válido para generar etiqueta'
+        ]);
+
+        return [
+            'success' => false,
+            'error' => 'El envío debe estar pendiente o en tránsito para generar la etiqueta'
+        ];
+    }
+
+    // Verificar si ya tenemos una etiqueta guardada
+    if (isset($shipment['label_url']) && !empty($shipment['label_url'])) {
+        zipnova_log('Label Retrieved from Cache', [
+            'shipment_id' => $shipment_id,
+            'format' => $format
+        ]);
+
+        return [
+            'success' => true,
+            'data' => [
+                'label_url' => $shipment['label_url'],
+                'format' => $shipment['label_format'] ?? $format,
+                'cached' => true
+            ]
+        ];
+    }
+
+    // TODO: Cuando se implemente con credenciales reales, descomentar esto:
+    /*
+    // Endpoint según documentación de Zipnova (por confirmar)
+    $endpoint = '/shipments/' . $shipment_id . '/label';
+
+    // Algunos carriers permiten especificar formato en query params
+    $query_params = ['format' => $format];
+
+    $result = zipnova_api_request($endpoint . '?' . http_build_query($query_params), 'GET');
+
+    if ($result['success']) {
+        // Guardar URL de etiqueta en datos locales
+        $shipment['label_url'] = $result['data']['label_url'] ?? '';
+        $shipment['label_format'] = $format;
+        $shipment['label_generated_at'] = date('Y-m-d H:i:s');
+
+        zipnova_save_shipment($shipment_id, $shipment);
+
+        zipnova_log('Label Generated Successfully', [
+            'shipment_id' => $shipment_id,
+            'format' => $format,
+            'label_url' => $shipment['label_url']
+        ]);
+
+        return [
+            'success' => true,
+            'data' => [
+                'label_url' => $result['data']['label_url'],
+                'format' => $format,
+                'cached' => false
+            ]
+        ];
+    }
+
+    zipnova_log('Label Generation Failed', [
+        'shipment_id' => $shipment_id,
+        'error' => $result['error'] ?? 'Unknown error'
+    ]);
+
+    return $result;
+    */
+
+    // STUB: Retornar error temporal mientras se esperan credenciales
+    zipnova_log('Label Request - Stub Mode', [
+        'shipment_id' => $shipment_id,
+        'format' => $format,
+        'note' => 'Pendiente de credenciales de Zipnova sandbox'
+    ]);
+
+    return [
+        'success' => false,
+        'error' => 'Funcionalidad de etiquetas pendiente de configuración. Se requieren credenciales de Zipnova sandbox.',
+        'stub_mode' => true
+    ];
+}
+
+/**
  * Verifica la firma de un webhook
  *
  * @param string $payload JSON payload del webhook

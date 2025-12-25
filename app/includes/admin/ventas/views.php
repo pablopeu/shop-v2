@@ -164,13 +164,14 @@ function render_orders_table($orders, $filters, $status_labels) {
                     <th>Cotiz. $</th>
                     <th>Método de Pago</th>
                     <th>Estado</th>
+                    <th>Envío</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($orders)): ?>
                     <tr>
-                        <td colspan="10" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="11" style="text-align: center; padding: 40px; color: #999;">
                             No hay órdenes<?php echo $filters['status'] !== 'all' ? ' con este estado' : ''; ?>.
                         </td>
                     </tr>
@@ -250,6 +251,31 @@ function render_orders_table($orders, $filters, $status_labels) {
                                 <span class="status-badge" style="background: <?php echo $color; ?>;">
                                     <?php echo $label; ?>
                                 </span>
+                            </td>
+                            <td>
+                                <?php
+                                // Check if order has shipping
+                                $has_shipping = !empty($order['shipping']['carrier_shipment_id']);
+                                $shipment_id = $order['shipping']['carrier_shipment_id'] ?? '';
+                                $carrier = $order['shipping']['carrier'] ?? '';
+                                ?>
+                                <?php if ($has_shipping): ?>
+                                    <div style="display: flex; flex-direction: column; gap: 5px; align-items: center;">
+                                        <small style="color: #666; font-size: 11px;">
+                                            <?php echo htmlspecialchars($carrier); ?> #<?php echo htmlspecialchars(substr($shipment_id, -6)); ?>
+                                        </small>
+                                        <button type="button" class="btn btn-sm"
+                                                style="background: #667eea; color: white; font-size: 11px; padding: 4px 8px;"
+                                                data-action="printShippingLabel"
+                                                data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
+                                                data-shipment-id="<?php echo htmlspecialchars($shipment_id); ?>"
+                                                title="Imprimir etiqueta de envío">
+                                            🖨️ Etiqueta
+                                        </button>
+                                    </div>
+                                <?php else: ?>
+                                    <small style="color: #999;">-</small>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <div class="actions">

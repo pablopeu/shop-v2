@@ -340,6 +340,84 @@ $status_labels = [
                 window.showToast('📊 Exportando ' + orderIds.length + ' venta(s) a CSV...');
             }
         }
+
+        /**
+         * Solicita e imprime la etiqueta de envío
+         */
+        function printShippingLabel(event, element, params) {
+            const orderId = params?.orderId;
+            const shipmentId = params?.shipmentId;
+
+            if (!orderId && !shipmentId) {
+                if (window.showToast) {
+                    window.showToast('⚠️ Error: No se pudo identificar el envío');
+                }
+                return;
+            }
+
+            // Disable button and show loading state
+            if (element) {
+                element.disabled = true;
+                element.textContent = '⏳ Cargando...';
+            }
+
+            // Build API URL
+            const apiUrl = '<?php echo url('/api/?endpoint=print-shipping-label'); ?>' +
+                          (orderId ? '&order_id=' + encodeURIComponent(orderId) : '') +
+                          (shipmentId ? '&shipment_id=' + encodeURIComponent(shipmentId) : '') +
+                          '&format=pdf&action=download';
+
+            // Fetch label from API
+            fetch(apiUrl, {
+                method: 'GET',
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Open label URL in new tab for printing/download
+                    if (data.data.label_url) {
+                        window.open(data.data.label_url, '_blank');
+                        if (window.showToast) {
+                            window.showToast('✅ Etiqueta obtenida exitosamente');
+                        }
+                    } else {
+                        // If no direct URL, show modal with label preview
+                        // TODO: Implementar modal de vista previa
+                        if (window.showToast) {
+                            window.showToast('✅ Etiqueta generada');
+                        }
+                    }
+                } else {
+                    // Check if this is stub mode
+                    if (data.stub_mode) {
+                        if (window.showToast) {
+                            window.showToast('⚠️ ' + data.error);
+                        }
+                    } else {
+                        if (window.showToast) {
+                            window.showToast('❌ Error: ' + (data.error || 'No se pudo obtener la etiqueta'));
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching label:', error);
+                if (window.showToast) {
+                    window.showToast('❌ Error de conexión al obtener la etiqueta');
+                }
+            })
+            .finally(() => {
+                // Restore button state
+                if (element) {
+                    element.disabled = false;
+                    element.textContent = '🖨️ Etiqueta';
+                }
+            });
+        }
+
+        // Export for event delegation
+        window.printShippingLabel = printShippingLabel;
     </script>
 
     <!-- Modal Component -->

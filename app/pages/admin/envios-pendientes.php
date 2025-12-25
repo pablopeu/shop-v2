@@ -889,6 +889,16 @@ $user = get_logged_user();
                                                         data-action="viewOrder" data-order-id="<?php echo $order['id']; ?>">
                                                     👁️ Ver
                                                 </button>
+                                                <?php if (!empty($order['shipping']['carrier_shipment_id'])): ?>
+                                                    <button type="button" class="btn btn-sm"
+                                                            style="background: #667eea; color: white;"
+                                                            data-action="printShippingLabel"
+                                                            data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
+                                                            data-shipment-id="<?php echo htmlspecialchars($order['shipping']['carrier_shipment_id']); ?>"
+                                                            title="Imprimir etiqueta de envío">
+                                                        🖨️ Etiqueta
+                                                    </button>
+                                                <?php endif; ?>
                                                 <button type="button" class="btn btn-danger btn-sm"
                                                         data-action="confirmArchiveOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
                                                     📦 Archivar
@@ -1372,6 +1382,70 @@ $user = get_logged_user();
                 if (id) return _exportSingleOrder(id, format);
             };
         })();
+
+        /**
+         * Solicita e imprime la etiqueta de envío
+         */
+        function printShippingLabel(event, element, params) {
+            const orderId = params?.orderId;
+            const shipmentId = params?.shipmentId;
+
+            if (!orderId && !shipmentId) {
+                showToast('⚠️ Error: No se pudo identificar el envío', 'warning');
+                return;
+            }
+
+            // Disable button and show loading state
+            if (element) {
+                element.disabled = true;
+                element.textContent = '⏳ Cargando...';
+            }
+
+            // Build API URL
+            const apiUrl = '<?php echo url('/api/?endpoint=print-shipping-label'); ?>' +
+                          (orderId ? '&order_id=' + encodeURIComponent(orderId) : '') +
+                          (shipmentId ? '&shipment_id=' + encodeURIComponent(shipmentId) : '') +
+                          '&format=pdf&action=download';
+
+            // Fetch label from API
+            fetch(apiUrl, {
+                method: 'GET',
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Open label URL in new tab for printing/download
+                    if (data.data.label_url) {
+                        window.open(data.data.label_url, '_blank');
+                        showToast('✅ Etiqueta obtenida exitosamente', 'success');
+                    } else {
+                        showToast('✅ Etiqueta generada', 'success');
+                    }
+                } else {
+                    // Check if this is stub mode
+                    if (data.stub_mode) {
+                        showToast('⚠️ ' + data.error, 'warning');
+                    } else {
+                        showToast('❌ Error: ' + (data.error || 'No se pudo obtener la etiqueta'), 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching label:', error);
+                showToast('❌ Error de conexión al obtener la etiqueta', 'error');
+            })
+            .finally(() => {
+                // Restore button state
+                if (element) {
+                    element.disabled = false;
+                    element.textContent = '🖨️ Etiqueta';
+                }
+            });
+        }
+
+        // Export for event delegation
+        window.printShippingLabel = printShippingLabel;
     </script>
 
     <!-- Event Delegation System for CSP -->
