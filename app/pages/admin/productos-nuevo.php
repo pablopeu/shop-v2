@@ -63,6 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
                     'stock_alert' => intval($_POST['stock_alert'] ?? 5),
                     'active' => isset($_POST['active']) ? true : false,
                     'pickup_only' => isset($_POST['pickup_only']) ? true : false,
+                    'weight' => floatval($_POST['weight'] ?? 500), // Default 500g
+                    'dimensions' => [
+                        'length' => floatval($_POST['length'] ?? 20),
+                        'width' => floatval($_POST['width'] ?? 15),
+                        'height' => floatval($_POST['height'] ?? 10)
+                    ],
                     'images' => $images,
                     'thumbnail' => $images[0], // First image is thumbnail
                     'seo' => [
@@ -268,6 +274,12 @@ $user = get_logged_user();
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 1rem;
         }
 
@@ -573,6 +585,40 @@ $user = get_logged_user();
                                 <label class="form-label" for="stock_alert">Alerta de Stock Bajo</label>
                                 <input type="number" id="stock_alert" name="stock_alert" class="form-control"
                                        value="<?php echo htmlspecialchars($_POST['stock_alert'] ?? '0'); ?>" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dimensions & Weight -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📐 Dimensiones y Peso</h2>
+                        </div>
+                        <p class="form-text" style="margin-bottom: 1rem;">Estos datos se usan para calcular gastos de envío.</p>
+                        <div class="form-group">
+                            <label class="form-label" for="weight">Peso (gramos)</label>
+                            <input type="number" id="weight" name="weight" class="form-control" step="1" min="0"
+                                   value="<?php echo htmlspecialchars($_POST['weight'] ?? '500'); ?>"
+                                   placeholder="500">
+                        </div>
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label class="form-label" for="length">Largo (cm)</label>
+                                <input type="number" id="length" name="length" class="form-control" step="0.1" min="0"
+                                       value="<?php echo htmlspecialchars($_POST['length'] ?? '20'); ?>"
+                                       placeholder="20">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="width">Ancho (cm)</label>
+                                <input type="number" id="width" name="width" class="form-control" step="0.1" min="0"
+                                       value="<?php echo htmlspecialchars($_POST['width'] ?? '15'); ?>"
+                                       placeholder="15">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="height">Alto (cm)</label>
+                                <input type="number" id="height" name="height" class="form-control" step="0.1" min="0"
+                                       value="<?php echo htmlspecialchars($_POST['height'] ?? '10'); ?>"
+                                       placeholder="10">
                             </div>
                         </div>
                     </div>

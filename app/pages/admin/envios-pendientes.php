@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
                     $success_count++;
                 }
             } elseif ($action === 'mark_sent') {
-                if (update_order_status($order_id, 'enviada', $_SESSION['username'])) {
+                if (update_order_status($order_id, 'en_transito', $_SESSION['username'])) {
                     $success_count++;
                 }
             } elseif ($action === 'mark_delivered') {
@@ -90,7 +90,7 @@ $all_orders = get_all_orders();
 
 // Filter only orders with shipping-related statuses (cobrada, enviada, entregada)
 $shipping_orders = array_filter($all_orders, function($order) {
-    return in_array($order['status'], ['cobrada', 'enviada', 'entregada']);
+    return in_array($order['status'], ['pendiente', 'en_transito', 'en_reparto', 'entregada', 'fallida', 'devuelta']);
 });
 
 // Apply filters
@@ -102,10 +102,10 @@ $search_query = $_GET['search'] ?? '';
 // Apply status filter
 if ($filter_status === 'all') {
     $orders = $shipping_orders;
-} elseif ($filter_status === 'cobrada') {
-    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'cobrada');
-} elseif ($filter_status === 'enviada') {
-    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'enviada');
+} elseif ($filter_status === 'pendiente') {
+    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'pendiente');
+} elseif ($filter_status === 'en_transito') {
+    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'en_transito');
 } elseif ($filter_status === 'entregada') {
     $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'entregada');
 } else {
@@ -148,8 +148,8 @@ usort($orders, function($a, $b) {
 
 // Calculate stats
 $total_orders = count($shipping_orders);
-$cobradas = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'cobrada'));
-$enviadas = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'enviada'));
+$pendientes = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'pendiente'));
+$en_transito = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'en_transito'));
 $entregadas = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'entregada'));
 
 // Get logged user
@@ -718,8 +718,8 @@ $user = get_logged_user();
                         <label for="filter">Estado</label>
                         <select id="filter" name="filter">
                             <option value="all" <?php echo $filter_status === 'all' ? 'selected' : ''; ?>>Todos</option>
-                            <option value="cobrada" <?php echo $filter_status === 'cobrada' ? 'selected' : ''; ?>>Cobrada</option>
-                            <option value="enviada" <?php echo $filter_status === 'enviada' ? 'selected' : ''; ?>>Enviada</option>
+                            <option value="pendiente" <?php echo $filter_status === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                            <option value="en_transito" <?php echo $filter_status === 'en_transito' ? 'selected' : ''; ?>>En Tránsito</option>
                             <option value="entregada" <?php echo $filter_status === 'entregada' ? 'selected' : ''; ?>>Entregada</option>
                         </select>
                     </div>
@@ -958,9 +958,12 @@ $user = get_logged_user();
                                     <span class="badge <?php echo $order['status']; ?>">
                                         <?php
                                             $status_labels = [
-                                                'cobrada' => 'Cobrada',
-                                                'enviada' => 'Enviada',
-                                                'entregada' => 'Entregada'
+                                                'pendiente' => 'Pendiente',
+                                                'en_transito' => 'En Tránsito',
+                                                'en_reparto' => 'En Reparto',
+                                                'entregada' => 'Entregada',
+                                                'fallida' => 'Fallida',
+                                                'devuelta' => 'Devuelta'
                                             ];
                                             echo $status_labels[$order['status']] ?? $order['status'];
                                         ?>

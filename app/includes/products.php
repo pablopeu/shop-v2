@@ -162,6 +162,12 @@ function create_product($data) {
         'rating_count' => 0,
         'active' => isset($data['active']) ? (bool)$data['active'] : true,
         'hide_when_out_of_stock' => isset($data['hide_when_out_of_stock']) ? (bool)$data['hide_when_out_of_stock'] : false,
+        'weight' => floatval($data['weight'] ?? 500),
+        'dimensions' => [
+            'length' => floatval($data['dimensions']['length'] ?? 20),
+            'width' => floatval($data['dimensions']['width'] ?? 15),
+            'height' => floatval($data['dimensions']['height'] ?? 10)
+        ],
         'order' => $max_order + 1,
         'created_at' => get_timestamp()
     ];
@@ -178,6 +184,13 @@ function create_product($data) {
         'stock_alert' => intval($data['stock_alert'] ?? 5),
         'active' => isset($data['active']) ? (bool)$data['active'] : true,
         'hide_when_out_of_stock' => isset($data['hide_when_out_of_stock']) ? (bool)$data['hide_when_out_of_stock'] : false,
+        'pickup_only' => isset($data['pickup_only']) ? (bool)$data['pickup_only'] : false,
+        'weight' => floatval($data['weight'] ?? 500),
+        'dimensions' => [
+            'length' => floatval($data['dimensions']['length'] ?? 20),
+            'width' => floatval($data['dimensions']['width'] ?? 15),
+            'height' => floatval($data['dimensions']['height'] ?? 10)
+        ],
         'seo' => [
             'title' => sanitize_input($data['seo']['title'] ?? $data['seo_title'] ?? $data['name'] . ' - Mi Tienda'),
             'description' => sanitize_input($data['seo']['description'] ?? $data['seo_description'] ?? ''),
@@ -295,6 +308,25 @@ function update_product($product_id, $data) {
 
     if (isset($data['pickup_only'])) {
         $product['pickup_only'] = (bool)$data['pickup_only'];
+    }
+
+    if (isset($data['weight'])) {
+        $product['weight'] = floatval($data['weight']);
+    }
+
+    if (isset($data['dimensions']) && is_array($data['dimensions'])) {
+        if (!isset($product['dimensions'])) {
+            $product['dimensions'] = [];
+        }
+        if (isset($data['dimensions']['length'])) {
+            $product['dimensions']['length'] = floatval($data['dimensions']['length']);
+        }
+        if (isset($data['dimensions']['width'])) {
+            $product['dimensions']['width'] = floatval($data['dimensions']['width']);
+        }
+        if (isset($data['dimensions']['height'])) {
+            $product['dimensions']['height'] = floatval($data['dimensions']['height']);
+        }
     }
 
     // Update images and thumbnail

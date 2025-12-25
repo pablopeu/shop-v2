@@ -286,10 +286,10 @@ function update_order_status($order_id, $new_status, $user = 'system') {
                 'user' => $user
             ];
 
-            // Reduce stock when changing to "cobrada" if not already reduced
-            if ($new_status === 'cobrada' && !($order['stock_reduced'] ?? false)) {
+            // Reduce stock when changing to "pendiente" (paid/confirmed) if not already reduced
+            if ($new_status === 'pendiente' && !($order['stock_reduced'] ?? false)) {
                 foreach ($order['items'] as $item) {
-                    update_stock($item['product_id'], -$item['quantity'], "Orden {$order['order_number']} marcada como cobrada por {$user}");
+                    update_stock($item['product_id'], -$item['quantity'], "Orden {$order['order_number']} marcada como pendiente (pago confirmado) por {$user}");
                 }
                 $order['stock_reduced'] = true;
 

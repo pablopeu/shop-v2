@@ -700,7 +700,8 @@ if ($notification_type === 'payment' || $notification_type === 'payments') {
 
         switch ($payment_status) {
             case 'approved':
-                $new_order_status = 'cobrada';
+                // Payment approved - order is now pending shipment (estado universal: pendiente)
+                $new_order_status = 'pendiente';
                 break;
 
             case 'authorized':
@@ -914,7 +915,7 @@ if ($notification_type === 'payment' || $notification_type === 'payments') {
             // Send notifications based on new status (outside lock)
             // Las notificaciones se pueden enviar fuera del lock crítico
 
-            if ($new_order_status === 'cobrada') {
+            if ($new_order_status === 'pendiente' && $payment_status === 'approved') {
                 // Payment approved - send to customer based on preference
                 $customer_notif_sent = false;
                 if (($updated_order['contact_preference'] ?? 'email') === 'telegram') {

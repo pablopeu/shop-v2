@@ -566,6 +566,7 @@ $user = get_logged_user();
                                     <th>Nombre</th>
                                     <th>Precio</th>
                                     <th>Stock</th>
+                                    <th>Peso/Dim</th>
                                     <th>Archivado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -573,7 +574,7 @@ $user = get_logged_user();
                             <tbody>
                                 <?php if (empty($archived_products)): ?>
                                     <tr>
-                                        <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                                        <td colspan="8" style="text-align: center; padding: 40px; color: #999;">
                                             No hay productos archivados.
                                             <a href="<?php echo url('/admin/?page=productos-listado'); ?>" style="color: #4CAF50;">Ir a productos activos</a>
                                         </td>
@@ -598,6 +599,16 @@ $user = get_logged_user();
                                             </td>
                                             <td><?php echo format_product_price($product, 'ARS'); ?></td>
                                             <td><?php echo $product['stock']; ?></td>
+                                            <td style="font-size: 0.85rem; color: #666;">
+                                                <?php
+                                                $weight = $product['weight'] ?? 500;
+                                                $length = $product['dimensions']['length'] ?? 20;
+                                                $width = $product['dimensions']['width'] ?? 15;
+                                                $height = $product['dimensions']['height'] ?? 10;
+                                                echo number_format($weight, 0) . 'g<br>';
+                                                echo number_format($length, 1) . '×' . number_format($width, 1) . '×' . number_format($height, 1) . 'cm';
+                                                ?>
+                                            </td>
                                             <td>
                                                 <span class="badge archived">Archivado</span><br>
                                                 <small style="color: #999;">

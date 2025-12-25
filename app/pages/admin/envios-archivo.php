@@ -115,8 +115,8 @@ usort($orders, function($a, $b) {
 
 // Calculate stats
 $total_archived = count($all_archived);
-$cobradas = count(array_filter($all_archived, fn($o) => $o['status'] === 'cobrada'));
-$enviadas = count(array_filter($all_archived, fn($o) => $o['status'] === 'enviada'));
+$pendientes = count(array_filter($all_archived, fn($o) => $o['status'] === 'pendiente'));
+$en_transito = count(array_filter($all_archived, fn($o) => $o['status'] === 'en_transito'));
 $entregadas = count(array_filter($all_archived, fn($o) => $o['status'] === 'entregada'));
 
 // Get logged user
@@ -794,9 +794,12 @@ $user = get_logged_user();
                                                 <?php
                                                     $status_labels = [
                                                         'pending' => 'Pendiente',
-                                                        'cobrada' => 'Cobrada',
-                                                        'enviada' => 'Enviada',
+                                                        'pendiente' => 'Pendiente',
+                                                        'en_transito' => 'En Tránsito',
+                                                        'en_reparto' => 'En Reparto',
                                                         'entregada' => 'Entregada',
+                                                        'fallida' => 'Fallida',
+                                                        'devuelta' => 'Devuelta',
                                                         'cancelada' => 'Cancelada'
                                                     ];
                                                     echo $status_labels[$order['status']] ?? $order['status'];
@@ -878,9 +881,12 @@ $user = get_logged_user();
                                         <?php
                                             $status_labels = [
                                                 'pending' => 'Pendiente',
-                                                'cobrada' => 'Cobrada',
-                                                'enviada' => 'Enviada',
+                                                'pendiente' => 'Pendiente',
+                                                'en_transito' => 'En Tránsito',
+                                                'en_reparto' => 'En Reparto',
                                                 'entregada' => 'Entregada',
+                                                'fallida' => 'Fallida',
+                                                'devuelta' => 'Devuelta',
                                                 'cancelada' => 'Cancelada'
                                             ];
                                             echo $status_labels[$order['status']] ?? $order['status'];

@@ -72,13 +72,15 @@ $csrf_token = generate_csrf_token();
 // 5. Get logged user info
 $user = get_logged_user();
 
-// 6. Status labels for UI display
+// 6. Status labels for UI display (estados universales)
 $status_labels = [
-    'pending' => ['label' => 'Pendiente', 'color' => '#FFA726'],
-    'cobrada' => ['label' => 'Cobrada', 'color' => '#4CAF50'],
-    'shipped' => ['label' => 'Enviado', 'color' => '#2196F3'],
-    'delivered' => ['label' => 'Entregado', 'color' => '#4CAF50'],
-    'cancelled' => ['label' => 'Cancelado', 'color' => '#f44336'],
+    'pendiente' => ['label' => 'Pendiente', 'color' => '#FFA726'],
+    'en_transito' => ['label' => 'En Tránsito', 'color' => '#2196F3'],
+    'en_reparto' => ['label' => 'En Reparto', 'color' => '#00BCD4'],
+    'entregada' => ['label' => 'Entregada', 'color' => '#4CAF50'],
+    'fallida' => ['label' => 'Fallida', 'color' => '#FF9800'],
+    'devuelta' => ['label' => 'Devuelta', 'color' => '#9C27B0'],
+    'cancelada' => ['label' => 'Cancelada', 'color' => '#f44336'],
     'rechazada' => ['label' => 'Rechazada', 'color' => '#f44336']
 ];
 
