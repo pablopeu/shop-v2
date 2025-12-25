@@ -115,7 +115,9 @@ usort($orders, function($a, $b) {
 
 // Calculate stats
 $total_archived = count($all_archived);
-$pendientes = count(array_filter($all_archived, fn($o) => $o['status'] === 'pendiente'));
+$impagos = count(array_filter($all_archived, fn($o) => $o['status'] === 'impago'));
+$pagados = count(array_filter($all_archived, fn($o) => $o['status'] === 'pagado'));
+$lista_retiro = count(array_filter($all_archived, fn($o) => $o['status'] === 'lista_retiro'));
 $en_transito = count(array_filter($all_archived, fn($o) => $o['status'] === 'en_transito'));
 $entregadas = count(array_filter($all_archived, fn($o) => $o['status'] === 'entregada'));
 
@@ -793,14 +795,16 @@ $user = get_logged_user();
                                             <span class="badge <?php echo $order['status']; ?>">
                                                 <?php
                                                     $status_labels = [
-                                                        'pending' => 'Pendiente',
-                                                        'pendiente' => 'Pendiente',
+                                                        'impago' => 'Impago',
+                                                        'pagado' => 'Pagado',
+                                                        'lista_retiro' => 'Lista para Retiro',
                                                         'en_transito' => 'En Tránsito',
                                                         'en_reparto' => 'En Reparto',
                                                         'entregada' => 'Entregada',
                                                         'fallida' => 'Fallida',
                                                         'devuelta' => 'Devuelta',
-                                                        'cancelada' => 'Cancelada'
+                                                        'cancelada' => 'Cancelada',
+                                                        'rechazada' => 'Rechazada'
                                                     ];
                                                     echo $status_labels[$order['status']] ?? $order['status'];
                                                 ?>
@@ -880,14 +884,16 @@ $user = get_logged_user();
                                     <span class="badge <?php echo $order['status']; ?>">
                                         <?php
                                             $status_labels = [
-                                                'pending' => 'Pendiente',
-                                                'pendiente' => 'Pendiente',
+                                                'impago' => 'Impago',
+                                                'pagado' => 'Pagado',
+                                                'lista_retiro' => 'Lista para Retiro',
                                                 'en_transito' => 'En Tránsito',
                                                 'en_reparto' => 'En Reparto',
                                                 'entregada' => 'Entregada',
                                                 'fallida' => 'Fallida',
                                                 'devuelta' => 'Devuelta',
-                                                'cancelada' => 'Cancelada'
+                                                'cancelada' => 'Cancelada',
+                                                'rechazada' => 'Rechazada'
                                             ];
                                             echo $status_labels[$order['status']] ?? $order['status'];
                                         ?>

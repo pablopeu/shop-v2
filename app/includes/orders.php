@@ -203,10 +203,10 @@ function create_order($order_data) {
         'coupon_code' => $order_data['coupon_code'] ?? null,
         'shipping_cost' => $order_data['shipping_cost'] ?? 0,
         'total' => $order_data['total'],
-        'status' => 'pending',
+        'status' => 'impago',
         'status_history' => [
             [
-                'status' => 'pending',
+                'status' => 'impago',
                 'date' => $timestamp,
                 'user' => 'system'
             ]
@@ -286,10 +286,10 @@ function update_order_status($order_id, $new_status, $user = 'system') {
                 'user' => $user
             ];
 
-            // Reduce stock when changing to "pendiente" (paid/confirmed) if not already reduced
-            if ($new_status === 'pendiente' && !($order['stock_reduced'] ?? false)) {
+            // Reduce stock when changing to "pagado" (payment confirmed) if not already reduced
+            if ($new_status === 'pagado' && !($order['stock_reduced'] ?? false)) {
                 foreach ($order['items'] as $item) {
-                    update_stock($item['product_id'], -$item['quantity'], "Orden {$order['order_number']} marcada como pendiente (pago confirmado) por {$user}");
+                    update_stock($item['product_id'], -$item['quantity'], "Orden {$order['order_number']} marcada como pagado (pago confirmado) por {$user}");
                 }
                 $order['stock_reduced'] = true;
 

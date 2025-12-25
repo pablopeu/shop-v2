@@ -88,9 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
 // Get all orders
 $all_orders = get_all_orders();
 
-// Filter only orders with shipping-related statuses (cobrada, enviada, entregada)
+// Filter only orders with shipping-related statuses
 $shipping_orders = array_filter($all_orders, function($order) {
-    return in_array($order['status'], ['pendiente', 'en_transito', 'en_reparto', 'entregada', 'fallida', 'devuelta']);
+    return in_array($order['status'], ['impago', 'pagado', 'lista_retiro', 'en_transito', 'en_reparto', 'entregada', 'fallida', 'devuelta']);
 });
 
 // Apply filters
@@ -102,8 +102,12 @@ $search_query = $_GET['search'] ?? '';
 // Apply status filter
 if ($filter_status === 'all') {
     $orders = $shipping_orders;
-} elseif ($filter_status === 'pendiente') {
-    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'pendiente');
+} elseif ($filter_status === 'impago') {
+    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'impago');
+} elseif ($filter_status === 'pagado') {
+    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'pagado');
+} elseif ($filter_status === 'lista_retiro') {
+    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'lista_retiro');
 } elseif ($filter_status === 'en_transito') {
     $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'en_transito');
 } elseif ($filter_status === 'entregada') {
@@ -148,7 +152,9 @@ usort($orders, function($a, $b) {
 
 // Calculate stats
 $total_orders = count($shipping_orders);
-$pendientes = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'pendiente'));
+$impagos = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'impago'));
+$pagados = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'pagado'));
+$lista_retiro = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'lista_retiro'));
 $en_transito = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'en_transito'));
 $entregadas = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'entregada'));
 
@@ -718,7 +724,9 @@ $user = get_logged_user();
                         <label for="filter">Estado</label>
                         <select id="filter" name="filter">
                             <option value="all" <?php echo $filter_status === 'all' ? 'selected' : ''; ?>>Todos</option>
-                            <option value="pendiente" <?php echo $filter_status === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                            <option value="impago" <?php echo $filter_status === 'impago' ? 'selected' : ''; ?>>Impago</option>
+                            <option value="pagado" <?php echo $filter_status === 'pagado' ? 'selected' : ''; ?>>Pagado</option>
+                            <option value="lista_retiro" <?php echo $filter_status === 'lista_retiro' ? 'selected' : ''; ?>>Lista para Retiro</option>
                             <option value="en_transito" <?php echo $filter_status === 'en_transito' ? 'selected' : ''; ?>>En Tránsito</option>
                             <option value="entregada" <?php echo $filter_status === 'entregada' ? 'selected' : ''; ?>>Entregada</option>
                         </select>
@@ -958,7 +966,9 @@ $user = get_logged_user();
                                     <span class="badge <?php echo $order['status']; ?>">
                                         <?php
                                             $status_labels = [
-                                                'pendiente' => 'Pendiente',
+                                                'impago' => 'Impago',
+                                                'pagado' => 'Pagado',
+                                                'lista_retiro' => 'Lista para Retiro',
                                                 'en_transito' => 'En Tránsito',
                                                 'en_reparto' => 'En Reparto',
                                                 'entregada' => 'Entregada',

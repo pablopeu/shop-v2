@@ -74,11 +74,18 @@ $user = get_logged_user();
 
 // 6. Status labels for UI display (estados universales)
 $status_labels = [
-    'pendiente' => ['label' => 'Pendiente', 'color' => '#FFA726'],
+    // Estados de pago
+    'impago' => ['label' => 'Impago', 'color' => '#FF9800'],
+    'pagado' => ['label' => 'Pagado', 'color' => '#4CAF50'],
+
+    // Estados de logística
+    'lista_retiro' => ['label' => 'Lista para Retiro', 'color' => '#00BCD4'],
     'en_transito' => ['label' => 'En Tránsito', 'color' => '#2196F3'],
-    'en_reparto' => ['label' => 'En Reparto', 'color' => '#00BCD4'],
+    'en_reparto' => ['label' => 'En Reparto', 'color' => '#03A9F4'],
     'entregada' => ['label' => 'Entregada', 'color' => '#4CAF50'],
-    'fallida' => ['label' => 'Fallida', 'color' => '#FF9800'],
+
+    // Estados de problema
+    'fallida' => ['label' => 'Fallida', 'color' => '#FF5722'],
     'devuelta' => ['label' => 'Devuelta', 'color' => '#9C27B0'],
     'cancelada' => ['label' => 'Cancelada', 'color' => '#f44336'],
     'rechazada' => ['label' => 'Rechazada', 'color' => '#f44336']
