@@ -38,22 +38,22 @@ function handle_order_actions() {
         if (update_order_status($order_id, $new_status, $_SESSION['username'])) {
             $result['message'] = 'Estado actualizado exitosamente';
 
-            // Send notification when order is marked as shipped
-            if ($new_status === 'shipped') {
+            // Send notification when order is marked as in transit
+            if ($new_status === 'en_transito') {
                 $updated_order = get_order_by_id($order_id);
                 if ($updated_order && !empty($updated_order['customer_email'])) {
                     send_order_shipped_email($updated_order);
                 }
             }
 
-            // Send notification when order is marked as cobrada (paid)
-            if ($new_status === 'cobrada') {
+            // Send notification when order is marked as pagado (paid)
+            if ($new_status === 'pagado') {
                 $updated_order = get_order_by_id($order_id);
                 if ($updated_order) {
                     // Send notification based on customer's contact preference
                     $contact_preference = $updated_order['contact_preference'] ?? 'email';
 
-                    error_log("Order {$order_id} marked as cobrada. Contact preference: {$contact_preference}");
+                    error_log("Order {$order_id} marked as pagado. Contact preference: {$contact_preference}");
 
                     if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
                         // Send via Telegram
@@ -130,12 +130,12 @@ function handle_order_actions() {
                     if (cancel_order($order_id, 'Cancelado en masa por admin', $_SESSION['username'])) {
                         $success_count++;
                     }
-                } elseif (in_array($action, ['pending', 'cobrada', 'shipped', 'delivered'])) {
+                } elseif (in_array($action, ['impago', 'pagado', 'lista_retiro', 'en_transito', 'en_reparto', 'entregada', 'cancelada'])) {
                     if (update_order_status($order_id, $action, $_SESSION['username'])) {
                         $success_count++;
 
-                        // Send email notification when order is marked as shipped
-                        if ($action === 'shipped') {
+                        // Send email notification when order is marked as in transit
+                        if ($action === 'en_transito') {
                             $updated_order = get_order_by_id($order_id);
                             if ($updated_order && !empty($updated_order['customer_email'])) {
                                 send_order_shipped_email($updated_order);
