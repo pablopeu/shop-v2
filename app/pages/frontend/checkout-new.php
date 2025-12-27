@@ -2382,6 +2382,15 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         function submitFormWithPaymentMethod(paymentMethod) {
             const form = document.getElementById('checkout-form');
 
+            // DEBUG: Verificar valores de campos de shipping antes de enviar
+            const shippingServiceId = document.getElementById('shipping_service_id')?.value;
+            const shippingRateId = document.getElementById('shipping_rate_id')?.value;
+            const shippingCarrierName = document.getElementById('shipping_carrier_name')?.value;
+            console.log('📤 Enviando formulario con shipping data:');
+            console.log('  - shipping_service_id:', shippingServiceId || 'EMPTY');
+            console.log('  - shipping_rate_id:', shippingRateId || 'EMPTY');
+            console.log('  - shipping_carrier_name:', shippingCarrierName || 'EMPTY');
+
             // Remove any existing place_order inputs to avoid duplicates
             const existingInputs = form.querySelectorAll('input[name="place_order"]');
             existingInputs.forEach(input => input.remove());

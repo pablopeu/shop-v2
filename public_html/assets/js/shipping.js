@@ -318,6 +318,7 @@ console.log('📦 shipping.js: Archivo cargado');
      * Handle quote selection
      */
     function handleQuoteSelection(quote) {
+        console.log('🚢 handleQuoteSelection called with quote:', quote);
         selectedShippingService = quote.service_id;
         shippingCost = parseFloat(quote.cost) || 0;
 
@@ -326,6 +327,8 @@ console.log('📦 shipping.js: Archivo cargado');
         setHiddenField('shipping_cost', shippingCost);
         setHiddenField('shipping_estimated_days', quote.estimated_days || '');
         setHiddenField('shipping_service_name', quote.service_name || '');
+
+        console.log('✅ Campos básicos llenados - service_id:', selectedShippingService, 'cost:', shippingCost);
 
         // IDs de servicio
         setHiddenField('shipping_service_type_id', quote.service_type_id || '');
