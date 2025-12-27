@@ -168,7 +168,7 @@ try {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'peu.net';
     $base_url = $protocol . '://' . $host . url('');
-    $return_url = $base_url . '/checkout-return?order=' . $order_id . '&token=' . $tracking_token;
+    $return_url = $base_url . '/gracias?order=' . $order_id . '&token=' . $tracking_token;
 
     // Datos de la preferencia
     $preference_data = [
