@@ -284,7 +284,8 @@
 
         // Set content
         title.textContent = options.title || 'Confirmar Acción';
-        message.textContent = options.message || '¿Estás seguro?';
+        // Use innerHTML to allow HTML formatting (like <strong>, <br>, etc.)
+        message.innerHTML = options.message || '¿Estás seguro?';
 
         // Set details (optional)
         if (options.details) {
