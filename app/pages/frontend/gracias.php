@@ -492,12 +492,15 @@ if ($is_pending) {
         }
 
         // Wrappers for event delegation
+        // Save original functions before overwriting
+        const _retryPayment = retryPayment;
         window.retryPayment = function(event, element, params) {
-            return retryPayment();
+            return _retryPayment();
         };
 
+        const _closeMercadopagoModal = closeMercadopagoModal;
         window.closeMercadopagoModal = function(event, element, params) {
-            return closeMercadopagoModal();
+            return _closeMercadopagoModal();
         };
     </script>
 
