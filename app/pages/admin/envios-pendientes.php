@@ -949,11 +949,15 @@ $user = get_logged_user();
                                                 $has_service_id = !empty($order['shipping_service_id']);
                                                 $delivery_method = $order['delivery_method'] ?? '';
 
-                                                // Logging temporal para debug
-                                                error_log("DEBUG Envíos - Order: {$order['id']}, has_shipment: " . ($has_shipment ? 'YES' : 'NO') .
-                                                         ", has_rate_id: " . ($has_rate_id ? 'YES' : 'NO') .
-                                                         ", has_service_id: " . ($has_service_id ? 'YES' : 'NO') .
-                                                         ", delivery_method: $delivery_method");
+                                                // Logging temporal EXTENDIDO para debug
+                                                error_log("DEBUG Envíos - Order: {$order['id']}");
+                                                error_log("  - has_shipment: " . ($has_shipment ? 'YES' : 'NO'));
+                                                error_log("  - has_rate_id: " . ($has_rate_id ? 'YES' : 'NO'));
+                                                error_log("  - has_service_id: " . ($has_service_id ? 'YES' : 'NO'));
+                                                error_log("  - delivery_method: $delivery_method");
+                                                error_log("  - shipping_quote_data: " . json_encode($order['shipping_quote_data'] ?? null));
+                                                error_log("  - shipping_service_id: " . ($order['shipping_service_id'] ?? 'NULL'));
+                                                error_log("  - shipping keys: " . json_encode(array_keys($order)));
                                                 ?>
 
                                                 <?php if ($has_shipment): ?>
