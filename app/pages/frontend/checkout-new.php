@@ -2197,7 +2197,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
             showModal({
                 title: '⚠️ Importante: Stock no reservado',
-                message: `Has elegido pagar con "${paymentLabel}". Tu pedido será confirmado, pero <strong>los productos no quedan reservados hasta que se confirme el pago</strong>.`,
+                message: `Has elegido pagar con "<strong>${paymentLabel}</strong>". Tu pedido será confirmado, pero <strong>los productos no quedan reservados hasta que se confirme el pago</strong>.`,
                 details: `
                     <div style="text-align: left; margin-top: 15px;">
                         <p style="margin-bottom: 10px;"><strong>Esto significa que:</strong></p>
@@ -2216,13 +2216,18 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 confirmType: 'primary',
                 cancelText: '✅ Continuar con ' + paymentLabel,
                 onConfirm: function() {
-                    // Switch to Mercadopago
-                    document.getElementById('mercadopago-radio').checked = true;
-                    validateStep3();
-                    showMercadopagoModalWithoutOrder();
+                    // Switch to Mercadopago and show modal (WITHOUT submitting form)
+                    const mpRadio = document.getElementById('mercadopago-radio');
+                    if (mpRadio) {
+                        mpRadio.checked = true;
+                        validateStep3();
+                        // Show MP modal WITHOUT creating order yet
+                        // Order will be created when user clicks MP payment button
+                        showMercadopagoModalWithoutOrder();
+                    }
                 },
                 onCancel: function() {
-                    // Continue with selected payment method
+                    // Continue with selected payment method - submit form to create order
                     submitFormWithPaymentMethod(paymentMethod);
                 }
             });
