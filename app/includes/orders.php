@@ -53,31 +53,15 @@ function get_order_by_token($token) {
 }
 
 /**
- * Generate order number
- * @return string Order number in format ORD-YYYY-XXXXX
+ * Generate order number (internal - NO escribe al archivo)
+ * Esta función solo calcula el próximo número, NO incrementa el contador
+ * El contador se incrementa en create_order() bajo file lock
+ *
+ * @param array $data Datos del archivo orders.json
+ * @return array ['number' => 'ORD-2025-00001', 'counter_value' => 1]
  */
-function generate_order_number() {
-    $orders_file = APP_PATH . '/data/orders.json';
+function calculate_next_order_number($data) {
     $year = date('Y');
-
-    // Open file with exclusive lock to prevent race conditions
-    $fp = fopen($orders_file, 'c+');
-    if (!$fp) {
-        error_log("Failed to open orders file for order number generation");
-        // Fallback: generate with timestamp to avoid collision
-        return sprintf("ORD-%s-%s", $year, substr(md5(microtime(true)), 0, 5));
-    }
-
-    // Acquire exclusive lock (blocks until available)
-    if (!flock($fp, LOCK_EX)) {
-        fclose($fp);
-        error_log("Failed to acquire lock for order number generation");
-        return sprintf("ORD-%s-%s", $year, substr(md5(microtime(true)), 0, 5));
-    }
-
-    // Read current data
-    $content = stream_get_contents($fp);
-    $data = $content ? json_decode($content, true) : [];
 
     // Inicializar estructura de contadores si no existe
     if (!isset($data['counters'])) {
@@ -100,21 +84,14 @@ function generate_order_number() {
         $data['counters'][$year] = $max_number;
     }
 
-    // Incrementar el contador (nunca decrementa)
-    $data['counters'][$year]++;
-    $next_number = $data['counters'][$year];
+    // Incrementar el contador
+    $next_counter = $data['counters'][$year] + 1;
+    $order_number = sprintf("ORD-%s-%05d", $year, $next_counter);
 
-    // Write updated data back to file
-    ftruncate($fp, 0);
-    rewind($fp);
-    fwrite($fp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    fflush($fp);
-
-    // Release lock and close file
-    flock($fp, LOCK_UN);
-    fclose($fp);
-
-    return sprintf("ORD-%s-%05d", $year, $next_number);
+    return [
+        'number' => $order_number,
+        'counter_value' => $next_counter
+    ];
 }
 
 /**
@@ -198,23 +175,42 @@ function create_order($order_data) {
         }
     }
 
-    // Generate order ID and number (ANTES de leer el archivo)
-    // generate_order_number() actualiza el contador en el archivo
+    // Generate order ID (but NOT order number yet)
     $order_id = generate_id('order-');
-    $order_number = generate_order_number();
 
-    // IMPORTANTE: Leer DESPUÉS de generate_order_number() para obtener el contador actualizado
-    $data = read_json($orders_file);
-
-    if (!isset($data['orders'])) {
-        $data = ['orders' => []];
+    // CRÍTICO: TODO bajo file lock para atomicidad
+    $fp = fopen($orders_file, 'c+');
+    if (!$fp) {
+        error_log("Failed to open orders file for order creation");
+        return ['error' => 'System error: Could not create order'];
     }
 
-    // CRÍTICO: Preservar el contador que generate_order_number() actualizó
-    // Si no existe en $data, no lo sobrescribimos
+    // Acquire exclusive lock (blocks until available)
+    if (!flock($fp, LOCK_EX)) {
+        fclose($fp);
+        error_log("Failed to acquire lock for order creation");
+        return ['error' => 'System error: Could not create order'];
+    }
+
+    // Read current data UNDER LOCK
+    $content = stream_get_contents($fp);
+    $data = $content ? json_decode($content, true) : [];
+
+    if (!isset($data['orders'])) {
+        $data['orders'] = [];
+    }
+
     if (!isset($data['counters'])) {
         $data['counters'] = [];
     }
+
+    // Calculate next order number (NO escribe, solo calcula)
+    $order_number_data = calculate_next_order_number($data);
+    $order_number = $order_number_data['number'];
+    $year = date('Y');
+
+    // Update counter in memory
+    $data['counters'][$year] = $order_number_data['counter_value'];
     $tracking_token = generate_token(32);
     $timestamp = get_timestamp();
 
@@ -268,11 +264,20 @@ function create_order($order_data) {
         'stock_reduced' => false
     ];
 
-    // Add order to array
+    // Add order to array IN MEMORY
     $data['orders'][] = $order;
 
-    // Save to file
-    if (write_json($orders_file, $data)) {
+    // Write EVERYTHING (order + counter) in ONE atomic operation
+    ftruncate($fp, 0);
+    rewind($fp);
+    $json_written = fwrite($fp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    fflush($fp);
+
+    // Release lock and close file
+    flock($fp, LOCK_UN);
+    fclose($fp);
+
+    if ($json_written !== false) {
         // IMPORTANT: Stock is NOT reduced when order is created
         // Stock will be reduced when:
         // 1. Payment status is updated to 'completed' (MercadoPago webhook)
@@ -290,6 +295,7 @@ function create_order($order_data) {
         return ['success' => true, 'order' => $order];
     }
 
+    error_log("Failed to write order to file");
     return ['error' => 'Failed to save order'];
 }
 
