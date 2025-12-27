@@ -2268,6 +2268,36 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
         // Submit order function
         function submitOrder() {
+            // Validar método de entrega
+            const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked');
+            if (!deliveryMethod) {
+                showModal({
+                    title: 'Error',
+                    message: 'Por favor selecciona un método de entrega',
+                    icon: '⚠️',
+                    confirmText: 'Entendido'
+                });
+                return;
+            }
+
+            // Si es envío, validar que se haya seleccionado cotización
+            if (deliveryMethod.value === 'shipping') {
+                const shippingServiceId = document.getElementById('shipping_service_id').value;
+                if (!shippingServiceId) {
+                    showModal({
+                        title: 'Cotización de envío requerida',
+                        message: 'Por favor hace clic en "📦 Calcular Costo de Envío" y seleccioná una opción de envío antes de continuar.',
+                        icon: '⚠️',
+                        iconClass: 'warning',
+                        confirmText: 'Entendido',
+                        showCancel: false
+                    });
+                    // Scroll hacia el paso 2 para que vea el botón de cotizar
+                    document.getElementById('step-2').scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+            }
+
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
 
             if (!paymentMethod) {

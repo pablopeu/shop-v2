@@ -1137,6 +1137,17 @@ $user = get_logged_user();
 
                         itemsHtml += '</tbody></table>';
 
+                        // Format shipping address if it exists
+                        let addressText = '';
+                        if (order.shipping_address) {
+                            if (typeof order.shipping_address === 'object') {
+                                const addr = order.shipping_address;
+                                addressText = `${addr.street || ''}, ${addr.city || ''}, ${addr.province || ''} (${addr.postal_code || ''})`;
+                            } else {
+                                addressText = order.shipping_address;
+                            }
+                        }
+
                         let detailsHtml = `
                             <p><strong>Nº Orden:</strong> ${order.order_number}</p>
                             <p><strong>Cliente:</strong> ${order.customer_name || 'N/A'}</p>
@@ -1144,7 +1155,7 @@ $user = get_logged_user();
                             <p><strong>Teléfono:</strong> ${order.customer_phone || 'N/A'}</p>
                             <p><strong>Estado:</strong> ${order.status}</p>
                             <p><strong>Método de Entrega:</strong> ${order.delivery_method === 'pickup' ? 'Retiro' : 'Envío'}</p>
-                            ${order.shipping_address ? `<p><strong>Dirección:</strong> ${order.shipping_address}</p>` : ''}
+                            ${addressText ? `<p><strong>Dirección:</strong> ${addressText}</p>` : ''}
                             ${order.tracking_number ? `<p><strong>Nº Seguimiento:</strong> ${order.tracking_number}</p>` : ''}
                             ${order.notes ? `<p><strong>Notas:</strong> ${order.notes}</p>` : ''}
                             <hr style="margin: 15px 0;">
