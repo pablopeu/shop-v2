@@ -36,7 +36,11 @@ Implementar la funcionalidad completa de envíos/logística en el sistema de e-c
 - **Chile:** `https://api.zipnova.cl/v2/`
 - **México:** `https://api.zipnova.com.mx/v2/`
 
-**Nota:** No existe URL de sandbox separada. Se usa la misma URL de producción.
+**IMPORTANTE - Credenciales Sandbox/Producción:**
+- No existe URL de sandbox separada. Se usa la misma URL de producción.
+- Las credenciales de sandbox y producción son las mismas (NO hay que crear campos ni variables nuevos).
+- Zipnova pasa las mismas credenciales a producción cuando sea necesario.
+- El sistema usa un flag `mode` en la configuración para diferenciar entre sandbox y producción, pero las credenciales son idénticas.
 
 ### 2.2 Autenticación
 - **Método:** HTTP Basic Authentication
@@ -462,8 +466,12 @@ El sistema actual usa archivos JSON. Para envíos se puede considerar:
 
 ### Credenciales de Prueba
 ```
-Client ID: test_client_id_123
-Client Secret: test_secret_456
+NOTA: Las credenciales de sandbox ya están creadas.
+NO se requieren campos adicionales ya que son las mismas que para producción.
+Zipnova pasa las credenciales a producción cuando sea necesario.
+
+Client ID: [Configurado en app/config/shipping.json]
+Client Secret: [Configurado en app/config/shipping.json]
 ```
 
 ### Direcciones de Prueba

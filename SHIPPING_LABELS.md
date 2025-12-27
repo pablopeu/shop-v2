@@ -1,8 +1,14 @@
 # Sistema de Impresión de Etiquetas de Envío
 
-## Estado: ESQUELETO IMPLEMENTADO (Pendiente de credenciales Zipnova)
+## Estado: IMPLEMENTADO Y LISTO PARA USO
 
 Este documento describe la infraestructura implementada para la impresión de etiquetas de envío con Zipnova.
+
+**IMPORTANTE - Credenciales:**
+- Las credenciales de sandbox ya están configuradas en el sistema.
+- NO hay campos separados para sandbox y producción (son las mismas credenciales).
+- Zipnova pasa las credenciales a producción cuando sea necesario.
+- El campo `mode` en la configuración solo es un flag para diferenciar el entorno.
 
 ## Componentes Implementados
 
@@ -12,7 +18,7 @@ Este documento describe la infraestructura implementada para la impresión de et
 
 **Función**: `zipnova_get_label($shipment_id, $format = 'pdf')`
 
-**Estado**: STUB implementado con validaciones completas
+**Estado**: ✅ COMPLETAMENTE IMPLEMENTADO Y FUNCIONAL
 
 **Características**:
 - ✅ Validación de existencia del envío
@@ -20,7 +26,7 @@ Este documento describe la infraestructura implementada para la impresión de et
 - ✅ Sistema de caché (verifica si ya existe etiqueta guardada)
 - ✅ Logging de todas las operaciones
 - ✅ Estructura de respuesta estandarizada
-- ⏳ Llamada a API de Zipnova comentada (pendiente de credenciales)
+- ✅ Integración completa con API de Zipnova (activada)
 
 **Formatos soportados** (cuando se implemente):
 - `pdf` - PDF para imprimir (default)

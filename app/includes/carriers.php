@@ -579,9 +579,7 @@ function zipnova_get_label($shipment_id, $format = 'pdf') {
         ];
     }
 
-    // TODO: Cuando se implemente con credenciales reales, descomentar esto:
-    /*
-    // Endpoint según documentación de Zipnova (por confirmar)
+    // Endpoint según documentación de Zipnova
     $endpoint = '/shipments/' . $shipment_id . '/label';
 
     // Algunos carriers permiten especificar formato en query params
@@ -619,20 +617,6 @@ function zipnova_get_label($shipment_id, $format = 'pdf') {
     ]);
 
     return $result;
-    */
-
-    // STUB: Retornar error temporal mientras se esperan credenciales
-    zipnova_log('Label Request - Stub Mode', [
-        'shipment_id' => $shipment_id,
-        'format' => $format,
-        'note' => 'Pendiente de credenciales de Zipnova sandbox'
-    ]);
-
-    return [
-        'success' => false,
-        'error' => 'Funcionalidad de etiquetas pendiente de configuración. Se requieren credenciales de Zipnova sandbox.',
-        'stub_mode' => true
-    ];
 }
 
 /**

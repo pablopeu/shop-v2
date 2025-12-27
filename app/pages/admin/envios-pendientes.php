@@ -593,7 +593,59 @@ $user = get_logged_user();
             display: none;
         }
 
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 10000;
+            min-width: 300px;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.success {
+            background: #28a745;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        .toast.warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         @media (max-width: 768px) {
+            .toast {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+                bottom: 10px;
+            }
+
             .table-container {
                 display: none !important;
             }
@@ -1016,6 +1068,9 @@ $user = get_logged_user();
         </div>
     </div>
 
+    <!-- Toast para notificaciones -->
+    <div class="toast" id="toast"></div>
+
     <!-- Modal Component -->
     <?php include APP_PATH . '/includes/admin/modal.php'; ?>
 
@@ -1382,6 +1437,21 @@ $user = get_logged_user();
                 if (id) return _exportSingleOrder(id, format);
             };
         })();
+
+        /**
+         * Muestra una notificación toast
+         */
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
 
         /**
          * Solicita e imprime la etiqueta de envío
