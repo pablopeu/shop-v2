@@ -175,7 +175,13 @@ if ($payment_status && $payment_status !== 'approved') {
                 <span class="order-label">Método de pago:</span>
                 <span class="order-value">
                     <?php
-                    echo $order['payment_method'] === 'presencial' ? '💵 Pago Presencial' : '💳 Mercadopago';
+                    $payment_labels = [
+                        'mercadopago' => '💳 Mercadopago',
+                        'arrangement' => '🤝 Arreglo con el vendedor',
+                        'pickup_payment' => '💵 Pago al retirar',
+                        'presencial' => '💵 Pago Presencial' // Legacy
+                    ];
+                    echo $payment_labels[$order['payment_method']] ?? '💳 ' . htmlspecialchars($order['payment_method']);
                     ?>
                 </span>
             </div>
@@ -213,13 +219,13 @@ if ($payment_status && $payment_status !== 'approved') {
         </div>
         <?php endif; ?>
 
-        <?php if ($order['payment_method'] === 'presencial'): ?>
+        <?php if (in_array($order['payment_method'], ['arrangement', 'pickup_payment', 'presencial'])): ?>
         <div class="info-box">
-            <h3>ℹ️ Instrucciones para el retiro</h3>
+            <h3>ℹ️ Instrucciones para tu pedido</h3>
             <p>
                 <strong>Tu pedido está confirmado.</strong><br>
-                <?php if ($order['shipping_address']): ?>
-                    Recibirás tu pedido en la dirección indicada. Te contactaremos pronto para coordinar la entrega.
+                <?php if (($order['delivery_method'] ?? 'pickup') === 'shipping'): ?>
+                    Recibirás tu pedido en la dirección indicada. Te contactaremos pronto para coordinar la entrega y el pago.
                 <?php else: ?>
                     Puedes retirar tu pedido en nuestro local. Te contactaremos pronto para coordinar el retiro y el pago.
                 <?php endif; ?>

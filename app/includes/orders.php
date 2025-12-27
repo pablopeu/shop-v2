@@ -58,8 +58,26 @@ function get_order_by_token($token) {
  */
 function generate_order_number() {
     $orders_file = APP_PATH . '/data/orders.json';
-    $data = read_json($orders_file);
     $year = date('Y');
+
+    // Open file with exclusive lock to prevent race conditions
+    $fp = fopen($orders_file, 'c+');
+    if (!$fp) {
+        error_log("Failed to open orders file for order number generation");
+        // Fallback: generate with timestamp to avoid collision
+        return sprintf("ORD-%s-%s", $year, substr(md5(microtime(true)), 0, 5));
+    }
+
+    // Acquire exclusive lock (blocks until available)
+    if (!flock($fp, LOCK_EX)) {
+        fclose($fp);
+        error_log("Failed to acquire lock for order number generation");
+        return sprintf("ORD-%s-%s", $year, substr(md5(microtime(true)), 0, 5));
+    }
+
+    // Read current data
+    $content = stream_get_contents($fp);
+    $data = $content ? json_decode($content, true) : [];
 
     // Inicializar estructura de contadores si no existe
     if (!isset($data['counters'])) {
@@ -86,8 +104,15 @@ function generate_order_number() {
     $data['counters'][$year]++;
     $next_number = $data['counters'][$year];
 
-    // Guardar el contador actualizado
-    write_json($orders_file, $data);
+    // Write updated data back to file
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    fflush($fp);
+
+    // Release lock and close file
+    flock($fp, LOCK_UN);
+    fclose($fp);
 
     return sprintf("ORD-%s-%05d", $year, $next_number);
 }
@@ -297,6 +322,53 @@ function update_order_status($order_id, $new_status, $user = 'system') {
                     'order_id' => $order_id,
                     'order_number' => $order['order_number']
                 ]);
+            }
+
+            // Crear envío automáticamente al marcar como pagado si es envío a domicilio
+            // y aún no tiene carrier_shipment_id
+            if ($new_status === 'pagado' &&
+                ($order['delivery_method'] ?? 'pickup') === 'shipping' &&
+                empty($order['shipping']['carrier_shipment_id'] ?? null)) {
+
+                // Require carriers.php si no está incluido
+                $carriers_file = __DIR__ . '/carriers.php';
+                if (file_exists($carriers_file)) {
+                    require_once $carriers_file;
+
+                    // Intentar crear el envío en Zipnova
+                    try {
+                        $result = zipnova_create_shipment($order);
+
+                        if ($result['success']) {
+                            // Actualizar orden con los datos del envío
+                            if (!isset($order['shipping'])) {
+                                $order['shipping'] = [];
+                            }
+                            $order['shipping']['carrier'] = 'ZNVA';
+                            $order['shipping']['carrier_shipment_id'] = $result['data']['shipment_id'] ?? null;
+                            $order['shipping']['tracking_id'] = $result['data']['tracking_number'] ?? null;
+                            $order['shipping']['status'] = 'pendiente';
+                            $order['shipping']['carrier_status'] = $result['data']['status'] ?? 'pending';
+                            $order['shipping']['created_at'] = date('Y-m-d H:i:s');
+
+                            log_admin_action('shipment_auto_created', $user, [
+                                'order_id' => $order_id,
+                                'order_number' => $order['order_number'],
+                                'shipment_id' => $result['data']['shipment_id'] ?? null
+                            ]);
+                        } else {
+                            // Log el error pero no fallar la actualización de estado
+                            log_admin_action('shipment_auto_creation_failed', $user, [
+                                'order_id' => $order_id,
+                                'order_number' => $order['order_number'],
+                                'error' => $result['error'] ?? 'Unknown error'
+                            ]);
+                        }
+                    } catch (Exception $e) {
+                        // Log el error pero continuar
+                        error_log("Error al crear envío automático para orden {$order_id}: " . $e->getMessage());
+                    }
+                }
             }
 
             // Restore stock when order is cancelled or rejected
