@@ -1586,8 +1586,8 @@ $user = get_logged_user();
                 element.textContent = '⏳ Creando envío...';
             }
 
-            // Get CSRF token
-            const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+            // Get CSRF token (usar la variable token ya exportada en la página)
+            const csrfToken = token;
 
             // Build API URL
             const apiUrl = '<?php echo url('/api/?endpoint=create-shipment-from-order'); ?>';
