@@ -942,7 +942,21 @@ $user = get_logged_user();
                                                         data-action="viewOrder" data-order-id="<?php echo $order['id']; ?>">
                                                     👁️ Ver
                                                 </button>
-                                                <?php if (!empty($order['shipping']['carrier_shipment_id'])): ?>
+                                                <?php
+                                                // Debug: ver estado de los datos
+                                                $has_shipment = !empty($order['shipping']['carrier_shipment_id']);
+                                                $has_rate_id = !empty($order['shipping_quote_data']['rate_id']);
+                                                $has_service_id = !empty($order['shipping_service_id']);
+                                                $delivery_method = $order['delivery_method'] ?? '';
+
+                                                // Logging temporal para debug
+                                                error_log("DEBUG Envíos - Order: {$order['id']}, has_shipment: " . ($has_shipment ? 'YES' : 'NO') .
+                                                         ", has_rate_id: " . ($has_rate_id ? 'YES' : 'NO') .
+                                                         ", has_service_id: " . ($has_service_id ? 'YES' : 'NO') .
+                                                         ", delivery_method: $delivery_method");
+                                                ?>
+
+                                                <?php if ($has_shipment): ?>
                                                     <!-- Botón: Ya existe envío creado, solo obtener etiqueta -->
                                                     <button type="button" class="btn btn-sm"
                                                             style="background: #667eea; color: white;"
@@ -952,15 +966,18 @@ $user = get_logged_user();
                                                             title="Imprimir etiqueta de envío">
                                                         🖨️ Etiqueta
                                                     </button>
-                                                <?php elseif (!empty($order['shipping_quote_data']['rate_id']) || !empty($order['shipping_service_id'])): ?>
+                                                <?php elseif ($has_rate_id || $has_service_id): ?>
                                                     <!-- Botón: Crear envío primero, luego obtener etiqueta -->
                                                     <button type="button" class="btn btn-sm"
                                                             style="background: #28a745; color: white;"
                                                             data-action="createAndPrintShippingLabel"
                                                             data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
-                                                            title="Crear envío y obtener etiqueta">
+                                                            title="Crear envío y obtener etiqueta (Debug: rate=<?= $has_rate_id ? 'Y' : 'N' ?>, service=<?= $has_service_id ? 'Y' : 'N' ?>)">
                                                         📦 Crear y Obtener Etiqueta
                                                     </button>
+                                                <?php else: ?>
+                                                    <!-- Debug: ninguna condición se cumple -->
+                                                    <small style="color: #999;">Sin datos de envío</small>
                                                 <?php endif; ?>
                                                 <button type="button" class="btn btn-danger btn-sm"
                                                         data-action="confirmArchiveOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">

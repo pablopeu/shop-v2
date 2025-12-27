@@ -256,9 +256,18 @@ function render_orders_table($orders, $filters, $status_labels) {
                                 <?php
                                 // Check if order has shipping
                                 $has_carrier_shipment = !empty($order['shipping']['carrier_shipment_id']);
-                                $has_shipping_data = !empty($order['shipping_quote_data']['rate_id']) || !empty($order['shipping_service_id']);
+                                $has_rate_id = !empty($order['shipping_quote_data']['rate_id']);
+                                $has_service_id = !empty($order['shipping_service_id']);
+                                $has_shipping_data = $has_rate_id || $has_service_id;
                                 $shipment_id = $order['shipping']['carrier_shipment_id'] ?? '';
                                 $carrier = $order['shipping']['carrier'] ?? ($order['shipping_quote_data']['carrier_name'] ?? '');
+                                $delivery_method = $order['delivery_method'] ?? '';
+
+                                // Debug logging
+                                error_log("DEBUG Ventas - Order: {$order['id']}, has_shipment: " . ($has_carrier_shipment ? 'YES' : 'NO') .
+                                         ", has_rate_id: " . ($has_rate_id ? 'YES' : 'NO') .
+                                         ", has_service_id: " . ($has_service_id ? 'YES' : 'NO') .
+                                         ", delivery_method: $delivery_method");
                                 ?>
                                 <?php if ($has_carrier_shipment): ?>
                                     <!-- Ya existe envío creado -->
