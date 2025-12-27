@@ -32,8 +32,6 @@ Shop V2 is a **professional e-commerce platform refactored with security-first a
 
 ---
 
----
-
 # ⚠️ CRITICAL RULES - NEVER BREAK THESE
 
 ## ❌ RULE 1: NO ALERT BOXES
