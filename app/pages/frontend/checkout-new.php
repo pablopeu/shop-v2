@@ -2228,10 +2228,16 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     const mpRadio = document.getElementById('mercadopago-radio');
                     if (mpRadio) {
                         mpRadio.checked = true;
-                        validateStep3();
+
+                        // Update step 3 summary manually
+                        document.getElementById('step-3-summary').textContent = '💳 Mercadopago';
+                        markStepCompleted(3);
+
                         // Show MP modal WITHOUT creating order yet
                         // Order will be created when user clicks MP payment button
-                        showMercadopagoModalWithoutOrder();
+                        setTimeout(() => {
+                            showMercadopagoModalWithoutOrder();
+                        }, 100);
                     }
                 },
                 onCancel: function() {
