@@ -437,6 +437,44 @@ $mp_public_key = $mp_mode === 'sandbox' ?
 
     <!-- Event Delegation System for CSP -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
+
+    <!-- Auto-show stock warning modal on page load -->
+    <script nonce="<?= csp_nonce() ?>">
+        // Show stock warning modal automatically
+        document.addEventListener('DOMContentLoaded', function() {
+            showModal({
+                title: '⚠️ Importante: Stock no reservado',
+                message: 'Tu pedido fue creado pero <strong>el pago no se completó</strong>. Los productos <strong>no quedan reservados</strong> hasta que se confirme el pago.',
+                details: `
+                    <div style="text-align: left; margin-top: 15px;">
+                        <p style="margin-bottom: 10px;"><strong>Esto significa que:</strong></p>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>Los productos pueden agotarse antes de que pagues</li>
+                            <li>No garantizamos disponibilidad hasta recibir el pago</li>
+                            <li>Te contactaremos para coordinar el pago</li>
+                        </ul>
+                        <p style="margin-bottom: 10px;"><strong>¿Deseas pagar ahora?</strong></p>
+                        <p style="color: #666; font-size: 14px;">Puedes intentar pagar nuevamente con MercadoPago o coordinar el pago con nosotros.</p>
+                    </div>
+                `,
+                icon: '⚠️',
+                iconClass: 'warning',
+                confirmText: '💳 Pagar con MercadoPago',
+                confirmType: 'primary',
+                cancelText: '📋 Ver Estado del Pedido',
+                onConfirm: function() {
+                    // Trigger retry payment
+                    const retryBtn = document.querySelector('[data-action="retryPayment"]');
+                    if (retryBtn) {
+                        retryBtn.click();
+                    }
+                },
+                onCancel: function() {
+                    // Do nothing - modal closes, user can see the page
+                }
+            });
+        });
+    </script>
     <?php endif; ?>
 
     <!-- Modal Component -->

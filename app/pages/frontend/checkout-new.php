@@ -1445,7 +1445,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
     </style>
 </head>
 <body>
-    <?php include APP_PATH . '/includes/admin/modal.php'; ?>
+    <?php include APP_PATH . '/includes/frontend/modal.php'; ?>
 
     <!-- Header -->
     <div class="header">
