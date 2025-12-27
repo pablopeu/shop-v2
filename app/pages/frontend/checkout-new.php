@@ -389,10 +389,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     // If no errors, create order
     if (empty($errors)) {
 
-        // Get shipping data from form
+        // Get shipping data from form - datos completos de cotización
         $shipping_cost = floatval($_POST['shipping_cost'] ?? 0);
         $shipping_service_id = sanitize_input($_POST['shipping_service_id'] ?? '');
         $shipping_estimated_days = sanitize_input($_POST['shipping_estimated_days'] ?? '');
+        $shipping_service_name = sanitize_input($_POST['shipping_service_name'] ?? '');
+
+        // IDs de servicio
+        $shipping_service_type_id = sanitize_input($_POST['shipping_service_type_id'] ?? '');
+        $shipping_service_type_code = sanitize_input($_POST['shipping_service_type_code'] ?? '');
+
+        // Información del carrier
+        $shipping_carrier_id = sanitize_input($_POST['shipping_carrier_id'] ?? '');
+        $shipping_carrier_name = sanitize_input($_POST['shipping_carrier_name'] ?? '');
+        $shipping_carrier_logo = sanitize_input($_POST['shipping_carrier_logo'] ?? '');
+        $shipping_carrier_rating = floatval($_POST['shipping_carrier_rating'] ?? 0);
+
+        // Tipo de logística
+        $shipping_logistic_type = sanitize_input($_POST['shipping_logistic_type'] ?? '');
+
+        // Tiempos de entrega
+        $shipping_estimated_delivery = sanitize_input($_POST['shipping_estimated_delivery'] ?? '');
+        $shipping_estimation_expires_at = sanitize_input($_POST['shipping_estimation_expires_at'] ?? '');
+
+        // Desglose de costos
+        $shipping_price_shipment = floatval($_POST['shipping_price_shipment'] ?? 0);
+        $shipping_price_insurance = floatval($_POST['shipping_price_insurance'] ?? 0);
+        $shipping_price_base = floatval($_POST['shipping_price_base'] ?? 0);
+
+        // IDs de tarifa (críticos para crear envío)
+        $shipping_rate_id = sanitize_input($_POST['shipping_rate_id'] ?? '');
+        $shipping_tariff_id = sanitize_input($_POST['shipping_tariff_id'] ?? '');
+        $shipping_rate_source = sanitize_input($_POST['shipping_rate_source'] ?? '');
+
+        // Tags
+        $shipping_tags_json = sanitize_input($_POST['shipping_tags'] ?? '[]');
+        $shipping_tags = json_decode($shipping_tags_json, true) ?: [];
 
         // Calculate final total including shipping
         $total_with_shipping = $total + $shipping_cost;
@@ -420,6 +452,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             'shipping_cost' => $shipping_cost,
             'shipping_service_id' => $shipping_service_id,
             'shipping_estimated_days' => $shipping_estimated_days,
+            // Datos completos de la cotización de envío (para recrear envío después)
+            'shipping_quote_data' => [
+                'service_id' => $shipping_service_id,
+                'service_name' => $shipping_service_name,
+                'service_type_id' => $shipping_service_type_id,
+                'service_type_code' => $shipping_service_type_code,
+                'carrier_id' => $shipping_carrier_id,
+                'carrier_name' => $shipping_carrier_name,
+                'carrier_logo' => $shipping_carrier_logo,
+                'carrier_rating' => $shipping_carrier_rating,
+                'logistic_type' => $shipping_logistic_type,
+                'estimated_days' => $shipping_estimated_days,
+                'estimated_delivery' => $shipping_estimated_delivery,
+                'estimation_expires_at' => $shipping_estimation_expires_at,
+                'cost' => $shipping_cost,
+                'price_shipment' => $shipping_price_shipment,
+                'price_insurance' => $shipping_price_insurance,
+                'price_base' => $shipping_price_base,
+                'rate_id' => $shipping_rate_id,
+                'tariff_id' => $shipping_tariff_id,
+                'rate_source' => $shipping_rate_source,
+                'tags' => $shipping_tags
+            ],
             'total' => $total_with_shipping,
             'payment_method' => $payment_method,
             'shipping_address' => $shipping_address,
@@ -1674,9 +1729,41 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 </div>
 
                                 <!-- Hidden fields para guardar el método seleccionado -->
+                                <!-- Campos básicos -->
                                 <input type="hidden" id="shipping_service_id" name="shipping_service_id">
                                 <input type="hidden" id="shipping_cost" name="shipping_cost" value="0">
                                 <input type="hidden" id="shipping_estimated_days" name="shipping_estimated_days">
+                                <input type="hidden" id="shipping_service_name" name="shipping_service_name">
+
+                                <!-- IDs de servicio -->
+                                <input type="hidden" id="shipping_service_type_id" name="shipping_service_type_id">
+                                <input type="hidden" id="shipping_service_type_code" name="shipping_service_type_code">
+
+                                <!-- Información del carrier -->
+                                <input type="hidden" id="shipping_carrier_id" name="shipping_carrier_id">
+                                <input type="hidden" id="shipping_carrier_name" name="shipping_carrier_name">
+                                <input type="hidden" id="shipping_carrier_logo" name="shipping_carrier_logo">
+                                <input type="hidden" id="shipping_carrier_rating" name="shipping_carrier_rating">
+
+                                <!-- Tipo de logística -->
+                                <input type="hidden" id="shipping_logistic_type" name="shipping_logistic_type">
+
+                                <!-- Tiempos de entrega -->
+                                <input type="hidden" id="shipping_estimated_delivery" name="shipping_estimated_delivery">
+                                <input type="hidden" id="shipping_estimation_expires_at" name="shipping_estimation_expires_at">
+
+                                <!-- Desglose de costos -->
+                                <input type="hidden" id="shipping_price_shipment" name="shipping_price_shipment">
+                                <input type="hidden" id="shipping_price_insurance" name="shipping_price_insurance">
+                                <input type="hidden" id="shipping_price_base" name="shipping_price_base">
+
+                                <!-- IDs de tarifa (críticos para crear envío) -->
+                                <input type="hidden" id="shipping_rate_id" name="shipping_rate_id">
+                                <input type="hidden" id="shipping_tariff_id" name="shipping_tariff_id">
+                                <input type="hidden" id="shipping_rate_source" name="shipping_rate_source">
+
+                                <!-- Tags -->
+                                <input type="hidden" id="shipping_tags" name="shipping_tags">
                             </div>
                         </div>
                     </div>

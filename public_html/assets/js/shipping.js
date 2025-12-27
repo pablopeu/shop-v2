@@ -239,9 +239,42 @@ console.log('📦 shipping.js: Archivo cargado');
         radio.type = 'radio';
         radio.name = 'shipping_method_quote';
         radio.value = quote.service_id || `service_${index}`;
+
+        // Datos básicos de cotización
         radio.dataset.cost = quote.cost || 0;
         radio.dataset.days = quote.estimated_days || '';
         radio.dataset.serviceId = quote.service_id || '';
+        radio.dataset.serviceName = quote.service_name || '';
+
+        // IDs de servicio
+        radio.dataset.serviceTypeId = quote.service_type_id || '';
+        radio.dataset.serviceTypeCode = quote.service_type_code || '';
+
+        // Información del carrier
+        radio.dataset.carrierId = quote.carrier_id || '';
+        radio.dataset.carrierName = quote.carrier_name || '';
+        radio.dataset.carrierLogo = quote.carrier_logo || '';
+        radio.dataset.carrierRating = quote.carrier_rating || '';
+
+        // Tipo de logística
+        radio.dataset.logisticType = quote.logistic_type || '';
+
+        // Tiempos de entrega
+        radio.dataset.estimatedDelivery = quote.estimated_delivery || '';
+        radio.dataset.estimationExpiresAt = quote.estimation_expires_at || '';
+
+        // Desglose de costos
+        radio.dataset.priceShipment = quote.price_shipment || 0;
+        radio.dataset.priceInsurance = quote.price_insurance || 0;
+        radio.dataset.priceBase = quote.price_base || 0;
+
+        // IDs de tarifa (críticos para crear envío)
+        radio.dataset.rateId = quote.rate_id || '';
+        radio.dataset.tariffId = quote.tariff_id || '';
+        radio.dataset.rateSource = quote.rate_source || '';
+
+        // Tags
+        radio.dataset.tags = JSON.stringify(quote.tags || []);
 
         radio.addEventListener('change', () => handleQuoteSelection(quote));
 
@@ -288,10 +321,41 @@ console.log('📦 shipping.js: Archivo cargado');
         selectedShippingService = quote.service_id;
         shippingCost = parseFloat(quote.cost) || 0;
 
-        // Update hidden fields
-        document.getElementById('shipping_service_id').value = selectedShippingService;
-        document.getElementById('shipping_cost').value = shippingCost;
-        document.getElementById('shipping_estimated_days').value = quote.estimated_days || '';
+        // Update hidden fields - campos básicos
+        setHiddenField('shipping_service_id', selectedShippingService);
+        setHiddenField('shipping_cost', shippingCost);
+        setHiddenField('shipping_estimated_days', quote.estimated_days || '');
+        setHiddenField('shipping_service_name', quote.service_name || '');
+
+        // IDs de servicio
+        setHiddenField('shipping_service_type_id', quote.service_type_id || '');
+        setHiddenField('shipping_service_type_code', quote.service_type_code || '');
+
+        // Información del carrier
+        setHiddenField('shipping_carrier_id', quote.carrier_id || '');
+        setHiddenField('shipping_carrier_name', quote.carrier_name || '');
+        setHiddenField('shipping_carrier_logo', quote.carrier_logo || '');
+        setHiddenField('shipping_carrier_rating', quote.carrier_rating || '');
+
+        // Tipo de logística
+        setHiddenField('shipping_logistic_type', quote.logistic_type || '');
+
+        // Tiempos de entrega
+        setHiddenField('shipping_estimated_delivery', quote.estimated_delivery || '');
+        setHiddenField('shipping_estimation_expires_at', quote.estimation_expires_at || '');
+
+        // Desglose de costos
+        setHiddenField('shipping_price_shipment', quote.price_shipment || 0);
+        setHiddenField('shipping_price_insurance', quote.price_insurance || 0);
+        setHiddenField('shipping_price_base', quote.price_base || 0);
+
+        // IDs de tarifa (críticos para crear envío)
+        setHiddenField('shipping_rate_id', quote.rate_id || '');
+        setHiddenField('shipping_tariff_id', quote.tariff_id || '');
+        setHiddenField('shipping_rate_source', quote.rate_source || '');
+
+        // Tags
+        setHiddenField('shipping_tags', JSON.stringify(quote.tags || []));
 
         // Update total
         updateShippingCost(shippingCost);
@@ -301,9 +365,20 @@ console.log('📦 shipping.js: Archivo cargado');
             detail: {
                 serviceId: selectedShippingService,
                 cost: shippingCost,
-                estimatedDays: quote.estimated_days
+                estimatedDays: quote.estimated_days,
+                quote: quote
             }
         }));
+    }
+
+    /**
+     * Helper para setear campos ocultos de forma segura
+     */
+    function setHiddenField(id, value) {
+        const field = document.getElementById(id);
+        if (field) {
+            field.value = value;
+        }
     }
 
     /**

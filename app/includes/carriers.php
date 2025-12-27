@@ -384,14 +384,39 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
                 $estimated_days = calculate_delivery_days($delivery_time);
 
                 $quotes[] = [
+                    // Identificadores de servicio
                     'service_id' => $zipnova_quote['service_type']['code'] ?? 'unknown',
+                    'service_type_id' => $zipnova_quote['service_type']['id'] ?? null,
+                    'service_type_code' => $zipnova_quote['service_type']['code'] ?? '',
                     'service_name' => ($zipnova_quote['carrier']['name'] ?? 'Carrier') . ' - ' . ($zipnova_quote['service_type']['name'] ?? 'Service'),
-                    'cost' => (float)($zipnova_quote['amounts']['price_incl_tax'] ?? 0),
-                    'estimated_days' => $estimated_days,
+
+                    // Información del carrier
+                    'carrier_id' => $zipnova_quote['carrier']['id'] ?? null,
                     'carrier_name' => $zipnova_quote['carrier']['name'] ?? '',
                     'carrier_logo' => $zipnova_quote['carrier']['logo'] ?? '',
+                    'carrier_rating' => $zipnova_quote['carrier']['rating'] ?? null,
+
+                    // Tipo de logística
                     'logistic_type' => $zipnova_quote['logistic_type'] ?? '',
-                    'service_type_code' => $zipnova_quote['service_type']['code'] ?? ''
+
+                    // Tiempos de entrega
+                    'estimated_days' => $estimated_days,
+                    'estimated_delivery' => $zipnova_quote['delivery_time']['estimated_delivery'] ?? null,
+                    'estimation_expires_at' => $zipnova_quote['delivery_time']['estimation_expires_at'] ?? null,
+
+                    // Costos (desglosados)
+                    'cost' => (float)($zipnova_quote['amounts']['price_incl_tax'] ?? 0),
+                    'price_shipment' => (float)($zipnova_quote['amounts']['price_shipment'] ?? 0),
+                    'price_insurance' => (float)($zipnova_quote['amounts']['price_insurance'] ?? 0),
+                    'price_base' => (float)($zipnova_quote['amounts']['price'] ?? 0),
+
+                    // IDs de tarifa (necesarios para crear envío)
+                    'rate_id' => $zipnova_quote['rate']['id'] ?? null,
+                    'tariff_id' => $zipnova_quote['rate']['tariff_id'] ?? null,
+                    'rate_source' => $zipnova_quote['rate']['source'] ?? null,
+
+                    // Tags (cheapest, fastest, etc.)
+                    'tags' => $zipnova_quote['tags'] ?? []
                 ];
             }
             $result['data']['quotes'] = $quotes;

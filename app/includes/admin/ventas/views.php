@@ -255,11 +255,13 @@ function render_orders_table($orders, $filters, $status_labels) {
                             <td>
                                 <?php
                                 // Check if order has shipping
-                                $has_shipping = !empty($order['shipping']['carrier_shipment_id']);
+                                $has_carrier_shipment = !empty($order['shipping']['carrier_shipment_id']);
+                                $has_shipping_data = !empty($order['shipping_quote_data']['rate_id']) || !empty($order['shipping_service_id']);
                                 $shipment_id = $order['shipping']['carrier_shipment_id'] ?? '';
-                                $carrier = $order['shipping']['carrier'] ?? '';
+                                $carrier = $order['shipping']['carrier'] ?? ($order['shipping_quote_data']['carrier_name'] ?? '');
                                 ?>
-                                <?php if ($has_shipping): ?>
+                                <?php if ($has_carrier_shipment): ?>
+                                    <!-- Ya existe envío creado -->
                                     <div style="display: flex; flex-direction: column; gap: 5px; align-items: center;">
                                         <small style="color: #666; font-size: 11px;">
                                             <?php echo htmlspecialchars($carrier); ?> #<?php echo htmlspecialchars(substr($shipment_id, -6)); ?>
@@ -271,6 +273,20 @@ function render_orders_table($orders, $filters, $status_labels) {
                                                 data-shipment-id="<?php echo htmlspecialchars($shipment_id); ?>"
                                                 title="Imprimir etiqueta de envío">
                                             🖨️ Etiqueta
+                                        </button>
+                                    </div>
+                                <?php elseif ($has_shipping_data): ?>
+                                    <!-- Tiene datos de shipping pero no se ha creado envío aún -->
+                                    <div style="display: flex; flex-direction: column; gap: 5px; align-items: center;">
+                                        <small style="color: #28a745; font-size: 11px;">
+                                            <?php echo htmlspecialchars($carrier); ?>
+                                        </small>
+                                        <button type="button" class="btn btn-sm"
+                                                style="background: #28a745; color: white; font-size: 11px; padding: 4px 8px;"
+                                                data-action="createAndPrintShippingLabel"
+                                                data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
+                                                title="Crear envío y obtener etiqueta">
+                                            📦 Crear
                                         </button>
                                     </div>
                                 <?php else: ?>

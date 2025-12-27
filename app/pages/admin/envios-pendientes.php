@@ -942,6 +942,7 @@ $user = get_logged_user();
                                                     👁️ Ver
                                                 </button>
                                                 <?php if (!empty($order['shipping']['carrier_shipment_id'])): ?>
+                                                    <!-- Botón: Ya existe envío creado, solo obtener etiqueta -->
                                                     <button type="button" class="btn btn-sm"
                                                             style="background: #667eea; color: white;"
                                                             data-action="printShippingLabel"
@@ -949,6 +950,15 @@ $user = get_logged_user();
                                                             data-shipment-id="<?php echo htmlspecialchars($order['shipping']['carrier_shipment_id']); ?>"
                                                             title="Imprimir etiqueta de envío">
                                                         🖨️ Etiqueta
+                                                    </button>
+                                                <?php elseif (!empty($order['shipping_quote_data']['rate_id']) || !empty($order['shipping_service_id'])): ?>
+                                                    <!-- Botón: Crear envío primero, luego obtener etiqueta -->
+                                                    <button type="button" class="btn btn-sm"
+                                                            style="background: #28a745; color: white;"
+                                                            data-action="createAndPrintShippingLabel"
+                                                            data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
+                                                            title="Crear envío y obtener etiqueta">
+                                                        📦 Crear y Obtener Etiqueta
                                                     </button>
                                                 <?php endif; ?>
                                                 <button type="button" class="btn btn-danger btn-sm"

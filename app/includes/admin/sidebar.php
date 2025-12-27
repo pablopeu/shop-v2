@@ -277,7 +277,7 @@ $current_page = $_GET['page'] ?? 'index';
 
         <!-- Envíos -->
         <li>
-            <div class="menu-item" data-action="toggleSubmenu" data-menu-id="envios">
+            <div class="menu-item" data-action="toggleSubmenu" data-menu-id="envios" data-redirect-url="<?php echo url('/admin/?page=envios-pendientes'); ?>">
                 <span>📦 Envíos</span>
                 <span class="menu-arrow" id="arrow-envios">▶</span>
             </div>
