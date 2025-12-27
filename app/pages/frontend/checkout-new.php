@@ -484,6 +484,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 send_admin_new_order_email($order);
                 send_telegram_new_order($order);
 
+                // Log the redirect for debugging
+                error_log("Redirecting to gracias page for order: {$order['id']}, method: {$payment_method}");
+
+                // Ensure no output before redirect
+                if (ob_get_level()) {
+                    ob_end_clean();
+                }
+
                 // Redirect to thank you page
                 header("Location: " . url("/gracias?order={$order['id']}&token={$order['tracking_token']}"));
                 exit;
@@ -2250,11 +2258,26 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         // Submit form with selected payment method
         function submitFormWithPaymentMethod(paymentMethod) {
             const form = document.getElementById('checkout-form');
+
+            // Remove any existing place_order inputs to avoid duplicates
+            const existingInputs = form.querySelectorAll('input[name="place_order"]');
+            existingInputs.forEach(input => input.remove());
+
+            // Add new hidden input
             const hiddenInput = document.createElement('input');
             hiddenInput.type = 'hidden';
             hiddenInput.name = 'place_order';
             hiddenInput.value = '1';
             form.appendChild(hiddenInput);
+
+            // Disable submit buttons to prevent double submission
+            const submitButtons = document.querySelectorAll('[data-action="submitOrder"]');
+            submitButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Procesando...';
+            });
+
+            // Submit form
             form.submit();
         }
 
