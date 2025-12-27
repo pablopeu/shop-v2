@@ -426,6 +426,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $shipping_tags_json = sanitize_input($_POST['shipping_tags'] ?? '[]');
         $shipping_tags = json_decode($shipping_tags_json, true) ?: [];
 
+        // DEBUG: Log shipping data received
+        error_log("DEBUG Checkout POST - shipping_service_id: " . ($shipping_service_id ?: 'EMPTY'));
+        error_log("DEBUG Checkout POST - shipping_rate_id: " . ($shipping_rate_id ?: 'EMPTY'));
+        error_log("DEBUG Checkout POST - shipping_carrier_name: " . ($shipping_carrier_name ?: 'EMPTY'));
+        error_log("DEBUG Checkout POST - delivery_method: " . $delivery_method);
+
         // Calculate final total including shipping
         $total_with_shipping = $total + $shipping_cost;
 
