@@ -21,6 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Require admin authentication
 require_admin();
 
+// Include carriers functions for zipnova_create_shipment()
+require_once APP_PATH . '/includes/carriers.php';
+
 // Rate limiting
 $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $identifier = 'create_shipment_' . $client_ip;
