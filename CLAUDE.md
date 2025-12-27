@@ -14,6 +14,26 @@ Shop V2 is a **professional e-commerce platform refactored with security-first a
 
 ---
 
+## ⚠️ ESTADO ACTUAL DEL PROYECTO
+
+**IMPORTANTE**: Aunque el código se está desplegando automáticamente en el servidor de producción (peu.net/shopv2), el sistema **AÚN NO ESTÁ EN PRODUCCIÓN REAL**.
+
+- El servidor https://peu.net/shopv2 se usa para **pruebas y desarrollo**
+- NO hay clientes reales usando el sistema actualmente
+- Los datos (ventas, productos, etc.) son de prueba
+- El sistema está en fase de testing antes del lanzamiento real
+
+**Implicaciones para desarrollo**:
+- Se puede probar directamente en peu.net/shopv2 después de cada deploy
+- Los errores no afectan a usuarios reales
+- Se pueden hacer cambios sin el nivel de precaución de un sistema en producción real
+
+**NOTA**: Esta sección será eliminada cuando el sistema entre en producción real con clientes activos.
+
+---
+
+---
+
 # ⚠️ CRITICAL RULES - NEVER BREAK THESE
 
 ## ❌ RULE 1: NO ALERT BOXES
