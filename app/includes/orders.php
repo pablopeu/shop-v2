@@ -244,6 +244,8 @@ function create_order($order_data) {
         'discount_coupon' => $order_data['discount_coupon'] ?? 0,
         'coupon_code' => $order_data['coupon_code'] ?? null,
         'shipping_cost' => $order_data['shipping_cost'] ?? 0,
+        'shipping_service_id' => $order_data['shipping_service_id'] ?? null,
+        'shipping_quote_data' => $order_data['shipping_quote_data'] ?? null,
         'total' => $order_data['total'],
         'status' => 'impago',
         'status_history' => [
