@@ -2181,15 +2181,62 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             if (paymentMethod.value === 'mercadopago') {
                 showMercadopagoModalWithoutOrder();
             } else {
-                // For other payment methods, submit form normally
-                const form = document.getElementById('checkout-form');
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'place_order';
-                hiddenInput.value = '1';
-                form.appendChild(hiddenInput);
-                form.submit();
+                // For other payment methods, show stock warning modal
+                showStockWarningModal(paymentMethod.value);
             }
+        }
+
+        // Show stock warning modal for non-Mercadopago payments
+        function showStockWarningModal(paymentMethod) {
+            const paymentLabels = {
+                'arrangement': 'Arreglo con el vendedor',
+                'pickup_payment': 'Pago al retirar'
+            };
+
+            const paymentLabel = paymentLabels[paymentMethod] || paymentMethod;
+
+            showModal({
+                title: '⚠️ Importante: Stock no reservado',
+                message: `Has elegido pagar con "${paymentLabel}". Tu pedido será confirmado, pero <strong>los productos no quedan reservados hasta que se confirme el pago</strong>.`,
+                details: `
+                    <div style="text-align: left; margin-top: 15px;">
+                        <p style="margin-bottom: 10px;"><strong>Esto significa que:</strong></p>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>Los productos pueden agotarse antes de que pagues</li>
+                            <li>No garantizamos disponibilidad hasta recibir el pago</li>
+                            <li>Te contactaremos para coordinar el pago y confirmar stock</li>
+                        </ul>
+                        <p style="margin-bottom: 10px;"><strong>¿Prefieres pagar ahora con MercadoPago?</strong></p>
+                        <p style="color: #666; font-size: 14px;">El pago con MercadoPago es instantáneo y reserva tu stock inmediatamente.</p>
+                    </div>
+                `,
+                icon: '⚠️',
+                iconClass: 'warning',
+                confirmText: '💳 Pagar con MercadoPago',
+                confirmType: 'primary',
+                cancelText: '✅ Continuar con ' + paymentLabel,
+                onConfirm: function() {
+                    // Switch to Mercadopago
+                    document.getElementById('mercadopago-radio').checked = true;
+                    validateStep3();
+                    showMercadopagoModalWithoutOrder();
+                },
+                onCancel: function() {
+                    // Continue with selected payment method
+                    submitFormWithPaymentMethod(paymentMethod);
+                }
+            });
+        }
+
+        // Submit form with selected payment method
+        function submitFormWithPaymentMethod(paymentMethod) {
+            const form = document.getElementById('checkout-form');
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'place_order';
+            hiddenInput.value = '1';
+            form.appendChild(hiddenInput);
+            form.submit();
         }
 
         // Show Mercadopago modal WITHOUT creating order (order will be created when user clicks MP button)
