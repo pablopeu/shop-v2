@@ -1524,8 +1524,93 @@ $user = get_logged_user();
             });
         }
 
+        /**
+         * Crea un envío en Zipnova y luego imprime la etiqueta
+         */
+        function createAndPrintShippingLabel(event, element, params) {
+            const orderId = params?.orderId;
+
+            if (!orderId) {
+                showToast('⚠️ Error: No se pudo identificar la orden', 'error');
+                return;
+            }
+
+            // Disable button and show loading state
+            const originalText = element ? element.textContent : '';
+            if (element) {
+                element.disabled = true;
+                element.textContent = '⏳ Creando envío...';
+            }
+
+            // Get CSRF token
+            const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+
+            // Build API URL
+            const apiUrl = '<?php echo url('/api/?endpoint=create-shipment-from-order'); ?>';
+
+            // Create shipment via API
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    order_id: orderId,
+                    csrf_token: csrfToken
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('✅ Envío creado exitosamente', 'success');
+
+                    // Wait a moment for UI feedback, then print label
+                    setTimeout(() => {
+                        // Update button to show we're getting label
+                        if (element) {
+                            element.textContent = '⏳ Obteniendo etiqueta...';
+                        }
+
+                        // Now get the label using the created shipment_id
+                        const shipmentId = data.data.shipment_id;
+
+                        // Call printShippingLabel with the new shipment_id
+                        printShippingLabel(event, element, {
+                            orderId: orderId,
+                            shipmentId: shipmentId
+                        });
+
+                        // Reload page after a delay to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }, 500);
+                } else {
+                    showToast('❌ Error: ' + (data.error || 'No se pudo crear el envío'), 'error');
+
+                    // Restore button state
+                    if (element) {
+                        element.disabled = false;
+                        element.textContent = originalText;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error creating shipment:', error);
+                showToast('❌ Error de conexión al crear el envío', 'error');
+
+                // Restore button state
+                if (element) {
+                    element.disabled = false;
+                    element.textContent = originalText;
+                }
+            });
+        }
+
         // Export for event delegation
         window.printShippingLabel = printShippingLabel;
+        window.createAndPrintShippingLabel = createAndPrintShippingLabel;
     </script>
 
     <!-- Event Delegation System for CSP -->
