@@ -2408,7 +2408,28 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 },
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                // Check if response is ok
+                if (!response.ok) {
+                    console.error('HTTP Error:', response.status, response.statusText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                // Get text first to see what we're receiving
+                return response.text();
+            })
+            .then(text => {
+                console.log('Raw response (first 500 chars):', text.substring(0, 500));
+
+                // Try to parse as JSON
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('JSON Parse Error:', e);
+                    console.error('Full response text:', text);
+                    throw new Error('El servidor retornó una respuesta inválida. Ver consola para detalles.');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     // Vaciar el carrito inmediatamente después de crear la orden
@@ -2422,7 +2443,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     submitBtn.innerHTML = originalText;
                 } else {
                     showModal({
-                        title: 'Error',
+                        title: 'Error al Crear Orden',
                         message: data.error || 'Error desconocido',
                         icon: '❌',
                         confirmText: 'Entendido'
@@ -2432,10 +2453,12 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error completo:', error);
+                console.error('Error stack:', error.stack);
                 showModal({
-                    title: 'Error',
-                    message: 'Por favor intenta nuevamente.',
+                    title: 'Error al Crear Orden',
+                    message: 'No se pudo crear el pedido. ' + (error.message || 'Error desconocido'),
+                    details: '<p style="color: #666; font-size: 14px; margin-top: 10px;">Abre la consola del navegador (F12 → Console) para ver detalles técnicos del error.</p>',
                     icon: '❌',
                     confirmText: 'Entendido'
                 });
