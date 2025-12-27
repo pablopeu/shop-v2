@@ -1717,7 +1717,13 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <!-- Cotizaciones de envío -->
                                 <div id="shipping-quotes-container" class="hidden">
                                     <div class="form-group">
-                                        <label>Seleccioná tu método de envío *</label>
+                                        <label style="font-size: 1.1em; font-weight: 600; color: var(--checkout-text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                                            📦 Seleccioná tu método de envío
+                                            <span style="color: #e74c3c; font-weight: 700;">*</span>
+                                        </label>
+                                        <p style="font-size: 0.875rem; color: var(--checkout-text-secondary); margin-top: 0.25rem; margin-bottom: 0.75rem;">
+                                            Elegí la opción de envío que mejor se adapte a tus necesidades. La opción más económica está pre-seleccionada.
+                                        </p>
                                         <div id="shipping-quotes" class="radio-group">
                                             <!-- Las cotizaciones se cargarán aquí dinámicamente -->
                                         </div>

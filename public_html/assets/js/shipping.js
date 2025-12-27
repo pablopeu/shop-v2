@@ -217,14 +217,40 @@ console.log('📦 shipping.js: Archivo cargado');
 
         // Show quotes container
         quotesWrapper.classList.remove('hidden');
+        console.log('✅ Contenedor de cotizaciones mostrado (hidden class removed)');
 
-        // Auto-select first option if only one available
+        // Scroll to quotes so user sees them
+        setTimeout(() => {
+            quotesWrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            console.log('📍 Scroll to quotes container');
+        }, 100);
+
+        // Auto-select cheapest or first option
+        let autoSelectedQuote = null;
+        let autoSelectedRadio = null;
+
         if (quotes.length === 1) {
-            const firstRadio = quotesContainer.querySelector('input[type="radio"]');
-            if (firstRadio) {
-                firstRadio.checked = true;
-                handleQuoteSelection(quotes[0]);
+            // Only one option - auto-select it
+            autoSelectedQuote = quotes[0];
+            autoSelectedRadio = quotesContainer.querySelector('input[type="radio"]');
+        } else {
+            // Multiple options - try to auto-select the cheapest one
+            const cheapestQuote = quotes.find(q => q.tags && q.tags.includes('cheapest'));
+            if (cheapestQuote) {
+                autoSelectedQuote = cheapestQuote;
+                const radioIndex = quotes.indexOf(cheapestQuote);
+                const allRadios = quotesContainer.querySelectorAll('input[type="radio"]');
+                autoSelectedRadio = allRadios[radioIndex];
+                console.log('💰 Auto-seleccionando la opción más barata:', cheapestQuote.service_name);
             }
+        }
+
+        if (autoSelectedQuote && autoSelectedRadio) {
+            autoSelectedRadio.checked = true;
+            handleQuoteSelection(autoSelectedQuote);
+            console.log('✅ Opción auto-seleccionada:', autoSelectedQuote.service_name);
+        } else {
+            console.log('⚠️ No se auto-seleccionó ninguna opción - usuario debe elegir manualmente');
         }
     }
 
@@ -282,8 +308,31 @@ console.log('📦 shipping.js: Archivo cargado');
         contentDiv.style.width = '100%';
 
         // Service name and delivery time
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.alignItems = 'center';
+        titleContainer.style.gap = '0.5rem';
+        titleContainer.style.flexWrap = 'wrap';
+
         const title = document.createElement('strong');
         title.textContent = quote.service_name || quote.service_id || 'Envío';
+        titleContainer.appendChild(title);
+
+        // Add "MÁS BARATA" badge if this is the cheapest option
+        if (quote.tags && quote.tags.includes('cheapest')) {
+            const badge = document.createElement('span');
+            badge.style.cssText = 'background: #27ae60; color: white; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.75rem; font-weight: 600;';
+            badge.textContent = '💰 MÁS BARATA';
+            titleContainer.appendChild(badge);
+        }
+
+        // Add "MÁS RÁPIDA" badge if this is the fastest option
+        if (quote.tags && quote.tags.includes('fastest')) {
+            const badge = document.createElement('span');
+            badge.style.cssText = 'background: #3498db; color: white; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.75rem; font-weight: 600;';
+            badge.textContent = '⚡ MÁS RÁPIDA';
+            titleContainer.appendChild(badge);
+        }
 
         const description = document.createElement('p');
         description.className = 'option-description';
@@ -304,7 +353,7 @@ console.log('📦 shipping.js: Archivo cargado');
         cost.style.fontSize = '1.1em';
         cost.textContent = formatCurrency(quote.cost || 0);
 
-        contentDiv.appendChild(title);
+        contentDiv.appendChild(titleContainer);
         contentDiv.appendChild(description);
         contentDiv.appendChild(cost);
 

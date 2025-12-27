@@ -1,12 +1,12 @@
 {
-    "timestamp": "2025-12-24 17:20:47",
+    "timestamp": "2025-12-27 16:54:24",
     "endpoint": "\/shipments\/quote",
     "method": "POST",
     "http_code": 200,
     "request": {
         "account_id": "20347",
         "origin_id": "373621",
-        "declared_value": 500,
+        "declared_value": 34200,
         "items": [
             {
                 "sku": "CART-ITEM",
@@ -45,7 +45,7 @@
                 "lng": -58.4967041000000023132088244892656803131103515625
             }
         },
-        "declared_value": 500,
+        "declared_value": 34200,
         "packages": [
             {
                 "descriptions": [
@@ -100,8 +100,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 3,
                     "max": 5,
-                    "estimated_delivery": "2026-01-05T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2026-01-06T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "P2D",
@@ -117,12 +117,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 5661.920000000000072759576141834259033203125,
-                    "price_insurance": 7.5,
-                    "price": 5669.420000000000072759576141834259033203125,
-                    "price_incl_tax": 6860,
-                    "seller_price": 5669.420000000000072759576141834259033203125,
-                    "seller_price_incl_tax": 6860
+                    "price_shipment": 5662.2100000000000363797880709171295166015625,
+                    "price_insurance": 513,
+                    "price": 6175.2100000000000363797880709171295166015625,
+                    "price_incl_tax": 7472,
+                    "seller_price": 6175.2100000000000363797880709171295166015625,
+                    "seller_price_incl_tax": 7472
                 },
                 "rate": {
                     "source": "tariff",
@@ -153,8 +153,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 4,
                     "max": 5,
-                    "estimated_delivery": "2026-01-05T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T21:00:00+00:00",
+                    "estimated_delivery": "2026-01-06T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T21:00:00+00:00",
                     "times": {
                         "preparation": "PT12H",
                         "crossdocking": "PT0S",
@@ -170,12 +170,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 6675.9700000000002546585164964199066162109375,
-                    "price_insurance": 7.5,
-                    "price": 6683.4700000000002546585164964199066162109375,
-                    "price_incl_tax": 8087,
-                    "seller_price": 6683.4700000000002546585164964199066162109375,
-                    "seller_price_incl_tax": 8087
+                    "price_shipment": 6676.260000000000218278728425502777099609375,
+                    "price_insurance": 513,
+                    "price": 7189.260000000000218278728425502777099609375,
+                    "price_incl_tax": 8699,
+                    "seller_price": 7189.260000000000218278728425502777099609375,
+                    "seller_price_incl_tax": 8699
                 },
                 "rate": {
                     "source": "tariff",
@@ -200,25 +200,6 @@
                                 "lat": -34.5741062000000027865098672918975353240966796875,
                                 "lng": -58.4991557999999969297277857549488544464111328125,
                                 "distance": 222
-                            }
-                        }
-                    },
-                    {
-                        "point_id": 15089,
-                        "description": "Correo Argentino - Villa Urquiza Hulkdrugstore",
-                        "open_hours": null,
-                        "phone": null,
-                        "location": {
-                            "street": "Monroe",
-                            "street_number": "5571",
-                            "street_extras": null,
-                            "city": "Capital Federal",
-                            "state": "Capital Federal",
-                            "zipcode": "1130",
-                            "geolocation": {
-                                "lat": -34.5773334000000005516994860954582691192626953125,
-                                "lng": -58.4917920999999978448613546788692474365234375,
-                                "distance": 601
                             }
                         }
                     },
@@ -278,6 +259,25 @@
                                 "distance": 901
                             }
                         }
+                    },
+                    {
+                        "point_id": 5434,
+                        "description": "Correo Argentino - V Urquiza Barroso",
+                        "open_hours": null,
+                        "phone": null,
+                        "location": {
+                            "street": "Piran",
+                            "street_number": "5434",
+                            "street_extras": null,
+                            "city": "Capital Federal",
+                            "state": "Capital Federal",
+                            "zipcode": "1130",
+                            "geolocation": {
+                                "lat": -34.5657700000000005502442945726215839385986328125,
+                                "lng": -58.49557999999999680085238651372492313385009765625,
+                                "distance": 907
+                            }
+                        }
                     }
                 ]
             }
@@ -303,8 +303,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 3,
                     "max": 5,
-                    "estimated_delivery": "2026-01-05T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2026-01-06T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "P2D",
@@ -320,12 +320,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 5661.920000000000072759576141834259033203125,
-                    "price_insurance": 7.5,
-                    "price": 5669.420000000000072759576141834259033203125,
-                    "price_incl_tax": 6860,
-                    "seller_price": 5669.420000000000072759576141834259033203125,
-                    "seller_price_incl_tax": 6860
+                    "price_shipment": 5662.2100000000000363797880709171295166015625,
+                    "price_insurance": 513,
+                    "price": 6175.2100000000000363797880709171295166015625,
+                    "price_incl_tax": 7472,
+                    "seller_price": 6175.2100000000000363797880709171295166015625,
+                    "seller_price_incl_tax": 7472
                 },
                 "rate": {
                     "source": "tariff",
@@ -356,8 +356,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 1,
                     "max": 2,
-                    "estimated_delivery": "2025-12-29T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2025-12-30T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "PT0S",
@@ -373,12 +373,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 6203.239999999999781721271574497222900390625,
-                    "price_insurance": 7.5,
-                    "price": 6210.739999999999781721271574497222900390625,
-                    "price_incl_tax": 7515,
-                    "seller_price": 6210.739999999999781721271574497222900390625,
-                    "seller_price_incl_tax": 7515
+                    "price_shipment": 6203.5299999999997453414835035800933837890625,
+                    "price_insurance": 513,
+                    "price": 6716.5299999999997453414835035800933837890625,
+                    "price_incl_tax": 8127,
+                    "seller_price": 6716.5299999999997453414835035800933837890625,
+                    "seller_price_incl_tax": 8127
                 },
                 "rate": {
                     "source": "tariff",
@@ -409,8 +409,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 4,
                     "max": 5,
-                    "estimated_delivery": "2026-01-05T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T21:00:00+00:00",
+                    "estimated_delivery": "2026-01-06T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T21:00:00+00:00",
                     "times": {
                         "preparation": "PT12H",
                         "crossdocking": "PT0S",
@@ -426,12 +426,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 6675.9700000000002546585164964199066162109375,
-                    "price_insurance": 7.5,
-                    "price": 6683.4700000000002546585164964199066162109375,
-                    "price_incl_tax": 8087,
-                    "seller_price": 6683.4700000000002546585164964199066162109375,
-                    "seller_price_incl_tax": 8087
+                    "price_shipment": 6676.260000000000218278728425502777099609375,
+                    "price_insurance": 513,
+                    "price": 7189.260000000000218278728425502777099609375,
+                    "price_incl_tax": 8699,
+                    "seller_price": 7189.260000000000218278728425502777099609375,
+                    "seller_price_incl_tax": 8699
                 },
                 "rate": {
                     "source": "tariff",
@@ -460,25 +460,6 @@
                         }
                     },
                     {
-                        "point_id": 15089,
-                        "description": "Correo Argentino - Villa Urquiza Hulkdrugstore",
-                        "open_hours": null,
-                        "phone": null,
-                        "location": {
-                            "street": "Monroe",
-                            "street_number": "5571",
-                            "street_extras": null,
-                            "city": "Capital Federal",
-                            "state": "Capital Federal",
-                            "zipcode": "1130",
-                            "geolocation": {
-                                "lat": -34.5773334000000005516994860954582691192626953125,
-                                "lng": -58.4917920999999978448613546788692474365234375,
-                                "distance": 601
-                            }
-                        }
-                    },
-                    {
                         "point_id": 37387,
                         "description": "Correo Argentino - Villa Urquiza Maezva",
                         "open_hours": null,
@@ -534,6 +515,25 @@
                                 "distance": 901
                             }
                         }
+                    },
+                    {
+                        "point_id": 5434,
+                        "description": "Correo Argentino - V Urquiza Barroso",
+                        "open_hours": null,
+                        "phone": null,
+                        "location": {
+                            "street": "Piran",
+                            "street_number": "5434",
+                            "street_extras": null,
+                            "city": "Capital Federal",
+                            "state": "Capital Federal",
+                            "zipcode": "1130",
+                            "geolocation": {
+                                "lat": -34.5657700000000005502442945726215839385986328125,
+                                "lng": -58.49557999999999680085238651372492313385009765625,
+                                "distance": 907
+                            }
+                        }
                     }
                 ]
             },
@@ -557,8 +557,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 6,
                     "max": 7,
-                    "estimated_delivery": "2026-01-07T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2026-01-08T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "P2D",
@@ -574,12 +574,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 6870.1899999999995998223312199115753173828125,
-                    "price_insurance": 7.5,
-                    "price": 6877.6899999999995998223312199115753173828125,
-                    "price_incl_tax": 8322,
-                    "seller_price": 6877.6899999999995998223312199115753173828125,
-                    "seller_price_incl_tax": 8322
+                    "price_shipment": 6869.6400000000003274180926382541656494140625,
+                    "price_insurance": 513,
+                    "price": 7382.6400000000003274180926382541656494140625,
+                    "price_incl_tax": 8933,
+                    "seller_price": 7382.6400000000003274180926382541656494140625,
+                    "seller_price_incl_tax": 8933
                 },
                 "rate": {
                     "source": "tariff",
@@ -608,8 +608,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 3,
                     "max": 4,
-                    "estimated_delivery": "2026-01-02T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T21:00:00+00:00",
+                    "estimated_delivery": "2026-01-05T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T21:00:00+00:00",
                     "times": {
                         "preparation": "PT12H",
                         "crossdocking": "PT0S",
@@ -625,12 +625,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 7247.8699999999998908606357872486114501953125,
-                    "price_insurance": 7.5,
-                    "price": 7255.3699999999998908606357872486114501953125,
-                    "price_incl_tax": 8779,
-                    "seller_price": 7255.3699999999998908606357872486114501953125,
-                    "seller_price_incl_tax": 8779
+                    "price_shipment": 7248.15999999999985448084771633148193359375,
+                    "price_insurance": 513,
+                    "price": 7761.15999999999985448084771633148193359375,
+                    "price_incl_tax": 9391,
+                    "seller_price": 7761.15999999999985448084771633148193359375,
+                    "seller_price_incl_tax": 9391
                 },
                 "rate": {
                     "source": "tariff",
@@ -659,8 +659,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 5,
                     "max": 6,
-                    "estimated_delivery": "2026-01-06T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T21:00:00+00:00",
+                    "estimated_delivery": "2026-01-07T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T21:00:00+00:00",
                     "times": {
                         "preparation": "PT12H",
                         "crossdocking": "PT0S",
@@ -676,12 +676,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 7434.649999999999636202119290828704833984375,
-                    "price_insurance": 7.5,
-                    "price": 7442.149999999999636202119290828704833984375,
-                    "price_incl_tax": 9005,
-                    "seller_price": 7442.149999999999636202119290828704833984375,
-                    "seller_price_incl_tax": 9005
+                    "price_shipment": 7434.9300000000002910383045673370361328125,
+                    "price_insurance": 513,
+                    "price": 7947.9300000000002910383045673370361328125,
+                    "price_incl_tax": 9617,
+                    "seller_price": 7947.9300000000002910383045673370361328125,
+                    "seller_price_incl_tax": 9617
                 },
                 "rate": {
                     "source": "tariff",
@@ -706,25 +706,6 @@
                                 "lat": -34.57724209999999942510839900933206081390380859375,
                                 "lng": -58.494347099999998818020685575902462005615234375,
                                 "distance": 437
-                            }
-                        }
-                    },
-                    {
-                        "point_id": 2895,
-                        "description": "Agente Oficial - Punto Oca - Libreria San Andres",
-                        "open_hours": null,
-                        "phone": "4573-3943 (Plank Luc",
-                        "location": {
-                            "street": "Roosevelt",
-                            "street_number": "5621",
-                            "street_extras": null,
-                            "city": "Villa Urquiza",
-                            "state": "Capital Federal",
-                            "zipcode": "1419",
-                            "geolocation": {
-                                "lat": -34.5764750000000020691004465334117412567138671875,
-                                "lng": -58.4931100000000014915713109076023101806640625,
-                                "distance": 438
                             }
                         }
                     },
@@ -784,6 +765,25 @@
                                 "distance": 1270
                             }
                         }
+                    },
+                    {
+                        "point_id": 51356,
+                        "description": "Agente Oficial - Punto Oca - Rapipago",
+                        "open_hours": null,
+                        "phone": null,
+                        "location": {
+                            "street": "Avenida Albarellos",
+                            "street_number": "2928",
+                            "street_extras": null,
+                            "city": "Saavedra",
+                            "state": "Capital Federal",
+                            "zipcode": "1429",
+                            "geolocation": {
+                                "lat": -34.57799680000000108748281490989029407501220703125,
+                                "lng": -58.5103318999999970628778100945055484771728515625,
+                                "distance": 1326
+                            }
+                        }
                     }
                 ]
             },
@@ -807,8 +807,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 6,
                     "max": 8,
-                    "estimated_delivery": "2026-01-08T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2026-01-09T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "P2D",
@@ -824,12 +824,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 7974.3199999999997089616954326629638671875,
-                    "price_insurance": 7.5,
-                    "price": 7981.8199999999997089616954326629638671875,
-                    "price_incl_tax": 9658,
-                    "seller_price": 7981.8199999999997089616954326629638671875,
-                    "seller_price_incl_tax": 9658
+                    "price_shipment": 7974.600000000000363797880709171295166015625,
+                    "price_insurance": 513,
+                    "price": 8487.600000000000363797880709171295166015625,
+                    "price_incl_tax": 10270,
+                    "seller_price": 8487.600000000000363797880709171295166015625,
+                    "seller_price_incl_tax": 10270
                 },
                 "rate": {
                     "source": "tariff",
@@ -854,25 +854,6 @@
                                 "lat": -34.5741062000000027865098672918975353240966796875,
                                 "lng": -58.4991557999999969297277857549488544464111328125,
                                 "distance": 222
-                            }
-                        }
-                    },
-                    {
-                        "point_id": 15089,
-                        "description": "Correo Argentino - Villa Urquiza Hulkdrugstore",
-                        "open_hours": null,
-                        "phone": null,
-                        "location": {
-                            "street": "Monroe",
-                            "street_number": "5571",
-                            "street_extras": null,
-                            "city": "Capital Federal",
-                            "state": "Capital Federal",
-                            "zipcode": "1130",
-                            "geolocation": {
-                                "lat": -34.5773334000000005516994860954582691192626953125,
-                                "lng": -58.4917920999999978448613546788692474365234375,
-                                "distance": 601
                             }
                         }
                     },
@@ -932,6 +913,25 @@
                                 "distance": 901
                             }
                         }
+                    },
+                    {
+                        "point_id": 5434,
+                        "description": "Correo Argentino - V Urquiza Barroso",
+                        "open_hours": null,
+                        "phone": null,
+                        "location": {
+                            "street": "Piran",
+                            "street_number": "5434",
+                            "street_extras": null,
+                            "city": "Capital Federal",
+                            "state": "Capital Federal",
+                            "zipcode": "1130",
+                            "geolocation": {
+                                "lat": -34.5657700000000005502442945726215839385986328125,
+                                "lng": -58.49557999999999680085238651372492313385009765625,
+                                "distance": 907
+                            }
+                        }
                     }
                 ]
             },
@@ -955,8 +955,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 7,
                     "max": 10,
-                    "estimated_delivery": "2026-01-12T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2026-01-13T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "P2D",
@@ -972,12 +972,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 8990.02000000000043655745685100555419921875,
-                    "price_insurance": 7.5,
-                    "price": 8997.52000000000043655745685100555419921875,
-                    "price_incl_tax": 10887,
-                    "seller_price": 8997.52000000000043655745685100555419921875,
-                    "seller_price_incl_tax": 10887
+                    "price_shipment": 8990.309999999999490682967007160186767578125,
+                    "price_insurance": 513,
+                    "price": 9503.309999999999490682967007160186767578125,
+                    "price_incl_tax": 11499,
+                    "seller_price": 9503.309999999999490682967007160186767578125,
+                    "seller_price_incl_tax": 11499
                 },
                 "rate": {
                     "source": "tariff",
@@ -1002,25 +1002,6 @@
                                 "lat": -34.57724209999999942510839900933206081390380859375,
                                 "lng": -58.494347099999998818020685575902462005615234375,
                                 "distance": 437
-                            }
-                        }
-                    },
-                    {
-                        "point_id": 2895,
-                        "description": "Agente Oficial - Punto Oca - Libreria San Andres",
-                        "open_hours": null,
-                        "phone": "4573-3943 (Plank Luc",
-                        "location": {
-                            "street": "Roosevelt",
-                            "street_number": "5621",
-                            "street_extras": null,
-                            "city": "Villa Urquiza",
-                            "state": "Capital Federal",
-                            "zipcode": "1419",
-                            "geolocation": {
-                                "lat": -34.5764750000000020691004465334117412567138671875,
-                                "lng": -58.4931100000000014915713109076023101806640625,
-                                "distance": 438
                             }
                         }
                     },
@@ -1080,6 +1061,25 @@
                                 "distance": 1270
                             }
                         }
+                    },
+                    {
+                        "point_id": 51356,
+                        "description": "Agente Oficial - Punto Oca - Rapipago",
+                        "open_hours": null,
+                        "phone": null,
+                        "location": {
+                            "street": "Avenida Albarellos",
+                            "street_number": "2928",
+                            "street_extras": null,
+                            "city": "Saavedra",
+                            "state": "Capital Federal",
+                            "zipcode": "1429",
+                            "geolocation": {
+                                "lat": -34.57799680000000108748281490989029407501220703125,
+                                "lng": -58.5103318999999970628778100945055484771728515625,
+                                "distance": 1326
+                            }
+                        }
                     }
                 ]
             },
@@ -1103,8 +1103,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 7,
                     "max": 10,
-                    "estimated_delivery": "2026-01-12T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2026-01-13T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "P2D",
@@ -1120,12 +1120,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 10775.139999999999417923390865325927734375,
-                    "price_insurance": 7.5,
-                    "price": 10782.639999999999417923390865325927734375,
-                    "price_incl_tax": 13047,
-                    "seller_price": 10782.639999999999417923390865325927734375,
-                    "seller_price_incl_tax": 13047
+                    "price_shipment": 10775.4300000000002910383045673370361328125,
+                    "price_insurance": 513,
+                    "price": 11288.4300000000002910383045673370361328125,
+                    "price_incl_tax": 13659,
+                    "seller_price": 11288.4300000000002910383045673370361328125,
+                    "seller_price_incl_tax": 13659
                 },
                 "rate": {
                     "source": "tariff",
@@ -1154,8 +1154,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 4,
                     "max": 5,
-                    "estimated_delivery": "2026-01-05T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T21:00:00+00:00",
+                    "estimated_delivery": "2026-01-06T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T21:00:00+00:00",
                     "times": {
                         "preparation": "PT12H",
                         "crossdocking": "PT0S",
@@ -1171,12 +1171,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 11597.4599999999991268850862979888916015625,
-                    "price_insurance": 7.5,
-                    "price": 11604.9599999999991268850862979888916015625,
-                    "price_incl_tax": 14042,
-                    "seller_price": 11604.9599999999991268850862979888916015625,
-                    "seller_price_incl_tax": 14042
+                    "price_shipment": 11597.739999999999781721271574497222900390625,
+                    "price_insurance": 513,
+                    "price": 12110.739999999999781721271574497222900390625,
+                    "price_incl_tax": 14654,
+                    "seller_price": 12110.739999999999781721271574497222900390625,
+                    "seller_price_incl_tax": 14654
                 },
                 "rate": {
                     "source": "tariff",
@@ -1205,8 +1205,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 6,
                     "max": 8,
-                    "estimated_delivery": "2026-01-08T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2026-01-09T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "P2D",
@@ -1222,12 +1222,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 12895.809999999999490682967007160186767578125,
-                    "price_insurance": 7.5,
-                    "price": 12903.309999999999490682967007160186767578125,
-                    "price_incl_tax": 15613,
-                    "seller_price": 12903.309999999999490682967007160186767578125,
-                    "seller_price_incl_tax": 15613
+                    "price_shipment": 12896.09000000000014551915228366851806640625,
+                    "price_insurance": 513,
+                    "price": 13409.09000000000014551915228366851806640625,
+                    "price_incl_tax": 16225,
+                    "seller_price": 13409.09000000000014551915228366851806640625,
+                    "seller_price_incl_tax": 16225
                 },
                 "rate": {
                     "source": "tariff",
@@ -1256,8 +1256,8 @@
                     "warning": "Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times",
                     "min": 4,
                     "max": 5,
-                    "estimated_delivery": "2026-01-05T23:59:00+00:00",
-                    "estimation_expires_at": "2025-12-26T19:00:00+00:00",
+                    "estimated_delivery": "2026-01-06T23:59:00+00:00",
+                    "estimation_expires_at": "2025-12-29T19:00:00+00:00",
                     "times": {
                         "preparation": "PT10H",
                         "crossdocking": "P2D",
@@ -1273,12 +1273,12 @@
                     }
                 },
                 "amounts": {
-                    "price_shipment": 33268.52999999999883584678173065185546875,
-                    "price_insurance": 7.5,
-                    "price": 33276.02999999999883584678173065185546875,
-                    "price_incl_tax": 40264,
-                    "seller_price": 33276.02999999999883584678173065185546875,
-                    "seller_price_incl_tax": 40264
+                    "price_shipment": 33268.8199999999997089616954326629638671875,
+                    "price_insurance": 513,
+                    "price": 33781.8199999999997089616954326629638671875,
+                    "price_incl_tax": 40876,
+                    "seller_price": 33781.8199999999997089616954326629638671875,
+                    "seller_price_incl_tax": 40876
                 },
                 "rate": {
                     "source": "tariff",
@@ -1290,5 +1290,5 @@
         ]
     },
     "error": null,
-    "raw_response": "{\"sorted_by\":\"price\",\"origin\":{\"location_id\":373621,\"name\":\"PEU Cuchillos\",\"geolocation\":{\"lat\":-34.5985795,\"lng\":-58.3798587}},\"destination\":{\"id\":49,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"country\":\"Argentina\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5738641,\"lng\":-58.4967041}},\"declared_value\":500,\"packages\":[{\"descriptions\":[\"Producto del carrito\"],\"weight\":1000,\"height\":10,\"width\":10,\"length\":10,\"volume\":1000,\"sku_id\":null,\"classification_id\":1,\"items\":[{\"sku_id\":null,\"sku_code\":null,\"description\":\"Producto del carrito\",\"tax_class_code\":null,\"quantity\":1,\"weight\":1000,\"must_keep_vertical\":false,\"width\":10,\"length\":10,\"height\":10,\"pos_x\":0,\"pos_y\":0,\"pos_z\":0}],\"container\":null,\"tax_class_code\":null}],\"results\":{\"standard_delivery\":{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":323,\"name\":\"Cabify Logistics\",\"rating\":0.98,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/cabify-logistics\\\/PmyjnSd26Bfd4UciQ1E7IlTtAZfT6CgMJInLSC8U.svg\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":3,\"max\":5,\"estimated_delivery\":\"2026-01-05T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"PT1S\",\"max\":\"P2D\",\"unadjusted\":null},\"total\":{\"min\":\"P2DT10H1S\",\"max\":\"P4DT10H\"}}},\"amounts\":{\"price_shipment\":5661.92,\"price_insurance\":7.5,\"price\":5669.42,\"price_incl_tax\":6860,\"seller_price\":5669.42,\"seller_price_incl_tax\":6860},\"rate\":{\"source\":\"tariff\",\"id\":181009,\"tariff_id\":5403},\"tags\":[\"cheapest\"]},\"pickup_point\":{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":4,\"max\":5,\"estimated_delivery\":\"2026-01-05T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P4D\",\"unadjusted\":null},\"total\":{\"min\":\"P3DT12H\",\"max\":\"P4DT12H\"}}},\"amounts\":{\"price_shipment\":6675.97,\"price_insurance\":7.5,\"price\":6683.47,\"price_incl_tax\":8087,\"seller_price\":6683.47,\"seller_price_incl_tax\":8087},\"rate\":{\"source\":\"tariff\",\"id\":148204,\"tariff_id\":421},\"tags\":[],\"pickup_points\":[{\"point_id\":50928,\"description\":\"Correo Argentino - V. Urquiza Hiper Hogar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Congreso\",\"street_number\":\"5829\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5741062,\"lng\":-58.4991558,\"distance\":222}}},{\"point_id\":15089,\"description\":\"Correo Argentino - Villa Urquiza Hulkdrugstore\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Monroe\",\"street_number\":\"5571\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5773334,\"lng\":-58.4917921,\"distance\":601}}},{\"point_id\":37387,\"description\":\"Correo Argentino - Villa Urquiza Maezva\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":39207,\"description\":\"Correo Argentino - Villa Pueyrredon Todo Silicona\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Gral Jose G Artigas\",\"street_number\":\"5067\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5805307,\"lng\":-58.5001941,\"distance\":807}}},{\"point_id\":51606,\"description\":\"Correo Argentino - Villa Pueyrredon Ks Bazar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Carlos Antonio Lopez\",\"street_number\":\"2394\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.581902,\"lng\":-58.497048,\"distance\":901}}}]}},\"all_results\":[{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":323,\"name\":\"Cabify Logistics\",\"rating\":0.98,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/cabify-logistics\\\/PmyjnSd26Bfd4UciQ1E7IlTtAZfT6CgMJInLSC8U.svg\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":3,\"max\":5,\"estimated_delivery\":\"2026-01-05T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"PT1S\",\"max\":\"P2D\",\"unadjusted\":null},\"total\":{\"min\":\"P2DT10H1S\",\"max\":\"P4DT10H\"}}},\"amounts\":{\"price_shipment\":5661.92,\"price_insurance\":7.5,\"price\":5669.42,\"price_incl_tax\":6860,\"seller_price\":5669.42,\"seller_price_incl_tax\":6860},\"rate\":{\"source\":\"tariff\",\"id\":181009,\"tariff_id\":5403},\"tags\":[\"cheapest\"]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":234,\"name\":\"Toparco\",\"rating\":0.97,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/toparco\\\/ae26g7uhgPg4xqTH775QblR11EDNDR3SVGenRk1v.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":1,\"max\":2,\"estimated_delivery\":\"2025-12-29T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"PT1S\",\"max\":\"P1D\",\"unadjusted\":null},\"total\":{\"min\":\"PT10H1S\",\"max\":\"P1DT10H\"}}},\"amounts\":{\"price_shipment\":6203.24,\"price_insurance\":7.5,\"price\":6210.74,\"price_incl_tax\":7515,\"seller_price\":6210.74,\"seller_price_incl_tax\":7515},\"rate\":{\"source\":\"tariff\",\"id\":198390,\"tariff_id\":4787},\"tags\":[\"fastest\"]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":4,\"max\":5,\"estimated_delivery\":\"2026-01-05T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P4D\",\"unadjusted\":null},\"total\":{\"min\":\"P3DT12H\",\"max\":\"P4DT12H\"}}},\"amounts\":{\"price_shipment\":6675.97,\"price_insurance\":7.5,\"price\":6683.47,\"price_incl_tax\":8087,\"seller_price\":6683.47,\"seller_price_incl_tax\":8087},\"rate\":{\"source\":\"tariff\",\"id\":148204,\"tariff_id\":421},\"tags\":[],\"pickup_points\":[{\"point_id\":50928,\"description\":\"Correo Argentino - V. Urquiza Hiper Hogar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Congreso\",\"street_number\":\"5829\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5741062,\"lng\":-58.4991558,\"distance\":222}}},{\"point_id\":15089,\"description\":\"Correo Argentino - Villa Urquiza Hulkdrugstore\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Monroe\",\"street_number\":\"5571\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5773334,\"lng\":-58.4917921,\"distance\":601}}},{\"point_id\":37387,\"description\":\"Correo Argentino - Villa Urquiza Maezva\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":39207,\"description\":\"Correo Argentino - Villa Pueyrredon Todo Silicona\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Gral Jose G Artigas\",\"street_number\":\"5067\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5805307,\"lng\":-58.5001941,\"distance\":807}}},{\"point_id\":51606,\"description\":\"Correo Argentino - Villa Pueyrredon Ks Bazar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Carlos Antonio Lopez\",\"street_number\":\"2394\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.581902,\"lng\":-58.497048,\"distance\":901}}}]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":241,\"name\":\"QX Log\\u00edstica\",\"rating\":0.98,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/qx-logistica\\\/oTJwkDEF0gUdCRDy7YEWnqNXcQRE4Zel5ywvpVWR.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":6,\"max\":7,\"estimated_delivery\":\"2026-01-07T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P4D\",\"unadjusted\":null},\"total\":{\"min\":\"P5DT10H\",\"max\":\"P6DT10H\"}}},\"amounts\":{\"price_shipment\":6870.19,\"price_insurance\":7.5,\"price\":6877.69,\"price_incl_tax\":8322,\"seller_price\":6877.69,\"seller_price_incl_tax\":8322},\"rate\":{\"source\":\"tariff\",\"id\":164243,\"tariff_id\":1119},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":3,\"max\":4,\"estimated_delivery\":\"2026-01-02T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P2D\",\"max\":\"P3D\",\"unadjusted\":null},\"total\":{\"min\":\"P2DT12H\",\"max\":\"P3DT12H\"}}},\"amounts\":{\"price_shipment\":7247.87,\"price_insurance\":7.5,\"price\":7255.37,\"price_incl_tax\":8779,\"seller_price\":7255.37,\"seller_price_incl_tax\":8779},\"rate\":{\"source\":\"tariff\",\"id\":null,\"tariff_id\":84},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":5,\"max\":6,\"estimated_delivery\":\"2026-01-06T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P4D\",\"max\":\"P5D\",\"unadjusted\":null},\"total\":{\"min\":\"P4DT12H\",\"max\":\"P5DT12H\"}}},\"amounts\":{\"price_shipment\":7434.65,\"price_insurance\":7.5,\"price\":7442.15,\"price_incl_tax\":9005,\"seller_price\":7442.15,\"seller_price_incl_tax\":9005},\"rate\":{\"source\":\"tariff\",\"id\":79679,\"tariff_id\":1366},\"tags\":[],\"pickup_points\":[{\"point_id\":43931,\"description\":\"OCA Locker - Smartlocker Oca - Carrefour Urquiza R\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Franklin D. Roosevelt\",\"street_number\":\"5749\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5772421,\"lng\":-58.4943471,\"distance\":437}}},{\"point_id\":2895,\"description\":\"Agente Oficial - Punto Oca - Libreria San Andres\",\"open_hours\":null,\"phone\":\"4573-3943 (Plank Luc\",\"location\":{\"street\":\"Roosevelt\",\"street_number\":\"5621\",\"street_extras\":null,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.576475,\"lng\":-58.49311,\"distance\":438}}},{\"point_id\":9207,\"description\":\"Agente Oficial - Punto Oca - Rapipago\",\"open_hours\":null,\"phone\":\"45459787\\\/1554017242\",\"location\":{\"street\":\"Av. Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":7268,\"description\":\"Agente Oficial - Punto Oca - Davanzo Carlos August\",\"open_hours\":null,\"phone\":\"1569639331\",\"location\":{\"street\":\"Av. De Los Constituyentes\",\"street_number\":\"5956\",\"street_extras\":null,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5725406,\"lng\":-58.5049795,\"distance\":764}}},{\"point_id\":34418,\"description\":\"Agente Oficial - Punto Oca - Parodi Silvia\",\"open_hours\":null,\"phone\":\"4572-1186\",\"location\":{\"street\":\"Av. Albarellos\",\"street_number\":\"2889\",\"street_extras\":null,\"city\":\"Villa Pueyrredon\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5773272,\"lng\":-58.5099138,\"distance\":1270}}}]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":6,\"max\":8,\"estimated_delivery\":\"2026-01-08T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P5D\",\"unadjusted\":null},\"total\":{\"min\":\"P5DT10H\",\"max\":\"P7DT10H\"}}},\"amounts\":{\"price_shipment\":7974.32,\"price_insurance\":7.5,\"price\":7981.82,\"price_incl_tax\":9658,\"seller_price\":7981.82,\"seller_price_incl_tax\":9658},\"rate\":{\"source\":\"tariff\",\"id\":148200,\"tariff_id\":420},\"tags\":[],\"pickup_points\":[{\"point_id\":50928,\"description\":\"Correo Argentino - V. Urquiza Hiper Hogar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Congreso\",\"street_number\":\"5829\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5741062,\"lng\":-58.4991558,\"distance\":222}}},{\"point_id\":15089,\"description\":\"Correo Argentino - Villa Urquiza Hulkdrugstore\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Monroe\",\"street_number\":\"5571\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5773334,\"lng\":-58.4917921,\"distance\":601}}},{\"point_id\":37387,\"description\":\"Correo Argentino - Villa Urquiza Maezva\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":39207,\"description\":\"Correo Argentino - Villa Pueyrredon Todo Silicona\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Gral Jose G Artigas\",\"street_number\":\"5067\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5805307,\"lng\":-58.5001941,\"distance\":807}}},{\"point_id\":51606,\"description\":\"Correo Argentino - Villa Pueyrredon Ks Bazar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Carlos Antonio Lopez\",\"street_number\":\"2394\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.581902,\"lng\":-58.497048,\"distance\":901}}}]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":7,\"max\":10,\"estimated_delivery\":\"2026-01-12T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P4D\",\"max\":\"P7D\",\"unadjusted\":null},\"total\":{\"min\":\"P6DT10H\",\"max\":\"P9DT10H\"}}},\"amounts\":{\"price_shipment\":8990.02,\"price_insurance\":7.5,\"price\":8997.52,\"price_incl_tax\":10887,\"seller_price\":8997.52,\"seller_price_incl_tax\":10887},\"rate\":{\"source\":\"tariff\",\"id\":101808,\"tariff_id\":2946},\"tags\":[],\"pickup_points\":[{\"point_id\":43931,\"description\":\"OCA Locker - Smartlocker Oca - Carrefour Urquiza R\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Franklin D. Roosevelt\",\"street_number\":\"5749\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5772421,\"lng\":-58.4943471,\"distance\":437}}},{\"point_id\":2895,\"description\":\"Agente Oficial - Punto Oca - Libreria San Andres\",\"open_hours\":null,\"phone\":\"4573-3943 (Plank Luc\",\"location\":{\"street\":\"Roosevelt\",\"street_number\":\"5621\",\"street_extras\":null,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.576475,\"lng\":-58.49311,\"distance\":438}}},{\"point_id\":9207,\"description\":\"Agente Oficial - Punto Oca - Rapipago\",\"open_hours\":null,\"phone\":\"45459787\\\/1554017242\",\"location\":{\"street\":\"Av. Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":7268,\"description\":\"Agente Oficial - Punto Oca - Davanzo Carlos August\",\"open_hours\":null,\"phone\":\"1569639331\",\"location\":{\"street\":\"Av. De Los Constituyentes\",\"street_number\":\"5956\",\"street_extras\":null,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5725406,\"lng\":-58.5049795,\"distance\":764}}},{\"point_id\":34418,\"description\":\"Agente Oficial - Punto Oca - Parodi Silvia\",\"open_hours\":null,\"phone\":\"4572-1186\",\"location\":{\"street\":\"Av. Albarellos\",\"street_number\":\"2889\",\"street_extras\":null,\"city\":\"Villa Pueyrredon\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5773272,\"lng\":-58.5099138,\"distance\":1270}}}]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":7,\"max\":10,\"estimated_delivery\":\"2026-01-12T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P4D\",\"max\":\"P7D\",\"unadjusted\":null},\"total\":{\"min\":\"P6DT10H\",\"max\":\"P9DT10H\"}}},\"amounts\":{\"price_shipment\":10775.14,\"price_insurance\":7.5,\"price\":10782.64,\"price_incl_tax\":13047,\"seller_price\":10782.64,\"seller_price_incl_tax\":13047},\"rate\":{\"source\":\"tariff\",\"id\":163872,\"tariff_id\":1141},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":4,\"max\":5,\"estimated_delivery\":\"2026-01-05T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P4D\",\"unadjusted\":null},\"total\":{\"min\":\"P3DT12H\",\"max\":\"P4DT12H\"}}},\"amounts\":{\"price_shipment\":11597.46,\"price_insurance\":7.5,\"price\":11604.96,\"price_incl_tax\":14042,\"seller_price\":11604.96,\"seller_price_incl_tax\":14042},\"rate\":{\"source\":\"tariff\",\"id\":148104,\"tariff_id\":422},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":6,\"max\":8,\"estimated_delivery\":\"2026-01-08T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P5D\",\"unadjusted\":null},\"total\":{\"min\":\"P5DT10H\",\"max\":\"P7DT10H\"}}},\"amounts\":{\"price_shipment\":12895.81,\"price_insurance\":7.5,\"price\":12903.31,\"price_incl_tax\":15613,\"seller_price\":12903.31,\"seller_price_incl_tax\":15613},\"rate\":{\"source\":\"tariff\",\"id\":148100,\"tariff_id\":417},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":220,\"name\":\"Malargue\",\"rating\":0.98,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/malargue\\\/gzHM0KZOWMtDbd0svUiRJpiExH9uIQsAa3n8auke.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":4,\"max\":5,\"estimated_delivery\":\"2026-01-05T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-26T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P1D\",\"max\":\"P2D\",\"unadjusted\":null},\"total\":{\"min\":\"P3DT10H\",\"max\":\"P4DT10H\"}}},\"amounts\":{\"price_shipment\":33268.53,\"price_insurance\":7.5,\"price\":33276.03,\"price_incl_tax\":40264,\"seller_price\":33276.03,\"seller_price_incl_tax\":40264},\"rate\":{\"source\":\"tariff\",\"id\":179941,\"tariff_id\":5556},\"tags\":[]}]}"
+    "raw_response": "{\"sorted_by\":\"price\",\"origin\":{\"location_id\":373621,\"name\":\"PEU Cuchillos\",\"geolocation\":{\"lat\":-34.5985795,\"lng\":-58.3798587}},\"destination\":{\"id\":49,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"country\":\"Argentina\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5738641,\"lng\":-58.4967041}},\"declared_value\":34200,\"packages\":[{\"descriptions\":[\"Producto del carrito\"],\"weight\":1000,\"height\":10,\"width\":10,\"length\":10,\"volume\":1000,\"sku_id\":null,\"classification_id\":1,\"items\":[{\"sku_id\":null,\"sku_code\":null,\"description\":\"Producto del carrito\",\"tax_class_code\":null,\"quantity\":1,\"weight\":1000,\"must_keep_vertical\":false,\"width\":10,\"length\":10,\"height\":10,\"pos_x\":0,\"pos_y\":0,\"pos_z\":0}],\"container\":null,\"tax_class_code\":null}],\"results\":{\"standard_delivery\":{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":323,\"name\":\"Cabify Logistics\",\"rating\":0.98,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/cabify-logistics\\\/PmyjnSd26Bfd4UciQ1E7IlTtAZfT6CgMJInLSC8U.svg\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":3,\"max\":5,\"estimated_delivery\":\"2026-01-06T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"PT1S\",\"max\":\"P2D\",\"unadjusted\":null},\"total\":{\"min\":\"P2DT10H1S\",\"max\":\"P4DT10H\"}}},\"amounts\":{\"price_shipment\":5662.21,\"price_insurance\":513,\"price\":6175.21,\"price_incl_tax\":7472,\"seller_price\":6175.21,\"seller_price_incl_tax\":7472},\"rate\":{\"source\":\"tariff\",\"id\":181009,\"tariff_id\":5403},\"tags\":[\"cheapest\"]},\"pickup_point\":{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":4,\"max\":5,\"estimated_delivery\":\"2026-01-06T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P4D\",\"unadjusted\":null},\"total\":{\"min\":\"P3DT12H\",\"max\":\"P4DT12H\"}}},\"amounts\":{\"price_shipment\":6676.26,\"price_insurance\":513,\"price\":7189.26,\"price_incl_tax\":8699,\"seller_price\":7189.26,\"seller_price_incl_tax\":8699},\"rate\":{\"source\":\"tariff\",\"id\":148204,\"tariff_id\":421},\"tags\":[],\"pickup_points\":[{\"point_id\":50928,\"description\":\"Correo Argentino - V. Urquiza Hiper Hogar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Congreso\",\"street_number\":\"5829\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5741062,\"lng\":-58.4991558,\"distance\":222}}},{\"point_id\":37387,\"description\":\"Correo Argentino - Villa Urquiza Maezva\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":39207,\"description\":\"Correo Argentino - Villa Pueyrredon Todo Silicona\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Gral Jose G Artigas\",\"street_number\":\"5067\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5805307,\"lng\":-58.5001941,\"distance\":807}}},{\"point_id\":51606,\"description\":\"Correo Argentino - Villa Pueyrredon Ks Bazar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Carlos Antonio Lopez\",\"street_number\":\"2394\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.581902,\"lng\":-58.497048,\"distance\":901}}},{\"point_id\":5434,\"description\":\"Correo Argentino - V Urquiza Barroso\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Piran\",\"street_number\":\"5434\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.56577,\"lng\":-58.49558,\"distance\":907}}}]}},\"all_results\":[{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":323,\"name\":\"Cabify Logistics\",\"rating\":0.98,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/cabify-logistics\\\/PmyjnSd26Bfd4UciQ1E7IlTtAZfT6CgMJInLSC8U.svg\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":3,\"max\":5,\"estimated_delivery\":\"2026-01-06T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"PT1S\",\"max\":\"P2D\",\"unadjusted\":null},\"total\":{\"min\":\"P2DT10H1S\",\"max\":\"P4DT10H\"}}},\"amounts\":{\"price_shipment\":5662.21,\"price_insurance\":513,\"price\":6175.21,\"price_incl_tax\":7472,\"seller_price\":6175.21,\"seller_price_incl_tax\":7472},\"rate\":{\"source\":\"tariff\",\"id\":181009,\"tariff_id\":5403},\"tags\":[\"cheapest\"]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":234,\"name\":\"Toparco\",\"rating\":0.97,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/toparco\\\/ae26g7uhgPg4xqTH775QblR11EDNDR3SVGenRk1v.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":1,\"max\":2,\"estimated_delivery\":\"2025-12-30T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"PT1S\",\"max\":\"P1D\",\"unadjusted\":null},\"total\":{\"min\":\"PT10H1S\",\"max\":\"P1DT10H\"}}},\"amounts\":{\"price_shipment\":6203.53,\"price_insurance\":513,\"price\":6716.53,\"price_incl_tax\":8127,\"seller_price\":6716.53,\"seller_price_incl_tax\":8127},\"rate\":{\"source\":\"tariff\",\"id\":198390,\"tariff_id\":4787},\"tags\":[\"fastest\"]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":4,\"max\":5,\"estimated_delivery\":\"2026-01-06T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P4D\",\"unadjusted\":null},\"total\":{\"min\":\"P3DT12H\",\"max\":\"P4DT12H\"}}},\"amounts\":{\"price_shipment\":6676.26,\"price_insurance\":513,\"price\":7189.26,\"price_incl_tax\":8699,\"seller_price\":7189.26,\"seller_price_incl_tax\":8699},\"rate\":{\"source\":\"tariff\",\"id\":148204,\"tariff_id\":421},\"tags\":[],\"pickup_points\":[{\"point_id\":50928,\"description\":\"Correo Argentino - V. Urquiza Hiper Hogar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Congreso\",\"street_number\":\"5829\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5741062,\"lng\":-58.4991558,\"distance\":222}}},{\"point_id\":37387,\"description\":\"Correo Argentino - Villa Urquiza Maezva\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":39207,\"description\":\"Correo Argentino - Villa Pueyrredon Todo Silicona\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Gral Jose G Artigas\",\"street_number\":\"5067\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5805307,\"lng\":-58.5001941,\"distance\":807}}},{\"point_id\":51606,\"description\":\"Correo Argentino - Villa Pueyrredon Ks Bazar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Carlos Antonio Lopez\",\"street_number\":\"2394\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.581902,\"lng\":-58.497048,\"distance\":901}}},{\"point_id\":5434,\"description\":\"Correo Argentino - V Urquiza Barroso\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Piran\",\"street_number\":\"5434\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.56577,\"lng\":-58.49558,\"distance\":907}}}]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":241,\"name\":\"QX Log\\u00edstica\",\"rating\":0.98,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/qx-logistica\\\/oTJwkDEF0gUdCRDy7YEWnqNXcQRE4Zel5ywvpVWR.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":6,\"max\":7,\"estimated_delivery\":\"2026-01-08T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P4D\",\"unadjusted\":null},\"total\":{\"min\":\"P5DT10H\",\"max\":\"P6DT10H\"}}},\"amounts\":{\"price_shipment\":6869.64,\"price_insurance\":513,\"price\":7382.64,\"price_incl_tax\":8933,\"seller_price\":7382.64,\"seller_price_incl_tax\":8933},\"rate\":{\"source\":\"tariff\",\"id\":164243,\"tariff_id\":1119},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":3,\"max\":4,\"estimated_delivery\":\"2026-01-05T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P2D\",\"max\":\"P3D\",\"unadjusted\":null},\"total\":{\"min\":\"P2DT12H\",\"max\":\"P3DT12H\"}}},\"amounts\":{\"price_shipment\":7248.16,\"price_insurance\":513,\"price\":7761.16,\"price_incl_tax\":9391,\"seller_price\":7761.16,\"seller_price_incl_tax\":9391},\"rate\":{\"source\":\"tariff\",\"id\":null,\"tariff_id\":84},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":5,\"max\":6,\"estimated_delivery\":\"2026-01-07T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P4D\",\"max\":\"P5D\",\"unadjusted\":null},\"total\":{\"min\":\"P4DT12H\",\"max\":\"P5DT12H\"}}},\"amounts\":{\"price_shipment\":7434.93,\"price_insurance\":513,\"price\":7947.93,\"price_incl_tax\":9617,\"seller_price\":7947.93,\"seller_price_incl_tax\":9617},\"rate\":{\"source\":\"tariff\",\"id\":79679,\"tariff_id\":1366},\"tags\":[],\"pickup_points\":[{\"point_id\":43931,\"description\":\"OCA Locker - Smartlocker Oca - Carrefour Urquiza R\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Franklin D. Roosevelt\",\"street_number\":\"5749\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5772421,\"lng\":-58.4943471,\"distance\":437}}},{\"point_id\":9207,\"description\":\"Agente Oficial - Punto Oca - Rapipago\",\"open_hours\":null,\"phone\":\"45459787\\\/1554017242\",\"location\":{\"street\":\"Av. Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":7268,\"description\":\"Agente Oficial - Punto Oca - Davanzo Carlos August\",\"open_hours\":null,\"phone\":\"1569639331\",\"location\":{\"street\":\"Av. De Los Constituyentes\",\"street_number\":\"5956\",\"street_extras\":null,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5725406,\"lng\":-58.5049795,\"distance\":764}}},{\"point_id\":34418,\"description\":\"Agente Oficial - Punto Oca - Parodi Silvia\",\"open_hours\":null,\"phone\":\"4572-1186\",\"location\":{\"street\":\"Av. Albarellos\",\"street_number\":\"2889\",\"street_extras\":null,\"city\":\"Villa Pueyrredon\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5773272,\"lng\":-58.5099138,\"distance\":1270}}},{\"point_id\":51356,\"description\":\"Agente Oficial - Punto Oca - Rapipago\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Avenida Albarellos\",\"street_number\":\"2928\",\"street_extras\":null,\"city\":\"Saavedra\",\"state\":\"Capital Federal\",\"zipcode\":\"1429\",\"geolocation\":{\"lat\":-34.5779968,\"lng\":-58.5103319,\"distance\":1326}}}]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":6,\"max\":8,\"estimated_delivery\":\"2026-01-09T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P5D\",\"unadjusted\":null},\"total\":{\"min\":\"P5DT10H\",\"max\":\"P7DT10H\"}}},\"amounts\":{\"price_shipment\":7974.6,\"price_insurance\":513,\"price\":8487.6,\"price_incl_tax\":10270,\"seller_price\":8487.6,\"seller_price_incl_tax\":10270},\"rate\":{\"source\":\"tariff\",\"id\":148200,\"tariff_id\":420},\"tags\":[],\"pickup_points\":[{\"point_id\":50928,\"description\":\"Correo Argentino - V. Urquiza Hiper Hogar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Congreso\",\"street_number\":\"5829\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5741062,\"lng\":-58.4991558,\"distance\":222}}},{\"point_id\":37387,\"description\":\"Correo Argentino - Villa Urquiza Maezva\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Av Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":39207,\"description\":\"Correo Argentino - Villa Pueyrredon Todo Silicona\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Gral Jose G Artigas\",\"street_number\":\"5067\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5805307,\"lng\":-58.5001941,\"distance\":807}}},{\"point_id\":51606,\"description\":\"Correo Argentino - Villa Pueyrredon Ks Bazar\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Carlos Antonio Lopez\",\"street_number\":\"2394\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.581902,\"lng\":-58.497048,\"distance\":901}}},{\"point_id\":5434,\"description\":\"Correo Argentino - V Urquiza Barroso\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Piran\",\"street_number\":\"5434\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.56577,\"lng\":-58.49558,\"distance\":907}}}]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"service_type\":{\"id\":9,\"code\":\"pickup_point\",\"name\":\"Entrega en punto de entrega\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":7,\"max\":10,\"estimated_delivery\":\"2026-01-13T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P4D\",\"max\":\"P7D\",\"unadjusted\":null},\"total\":{\"min\":\"P6DT10H\",\"max\":\"P9DT10H\"}}},\"amounts\":{\"price_shipment\":8990.31,\"price_insurance\":513,\"price\":9503.31,\"price_incl_tax\":11499,\"seller_price\":9503.31,\"seller_price_incl_tax\":11499},\"rate\":{\"source\":\"tariff\",\"id\":101808,\"tariff_id\":2946},\"tags\":[],\"pickup_points\":[{\"point_id\":43931,\"description\":\"OCA Locker - Smartlocker Oca - Carrefour Urquiza R\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Franklin D. Roosevelt\",\"street_number\":\"5749\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.5772421,\"lng\":-58.4943471,\"distance\":437}}},{\"point_id\":9207,\"description\":\"Agente Oficial - Punto Oca - Rapipago\",\"open_hours\":null,\"phone\":\"45459787\\\/1554017242\",\"location\":{\"street\":\"Av. Triunvirato\",\"street_number\":\"5390\",\"street_extras\":null,\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1130\",\"geolocation\":{\"lat\":-34.569686,\"lng\":-58.492208,\"distance\":622}}},{\"point_id\":7268,\"description\":\"Agente Oficial - Punto Oca - Davanzo Carlos August\",\"open_hours\":null,\"phone\":\"1569639331\",\"location\":{\"street\":\"Av. De Los Constituyentes\",\"street_number\":\"5956\",\"street_extras\":null,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5725406,\"lng\":-58.5049795,\"distance\":764}}},{\"point_id\":34418,\"description\":\"Agente Oficial - Punto Oca - Parodi Silvia\",\"open_hours\":null,\"phone\":\"4572-1186\",\"location\":{\"street\":\"Av. Albarellos\",\"street_number\":\"2889\",\"street_extras\":null,\"city\":\"Villa Pueyrredon\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"geolocation\":{\"lat\":-34.5773272,\"lng\":-58.5099138,\"distance\":1270}}},{\"point_id\":51356,\"description\":\"Agente Oficial - Punto Oca - Rapipago\",\"open_hours\":null,\"phone\":null,\"location\":{\"street\":\"Avenida Albarellos\",\"street_number\":\"2928\",\"street_extras\":null,\"city\":\"Saavedra\",\"state\":\"Capital Federal\",\"zipcode\":\"1429\",\"geolocation\":{\"lat\":-34.5779968,\"lng\":-58.5103319,\"distance\":1326}}}]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":7,\"max\":10,\"estimated_delivery\":\"2026-01-13T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P4D\",\"max\":\"P7D\",\"unadjusted\":null},\"total\":{\"min\":\"P6DT10H\",\"max\":\"P9DT10H\"}}},\"amounts\":{\"price_shipment\":10775.43,\"price_insurance\":513,\"price\":11288.43,\"price_incl_tax\":13659,\"seller_price\":11288.43,\"seller_price_incl_tax\":13659},\"rate\":{\"source\":\"tariff\",\"id\":163872,\"tariff_id\":1141},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"carrier_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":4,\"max\":5,\"estimated_delivery\":\"2026-01-06T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T21:00:00+00:00\",\"times\":{\"preparation\":\"PT12H\",\"crossdocking\":\"PT0S\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P4D\",\"unadjusted\":null},\"total\":{\"min\":\"P3DT12H\",\"max\":\"P4DT12H\"}}},\"amounts\":{\"price_shipment\":11597.74,\"price_insurance\":513,\"price\":12110.74,\"price_incl_tax\":14654,\"seller_price\":12110.74,\"seller_price_incl_tax\":14654},\"rate\":{\"source\":\"tariff\",\"id\":148104,\"tariff_id\":422},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":233,\"name\":\"Correo Argentino\",\"rating\":0.99,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/correo-argentino\\\/a7owGcEu8d6iMRfzb74qhk66dZZM7kCJkK4dG04C.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":6,\"max\":8,\"estimated_delivery\":\"2026-01-09T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P3D\",\"max\":\"P5D\",\"unadjusted\":null},\"total\":{\"min\":\"P5DT10H\",\"max\":\"P7DT10H\"}}},\"amounts\":{\"price_shipment\":12896.09,\"price_insurance\":513,\"price\":13409.09,\"price_incl_tax\":16225,\"seller_price\":13409.09,\"seller_price_incl_tax\":16225},\"rate\":{\"source\":\"tariff\",\"id\":148100,\"tariff_id\":417},\"tags\":[]},{\"selectable\":true,\"impediments\":null,\"logistic_type\":\"xd_dropoff\",\"carrier\":{\"id\":220,\"name\":\"Malargue\",\"rating\":0.98,\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/malargue\\\/gzHM0KZOWMtDbd0svUiRJpiExH9uIQsAa3n8auke.png\"},\"service_type\":{\"id\":1,\"code\":\"standard_delivery\",\"name\":\"Entrega a domicilio\",\"is_urgent\":0},\"delivery_time\":{\"warning\":\"Dear developer, min and max attributes will be deprecated soon. Use provided estimation date or times\",\"min\":4,\"max\":5,\"estimated_delivery\":\"2026-01-06T23:59:00+00:00\",\"estimation_expires_at\":\"2025-12-29T19:00:00+00:00\",\"times\":{\"preparation\":\"PT10H\",\"crossdocking\":\"P2D\",\"carrier\":{\"min\":\"P1D\",\"max\":\"P2D\",\"unadjusted\":null},\"total\":{\"min\":\"P3DT10H\",\"max\":\"P4DT10H\"}}},\"amounts\":{\"price_shipment\":33268.82,\"price_insurance\":513,\"price\":33781.82,\"price_incl_tax\":40876,\"seller_price\":33781.82,\"seller_price_incl_tax\":40876},\"rate\":{\"source\":\"tariff\",\"id\":179941,\"tariff_id\":5556},\"tags\":[]}]}"
 }
