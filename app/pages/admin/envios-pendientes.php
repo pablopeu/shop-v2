@@ -1113,6 +1113,9 @@ $user = get_logged_user();
         // CSRF Token for API requests
         const token = '<?php echo $csrf_token; ?>';
 
+        // Export to global scope for API calls
+        window.csrfToken = token;
+
         /**
          * Ver detalles de orden en modal
          */
@@ -1586,8 +1589,8 @@ $user = get_logged_user();
                 element.textContent = '⏳ Creando envío...';
             }
 
-            // Get CSRF token (usar la variable token ya exportada en la página)
-            const csrfToken = token;
+            // Get CSRF token (usar la variable global window.csrfToken)
+            const csrfToken = window.csrfToken || '<?php echo $csrf_token; ?>';
 
             // Build API URL
             const apiUrl = '<?php echo url('/api/?endpoint=create-shipment-from-order'); ?>';

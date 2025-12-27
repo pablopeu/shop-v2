@@ -238,6 +238,9 @@ $status_labels = [
         const ordersData = <?php echo json_encode($orders); ?>;
         const token = '<?php echo $csrf_token; ?>';
 
+        // Export CSRF token to global scope for API calls
+        window.csrfToken = token;
+
         // Initialize immediately (before DOMContentLoaded)
         initModal(ordersData, token);
 
@@ -436,8 +439,8 @@ $status_labels = [
                 element.textContent = '⏳ Creando envío...';
             }
 
-            // Get CSRF token (usar la variable token ya exportada en la página)
-            const csrfToken = token;
+            // Get CSRF token (usar la variable global window.csrfToken)
+            const csrfToken = window.csrfToken || '<?php echo $csrf_token; ?>';
 
             // Build API URL
             const apiUrl = '<?php echo url('/api/?endpoint=create-shipment-from-order'); ?>';
