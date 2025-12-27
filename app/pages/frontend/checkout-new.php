@@ -431,8 +431,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             'notes' => sanitize_input($_POST['notes'] ?? '')
         ];
 
-        // Create order
-        $result = create_order($order_data);
+        // Create order with error handling to ensure JSON response
+        try {
+            $result = create_order($order_data);
+        } catch (Exception $e) {
+            error_log("Exception during order creation: " . $e->getMessage());
+            $result = ['error' => 'Error del sistema al crear la orden'];
+        } catch (Error $e) {
+            error_log("Fatal error during order creation: " . $e->getMessage());
+            $result = ['error' => 'Error crítico del sistema'];
+        }
 
         if (isset($result['success']) && $result['success']) {
             $order = $result['order'];

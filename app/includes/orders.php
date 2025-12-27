@@ -196,21 +196,12 @@ function create_order($order_data) {
         return ['error' => 'System error: Could not create order (open)'];
     }
 
-    // Acquire exclusive lock (blocks until available, timeout after 10 seconds)
-    $lock_start = microtime(true);
-    $lock_acquired = false;
-
-    while (!$lock_acquired && (microtime(true) - $lock_start) < 10) {
-        $lock_acquired = flock($fp, LOCK_EX | LOCK_NB);
-        if (!$lock_acquired) {
-            usleep(100000); // Sleep 100ms before retry
-        }
-    }
-
-    if (!$lock_acquired) {
+    // Acquire exclusive lock (SIMPLIFIED: simple blocking lock)
+    // This will block until lock is available, much simpler and more reliable
+    if (!flock($fp, LOCK_EX)) {
         fclose($fp);
-        error_log("Failed to acquire lock for order creation (timeout after 10s)");
-        return ['error' => 'System error: Could not create order (lock timeout)'];
+        error_log("Failed to acquire lock for order creation");
+        return ['error' => 'System error: Could not create order (lock)'];
     }
 
     // Read current data UNDER LOCK
