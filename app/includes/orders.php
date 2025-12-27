@@ -177,11 +177,6 @@ function build_shipping_data($order_data) {
  */
 function create_order($order_data) {
     $orders_file = __DIR__ . '/../data/orders.json';
-    $data = read_json($orders_file);
-
-    if (!isset($data['orders'])) {
-        $data = ['orders' => []];
-    }
 
     // Validate required fields
     $required = ['items', 'total', 'currency', 'payment_method'];
@@ -203,9 +198,23 @@ function create_order($order_data) {
         }
     }
 
-    // Generate order ID and number
+    // Generate order ID and number (ANTES de leer el archivo)
+    // generate_order_number() actualiza el contador en el archivo
     $order_id = generate_id('order-');
     $order_number = generate_order_number();
+
+    // IMPORTANTE: Leer DESPUÉS de generate_order_number() para obtener el contador actualizado
+    $data = read_json($orders_file);
+
+    if (!isset($data['orders'])) {
+        $data = ['orders' => []];
+    }
+
+    // CRÍTICO: Preservar el contador que generate_order_number() actualizó
+    // Si no existe en $data, no lo sobrescribimos
+    if (!isset($data['counters'])) {
+        $data['counters'] = [];
+    }
     $tracking_token = generate_token(32);
     $timestamp = get_timestamp();
 
