@@ -970,17 +970,20 @@ $user = get_logged_user();
                                                             title="Imprimir etiqueta de envío">
                                                         🖨️ Etiqueta
                                                     </button>
-                                                <?php elseif ($has_rate_id || $has_service_id): ?>
-                                                    <!-- Botón: Crear envío primero, luego obtener etiqueta -->
+                                                <?php elseif (($has_rate_id || $has_service_id) && $order['status'] === 'pagado'): ?>
+                                                    <!-- Botón: Crear envío primero, luego obtener etiqueta (SOLO si está pagado) -->
                                                     <button type="button" class="btn btn-sm"
                                                             style="background: #28a745; color: white;"
                                                             data-action="createAndPrintShippingLabel"
                                                             data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
-                                                            title="Crear envío y obtener etiqueta (Debug: rate=<?= $has_rate_id ? 'Y' : 'N' ?>, service=<?= $has_service_id ? 'Y' : 'N' ?>)">
+                                                            title="Crear envío y obtener etiqueta">
                                                         📦 Crear y Obtener Etiqueta
                                                     </button>
+                                                <?php elseif (($has_rate_id || $has_service_id) && $order['status'] !== 'pagado'): ?>
+                                                    <!-- Tiene datos pero no está pagado -->
+                                                    <small style="color: #FF9800; font-weight: 600;">⏳ Pendiente de pago</small>
                                                 <?php else: ?>
-                                                    <!-- Debug: ninguna condición se cumple -->
+                                                    <!-- Sin datos de envío -->
                                                     <small style="color: #999;">Sin datos de envío</small>
                                                 <?php endif; ?>
                                                 <button type="button" class="btn btn-danger btn-sm"
