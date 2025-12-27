@@ -247,8 +247,10 @@ $mp_public_key = $mp_mode === 'sandbox' ?
                 <span class="return-order-value">
                     <?php
                     $status_labels = [
+                        'impago' => '⏳ Pendiente de pago',
                         'pendiente' => '⏳ Pendiente de pago',
                         'cobrada' => '✅ Pagado',
+                        'pagado' => '✅ Pagado',
                         'rechazada' => '❌ Rechazado'
                     ];
                     echo $status_labels[$payment_status] ?? $payment_status;
@@ -262,7 +264,7 @@ $mp_public_key = $mp_mode === 'sandbox' ?
                 📋 Ver Estado del Pedido
             </a>
 
-            <?php if ($payment_status === 'pendiente' || $payment_status === 'pending' || $payment_status === 'rechazada' || $payment_status === 'cancelada'): ?>
+            <?php if ($payment_status === 'impago' || $payment_status === 'pendiente' || $payment_status === 'pending' || $payment_status === 'rechazada' || $payment_status === 'cancelada'): ?>
             <button data-action="retryPayment" class="return-btn return-btn-secondary">
                 💳 Intentar Pagar Nuevamente
             </button>
@@ -274,7 +276,7 @@ $mp_public_key = $mp_mode === 'sandbox' ?
         </div>
     </div>
 
-    <?php if (($payment_status === 'pendiente' || $payment_status === 'pending' || $payment_status === 'rechazada' || $payment_status === 'cancelada') && !empty($mp_public_key)): ?>
+    <?php if (($payment_status === 'impago' || $payment_status === 'pendiente' || $payment_status === 'pending' || $payment_status === 'rechazada' || $payment_status === 'cancelada') && !empty($mp_public_key)): ?>
     <!-- MercadoPago Payment Modal -->
     <div id="mercadopago-modal" class="mp-modal mp-modal-scrollable">
         <div class="mp-modal-content mp-modal-content-small">
