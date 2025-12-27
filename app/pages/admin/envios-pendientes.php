@@ -156,6 +156,7 @@ $impagos = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'impa
 $pagados = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'pagado'));
 $lista_retiro = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'lista_retiro'));
 $en_transito = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'en_transito'));
+$enviadas = count(array_filter($shipping_orders, fn($o) => !empty($o['shipping']['carrier_shipment_id'])));
 $entregadas = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'entregada'));
 
 // Get logged user
