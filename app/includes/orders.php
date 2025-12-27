@@ -179,17 +179,38 @@ function create_order($order_data) {
     $order_id = generate_id('order-');
 
     // CRÍTICO: TODO bajo file lock para atomicidad
-    $fp = fopen($orders_file, 'c+');
-    if (!$fp) {
-        error_log("Failed to open orders file for order creation");
-        return ['error' => 'System error: Could not create order'];
+    // Ensure directory exists
+    $orders_dir = dirname($orders_file);
+    if (!is_dir($orders_dir)) {
+        if (!mkdir($orders_dir, 0755, true)) {
+            error_log("Failed to create orders directory: $orders_dir");
+            return ['error' => 'System error: Could not create order (dir)'];
+        }
     }
 
-    // Acquire exclusive lock (blocks until available)
-    if (!flock($fp, LOCK_EX)) {
+    // Open file for read/write, create if doesn't exist
+    $fp = @fopen($orders_file, 'c+');
+    if (!$fp) {
+        $error_msg = error_get_last();
+        error_log("Failed to open orders file: " . ($error_msg['message'] ?? 'unknown error'));
+        return ['error' => 'System error: Could not create order (open)'];
+    }
+
+    // Acquire exclusive lock (blocks until available, timeout after 10 seconds)
+    $lock_start = microtime(true);
+    $lock_acquired = false;
+
+    while (!$lock_acquired && (microtime(true) - $lock_start) < 10) {
+        $lock_acquired = flock($fp, LOCK_EX | LOCK_NB);
+        if (!$lock_acquired) {
+            usleep(100000); // Sleep 100ms before retry
+        }
+    }
+
+    if (!$lock_acquired) {
         fclose($fp);
-        error_log("Failed to acquire lock for order creation");
-        return ['error' => 'System error: Could not create order'];
+        error_log("Failed to acquire lock for order creation (timeout after 10s)");
+        return ['error' => 'System error: Could not create order (lock timeout)'];
     }
 
     // Read current data UNDER LOCK
