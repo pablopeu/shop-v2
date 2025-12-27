@@ -115,9 +115,9 @@ try {
         'reference' => $order['order_number'] ?? $order_id,
         'destination' => [
             'name' => $shipping_address['name'] ?? $order['customer_name'],
-            'street' => $shipping_address['street'] ?? '',
+            'street' => $shipping_address['street'] ?? $shipping_address['address'] ?? '',
             'city' => $shipping_address['city'] ?? '',
-            'province' => $shipping_address['province'] ?? '',
+            'province' => $shipping_address['province'] ?? $shipping_address['state'] ?? '',
             'postal_code' => $shipping_address['postal_code'] ?? '',
             'country' => $shipping_address['country'] ?? 'AR',
             'phone' => $shipping_address['phone'] ?? $order['customer_phone'] ?? '',

@@ -1142,7 +1142,15 @@ $user = get_logged_user();
                         if (order.shipping_address) {
                             if (typeof order.shipping_address === 'object') {
                                 const addr = order.shipping_address;
-                                addressText = `${addr.street || ''}, ${addr.city || ''}, ${addr.province || ''} (${addr.postal_code || ''})`;
+                                // Soportar ambos formatos: nuevo (street/province) y actual (address/state)
+                                const street = addr.street || addr.address || '';
+                                const province = addr.province || addr.state || '';
+                                const parts = [];
+                                if (street) parts.push(street);
+                                if (addr.city) parts.push(addr.city);
+                                if (province) parts.push(province);
+                                if (addr.postal_code) parts.push(`(${addr.postal_code})`);
+                                addressText = parts.join(', ');
                             } else {
                                 addressText = order.shipping_address;
                             }
