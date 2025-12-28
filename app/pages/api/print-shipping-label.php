@@ -106,7 +106,33 @@ log_admin_action('print_label', $_SESSION['username'], [
     'cached' => $result['data']['cached'] ?? false
 ]);
 
-// Return label data
+// Si action=download, servir el PDF directamente
+if ($action === 'download') {
+    $label_url = $result['data']['label_url'];
+    $filepath = APP_PATH . $label_url;
+
+    if (file_exists($filepath)) {
+        // Headers para PDF
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="etiqueta_' . $shipment_id . '.pdf"');
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        readfile($filepath);
+        exit;
+    } else {
+        http_response_code(404);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Archivo de etiqueta no encontrado'
+        ]);
+        exit;
+    }
+}
+
+// Si action=view, devolver JSON
 echo json_encode([
     'success' => true,
     'data' => [

@@ -599,41 +599,71 @@ function zipnova_get_label($shipment_id, $format = 'pdf') {
         ];
     }
 
-    // Probar múltiples endpoints posibles para obtener la etiqueta
-    // Zipnova no documenta claramente cuál es el endpoint correcto
-    $endpoints_to_try = [
-        '/shipments/' . $shipment_id . '/documents',           // Documentos generales
-        '/shipments/' . $shipment_id . '/documents/pdf',       // PDF específico
-        '/shipments/' . $shipment_id . '/label/pdf',           // Label con formato
-        '/documents/' . $shipment_id,                           // Recurso separado
-        '/shipments/' . $shipment_id . '/label',               // Endpoint original
-    ];
+    // Endpoint correcto según documentación de Zipnova:
+    // GET /shipments/{id}/documentation?what=label&format=pdf
+    // La respuesta incluye el PDF en base64 en el campo 'content'
+    $endpoint = '/shipments/' . $shipment_id . '/documentation?what=label&format=' . $format;
 
-    $result = ['success' => false, 'error' => 'No se encontró endpoint válido para obtener la etiqueta'];
-
-    foreach ($endpoints_to_try as $endpoint) {
-        $test_result = zipnova_api_request($endpoint, 'GET');
-
-        if ($test_result['success']) {
-            $result = $test_result;
-            zipnova_log('Label Endpoint Found', [
-                'shipment_id' => $shipment_id,
-                'endpoint' => $endpoint
-            ]);
-            break;
-        } else {
-            zipnova_log('Label Endpoint Failed', [
-                'shipment_id' => $shipment_id,
-                'endpoint' => $endpoint,
-                'http_code' => $test_result['http_code'] ?? 'unknown',
-                'error' => $test_result['error'] ?? 'unknown'
-            ]);
-        }
-    }
+    $result = zipnova_api_request($endpoint, 'GET');
 
     if ($result['success']) {
-        // Guardar URL de etiqueta en datos locales
-        $shipment['label_url'] = $result['data']['label_url'] ?? '';
+        // Zipnova devuelve el PDF en base64 en el campo 'content'
+        $base64_content = $result['data']['content'] ?? '';
+
+        if (empty($base64_content)) {
+            zipnova_log('Label Generation Failed - No Content', [
+                'shipment_id' => $shipment_id,
+                'error' => 'Respuesta de Zipnova sin contenido base64'
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'La etiqueta no contiene datos'
+            ];
+        }
+
+        // Decodificar base64
+        $pdf_content = base64_decode($base64_content);
+
+        if ($pdf_content === false) {
+            zipnova_log('Label Generation Failed - Invalid Base64', [
+                'shipment_id' => $shipment_id,
+                'error' => 'Error al decodificar base64'
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Error al decodificar la etiqueta'
+            ];
+        }
+
+        // Crear directorio para etiquetas si no existe
+        $labels_dir = __DIR__ . '/../data/labels';
+        if (!is_dir($labels_dir)) {
+            mkdir($labels_dir, 0755, true);
+        }
+
+        // Guardar PDF en el servidor
+        $filename = 'label_' . $shipment_id . '_' . time() . '.' . $format;
+        $filepath = $labels_dir . '/' . $filename;
+
+        if (file_put_contents($filepath, $pdf_content) === false) {
+            zipnova_log('Label Generation Failed - Save Error', [
+                'shipment_id' => $shipment_id,
+                'error' => 'Error al guardar archivo PDF'
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Error al guardar la etiqueta'
+            ];
+        }
+
+        // Generar URL relativa del PDF
+        $label_url = '/data/labels/' . $filename;
+
+        // Guardar en datos locales
+        $shipment['label_url'] = $label_url;
         $shipment['label_format'] = $format;
         $shipment['label_generated_at'] = date('Y-m-d H:i:s');
 
@@ -642,13 +672,14 @@ function zipnova_get_label($shipment_id, $format = 'pdf') {
         zipnova_log('Label Generated Successfully', [
             'shipment_id' => $shipment_id,
             'format' => $format,
-            'label_url' => $shipment['label_url']
+            'label_url' => $label_url,
+            'filesize' => strlen($pdf_content)
         ]);
 
         return [
             'success' => true,
             'data' => [
-                'label_url' => $result['data']['label_url'],
+                'label_url' => $label_url,
                 'format' => $format,
                 'cached' => false
             ]
