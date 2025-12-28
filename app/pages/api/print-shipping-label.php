@@ -90,8 +90,16 @@ if (!$result['success']) {
         'shipment_id' => $shipment_id,
         'order_id' => $order_id,
         'format' => $format,
-        'error' => $result['error'] ?? 'Unknown error'
+        'error' => $result['error'] ?? 'Unknown error',
+        'http_code' => $result['http_code'] ?? null
     ]);
+
+    // Propagar el código HTTP de Zipnova si existe
+    if (isset($result['http_code'])) {
+        http_response_code($result['http_code']);
+    } else {
+        http_response_code(500);
+    }
 
     echo json_encode($result);
     exit;

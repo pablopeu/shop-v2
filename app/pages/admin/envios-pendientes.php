@@ -1525,16 +1525,48 @@ $user = get_logged_user();
                 return;
             }
 
-            // Build API URL para descarga directa del PDF
+            // Disable button
+            if (element) {
+                element.disabled = true;
+                element.textContent = '⏳ Obteniendo...';
+            }
+
+            // Build API URL para verificar primero si hay error
             const apiUrl = '<?php echo url('/api/?endpoint=print-shipping-label'); ?>' +
                           (orderId ? '&order_id=' + encodeURIComponent(orderId) : '') +
                           (shipmentId ? '&shipment_id=' + encodeURIComponent(shipmentId) : '') +
                           '&format=pdf&action=download';
 
-            // Abrir URL directamente - el backend sirve el PDF con headers correctos
-            // Esto evita el error de parsear PDF como JSON
-            window.open(apiUrl, '_blank');
-            showToast('✅ Descargando etiqueta...', 'success');
+            // Usar fetch para detectar errores antes de abrir ventana
+            fetch(apiUrl, {
+                method: 'HEAD', // Solo headers para verificar sin descargar
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Todo bien, abrir PDF en nueva ventana
+                    window.open(apiUrl, '_blank');
+                    showToast('✅ Abriendo etiqueta...', 'success');
+                } else if (response.status === 409) {
+                    // Error 409: Etiqueta aún no disponible
+                    showToast('⏳ La etiqueta se está generando. Espera unos segundos y vuelve a intentar.', 'warning');
+                } else if (response.status === 404) {
+                    showToast('❌ Etiqueta no encontrada. Verifica que el envío esté creado.', 'error');
+                } else {
+                    showToast('❌ Error al obtener la etiqueta. Código: ' + response.status, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error checking label:', error);
+                showToast('❌ Error de conexión al obtener la etiqueta', 'error');
+            })
+            .finally(() => {
+                // Restore button
+                if (element) {
+                    element.disabled = false;
+                    element.textContent = '🖨️ Etiqueta';
+                }
+            });
         }
 
         /**

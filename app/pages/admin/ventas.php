@@ -358,18 +358,58 @@ $status_labels = [
                 return;
             }
 
-            // Build API URL para descarga directa del PDF
+            // Disable button
+            if (element) {
+                element.disabled = true;
+                element.textContent = '⏳ Obteniendo...';
+            }
+
+            // Build API URL para verificar primero si hay error
             const apiUrl = '<?php echo url('/api/?endpoint=print-shipping-label'); ?>' +
                           (orderId ? '&order_id=' + encodeURIComponent(orderId) : '') +
                           (shipmentId ? '&shipment_id=' + encodeURIComponent(shipmentId) : '') +
                           '&format=pdf&action=download';
 
-            // Abrir URL directamente - el backend sirve el PDF con headers correctos
-            // Esto evita el error de parsear PDF como JSON
-            window.open(apiUrl, '_blank');
-            if (window.showToast) {
-                window.showToast('✅ Descargando etiqueta...');
-            }
+            // Usar fetch para detectar errores antes de abrir ventana
+            fetch(apiUrl, {
+                method: 'HEAD', // Solo headers para verificar sin descargar
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Todo bien, abrir PDF en nueva ventana
+                    window.open(apiUrl, '_blank');
+                    if (window.showToast) {
+                        window.showToast('✅ Abriendo etiqueta...');
+                    }
+                } else if (response.status === 409) {
+                    // Error 409: Etiqueta aún no disponible
+                    if (window.showToast) {
+                        window.showToast('⏳ La etiqueta se está generando. Espera unos segundos y vuelve a intentar.');
+                    }
+                } else if (response.status === 404) {
+                    if (window.showToast) {
+                        window.showToast('❌ Etiqueta no encontrada. Verifica que el envío esté creado.');
+                    }
+                } else {
+                    if (window.showToast) {
+                        window.showToast('❌ Error al obtener la etiqueta. Código: ' + response.status);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking label:', error);
+                if (window.showToast) {
+                    window.showToast('❌ Error de conexión al obtener la etiqueta');
+                }
+            })
+            .finally(() => {
+                // Restore button
+                if (element) {
+                    element.disabled = false;
+                    element.textContent = '🖨️ Etiqueta';
+                }
+            });
         }
 
         /**
