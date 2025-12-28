@@ -157,6 +157,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
             'same_day' => isset($_POST['service_same_day'])
         ];
 
+        // Dispatch method configuration (pickup vs dropoff)
+        $preferred_dispatch = sanitize_input($_POST['dispatch_preferred'] ?? 'pickup');
+        $config['dispatch_method'] = [
+            'preferred' => $preferred_dispatch,
+            'description' => 'Método preferido para entregar paquetes al carrier',
+            'options' => [
+                'pickup' => [
+                    'enabled' => true,
+                    'label' => 'Recolección a domicilio',
+                    'logistic_types' => ['carrier_pickup', 'home_pickup', 'pickup']
+                ],
+                'dropoff' => [
+                    'enabled' => ($preferred_dispatch === 'dropoff'),
+                    'label' => 'Entrega en punto Zipnova',
+                    'logistic_types' => ['carrier_dropoff', 'seller_dropoff', 'dropoff'],
+                    'point_id' => sanitize_input($_POST['dropoff_point_id'] ?? ''),
+                    'point_name' => sanitize_input($_POST['dropoff_point_name'] ?? ''),
+                    'point_address' => sanitize_input($_POST['dropoff_point_address'] ?? '')
+                ]
+            ]
+        ];
+
         // Save configuration
         if (zipnova_save_config($config)) {
             $_SESSION['shipping_config_message'] = 'Configuración de envíos guardada exitosamente';
@@ -618,6 +640,58 @@ $provincias = [
                     </div>
                 </div>
 
+                <!-- Método de Despacho -->
+                <div class="card">
+                    <div class="card-title">
+                        🚚 Método de Despacho
+                    </div>
+                    <div class="card-description">
+                        Cómo entregas los paquetes al carrier para su distribución
+                    </div>
+
+                    <div class="form-group">
+                        <label>Método Preferido</label>
+                        <select name="dispatch_preferred" id="dispatch_preferred" data-onchange="toggleDropoffFields">
+                            <option value="pickup" <?php echo ($shipping_config['dispatch_method']['preferred'] ?? 'pickup') === 'pickup' ? 'selected' : ''; ?>>
+                                📍 Recolección a domicilio (Pickup) - El carrier recoge en mi dirección
+                            </option>
+                            <option value="dropoff" <?php echo ($shipping_config['dispatch_method']['preferred'] ?? 'pickup') === 'dropoff' ? 'selected' : ''; ?>>
+                                🏪 Entrega en punto Zipnova (Drop-off) - Yo llevo el paquete a un punto
+                            </option>
+                        </select>
+                        <div class="help-text">
+                            Esta configuración filtrará las cotizaciones para mostrar solo servicios compatibles con tu método preferido.
+                            El cliente NO verá esta configuración - es transparente para él.
+                        </div>
+                    </div>
+
+                    <div id="dropoff-fields" style="display: <?php echo ($shipping_config['dispatch_method']['preferred'] ?? 'pickup') === 'dropoff' ? 'block' : 'none'; ?>;">
+                        <div class="form-group">
+                            <label>Point ID del Punto de Entrega</label>
+                            <input type="text" name="dropoff_point_id"
+                                   value="<?php echo htmlspecialchars($shipping_config['dispatch_method']['options']['dropoff']['point_id'] ?? ''); ?>"
+                                   placeholder="321">
+                            <div class="help-text">
+                                ID del punto Zipnova donde entregarás los paquetes. Lo obtienes al cotizar un envío (campo "origin_points").
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nombre del Punto (opcional)</label>
+                            <input type="text" name="dropoff_point_name"
+                                   value="<?php echo htmlspecialchars($shipping_config['dispatch_method']['options']['dropoff']['point_name'] ?? ''); ?>"
+                                   placeholder="Zipnova Punto Palermo">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Dirección del Punto (opcional)</label>
+                            <input type="text" name="dropoff_point_address"
+                                   value="<?php echo htmlspecialchars($shipping_config['dispatch_method']['options']['dropoff']['point_address'] ?? ''); ?>"
+                                   placeholder="Av. Santa Fe 1234, CABA">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Paquete por Defecto -->
                 <div class="card">
                     <div class="card-title">
@@ -859,6 +933,21 @@ $provincias = [
             showResponseModal(<?php echo json_encode($test_response_json); ?>);
             <?php endif; ?>
         });
+
+        /**
+         * Toggle dropoff fields visibility based on dispatch method selection
+         */
+        function toggleDropoffFields(event, element, params) {
+            const selectValue = element.value;
+            const dropoffFields = document.getElementById('dropoff-fields');
+
+            if (dropoffFields) {
+                dropoffFields.style.display = (selectValue === 'dropoff') ? 'block' : 'none';
+            }
+        }
+
+        // Export for event delegation
+        window.toggleDropoffFields = toggleDropoffFields;
     </script>
 </body>
 </html>

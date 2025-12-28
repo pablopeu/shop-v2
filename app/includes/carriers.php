@@ -420,6 +420,41 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
                 ];
             }
             $result['data']['quotes'] = $quotes;
+
+            // Filtrar cotizaciones según método de despacho preferido del vendedor
+            $dispatch_method = $config['dispatch_method'] ?? null;
+            if ($dispatch_method && isset($dispatch_method['preferred'])) {
+                $preferred = $dispatch_method['preferred'];
+                $valid_logistic_types = $dispatch_method['options'][$preferred]['logistic_types'] ?? [];
+
+                if (!empty($valid_logistic_types) && !empty($quotes)) {
+                    $filtered_quotes = [];
+                    foreach ($quotes as $quote) {
+                        $quote_logistic_type = $quote['logistic_type'] ?? '';
+                        // Verificar si el logistic_type de la cotización coincide con los permitidos
+                        if (in_array($quote_logistic_type, $valid_logistic_types)) {
+                            $filtered_quotes[] = $quote;
+                        }
+                    }
+
+                    // Solo reemplazar si hay quotes filtradas, sino mantener todas
+                    if (!empty($filtered_quotes)) {
+                        $result['data']['quotes'] = $filtered_quotes;
+                        zipnova_log('Quotes Filtered by Dispatch Method', [
+                            'preferred_method' => $preferred,
+                            'valid_logistic_types' => $valid_logistic_types,
+                            'total_quotes' => count($quotes),
+                            'filtered_quotes' => count($filtered_quotes)
+                        ]);
+                    } else {
+                        zipnova_log('No Quotes Match Preferred Dispatch Method', [
+                            'preferred_method' => $preferred,
+                            'valid_logistic_types' => $valid_logistic_types,
+                            'available_logistic_types' => array_unique(array_column($quotes, 'logistic_type'))
+                        ]);
+                    }
+                }
+            }
         }
 
         // Aplicar margen de costo si está configurado
@@ -459,9 +494,41 @@ function zipnova_create_shipment($shipment_data) {
         return ['success' => false, 'error' => 'Zipnova no está habilitado'];
     }
 
-    // Agregar origin_id si no se proporciona (solo el ID, no el objeto completo)
-    if (!isset($shipment_data['origin_id'])) {
-        $shipment_data['origin_id'] = $config['origin']['origin_id'] ?? '';
+    // Determinar método de despacho y configurar origin según preferencia del vendedor
+    $dispatch_method = $config['dispatch_method'] ?? null;
+    $preferred_method = $dispatch_method['preferred'] ?? 'pickup';
+
+    if ($preferred_method === 'dropoff') {
+        // Drop-off: el vendedor entrega en un punto Zipnova
+        if (!isset($shipment_data['origin'])) {
+            $point_id = $dispatch_method['options']['dropoff']['point_id'] ?? null;
+
+            if (empty($point_id)) {
+                zipnova_log('Create Shipment Error', [
+                    'error' => 'Drop-off configurado pero point_id no definido',
+                    'dispatch_config' => $dispatch_method
+                ]);
+                return ['success' => false, 'error' => 'Punto de entrega no configurado para drop-off'];
+            }
+
+            $shipment_data['origin'] = [
+                'point_id' => $point_id
+            ];
+
+            zipnova_log('Using Drop-off Point', [
+                'point_id' => $point_id,
+                'point_name' => $dispatch_method['options']['dropoff']['point_name'] ?? 'N/A'
+            ]);
+        }
+    } else {
+        // Pickup: recolección en domicilio del vendedor
+        if (!isset($shipment_data['origin_id'])) {
+            $shipment_data['origin_id'] = $config['origin']['origin_id'] ?? '';
+
+            zipnova_log('Using Pickup from Origin', [
+                'origin_id' => $shipment_data['origin_id']
+            ]);
+        }
     }
 
     // Agregar account_id al request (CRÍTICO para Zipnova)
