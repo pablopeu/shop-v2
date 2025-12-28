@@ -4,7 +4,9 @@
  * Listado de envíos archivados con opciones de restaurar o eliminar
  */
 
-
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
 // Check admin authentication
 require_admin();
