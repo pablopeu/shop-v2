@@ -420,6 +420,41 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
                 ];
             }
             $result['data']['quotes'] = $quotes;
+
+            // Filtrar cotizaciones según método de despacho preferido del vendedor
+            $dispatch_method = $config['dispatch_method'] ?? null;
+            if ($dispatch_method && isset($dispatch_method['preferred'])) {
+                $preferred = $dispatch_method['preferred'];
+                $valid_logistic_types = $dispatch_method['options'][$preferred]['logistic_types'] ?? [];
+
+                if (!empty($valid_logistic_types) && !empty($quotes)) {
+                    $filtered_quotes = [];
+                    foreach ($quotes as $quote) {
+                        $quote_logistic_type = $quote['logistic_type'] ?? '';
+                        // Verificar si el logistic_type de la cotización coincide con los permitidos
+                        if (in_array($quote_logistic_type, $valid_logistic_types)) {
+                            $filtered_quotes[] = $quote;
+                        }
+                    }
+
+                    // Solo reemplazar si hay quotes filtradas, sino mantener todas
+                    if (!empty($filtered_quotes)) {
+                        $result['data']['quotes'] = $filtered_quotes;
+                        zipnova_log('Quotes Filtered by Dispatch Method', [
+                            'preferred_method' => $preferred,
+                            'valid_logistic_types' => $valid_logistic_types,
+                            'total_quotes' => count($quotes),
+                            'filtered_quotes' => count($filtered_quotes)
+                        ]);
+                    } else {
+                        zipnova_log('No Quotes Match Preferred Dispatch Method', [
+                            'preferred_method' => $preferred,
+                            'valid_logistic_types' => $valid_logistic_types,
+                            'available_logistic_types' => array_unique(array_column($quotes, 'logistic_type'))
+                        ]);
+                    }
+                }
+            }
         }
 
         // Aplicar margen de costo si está configurado

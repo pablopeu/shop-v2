@@ -171,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
                 'dropoff' => [
                     'enabled' => ($preferred_dispatch === 'dropoff'),
                     'label' => 'Entrega en punto Zipnova',
-                    'logistic_types' => ['carrier_dropoff', 'seller_dropoff', 'dropoff'],
+                    'logistic_types' => ['xd_dropoff', 'carrier_dropoff', 'seller_dropoff', 'dropoff'],
                     'point_id' => sanitize_input($_POST['dropoff_point_id'] ?? ''),
                     'point_name' => sanitize_input($_POST['dropoff_point_name'] ?? ''),
                     'point_address' => sanitize_input($_POST['dropoff_point_address'] ?? '')
