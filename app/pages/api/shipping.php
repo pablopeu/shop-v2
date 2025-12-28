@@ -375,17 +375,32 @@ if ($action === 'webhook' && $_SERVER['REQUEST_METHOD'] === 'POST') {
  * Send shipping status notification to customer
  */
 function send_shipping_status_notification($order, $new_status) {
+    require_once APP_PATH . '/includes/carriers.php';
+
+    // Mapear estado de carrier a estado base del sistema
+    $carrier_type = 'zipnova'; // Default
+    $carrier = $order['shipping']['carrier'] ?? null;
+    if ($carrier) {
+        $carrier_config = get_carrier_config($carrier);
+        $carrier_type = $carrier_config['type'] ?? 'zipnova';
+    }
+
+    // Convertir status de carrier a base status
+    $base_status = map_carrier_status_to_base($carrier_type, $new_status);
+
+    // Mensajes según estado base del sistema
     $status_messages = [
-        'pending' => 'Tu envío está siendo procesado',
-        'in_transit' => 'Tu pedido está en camino',
-        'out_for_delivery' => 'Tu pedido está en reparto',
-        'delivered' => 'Tu pedido ha sido entregado',
-        'failed' => 'Hubo un problema con tu envío',
-        'returned' => 'Tu envío está siendo devuelto',
-        'cancelled' => 'Tu envío ha sido cancelado'
+        'pendiente' => 'Tu envío está siendo procesado',
+        'en_preparacion' => 'Tu pedido está en preparación',
+        'en_transito' => 'Tu pedido está en camino',
+        'en_reparto' => 'Tu pedido está en reparto',
+        'entregada' => 'Tu pedido ha sido entregado',
+        'fallida' => 'Hubo un problema con tu envío',
+        'devuelta' => 'Tu envío está siendo devuelto',
+        'cancelada' => 'Tu envío ha sido cancelado'
     ];
 
-    $subject = $status_messages[$new_status] ?? 'Actualización de tu envío';
+    $subject = $status_messages[$base_status] ?? 'Actualización de tu envío';
     $tracking_id = $order['shipping']['tracking_id'] ?? '';
     $order_number = $order['order_number'];
 

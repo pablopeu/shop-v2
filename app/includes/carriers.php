@@ -543,6 +543,17 @@ function zipnova_create_shipment($shipment_data, $order_id = null) {
         $shipment_data['account_id'] = $account_id;
     }
 
+    // Controlar envío de email del cliente a Zipnova
+    // Si send_customer_email = false, NO enviar el email para evitar que Zipnova envíe notificaciones duplicadas
+    $send_customer_email = $config['options']['send_customer_email'] ?? false;
+    if (!$send_customer_email && isset($shipment_data['destination']['email'])) {
+        zipnova_log('Customer Email Removed', [
+            'note' => 'Email no enviado a Zipnova (send_customer_email=false)',
+            'removed_email' => $shipment_data['destination']['email']
+        ], $order_id);
+        unset($shipment_data['destination']['email']);
+    }
+
     $result = zipnova_api_request('/shipments', 'POST', $shipment_data, true, $order_id);
 
     if ($result['success']) {
@@ -737,10 +748,11 @@ function zipnova_get_label($shipment_id, $format = 'pdf', $order_id = null) {
         // Generar URL relativa del PDF
         $label_url = '/data/labels/' . $filename;
 
-        // Guardar en datos locales
+        // Guardar en datos locales y cambiar estado a "en_preparacion"
         $shipment['label_url'] = $label_url;
         $shipment['label_format'] = $format;
         $shipment['label_generated_at'] = date('Y-m-d H:i:s');
+        $shipment['status'] = 'en_preparacion'; // Cambiar estado cuando se genera etiqueta
 
         zipnova_save_shipment($shipment_id, $shipment);
 
@@ -748,8 +760,35 @@ function zipnova_get_label($shipment_id, $format = 'pdf', $order_id = null) {
             'shipment_id' => $shipment_id,
             'format' => $format,
             'label_url' => $label_url,
-            'filesize' => strlen($pdf_content)
+            'filesize' => strlen($pdf_content),
+            'new_status' => 'en_preparacion'
         ], $order_id);
+
+        // Actualizar estado de la orden y enviar email al cliente
+        require_once __DIR__ . '/orders.php';
+        require_once __DIR__ . '/email.php';
+
+        // Buscar la orden por shipment_id
+        $orders = get_all_orders();
+        foreach ($orders as $ord) {
+            if (isset($ord['shipping']['carrier_shipment_id']) &&
+                $ord['shipping']['carrier_shipment_id'] === $shipment_id) {
+
+                // Actualizar estado del envío en la orden
+                update_order_shipping_status($ord['id'], 'en_preparacion');
+
+                // Enviar email de notificación al cliente
+                send_shipping_preparation_email($ord);
+
+                zipnova_log('Order Status Updated to en_preparacion', [
+                    'order_id' => $ord['id'],
+                    'order_number' => $ord['order_number'],
+                    'shipment_id' => $shipment_id
+                ], $order_id ?? $ord['order_number']);
+
+                break;
+            }
+        }
 
         return [
             'success' => true,
@@ -1126,6 +1165,7 @@ function map_carrier_status_to_base($carrier_type, $carrier_status) {
     $mappings = [
         'zipnova' => [
             'pending' => 'pendiente',
+            'ready' => 'en_preparacion',
             'in_transit' => 'en_transito',
             'out_for_delivery' => 'en_reparto',
             'delivered' => 'entregada',
@@ -1151,6 +1191,7 @@ function map_carrier_status_to_base($carrier_type, $carrier_status) {
 function get_status_label($base_status) {
     $labels = [
         'pendiente' => 'Pendiente',
+        'en_preparacion' => 'En preparación',
         'en_transito' => 'En tránsito',
         'en_reparto' => 'En reparto',
         'entregada' => 'Entregada',

@@ -524,6 +524,27 @@ function send_admin_chargeback_alert($order, $chargeback) {
 }
 
 /**
+ * Send shipping preparation notification to customer
+ * Enviado cuando se genera la etiqueta de envío (estado: en_preparacion)
+ */
+function send_shipping_preparation_email($order) {
+    $config = read_json(__DIR__ . '/../config/email.json');
+
+    if (!($config['notifications']['customer']['shipping_preparation'] ?? true)) {
+        return false;
+    }
+
+    $to = $order['customer_email'];
+    $subject = "¡Tu Pedido Está en Preparación! - #{$order['order_number']}";
+
+    $html = get_email_template('shipping_preparation', [
+        'order' => $order
+    ]);
+
+    return send_email($to, $subject, $html);
+}
+
+/**
  * Get email template with variables replaced
  */
 function get_email_template($template_name, $vars = []) {
