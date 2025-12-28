@@ -1051,7 +1051,7 @@ $user = get_logged_user();
                                                     </button>
                                                 <?php elseif (($has_rate_id || $has_service_id) && $order['status'] !== 'pagado'): ?>
                                                     <!-- Tiene datos pero no está pagado -->
-                                                    <small style="color: #FF9800; font-weight: 600;">⏳ Pendiente de pago</small>
+                                                    <span style="display: inline-block; padding: 4px 8px; background: #fff3cd; border: 1px solid #FF9800; border-radius: 4px; color: #856404; font-size: 11px; font-weight: 600;">⏳ Pendiente</span>
                                                 <?php else: ?>
                                                     <!-- Sin datos de envío -->
                                                     <small style="color: #999;">Sin datos de envío</small>

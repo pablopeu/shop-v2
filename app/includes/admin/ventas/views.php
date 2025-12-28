@@ -305,7 +305,7 @@ function render_orders_table($orders, $filters, $status_labels) {
                                     </div>
                                 <?php elseif ($has_shipping_data && $order['status'] !== 'pagado'): ?>
                                     <!-- Tiene datos pero no está pagado -->
-                                    <small style="color: #FF9800; font-size: 11px; font-weight: 600;">⏳ Pago pendiente</small>
+                                    <span style="display: inline-block; padding: 4px 8px; background: #fff3cd; border: 1px solid #FF9800; border-radius: 4px; color: #856404; font-size: 11px; font-weight: 600;">⏳ Pendiente</span>
                                 <?php else: ?>
                                     <small style="color: #999;">-</small>
                                 <?php endif; ?>
