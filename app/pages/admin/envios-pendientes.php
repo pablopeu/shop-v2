@@ -1053,16 +1053,6 @@ $user = get_logged_user();
 
                                                 // Verificar si la etiqueta ya fue generada
                                                 $has_label = !empty($order['shipping']['label_url']) || !empty($order['shipping']['label_generated_at']);
-
-                                                // Logging temporal EXTENDIDO para debug
-                                                error_log("DEBUG Envíos - Order: {$order['id']}");
-                                                error_log("  - has_shipment: " . ($has_shipment ? 'YES' : 'NO'));
-                                                error_log("  - has_rate_id: " . ($has_rate_id ? 'YES' : 'NO'));
-                                                error_log("  - has_service_id: " . ($has_service_id ? 'YES' : 'NO'));
-                                                error_log("  - delivery_method: $delivery_method");
-                                                error_log("  - shipping_quote_data: " . json_encode($order['shipping_quote_data'] ?? null));
-                                                error_log("  - shipping_service_id: " . ($order['shipping_service_id'] ?? 'NULL'));
-                                                error_log("  - shipping keys: " . json_encode(array_keys($order)));
                                                 ?>
 
                                                 <?php if ($has_shipment): ?>

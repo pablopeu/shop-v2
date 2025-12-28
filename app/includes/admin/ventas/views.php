@@ -262,17 +262,6 @@ function render_orders_table($orders, $filters, $status_labels) {
                                 $shipment_id = $order['shipping']['carrier_shipment_id'] ?? '';
                                 $carrier = $order['shipping']['carrier'] ?? ($order['shipping_quote_data']['carrier_name'] ?? '');
                                 $delivery_method = $order['delivery_method'] ?? '';
-
-                                // Logging temporal EXTENDIDO para debug
-                                error_log("DEBUG Ventas - Order: {$order['id']}");
-                                error_log("  - has_shipment: " . ($has_carrier_shipment ? 'YES' : 'NO'));
-                                error_log("  - has_rate_id: " . ($has_rate_id ? 'YES' : 'NO'));
-                                error_log("  - has_service_id: " . ($has_service_id ? 'YES' : 'NO'));
-                                error_log("  - delivery_method: $delivery_method");
-                                error_log("  - shipping_quote_data: " . json_encode($order['shipping_quote_data'] ?? null));
-                                error_log("  - shipping_service_id: " . ($order['shipping_service_id'] ?? 'NULL'));
-                                error_log("  - carrier from shipping: " . ($order['shipping']['carrier'] ?? 'NULL'));
-                                error_log("  - carrier from quote_data: " . ($order['shipping_quote_data']['carrier_name'] ?? 'NULL'));
                                 ?>
                                 <?php if ($has_carrier_shipment): ?>
                                     <!-- Ya existe envío creado -->
