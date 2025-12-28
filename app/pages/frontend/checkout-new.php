@@ -337,6 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
     if ($needs_shipping) {
         $address = sanitize_input($_POST['shipping_address'] ?? '');
+        $document = sanitize_input($_POST['shipping_document'] ?? '');
         $city = sanitize_input($_POST['shipping_city'] ?? '');
         $postal_code = sanitize_input($_POST['shipping_postal_code'] ?? '');
         $state = sanitize_input($_POST['shipping_province'] ?? '');
@@ -344,6 +345,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
         if (empty($address)) {
             $errors[] = 'La dirección es requerida para envío';
+        }
+
+        if (empty($document)) {
+            $errors[] = 'El DNI/CUIT es requerido para envío';
         }
 
         if (empty($city)) {
@@ -366,6 +371,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             $shipping_address = [
                 'name' => $customer_name,
                 'address' => $address,
+                'document' => $document,
                 'city' => $city,
                 'postal_code' => $postal_code,
                 'state' => $state,
@@ -487,6 +493,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             'customer_name' => $customer_name,
             'customer_email' => $customer_email,
             'customer_phone' => $full_phone,
+            'customer_document' => $shipping_address['document'] ?? '',
             'contact_preference' => $contact_preference,
             'delivery_method' => $delivery_method,
             'notes' => sanitize_input($_POST['notes'] ?? '')
@@ -529,6 +536,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             // Save shipping address if provided
             if ($shipping_address) {
                 setcookie('checkout_address', $shipping_address['address'], $cookie_expiry, $cookie_path);
+                setcookie('checkout_document', $shipping_address['document'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_city', $shipping_address['city'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_postal_code', $shipping_address['postal_code'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_state', $shipping_address['state'], $cookie_expiry, $cookie_path);
@@ -1654,6 +1662,13 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     <label for="shipping_address">Dirección *</label>
                                     <input type="text" id="shipping_address" name="shipping_address" placeholder="Calle y número"
                                            value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="shipping_document">DNI / CUIT *</label>
+                                    <input type="text" id="shipping_document" name="shipping_document" placeholder="Ej: 12345678 o 20-12345678-9"
+                                           value="<?php echo htmlspecialchars($_POST['shipping_document'] ?? $_COOKIE['checkout_document'] ?? ''); ?>">
+                                    <small>Requerido por la empresa de envío</small>
                                 </div>
 
                                 <div class="form-row">
