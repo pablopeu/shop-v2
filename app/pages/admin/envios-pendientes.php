@@ -949,6 +949,9 @@ $user = get_logged_user();
                                                 $has_service_id = !empty($order['shipping_service_id']);
                                                 $delivery_method = $order['delivery_method'] ?? '';
 
+                                                // Verificar si la etiqueta ya fue generada
+                                                $has_label = !empty($order['shipping']['label_url']) || !empty($order['shipping']['label_generated_at']);
+
                                                 // Logging temporal EXTENDIDO para debug
                                                 error_log("DEBUG Envíos - Order: {$order['id']}");
                                                 error_log("  - has_shipment: " . ($has_shipment ? 'YES' : 'NO'));
@@ -963,12 +966,12 @@ $user = get_logged_user();
                                                 <?php if ($has_shipment): ?>
                                                     <!-- Botón: Ya existe envío creado, solo obtener etiqueta -->
                                                     <button type="button" class="btn btn-sm"
-                                                            style="background: #667eea; color: white;"
+                                                            style="background: <?php echo $has_label ? '#28a745' : '#667eea'; ?>; color: white;"
                                                             data-action="printShippingLabel"
                                                             data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
                                                             data-shipment-id="<?php echo htmlspecialchars($order['shipping']['carrier_shipment_id']); ?>"
-                                                            title="Imprimir etiqueta de envío">
-                                                        🖨️ Etiqueta
+                                                            title="<?php echo $has_label ? 'Re-imprimir etiqueta de envío' : 'Imprimir etiqueta de envío'; ?>">
+                                                        🖨️ Etiqueta<?php echo $has_label ? ' ✓' : ''; ?>
                                                     </button>
                                                 <?php elseif (($has_rate_id || $has_service_id) && $order['status'] === 'pagado'): ?>
                                                     <!-- Botón: Crear envío primero, luego obtener etiqueta (SOLO si está pagado) -->
