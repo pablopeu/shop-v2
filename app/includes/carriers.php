@@ -473,6 +473,12 @@ function zipnova_create_shipment($shipment_data) {
         ];
     }
 
+    // Agregar account_id al request (CRÍTICO para Zipnova)
+    $account_id = $config['credentials']['account_id'] ?? '';
+    if (!empty($account_id)) {
+        $shipment_data['account_id'] = $account_id;
+    }
+
     $result = zipnova_api_request('/shipments', 'POST', $shipment_data);
 
     if ($result['success']) {
