@@ -26,6 +26,9 @@ if (!defined('APP_ENTRY_POINT')) {
 // Require admin authentication
 require_admin();
 
+// Include carriers functions for zipnova_get_label()
+require_once APP_PATH . '/includes/carriers.php';
+
 // Set JSON response header
 header('Content-Type: application/json');
 
