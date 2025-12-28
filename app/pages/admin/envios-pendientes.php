@@ -390,7 +390,13 @@ $user = get_logged_user();
 
         .actions {
             display: flex;
+            align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .actions .btn {
+            white-space: nowrap;
         }
 
         /* Filters */
@@ -1068,7 +1074,7 @@ $user = get_logged_user();
                                                             data-action="createAndPrintShippingLabel"
                                                             data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
                                                             title="Crear envío y obtener etiqueta">
-                                                        📦 Crear y Obtener Etiqueta
+                                                        📦 Crear
                                                     </button>
                                                 <?php elseif (($has_rate_id || $has_service_id) && $order['status'] !== 'pagado'): ?>
                                                     <!-- Tiene datos pero no está pagado -->
