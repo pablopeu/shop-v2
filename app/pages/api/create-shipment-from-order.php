@@ -218,8 +218,8 @@ try {
     $result = zipnova_create_shipment($shipment_data);
 
     if ($result['success']) {
-        // Actualizar la orden con el shipment_id
-        $shipment_id = $result['data']['shipment_id'] ?? null;
+        // Actualizar la orden con el shipment_id (Zipnova lo devuelve como 'id')
+        $shipment_id = $result['data']['id'] ?? null;
 
         if ($shipment_id) {
             // Obtener la orden actualizada
