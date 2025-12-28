@@ -366,7 +366,75 @@ function update_order_status($order_id, $new_status, $user = 'system') {
 
                     // Intentar crear el envío en Zipnova
                     try {
-                        $result = zipnova_create_shipment($order);
+                        // IMPORTANTE: NO enviar toda la orden a Zipnova (leak de información)
+                        // Solo enviar los campos específicos que la API requiere
+
+                        // La auto-creación no funcionará si no tiene quote_data (orden legacy)
+                        // Solo las órdenes nuevas con cotización pueden auto-crear el envío
+                        $quote_data = $order['shipping_quote_data'] ?? [];
+                        if (empty($quote_data['rate_id'])) {
+                            throw new Exception('Orden sin datos de cotización - no se puede crear envío automático');
+                        }
+
+                        $shipping_address = $order['shipping_address'] ?? [];
+                        $shipping_config = read_json(APP_PATH . '/config/shipping.json');
+                        $znva_config = $shipping_config['carriers']['ZNVA'] ?? null;
+
+                        // Separar calle y número
+                        $street_full = $shipping_address['address'] ?? '';
+                        $street_parts = preg_match('/^(.+?)\s+(\d+.*)$/', $street_full, $matches);
+                        $street = $street_parts ? trim($matches[1]) : $street_full;
+                        $street_number = $street_parts ? trim($matches[2]) : '';
+
+                        // Construir items desde la orden
+                        $items = [];
+                        if (isset($order['items']) && is_array($order['items'])) {
+                            foreach ($order['items'] as $item) {
+                                $items[] = [
+                                    'sku' => 'ITEM',
+                                    'weight' => 500,
+                                    'height' => 10,
+                                    'width' => 10,
+                                    'length' => 10,
+                                    'description' => $item['name'] ?? 'Producto',
+                                    'classification_id' => 1
+                                ];
+                            }
+                        }
+
+                        // Calcular valor declarado (solo productos, SIN envío)
+                        $declared_value = 0;
+                        if (isset($order['items']) && is_array($order['items'])) {
+                            foreach ($order['items'] as $item) {
+                                $declared_value += ((float)($item['price'] ?? 0)) * ((int)($item['quantity'] ?? 1));
+                            }
+                        }
+
+                        // Construir request limpio (solo lo que Zipnova necesita)
+                        $shipment_data = [
+                            'rate_id' => $quote_data['rate_id'],
+                            'tariff_id' => $quote_data['tariff_id'] ?? null,
+                            'external_id' => $order['order_number'] ?? 'ORD-' . $order_id,
+                            'reference' => $order['order_number'] ?? $order_id,
+                            'service_type' => $quote_data['service_type_code'] ?? 'standard_delivery',
+                            'declared_value' => (int)$declared_value,
+                            'origin_id' => $znva_config['origin']['origin_id'] ?? '',
+                            'items' => $items,
+                            'destination' => [
+                                'name' => $shipping_address['name'] ?? $order['customer_name'],
+                                'street' => $street,
+                                'street_number' => $street_number,
+                                'city' => $shipping_address['city'] ?? '',
+                                'state' => $shipping_address['state'] ?? '',
+                                'zipcode' => $shipping_address['postal_code'] ?? '',
+                                'country' => $shipping_address['country'] ?? 'AR',
+                                'phone' => $shipping_address['phone'] ?? $order['customer_phone'] ?? '',
+                                'email' => $order['customer_email'] ?? '',
+                                'document' => $shipping_address['document'] ?? $order['customer_document'] ?? ''
+                            ]
+                        ];
+
+                        $result = zipnova_create_shipment($shipment_data);
 
                         if ($result['success']) {
                             // Actualizar orden con los datos del envío
@@ -374,7 +442,7 @@ function update_order_status($order_id, $new_status, $user = 'system') {
                                 $order['shipping'] = [];
                             }
                             $order['shipping']['carrier'] = 'ZNVA';
-                            $order['shipping']['carrier_shipment_id'] = $result['data']['shipment_id'] ?? null;
+                            $order['shipping']['carrier_shipment_id'] = $result['data']['id'] ?? null;
                             $order['shipping']['tracking_id'] = $result['data']['tracking_number'] ?? null;
                             $order['shipping']['status'] = 'pendiente';
                             $order['shipping']['carrier_status'] = $result['data']['status'] ?? 'pending';
