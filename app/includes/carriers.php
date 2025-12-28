@@ -552,8 +552,6 @@ function zipnova_cancel_shipment($shipment_id) {
  * @return array ['success' => bool, 'data' => ['label_url' => string, 'format' => string], 'error' => string]
  */
 function zipnova_get_label($shipment_id, $format = 'pdf') {
-    // TODO: Implementar cuando se tengan credenciales de sandbox
-
     // Validar que el envío existe
     $shipment = zipnova_load_shipment($shipment_id);
     if (!$shipment) {
