@@ -458,6 +458,39 @@ $user = get_logged_user();
             max-width: 100%;
         }
 
+        /* Status Filter Buttons */
+        .status-filters-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .filter-btn:hover {
+            background: #e8e8e8;
+            border-color: #d0d0d0;
+            color: #333;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
         /* Bulk Actions Bar */
         .bulk-actions-bar {
             background: #fff3cd;
@@ -752,6 +785,48 @@ $user = get_logged_user();
             <div class="stat-card">
                 <div class="stat-value"><?php echo $entregadas; ?></div>
                 <div class="stat-label">Entregadas</div>
+            </div>
+        </div>
+
+        <!-- Status Filter Buttons -->
+        <div class="card">
+            <div class="status-filters-section">
+                <a href="?page=envios-pendientes&filter=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'all' ? 'active' : ''; ?>">
+                    Todas
+                </a>
+                <a href="?page=envios-pendientes&filter=impago<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'impago' ? 'active' : ''; ?>">
+                    Impago
+                </a>
+                <a href="?page=envios-pendientes&filter=pagado<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'pagado' ? 'active' : ''; ?>">
+                    Pagado
+                </a>
+                <a href="?page=envios-pendientes&filter=lista_retiro<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'lista_retiro' ? 'active' : ''; ?>">
+                    Lista Retiro
+                </a>
+                <a href="?page=envios-pendientes&filter=en_transito<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'en_transito' ? 'active' : ''; ?>">
+                    En Tránsito
+                </a>
+                <a href="?page=envios-pendientes&filter=en_reparto<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'en_reparto' ? 'active' : ''; ?>">
+                    En Reparto
+                </a>
+                <a href="?page=envios-pendientes&filter=entregada<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'entregada' ? 'active' : ''; ?>">
+                    Entregada
+                </a>
+                <a href="?page=envios-pendientes&filter=fallida<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'fallida' ? 'active' : ''; ?>">
+                    Fallida
+                </a>
+                <a href="?page=envios-pendientes&filter=devuelta<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                   class="filter-btn <?php echo $filter_status === 'devuelta' ? 'active' : ''; ?>">
+                    Devuelta
+                </a>
             </div>
         </div>
 
