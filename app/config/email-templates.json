@@ -1,0 +1,27 @@
+{
+    "order_created": {
+        "subject": "¡Gracias por tu Compra! - Orden #{order_number}",
+        "title": "¡Gracias por tu compra!",
+        "content": "<p>Hemos recibido tu pedido correctamente y estamos procesándolo.</p>\n\n<div class='order-info'>\n<p><strong>📝 Orden:</strong> #{order_number}</p>\n<p><strong>📅 Fecha:</strong> {date}</p>\n</div>\n\n<h3>📦 Productos:</h3>\n{items_list}\n\n<p><strong>💰 Total:</strong> {total}</p>\n\n<p>Te mantendremos informado sobre el estado de tu pedido.</p>"
+    },
+    "order_paid": {
+        "subject": "✅ ¡Pago Confirmado! - Orden #{order_number}",
+        "title": "¡Pago Confirmado!",
+        "content": "<p>Hemos confirmado el pago de tu pedido. ¡Gracias por tu compra!</p>\n\n<div class='order-info'>\n<p><strong>📝 Orden:</strong> #{order_number}</p>\n<p><strong>💰 Monto:</strong> {total}</p>\n<p><strong>📅 Estado:</strong> Cobrado ✓</p>\n</div>\n\n<h3>📦 Productos:</h3>\n{items_list}\n\n<p><strong>🎯 Próximos pasos:</strong></p>\n<ul>\n<li>Estamos preparando tu pedido</li>\n<li>Te notificaremos cuando sea enviado</li>\n<li>Recibirás un número de seguimiento</li>\n</ul>\n\n<p>¡Gracias por tu compra! 🎉</p>"
+    },
+    "order_shipped": {
+        "subject": "🚚 ¡Tu Pedido Está en Camino! - #{order_number}",
+        "title": "🚚 Tu pedido está en camino",
+        "content": "<p>¡Buenas noticias! Tu pedido ha sido despachado y está en camino.</p>\n\n<div class='order-info'>\n<p><strong>📝 Orden:</strong> #{order_number}</p>\n<p><strong>📅 Fecha de envío:</strong> {date}</p>\n</div>\n\n<h3>📦 Productos enviados:</h3>\n{items_list}\n\n{tracking_info}\n\n<p><strong>📬 ¿Cuándo llega mi pedido?</strong></p>\n<p>El tiempo de entrega estimado es de 3 a 7 días hábiles, dependiendo de tu ubicación. Te enviaremos otra notificación cuando el paquete esté cerca de ser entregado.</p>\n\n<p><strong>💡 Consejos para recibir tu pedido:</strong></p>\n<ul>\n<li>Asegúrate de que haya alguien disponible en la dirección de entrega</li>\n<li>Verifica que el número de contacto proporcionado esté correcto</li>\n<li>Si no estás, el transportista dejará un aviso para coordinar la entrega</li>\n</ul>\n\n<p style='margin-top: 30px;'>Si tienes alguna pregunta sobre tu envío, no dudes en contactarnos.</p>"
+    },
+    "order_in_delivery": {
+        "subject": "🚴 ¡Tu Pedido Está Muy Cerca! - #{order_number}",
+        "title": "🚴 ¡Tu pedido está muy cerca!",
+        "content": "<p>¡Excelentes noticias! 🎉</p>\n<p>Tu pedido salió para entrega y <strong>llegará hoy</strong> o en las próximas horas.</p>\n\n<div class='order-info' style='background: #fff3cd; border-left-color: #ffc107;'>\n<p><strong>📝 Orden:</strong> #{order_number}</p>\n<p><strong>🚴 Estado:</strong> En Reparto</p>\n<p><strong>📅 Fecha estimada de entrega:</strong> Hoy</p>\n</div>\n\n<h3>📦 Productos en camino:</h3>\n{items_list}\n\n{tracking_info}\n\n<div style='background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #2196F3;'>\n<h3 style='margin-top: 0; color: #1976d2;'>📍 Preparate para recibir tu pedido</h3>\n<p><strong>Consejos importantes:</strong></p>\n<ul>\n<li><strong>Estate atento:</strong> El repartidor podría llamar o tocar el timbre pronto</li>\n<li><strong>Verifica tu teléfono:</strong> Asegúrate de tenerlo cerca por si te contactan</li>\n<li><strong>Prepara tu DNI:</strong> Algunos envíos requieren verificación de identidad</li>\n<li><strong>Espacio disponible:</strong> Ten un lugar listo para recibir el paquete</li>\n</ul>\n</div>\n\n<div style='background: #fff9e6; padding: 15px; border-radius: 8px; text-align: center;'>\n<p style='margin: 0; font-weight: 600;'>⏰ <strong>¡Ya casi llega!</strong></p>\n<p style='margin: 10px 0;'>Mantente atento a tu puerta o teléfono</p>\n</div>\n\n<p style='margin-top: 30px;'>Si tienes alguna pregunta, estamos aquí para ayudarte.</p>"
+    },
+    "order_delivered": {
+        "subject": "📦 ¡Tu Pedido Ha Sido Entregado! - #{order_number}",
+        "title": "📦 ¡Pedido Entregado!",
+        "content": "<p>¡Tu pedido ha sido entregado exitosamente! 🎉</p>\n\n<div class='order-info' style='background: #e8f5e9; border-left-color: #4CAF50;'>\n<p><strong>📝 Orden:</strong> #{order_number}</p>\n<p><strong>✅ Estado:</strong> Entregado</p>\n<p><strong>📅 Fecha de entrega:</strong> {date}</p>\n</div>\n\n<h3>📦 Productos entregados:</h3>\n{items_list}\n\n<div style='background: #fff9e6; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #ffc107;'>\n<h3 style='margin-top: 0; color: #f57c00;'>💬 Tu opinión nos importa</h3>\n<p>Nos encantaría conocer tu experiencia con nosotros. Tu feedback nos ayuda a mejorar cada día.</p>\n<p><strong>¿Cómo fue tu experiencia con:</strong></p>\n<ul>\n<li>La calidad de los productos</li>\n<li>El tiempo de entrega</li>\n<li>El servicio de atención</li>\n</ul>\n<p>Contáctanos y cuéntanos qué te pareció tu compra. ¡Tu opinión es muy valiosa para nosotros!</p>\n</div>\n\n<div style='text-align: center; margin: 40px 0;'>\n<h3 style='color: #667eea;'>¡Gracias por confiar en {site_name}!</h3>\n<p style='font-size: 16px;'>Esperamos verte pronto por aquí. 😊</p>\n</div>\n\n<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;'>\n<p style='margin: 0; font-weight: 600; color: #667eea;'>¿Te gustó tu compra?</p>\n<p style='margin: 10px 0;'>¡Comparte tu experiencia con tus amigos!</p>\n</div>"
+    }
+}
