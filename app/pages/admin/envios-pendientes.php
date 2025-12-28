@@ -458,12 +458,43 @@ $user = get_logged_user();
             max-width: 100%;
         }
 
+        /* Compact Actions Bar */
+        .compact-actions-bar {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .bulk-actions-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .bulk-actions-section select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 180px;
+        }
+
+        .bulk-actions-section #selectedCount {
+            color: #4CAF50;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
         /* Status Filter Buttons */
         .status-filters-section {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            padding: 15px;
         }
 
         .filter-btn {
@@ -560,6 +591,25 @@ $user = get_logged_user();
         @media (max-width: 768px) {
             .main-content {
                 padding: 10px;
+            }
+
+            .compact-actions-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .bulk-actions-section {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .bulk-actions-section select,
+            .bulk-actions-section .btn {
+                width: 100%;
+            }
+
+            .status-filters-section {
+                justify-content: center;
             }
 
             .orders-table {
@@ -788,123 +838,94 @@ $user = get_logged_user();
             </div>
         </div>
 
-        <!-- Status Filter Buttons -->
+        <!-- Filtros Avanzados -->
         <div class="card">
-            <div class="status-filters-section">
-                <a href="?page=envios-pendientes&filter=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'all' ? 'active' : ''; ?>">
-                    Todas
-                </a>
-                <a href="?page=envios-pendientes&filter=impago<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'impago' ? 'active' : ''; ?>">
-                    Impago
-                </a>
-                <a href="?page=envios-pendientes&filter=pagado<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'pagado' ? 'active' : ''; ?>">
-                    Pagado
-                </a>
-                <a href="?page=envios-pendientes&filter=lista_retiro<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'lista_retiro' ? 'active' : ''; ?>">
-                    Lista Retiro
-                </a>
-                <a href="?page=envios-pendientes&filter=en_transito<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'en_transito' ? 'active' : ''; ?>">
-                    En Tránsito
-                </a>
-                <a href="?page=envios-pendientes&filter=en_reparto<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'en_reparto' ? 'active' : ''; ?>">
-                    En Reparto
-                </a>
-                <a href="?page=envios-pendientes&filter=entregada<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'entregada' ? 'active' : ''; ?>">
-                    Entregada
-                </a>
-                <a href="?page=envios-pendientes&filter=fallida<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'fallida' ? 'active' : ''; ?>">
-                    Fallida
-                </a>
-                <a href="?page=envios-pendientes&filter=devuelta<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                   class="filter-btn <?php echo $filter_status === 'devuelta' ? 'active' : ''; ?>">
-                    Devuelta
-                </a>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="filters-card">
-            <form method="GET" action="<?php echo url('/admin/'); ?>">
+            <div class="card-header">Filtros Avanzados</div>
+            <form method="GET" action="<?php echo url('/admin/'); ?>" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; align-items: end;">
                 <input type="hidden" name="page" value="envios-pendientes">
-                <div class="filters-row">
-                    <div class="filter-group">
-                        <a href="<?php echo url('/admin/?page=envios-archivo'); ?>" class="btn btn-secondary">
-                            Ver Archivados
-                        </a>
-                    </div>
+                <input type="hidden" name="filter" value="<?php echo htmlspecialchars($filter_status); ?>">
 
-                    <div class="filter-group">
-                        <label for="search">Buscar</label>
-                        <input type="text" id="search" name="search"
-                               value="<?php echo htmlspecialchars($search_query); ?>"
-                               placeholder="Nº Orden, Cliente, Email">
-                    </div>
+                <div class="form-group" style="margin: 0;">
+                    <label for="search" style="font-size: 13px; margin-bottom: 5px; display: block;">Buscar (Nº Orden, Cliente, Email)</label>
+                    <input type="text" id="search" name="search"
+                           value="<?php echo htmlspecialchars($search_query); ?>"
+                           placeholder="Ej: 1001 o Juan Perez"
+                           style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%;">
+                </div>
 
-                    <div class="filter-group">
-                        <label for="filter">Estado</label>
-                        <select id="filter" name="filter">
-                            <option value="all" <?php echo $filter_status === 'all' ? 'selected' : ''; ?>>Todos</option>
-                            <option value="impago" <?php echo $filter_status === 'impago' ? 'selected' : ''; ?>>Impago</option>
-                            <option value="pagado" <?php echo $filter_status === 'pagado' ? 'selected' : ''; ?>>Pagado</option>
-                            <option value="lista_retiro" <?php echo $filter_status === 'lista_retiro' ? 'selected' : ''; ?>>Lista para Retiro</option>
-                            <option value="en_transito" <?php echo $filter_status === 'en_transito' ? 'selected' : ''; ?>>En Tránsito</option>
-                            <option value="entregada" <?php echo $filter_status === 'entregada' ? 'selected' : ''; ?>>Entregada</option>
-                        </select>
-                    </div>
+                <div class="form-group" style="margin: 0;">
+                    <label for="delivery" style="font-size: 13px; margin-bottom: 5px; display: block;">Método Entrega</label>
+                    <select id="delivery" name="delivery" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%;">
+                        <option value="all" <?php echo $filter_delivery === 'all' ? 'selected' : ''; ?>>Todos</option>
+                        <option value="pickup" <?php echo $filter_delivery === 'pickup' ? 'selected' : ''; ?>>Retiro</option>
+                        <option value="shipping" <?php echo $filter_delivery === 'shipping' ? 'selected' : ''; ?>>Envío</option>
+                    </select>
+                </div>
 
-                    <div class="filter-group">
-                        <label for="delivery">Método Entrega</label>
-                        <select id="delivery" name="delivery">
-                            <option value="all" <?php echo $filter_delivery === 'all' ? 'selected' : ''; ?>>Todos</option>
-                            <option value="pickup" <?php echo $filter_delivery === 'pickup' ? 'selected' : ''; ?>>Retiro</option>
-                            <option value="shipping" <?php echo $filter_delivery === 'shipping' ? 'selected' : ''; ?>>Envío</option>
-                        </select>
-                    </div>
+                <div class="form-group" style="margin: 0;">
+                    <label for="carrier" style="font-size: 13px; margin-bottom: 5px; display: block;">Carrier</label>
+                    <select id="carrier" name="carrier" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%;">
+                        <option value="all" <?php echo $filter_carrier === 'all' ? 'selected' : ''; ?>>Todos</option>
+                        <option value="manual" <?php echo $filter_carrier === 'manual' ? 'selected' : ''; ?>>Manual</option>
+                        <?php foreach ($available_carriers as $tag => $carrier): ?>
+                            <option value="<?php echo htmlspecialchars($tag); ?>"
+                                    <?php echo $filter_carrier === $tag ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($carrier['name'] ?? $tag); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-                    <div class="filter-group">
-                        <label for="carrier">Carrier</label>
-                        <select id="carrier" name="carrier">
-                            <option value="all" <?php echo $filter_carrier === 'all' ? 'selected' : ''; ?>>Todos</option>
-                            <option value="manual" <?php echo $filter_carrier === 'manual' ? 'selected' : ''; ?>>Manual</option>
-                            <?php foreach ($available_carriers as $tag => $carrier): ?>
-                                <option value="<?php echo htmlspecialchars($tag); ?>"
-                                        <?php echo $filter_carrier === $tag ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($carrier['name'] ?? $tag); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn btn-primary btn-sm">Aplicar Filtros</button>
+                    <a href="?page=envios-pendientes" class="btn btn-secondary btn-sm">Limpiar</a>
                 </div>
             </form>
         </div>
 
-        <!-- Bulk Actions Bar -->
-        <form method="POST" id="bulkForm">
-            <div class="bulk-actions-bar" id="bulkActionsBar">
-                <span id="selectedCount">0 envíos seleccionados</span>
-                <select name="bulk_action" id="bulkAction">
-                    <option value="">Seleccionar acción...</option>
-                    <option value="mark_sent">Marcar como Enviada</option>
-                    <option value="mark_delivered">Marcar como Entregada</option>
-                    <option value="archive">Archivar</option>
-                </select>
-                <button type="button" class="btn btn-sm btn-primary" data-action="confirmBulkAction">
-                    Aplicar
-                </button>
-            </div>
+        <!-- Compact Actions Bar: Bulk Actions + Status Filters -->
+        <div class="card">
+            <div class="compact-actions-bar">
+                <!-- Bulk Actions Form -->
+                <form method="POST" id="bulkForm" class="bulk-actions-section">
+                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                    <select name="bulk_action" id="bulkAction">
+                        <option value="">Seleccionar acción...</option>
+                        <option value="mark_sent">Marcar como Enviada</option>
+                        <option value="mark_delivered">Marcar como Entregada</option>
+                        <option value="archive">Archivar</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm" data-action="confirmBulkAction">Aplicar a Seleccionadas</button>
+                    <a href="?page=envios-archivo" class="btn btn-secondary btn-sm">Ver Archivo</a>
+                    <span id="selectedCount"></span>
+                </form>
 
-            <!-- Orders List -->
-            <div class="card">
+                <!-- Status Filters -->
+                <div class="status-filters-section">
+                    <a href="?page=envios-pendientes&filter=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'all' ? 'active' : ''; ?>">Todas</a>
+                    <a href="?page=envios-pendientes&filter=impago<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'impago' ? 'active' : ''; ?>">Impago</a>
+                    <a href="?page=envios-pendientes&filter=pagado<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'pagado' ? 'active' : ''; ?>">Pagado</a>
+                    <a href="?page=envios-pendientes&filter=lista_retiro<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'lista_retiro' ? 'active' : ''; ?>">Lista Retiro</a>
+                    <a href="?page=envios-pendientes&filter=en_transito<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'en_transito' ? 'active' : ''; ?>">En Tránsito</a>
+                    <a href="?page=envios-pendientes&filter=en_reparto<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'en_reparto' ? 'active' : ''; ?>">En Reparto</a>
+                    <a href="?page=envios-pendientes&filter=entregada<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'entregada' ? 'active' : ''; ?>">Entregada</a>
+                    <a href="?page=envios-pendientes&filter=fallida<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'fallida' ? 'active' : ''; ?>">Fallida</a>
+                    <a href="?page=envios-pendientes&filter=devuelta<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
+                       class="filter-btn <?php echo $filter_status === 'devuelta' ? 'active' : ''; ?>">Devuelta</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="card">
                 <div class="card-header">
                     <?php if (empty($orders)): ?>
                         Todos los Envíos
