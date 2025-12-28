@@ -399,6 +399,14 @@ $user = get_logged_user();
             white-space: nowrap;
         }
 
+        /* Botones de estado de envío con ancho fijo para alineación */
+        .actions .btn-shipping-action,
+        .actions .shipping-status-badge {
+            min-width: 100px;
+            text-align: center;
+            display: inline-block;
+        }
+
         /* Filters */
         .filters-card {
             background: white;
@@ -1059,7 +1067,7 @@ $user = get_logged_user();
 
                                                 <?php if ($has_shipment): ?>
                                                     <!-- Botón: Ya existe envío creado, solo obtener etiqueta -->
-                                                    <button type="button" class="btn btn-sm"
+                                                    <button type="button" class="btn btn-sm btn-shipping-action"
                                                             style="background: <?php echo $has_label ? '#28a745' : '#667eea'; ?>; color: white;"
                                                             data-action="printShippingLabel"
                                                             data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
@@ -1069,7 +1077,7 @@ $user = get_logged_user();
                                                     </button>
                                                 <?php elseif (($has_rate_id || $has_service_id) && $order['status'] === 'pagado'): ?>
                                                     <!-- Botón: Crear envío primero, luego obtener etiqueta (SOLO si está pagado) -->
-                                                    <button type="button" class="btn btn-sm"
+                                                    <button type="button" class="btn btn-sm btn-shipping-action"
                                                             style="background: #28a745; color: white;"
                                                             data-action="createAndPrintShippingLabel"
                                                             data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
@@ -1078,10 +1086,10 @@ $user = get_logged_user();
                                                     </button>
                                                 <?php elseif (($has_rate_id || $has_service_id) && $order['status'] !== 'pagado'): ?>
                                                     <!-- Tiene datos pero no está pagado -->
-                                                    <span style="display: inline-block; padding: 4px 8px; background: #fff3cd; border: 1px solid #FF9800; border-radius: 4px; color: #856404; font-size: 11px; font-weight: 600;">⏳ Pendiente</span>
+                                                    <span class="shipping-status-badge" style="display: inline-block; padding: 4px 8px; background: #fff3cd; border: 1px solid #FF9800; border-radius: 4px; color: #856404; font-size: 11px; font-weight: 600;">⏳ Pendiente</span>
                                                 <?php else: ?>
                                                     <!-- Sin datos de envío -->
-                                                    <small style="color: #999;">Sin datos de envío</small>
+                                                    <span class="shipping-status-badge" style="color: #999; font-size: 11px;">Sin datos</span>
                                                 <?php endif; ?>
                                                 <button type="button" class="btn btn-danger btn-sm"
                                                         data-action="confirmArchiveOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">

@@ -119,6 +119,7 @@ $impagos = count(array_filter($all_archived, fn($o) => $o['status'] === 'impago'
 $pagados = count(array_filter($all_archived, fn($o) => $o['status'] === 'pagado'));
 $lista_retiro = count(array_filter($all_archived, fn($o) => $o['status'] === 'lista_retiro'));
 $en_transito = count(array_filter($all_archived, fn($o) => $o['status'] === 'en_transito'));
+$enviadas = $en_transito; // Alias para stats card
 $entregadas = count(array_filter($all_archived, fn($o) => $o['status'] === 'entregada'));
 
 // Get logged user
