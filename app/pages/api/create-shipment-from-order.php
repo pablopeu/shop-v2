@@ -161,6 +161,22 @@ try {
         ];
     }
 
+    // Calcular valor declarado (solo productos, SIN envío ni descuentos)
+    $declared_value = 0;
+    if (isset($order['items']) && is_array($order['items'])) {
+        foreach ($order['items'] as $item) {
+            $item_price = (float)($item['price'] ?? 0);
+            $item_quantity = (int)($item['quantity'] ?? 1);
+            $declared_value += $item_price * $item_quantity;
+        }
+    }
+    // Si no hay items, usar subtotal o total - shipping_cost
+    if ($declared_value == 0) {
+        $declared_value = (float)($order['subtotal'] ?? $order['total'] ?? 0);
+        $shipping_cost = (float)($order['shipping_cost'] ?? 0);
+        $declared_value = max(0, $declared_value - $shipping_cost);
+    }
+
     // Preparar datos para crear envío en Zipnova (formato correcto según API)
     $shipment_data = [
         // IDs y referencias
@@ -172,8 +188,8 @@ try {
         // Tipo de servicio (código, no ID)
         'service_type' => $quote_data['service_type_code'] ?? $quote_data['service_id'] ?? 'standard_delivery',
 
-        // Valor declarado
-        'declared_value' => (int)($order['total'] ?? 0),
+        // Valor declarado (solo mercadería, SIN envío)
+        'declared_value' => (int)$declared_value,
 
         // Origen (solo el ID, no el objeto completo)
         'origin_id' => $znva_config['origin']['origin_id'],
@@ -192,7 +208,7 @@ try {
             'country' => $shipping_address['country'] ?? 'AR',
             'phone' => $shipping_address['phone'] ?? $order['customer_phone'] ?? '',
             'email' => $order['customer_email'] ?? '',
-            'document' => $shipping_address['document'] ?? null // DNI/CUIT (pendiente agregar en checkout)
+            'document' => $shipping_address['document'] ?? $order['customer_document'] ?? '' // DNI/CUIT (REQUERIDO)
         ]
     ];
 
