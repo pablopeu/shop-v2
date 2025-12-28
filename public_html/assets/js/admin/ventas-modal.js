@@ -295,6 +295,7 @@ export function viewOrder(orderId) {
                             <div style="background: white; padding: 12px; margin-bottom: ${index < order.status_history.length - 1 ? '10px' : '0'}; border-radius: 4px; border-left: 3px solid ${
                                 change.status === 'impago' ? '#FF9800' :
                                 change.status === 'pagado' ? '#4CAF50' :
+                                change.status === 'pendiente' ? '#9E9E9E' :
                                 change.status === 'lista_retiro' ? '#00BCD4' :
                                 change.status === 'en_transito' ? '#2196F3' :
                                 change.status === 'en_reparto' ? '#03A9F4' :
@@ -307,6 +308,7 @@ export function viewOrder(orderId) {
                                     <span style="font-weight: 600; color: #333;">
                                         ${change.status === 'impago' ? '💵 Impago' :
                                           change.status === 'pagado' ? '✅ Pagado' :
+                                          change.status === 'pendiente' ? '⏳ Pendiente de Envío' :
                                           change.status === 'lista_retiro' ? '📋 Lista para Retiro' :
                                           change.status === 'en_transito' ? '🚚 En Tránsito' :
                                           change.status === 'en_reparto' ? '🚴 En Reparto' :
@@ -340,6 +342,7 @@ export function viewOrder(orderId) {
             <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid ${
                 order.status === 'impago' ? '#FF9800' :
                 order.status === 'pagado' ? '#4CAF50' :
+                order.status === 'pendiente' ? '#9E9E9E' :
                 order.status === 'lista_retiro' ? '#00BCD4' :
                 order.status === 'en_transito' ? '#2196F3' :
                 order.status === 'en_reparto' ? '#03A9F4' :
@@ -353,6 +356,7 @@ export function viewOrder(orderId) {
                     <span style="padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; color: white; background: ${
                         order.status === 'impago' ? '#FF9800' :
                         order.status === 'pagado' ? '#4CAF50' :
+                        order.status === 'pendiente' ? '#9E9E9E' :
                         order.status === 'lista_retiro' ? '#00BCD4' :
                         order.status === 'en_transito' ? '#2196F3' :
                         order.status === 'en_reparto' ? '#03A9F4' :
@@ -363,6 +367,7 @@ export function viewOrder(orderId) {
                     };">
                         ${order.status === 'impago' ? '💵 Impago' :
                           order.status === 'pagado' ? '✅ Pagado' :
+                          order.status === 'pendiente' ? '⏳ Pendiente de Envío' :
                           order.status === 'lista_retiro' ? '📋 Lista para Retiro' :
                           order.status === 'en_transito' ? '🚚 En Tránsito' :
                           order.status === 'en_reparto' ? '🚴 En Reparto' :
@@ -389,6 +394,7 @@ export function viewOrder(orderId) {
                             <option value="pagado" ${order.status === 'pagado' ? 'selected' : ''}>✅ Pagado</option>
                         </optgroup>
                         <optgroup label="Estados de Logística">
+                            <option value="pendiente" ${order.status === 'pendiente' ? 'selected' : ''}>⏳ Pendiente de Envío</option>
                             <option value="lista_retiro" ${order.status === 'lista_retiro' ? 'selected' : ''}>📋 Lista para Retiro</option>
                             <option value="en_transito" ${order.status === 'en_transito' ? 'selected' : ''}>🚚 En Tránsito</option>
                             <option value="en_reparto" ${order.status === 'en_reparto' ? 'selected' : ''}>🚴 En Reparto</option>

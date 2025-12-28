@@ -72,6 +72,32 @@ function handle_order_actions() {
                     error_log("Could not retrieve updated order {$order_id}");
                 }
             }
+
+            // Send notification when order is marked as entregada (delivered)
+            if ($new_status === 'entregada') {
+                $updated_order = get_order_by_id($order_id);
+                if ($updated_order) {
+                    $contact_preference = $updated_order['contact_preference'] ?? 'email';
+
+                    error_log("Order {$order_id} marked as entregada. Contact preference: {$contact_preference}");
+
+                    if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
+                        // Send via Telegram
+                        error_log("Sending Telegram notification to chat_id: {$updated_order['telegram_chat_id']}");
+                        $telegram_result = send_telegram_order_delivered_to_customer($updated_order);
+                        error_log("Telegram notification result: " . ($telegram_result ? 'SUCCESS' : 'FAILED'));
+                    } elseif (!empty($updated_order['customer_email'])) {
+                        // Send via Email (default)
+                        error_log("Sending email notification to: {$updated_order['customer_email']}");
+                        $email_result = send_order_delivered_email($updated_order);
+                        error_log("Email notification result: " . ($email_result ? 'SUCCESS' : 'FAILED'));
+                    } else {
+                        error_log("No valid contact method found for order {$order_id}");
+                    }
+                } else {
+                    error_log("Could not retrieve updated order {$order_id}");
+                }
+            }
         } else {
             $result['error'] = 'Error al actualizar el estado';
         }
@@ -130,7 +156,7 @@ function handle_order_actions() {
                     if (cancel_order($order_id, 'Cancelado en masa por admin', $_SESSION['username'])) {
                         $success_count++;
                     }
-                } elseif (in_array($action, ['impago', 'pagado', 'lista_retiro', 'en_transito', 'en_reparto', 'entregada', 'cancelada'])) {
+                } elseif (in_array($action, ['impago', 'pagado', 'pendiente', 'lista_retiro', 'en_transito', 'en_reparto', 'entregada', 'fallida', 'devuelta', 'cancelada', 'rechazada'])) {
                     if (update_order_status($order_id, $action, $_SESSION['username'])) {
                         $success_count++;
 
@@ -139,6 +165,20 @@ function handle_order_actions() {
                             $updated_order = get_order_by_id($order_id);
                             if ($updated_order && !empty($updated_order['customer_email'])) {
                                 send_order_shipped_email($updated_order);
+                            }
+                        }
+
+                        // Send notification when order is marked as entregada (delivered)
+                        if ($action === 'entregada') {
+                            $updated_order = get_order_by_id($order_id);
+                            if ($updated_order) {
+                                $contact_preference = $updated_order['contact_preference'] ?? 'email';
+
+                                if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
+                                    send_telegram_order_delivered_to_customer($updated_order);
+                                } elseif (!empty($updated_order['customer_email'])) {
+                                    send_order_delivered_email($updated_order);
+                                }
                             }
                         }
                     }

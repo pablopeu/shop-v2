@@ -483,6 +483,26 @@ function send_order_paid_email($order) {
 }
 
 /**
+ * Send order delivered notification to customer
+ */
+function send_order_delivered_email($order) {
+    $config = read_json(__DIR__ . '/../config/email.json');
+
+    if (!($config['notifications']['customer']['order_delivered'] ?? true)) {
+        return false;
+    }
+
+    $to = $order['customer_email'];
+    $subject = "¡Tu Pedido Fue Entregado! - #{$order['order_number']}";
+
+    $html = get_email_template('order_delivered', [
+        'order' => $order
+    ]);
+
+    return send_email($to, $subject, $html);
+}
+
+/**
  * Send new order notification to admin
  */
 function send_admin_new_order_email($order) {

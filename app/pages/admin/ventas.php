@@ -79,6 +79,7 @@ $status_labels = [
     'pagado' => ['label' => 'Pagado', 'color' => '#4CAF50'],
 
     // Estados de logística
+    'pendiente' => ['label' => 'Pendiente de Envío', 'color' => '#9E9E9E'],
     'lista_retiro' => ['label' => 'Lista para Retiro', 'color' => '#00BCD4'],
     'en_transito' => ['label' => 'En Tránsito', 'color' => '#2196F3'],
     'en_reparto' => ['label' => 'En Reparto', 'color' => '#03A9F4'],

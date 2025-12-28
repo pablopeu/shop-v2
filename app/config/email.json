@@ -10,7 +10,9 @@
             "payment_approved": true,
             "payment_rejected": true,
             "payment_pending": true,
+            "order_paid": true,
             "order_shipped": true,
+            "order_delivered": true,
             "chargeback_notice": false
         },
         "admin": {
