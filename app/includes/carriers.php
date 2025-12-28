@@ -599,13 +599,37 @@ function zipnova_get_label($shipment_id, $format = 'pdf') {
         ];
     }
 
-    // Endpoint según documentación de Zipnova
-    $endpoint = '/shipments/' . $shipment_id . '/label';
+    // Probar múltiples endpoints posibles para obtener la etiqueta
+    // Zipnova no documenta claramente cuál es el endpoint correcto
+    $endpoints_to_try = [
+        '/shipments/' . $shipment_id . '/documents',           // Documentos generales
+        '/shipments/' . $shipment_id . '/documents/pdf',       // PDF específico
+        '/shipments/' . $shipment_id . '/label/pdf',           // Label con formato
+        '/documents/' . $shipment_id,                           // Recurso separado
+        '/shipments/' . $shipment_id . '/label',               // Endpoint original
+    ];
 
-    // Algunos carriers permiten especificar formato en query params
-    $query_params = ['format' => $format];
+    $result = ['success' => false, 'error' => 'No se encontró endpoint válido para obtener la etiqueta'];
 
-    $result = zipnova_api_request($endpoint . '?' . http_build_query($query_params), 'GET');
+    foreach ($endpoints_to_try as $endpoint) {
+        $test_result = zipnova_api_request($endpoint, 'GET');
+
+        if ($test_result['success']) {
+            $result = $test_result;
+            zipnova_log('Label Endpoint Found', [
+                'shipment_id' => $shipment_id,
+                'endpoint' => $endpoint
+            ]);
+            break;
+        } else {
+            zipnova_log('Label Endpoint Failed', [
+                'shipment_id' => $shipment_id,
+                'endpoint' => $endpoint,
+                'http_code' => $test_result['http_code'] ?? 'unknown',
+                'error' => $test_result['error'] ?? 'unknown'
+            ]);
+        }
+    }
 
     if ($result['success']) {
         // Guardar URL de etiqueta en datos locales
