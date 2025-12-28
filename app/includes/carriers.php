@@ -607,8 +607,8 @@ function zipnova_get_label($shipment_id, $format = 'pdf') {
     $result = zipnova_api_request($endpoint, 'GET');
 
     if ($result['success']) {
-        // Zipnova devuelve el PDF en base64 en el campo 'content'
-        $base64_content = $result['data']['content'] ?? '';
+        // Zipnova devuelve el PDF en base64 en el campo 'body'
+        $base64_content = $result['data']['body'] ?? '';
 
         if (empty($base64_content)) {
             zipnova_log('Label Generation Failed - No Content', [
