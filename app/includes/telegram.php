@@ -631,6 +631,100 @@ function send_telegram_order_paid_to_customer($order) {
 }
 
 /**
+ * Send order shipped notification to customer via Telegram
+ *
+ * @param array $order Order data
+ * @return bool Success status
+ */
+function send_telegram_order_shipped_to_customer($order) {
+    if (empty($order['telegram_chat_id'])) {
+        error_log("No telegram_chat_id in order");
+        return false;
+    }
+
+    $site_config = read_json(__DIR__ . '/../config/site.json');
+    $site_name = $site_config['site_name'] ?? 'Nuestra Tienda';
+
+    $message = "🚚 <b>¡Tu Pedido Está en Camino!</b>\n\n";
+    $message .= "Buenas noticias! Tu pedido de <b>{$site_name}</b> ha sido despachado y está en tránsito.\n\n";
+    $message .= "📝 Orden: <code>#{$order['order_number']}</code>\n";
+    $message .= "📅 Enviado: " . date('d/m/Y H:i') . "\n\n";
+
+    // Tracking info if available
+    if (!empty($order['tracking_number'])) {
+        $message .= "📦 <b>Seguimiento:</b> <code>{$order['tracking_number']}</code>\n";
+        if (!empty($order['tracking_url'])) {
+            $message .= "🔗 <a href='{$order['tracking_url']}'>Rastrear envío</a>\n";
+        }
+        $message .= "\n";
+    }
+
+    $message .= "📦 <b>Productos enviados:</b>\n";
+    foreach ($order['items'] as $item) {
+        $message .= "• {$item['name']} x{$item['quantity']}\n";
+    }
+
+    $message .= "\n📬 <b>¿Cuándo llega?</b>\n";
+    $message .= "• Tiempo estimado: 3-7 días hábiles\n";
+    $message .= "• Te notificaremos cuando esté cerca\n\n";
+
+    $message .= "💡 <b>Consejos:</b>\n";
+    $message .= "• Asegúrate de estar disponible en la dirección\n";
+    $message .= "• Verifica tu número de contacto\n";
+    $message .= "• Si no estás, dejarán un aviso\n\n";
+
+    $message .= "Si tienes preguntas, contáctanos. ¡Gracias por tu compra! 🎉";
+
+    return send_telegram_to_user($order['telegram_chat_id'], $message);
+}
+
+/**
+ * Send order out for delivery notification to customer via Telegram
+ *
+ * @param array $order Order data
+ * @return bool Success status
+ */
+function send_telegram_order_in_delivery_to_customer($order) {
+    if (empty($order['telegram_chat_id'])) {
+        error_log("No telegram_chat_id in order");
+        return false;
+    }
+
+    $site_config = read_json(__DIR__ . '/../config/site.json');
+    $site_name = $site_config['site_name'] ?? 'Nuestra Tienda';
+
+    $message = "🚴 <b>¡Tu Pedido Está Muy Cerca!</b>\n\n";
+    $message .= "¡Excelentes noticias! Tu pedido de <b>{$site_name}</b> salió para entrega y <b>llegará hoy</b> o en las próximas horas.\n\n";
+    $message .= "📝 Orden: <code>#{$order['order_number']}</code>\n";
+    $message .= "🚴 Estado: <b>En Reparto</b>\n";
+    $message .= "📅 Entrega estimada: <b>Hoy</b>\n\n";
+
+    // Tracking info if available
+    if (!empty($order['tracking_number'])) {
+        $message .= "📦 Seguimiento: <code>{$order['tracking_number']}</code>\n";
+        if (!empty($order['tracking_url'])) {
+            $message .= "🔗 <a href='{$order['tracking_url']}'>Ver estado</a>\n";
+        }
+        $message .= "\n";
+    }
+
+    $message .= "📦 <b>Productos en camino:</b>\n";
+    foreach ($order['items'] as $item) {
+        $message .= "• {$item['name']} x{$item['quantity']}\n";
+    }
+
+    $message .= "\n📍 <b>Preparate para recibir:</b>\n";
+    $message .= "• 📱 Estate atento al teléfono\n";
+    $message .= "• 🔔 El repartidor podría llamar pronto\n";
+    $message .= "• 🆔 Prepara tu DNI si es necesario\n";
+    $message .= "• 📦 Ten espacio listo para el paquete\n\n";
+
+    $message .= "⏰ <b>¡Ya casi llega!</b> Mantente atento. 🎉";
+
+    return send_telegram_to_user($order['telegram_chat_id'], $message);
+}
+
+/**
  * Send order delivered notification to customer via Telegram
  *
  * @param array $order Order data
@@ -648,24 +742,30 @@ function send_telegram_order_delivered_to_customer($order) {
     $currency = $order['currency'] === 'USD' ? 'U$D' : '$';
     $total = number_format($order['total'], 2);
 
-    $message = "📦 <b>¡Tu Pedido Fue Entregado!</b>\n\n";
-    $message .= "Tu pedido de <b>{$site_name}</b> ha sido entregado exitosamente.\n\n";
+    $message = "📦 <b>¡Tu Pedido Ha Sido Entregado!</b>\n\n";
+    $message .= "¡Tu pedido de <b>{$site_name}</b> fue entregado exitosamente! 🎉\n\n";
     $message .= "📝 Orden: <code>#{$order['order_number']}</code>\n";
     $message .= "💰 Monto: <b>{$currency} {$total}</b>\n";
-    $message .= "📅 Estado: <b>Entregado</b> ✓\n\n";
+    $message .= "✅ Estado: <b>Entregado</b>\n";
+    $message .= "📅 Entregado: " . date('d/m/Y H:i') . "\n\n";
 
     $message .= "📦 <b>Productos entregados:</b>\n";
     foreach ($order['items'] as $item) {
         $message .= "• {$item['name']} x{$item['quantity']}\n";
     }
 
-    $message .= "\n💬 <b>¿Cómo fue tu experiencia?</b>\n";
-    $message .= "Nos encantaría conocer tu opinión sobre:\n";
-    $message .= "• La calidad de los productos\n";
-    $message .= "• El tiempo de entrega\n";
-    $message .= "• El servicio recibido\n";
+    $message .= "\n💬 <b>Tu opinión nos importa</b>\n";
+    $message .= "Nos encantaría conocer tu experiencia:\n\n";
+    $message .= "• ¿Qué te pareció la calidad de los productos?\n";
+    $message .= "• ¿El tiempo de entrega fue el esperado?\n";
+    $message .= "• ¿Cómo fue tu experiencia general?\n\n";
 
-    $message .= "\n¡Gracias por confiar en nosotros! 🎉";
+    $message .= "Tu feedback es muy valioso para seguir mejorando.\n\n";
+
+    $message .= "━━━━━━━━━━━━━━━━━\n";
+    $message .= "🎊 <b>¡Gracias por confiar en {$site_name}!</b>\n\n";
+    $message .= "Esperamos verte pronto. 😊\n\n";
+    $message .= "¿Te gustó tu compra? ¡Compártelo con tus amigos!";
 
     return send_telegram_to_user($order['telegram_chat_id'], $message);
 }

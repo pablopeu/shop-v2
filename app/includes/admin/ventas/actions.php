@@ -41,8 +41,48 @@ function handle_order_actions() {
             // Send notification when order is marked as in transit
             if ($new_status === 'en_transito') {
                 $updated_order = get_order_by_id($order_id);
-                if ($updated_order && !empty($updated_order['customer_email'])) {
-                    send_order_shipped_email($updated_order);
+                if ($updated_order) {
+                    $contact_preference = $updated_order['contact_preference'] ?? 'email';
+
+                    error_log("Order {$order_id} marked as en_transito. Contact preference: {$contact_preference}");
+
+                    if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
+                        // Send via Telegram
+                        error_log("Sending Telegram notification to chat_id: {$updated_order['telegram_chat_id']}");
+                        $telegram_result = send_telegram_order_shipped_to_customer($updated_order);
+                        error_log("Telegram notification result: " . ($telegram_result ? 'SUCCESS' : 'FAILED'));
+                    } elseif (!empty($updated_order['customer_email'])) {
+                        // Send via Email (default)
+                        error_log("Sending email notification to: {$updated_order['customer_email']}");
+                        $email_result = send_order_shipped_email($updated_order);
+                        error_log("Email notification result: " . ($email_result ? 'SUCCESS' : 'FAILED'));
+                    } else {
+                        error_log("No valid contact method found for order {$order_id}");
+                    }
+                }
+            }
+
+            // Send notification when order is marked as en_reparto (out for delivery)
+            if ($new_status === 'en_reparto') {
+                $updated_order = get_order_by_id($order_id);
+                if ($updated_order) {
+                    $contact_preference = $updated_order['contact_preference'] ?? 'email';
+
+                    error_log("Order {$order_id} marked as en_reparto. Contact preference: {$contact_preference}");
+
+                    if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
+                        // Send via Telegram
+                        error_log("Sending Telegram notification to chat_id: {$updated_order['telegram_chat_id']}");
+                        $telegram_result = send_telegram_order_in_delivery_to_customer($updated_order);
+                        error_log("Telegram notification result: " . ($telegram_result ? 'SUCCESS' : 'FAILED'));
+                    } elseif (!empty($updated_order['customer_email'])) {
+                        // Send via Email (default)
+                        error_log("Sending email notification to: {$updated_order['customer_email']}");
+                        $email_result = send_order_in_delivery_email($updated_order);
+                        error_log("Email notification result: " . ($email_result ? 'SUCCESS' : 'FAILED'));
+                    } else {
+                        error_log("No valid contact method found for order {$order_id}");
+                    }
                 }
             }
 
@@ -160,11 +200,31 @@ function handle_order_actions() {
                     if (update_order_status($order_id, $action, $_SESSION['username'])) {
                         $success_count++;
 
-                        // Send email notification when order is marked as in transit
+                        // Send notification when order is marked as in transit
                         if ($action === 'en_transito') {
                             $updated_order = get_order_by_id($order_id);
-                            if ($updated_order && !empty($updated_order['customer_email'])) {
-                                send_order_shipped_email($updated_order);
+                            if ($updated_order) {
+                                $contact_preference = $updated_order['contact_preference'] ?? 'email';
+
+                                if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
+                                    send_telegram_order_shipped_to_customer($updated_order);
+                                } elseif (!empty($updated_order['customer_email'])) {
+                                    send_order_shipped_email($updated_order);
+                                }
+                            }
+                        }
+
+                        // Send notification when order is marked as en_reparto (out for delivery)
+                        if ($action === 'en_reparto') {
+                            $updated_order = get_order_by_id($order_id);
+                            if ($updated_order) {
+                                $contact_preference = $updated_order['contact_preference'] ?? 'email';
+
+                                if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
+                                    send_telegram_order_in_delivery_to_customer($updated_order);
+                                } elseif (!empty($updated_order['customer_email'])) {
+                                    send_order_in_delivery_email($updated_order);
+                                }
                             }
                         }
 
