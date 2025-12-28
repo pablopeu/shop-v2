@@ -81,8 +81,15 @@ if (empty($shipment_id)) {
     exit;
 }
 
-// Get label from Zipnova
-$result = zipnova_get_label($shipment_id, $format);
+// Get order_number for logging if we have order
+$order_number = null;
+if (!empty($order_id)) {
+    $order = $order ?? get_order_by_id($order_id);
+    $order_number = $order['order_number'] ?? $order_id;
+}
+
+// Get label from Zipnova (pasar order_number para logs)
+$result = zipnova_get_label($shipment_id, $format, $order_number);
 
 if (!$result['success']) {
     // Log admin action

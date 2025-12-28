@@ -214,8 +214,8 @@ try {
 
     error_log("API CreateShipment: Creando envío para orden $order_id");
 
-    // Crear envío en Zipnova
-    $result = zipnova_create_shipment($shipment_data);
+    // Crear envío en Zipnova (pasar order_number o order_id para logs)
+    $result = zipnova_create_shipment($shipment_data, $order['order_number'] ?? $order_id);
 
     if ($result['success']) {
         // Actualizar la orden con el shipment_id (Zipnova lo devuelve como 'id')

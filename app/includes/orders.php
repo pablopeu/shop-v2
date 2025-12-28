@@ -434,7 +434,7 @@ function update_order_status($order_id, $new_status, $user = 'system') {
                             ]
                         ];
 
-                        $result = zipnova_create_shipment($shipment_data);
+                        $result = zipnova_create_shipment($shipment_data, $order['order_number'] ?? $order_id);
 
                         if ($result['success']) {
                             // Actualizar orden con los datos del envío
@@ -871,7 +871,7 @@ function create_zipnova_shipment_for_order($order_id) {
     ];
 
     // Create shipment in Zipnova
-    $result = zipnova_create_shipment($shipment_data);
+    $result = zipnova_create_shipment($shipment_data, $order['order_number'] ?? $order_id);
 
     if ($result['success']) {
         // Update order with shipment info
