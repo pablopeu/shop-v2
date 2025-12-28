@@ -1522,53 +1522,16 @@ $user = get_logged_user();
                 return;
             }
 
-            // Disable button and show loading state
-            if (element) {
-                element.disabled = true;
-                element.textContent = '⏳ Cargando...';
-            }
-
-            // Build API URL
+            // Build API URL para descarga directa del PDF
             const apiUrl = '<?php echo url('/api/?endpoint=print-shipping-label'); ?>' +
                           (orderId ? '&order_id=' + encodeURIComponent(orderId) : '') +
                           (shipmentId ? '&shipment_id=' + encodeURIComponent(shipmentId) : '') +
                           '&format=pdf&action=download';
 
-            // Fetch label from API
-            fetch(apiUrl, {
-                method: 'GET',
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Open label URL in new tab for printing/download
-                    if (data.data.label_url) {
-                        window.open(data.data.label_url, '_blank');
-                        showToast('✅ Etiqueta obtenida exitosamente', 'success');
-                    } else {
-                        showToast('✅ Etiqueta generada', 'success');
-                    }
-                } else {
-                    // Check if this is stub mode
-                    if (data.stub_mode) {
-                        showToast('⚠️ ' + data.error, 'warning');
-                    } else {
-                        showToast('❌ Error: ' + (data.error || 'No se pudo obtener la etiqueta'), 'error');
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching label:', error);
-                showToast('❌ Error de conexión al obtener la etiqueta', 'error');
-            })
-            .finally(() => {
-                // Restore button state
-                if (element) {
-                    element.disabled = false;
-                    element.textContent = '🖨️ Etiqueta';
-                }
-            });
+            // Abrir URL directamente - el backend sirve el PDF con headers correctos
+            // Esto evita el error de parsear PDF como JSON
+            window.open(apiUrl, '_blank');
+            showToast('✅ Descargando etiqueta...', 'success');
         }
 
         /**
