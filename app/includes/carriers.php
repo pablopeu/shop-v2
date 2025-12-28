@@ -503,22 +503,25 @@ function zipnova_create_shipment($shipment_data) {
         if (!isset($shipment_data['origin'])) {
             $point_id = $dispatch_method['options']['dropoff']['point_id'] ?? null;
 
-            if (empty($point_id)) {
-                zipnova_log('Create Shipment Error', [
-                    'error' => 'Drop-off configurado pero point_id no definido',
-                    'dispatch_config' => $dispatch_method
+            // Si hay point_id configurado, usarlo
+            // Si NO hay point_id, significa que se puede entregar en cualquier punto de la red
+            if (!empty($point_id)) {
+                $shipment_data['origin'] = [
+                    'point_id' => $point_id
+                ];
+
+                zipnova_log('Using Specific Drop-off Point', [
+                    'point_id' => $point_id,
+                    'point_name' => $dispatch_method['options']['dropoff']['point_name'] ?? 'N/A'
                 ]);
-                return ['success' => false, 'error' => 'Punto de entrega no configurado para drop-off'];
+            } else {
+                // No especificar origin ni origin_id
+                // El logistic_type del rate_id indica que es dropoff
+                // Zipnova permite entregar en cualquier punto de su red
+                zipnova_log('Using Flexible Drop-off', [
+                    'note' => 'No point_id specified - can deliver to any Zipnova network point'
+                ]);
             }
-
-            $shipment_data['origin'] = [
-                'point_id' => $point_id
-            ];
-
-            zipnova_log('Using Drop-off Point', [
-                'point_id' => $point_id,
-                'point_name' => $dispatch_method['options']['dropoff']['point_name'] ?? 'N/A'
-            ]);
         }
     } else {
         // Pickup: recolección en domicilio del vendedor

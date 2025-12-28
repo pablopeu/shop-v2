@@ -667,12 +667,14 @@ $provincias = [
 
                     <div id="dropoff-fields" style="display: <?php echo ($shipping_config['dispatch_method']['preferred'] ?? 'pickup') === 'dropoff' ? 'block' : 'none'; ?>;">
                         <div class="form-group">
-                            <label>Point ID del Punto de Entrega</label>
+                            <label>Point ID del Punto de Entrega (Opcional)</label>
                             <input type="text" name="dropoff_point_id"
                                    value="<?php echo htmlspecialchars($shipping_config['dispatch_method']['options']['dropoff']['point_id'] ?? ''); ?>"
-                                   placeholder="321">
+                                   placeholder="Dejar vacío para cualquier punto">
                             <div class="help-text">
-                                ID del punto Zipnova donde entregarás los paquetes. Lo obtienes al cotizar un envío (campo "origin_points").
+                                <strong>Opcional:</strong> Si lo dejas vacío, podrás entregar en <strong>cualquier punto de la red Zipnova/Correo Argentino</strong>.<br>
+                                Si especificas un point_id, solo podrás usar ese punto específico (útil si hay un punto cerca de ti).<br>
+                                <em>Los point_id disponibles aparecen en las cotizaciones que tienen "origin_points".</em>
                             </div>
                         </div>
 
