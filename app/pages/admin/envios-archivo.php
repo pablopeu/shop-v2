@@ -556,7 +556,58 @@ $user = get_logged_user();
             display: none;
         }
 
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 10000;
+            min-width: 300px;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.success {
+            background: #28a745;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        .toast.warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         @media (max-width: 768px) {
+            .toast {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+                bottom: 10px;
+            }
             .table-container {
                 display: none !important;
             }
@@ -695,16 +746,6 @@ $user = get_logged_user();
                     </div>
 
                     <button type="submit" class="btn btn-primary">Filtrar</button>
-
-                    <?php if (!empty($all_archived)): ?>
-                    <button type="button" class="btn btn-primary" data-action="exportSelected" data-format="csv">
-                        Exportar CSV
-                    </button>
-
-                    <button type="button" class="btn btn-primary" data-action="exportSelected" data-format="json">
-                        Exportar JSON
-                    </button>
-                    <?php endif; ?>
                 </div>
             </form>
         </div>
@@ -922,6 +963,9 @@ $user = get_logged_user();
         </div>
     </div>
 
+    <!-- Toast para notificaciones -->
+    <div class="toast" id="toast"></div>
+
     <!-- Modal Component -->
     <?php include APP_PATH . '/includes/admin/modal.php'; ?>
 
@@ -952,26 +996,93 @@ $user = get_logged_user();
 
                         itemsHtml += '</tbody></table>';
 
+                        // Format shipping address if it exists
+                        let addressText = '';
+                        if (order.shipping_address) {
+                            if (typeof order.shipping_address === 'object') {
+                                const addr = order.shipping_address;
+                                const street = addr.street || addr.address || '';
+                                const province = addr.province || addr.state || '';
+                                const parts = [];
+                                if (street) parts.push(street);
+                                if (addr.city) parts.push(addr.city);
+                                if (province) parts.push(province);
+                                if (addr.postal_code) parts.push(`(${addr.postal_code})`);
+                                addressText = parts.join(', ');
+                            } else {
+                                addressText = order.shipping_address;
+                            }
+                        }
+
+                        // Format shipping information
+                        let shippingHtml = '';
+                        if (order.shipping) {
+                            const shipping = order.shipping;
+                            shippingHtml = '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">';
+                            shippingHtml += '<h4 style="margin: 0 0 10px 0; color: #667eea;">📦 Información de Envío</h4>';
+
+                            if (shipping.carrier) {
+                                shippingHtml += `<p><strong>Carrier:</strong> ${shipping.carrier} - ${shipping.service_name || 'N/A'}</p>`;
+                            }
+                            if (shipping.carrier_shipment_id) {
+                                shippingHtml += `<p><strong>ID de Envío:</strong> ${shipping.carrier_shipment_id}</p>`;
+                            }
+                            if (shipping.tracking_id) {
+                                shippingHtml += `<p><strong>Tracking ID:</strong> ${shipping.tracking_id}</p>`;
+                            }
+                            if (shipping.status) {
+                                const statusLabels = {
+                                    'pendiente': '⏳ Pendiente',
+                                    'en_transito': '🚚 En Tránsito',
+                                    'en_reparto': '🚴 En Reparto',
+                                    'entregada': '📦 Entregada',
+                                    'cancelada': '❌ Cancelada',
+                                    'rechazada': '⛔ Rechazada',
+                                    'devuelta': '↩️ Devuelta',
+                                    'fallida': '⚠️ Fallida'
+                                };
+                                shippingHtml += `<p><strong>Estado de Envío:</strong> ${statusLabels[shipping.status] || shipping.status}</p>`;
+                            }
+                            if (shipping.cost) {
+                                shippingHtml += `<p><strong>Costo de Envío:</strong> $${shipping.cost}</p>`;
+                            }
+                            if (shipping.estimated_delivery) {
+                                shippingHtml += `<p><strong>Entrega Estimada:</strong> ${shipping.estimated_delivery} días</p>`;
+                            }
+                            if (shipping.label_url || shipping.carrier_shipment_id) {
+                                shippingHtml += '<hr style="margin: 10px 0;">';
+                                shippingHtml += '<button data-action="printShippingLabel" data-order-id="' + order.id + '" ';
+                                if (shipping.carrier_shipment_id) {
+                                    shippingHtml += 'data-shipment-id="' + shipping.carrier_shipment_id + '" ';
+                                }
+                                shippingHtml += 'class="btn btn-sm btn-primary" style="background: #28a745; width: 100%;">🖨️ Ver/Imprimir Etiqueta</button>';
+                            }
+
+                            shippingHtml += '</div>';
+                        }
+
                         let detailsHtml = `
-                            <p><strong>Nº Orden:</strong> ${order.order_number}</p>
-                            <p><strong>Cliente:</strong> ${order.customer_name || 'N/A'}</p>
-                            <p><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
-                            <p><strong>Teléfono:</strong> ${order.customer_phone || 'N/A'}</p>
-                            <p><strong>Estado:</strong> ${order.status}</p>
-                            ${order.archived_date ? `<p><strong>Fecha Archivo:</strong> ${order.archived_date}</p>` : ''}
-                            ${order.shipping_address ? `<p><strong>Dirección:</strong> ${order.shipping_address}</p>` : ''}
-                            ${order.tracking_number ? `<p><strong>Nº Seguimiento:</strong> ${order.tracking_number}</p>` : ''}
-                            ${order.notes ? `<p><strong>Notas:</strong> ${order.notes}</p>` : ''}
-                            <hr style="margin: 15px 0;">
-                            <p><strong>Productos:</strong></p>
-                            ${itemsHtml}
-                            <hr style="margin: 15px 0;">
-                            <p style="text-align: right;"><strong>Total: ${order.total_formatted || order.total}</strong></p>
-                            <hr style="margin: 15px 0;">
-                            <div style="display: flex; gap: 10px; justify-content: center;">
-                                <button data-action="exportSingleOrder" data-order-id="${order.id}" data-format="csv" class="btn btn-sm btn-primary">📊 Exportar CSV</button>
-                                <button data-action="exportSingleOrder" data-order-id="${order.id}" data-format="json" class="btn btn-sm btn-primary">📄 Exportar JSON</button>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <p><strong>Nº Orden:</strong> ${order.order_number}</p>
+                                    <p><strong>Cliente:</strong> ${order.customer_name || 'N/A'}</p>
+                                    <p><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
+                                    <p><strong>Teléfono:</strong> ${order.customer_phone || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p><strong>Estado:</strong> <span style="background: #999; color: white; padding: 4px 8px; border-radius: 4px;">${order.status}</span></p>
+                                    <p><strong>Fecha Orden:</strong> ${order.date ? new Date(order.date).toLocaleString('es-AR') : 'N/A'}</p>
+                                    ${order.archived_date ? `<p><strong>Fecha Archivo:</strong> ${new Date(order.archived_date).toLocaleString('es-AR')}</p>` : ''}
+                                    <p><strong>Método de Entrega:</strong> ${order.delivery_method === 'pickup' ? '🏪 Retiro en Local' : '🚚 Envío a Domicilio'}</p>
+                                    <p><strong>Total:</strong> <span style="font-size: 1.2em; color: #28a745;">${order.total_formatted || order.total}</span></p>
+                                </div>
                             </div>
+                            ${addressText ? `<p style="background: #f0f0f0; padding: 10px; border-radius: 6px;"><strong>📍 Dirección de Envío:</strong><br>${addressText}</p>` : ''}
+                            ${order.notes ? `<p style="background: #fff3cd; padding: 10px; border-radius: 6px;"><strong>📝 Notas:</strong><br>${order.notes}</p>` : ''}
+                            ${shippingHtml}
+                            <hr style="margin: 15px 0;">
+                            <h4 style="margin-bottom: 10px;">🛍️ Productos del Pedido</h4>
+                            ${itemsHtml}
                         `;
 
                         showModal({
@@ -1140,97 +1251,8 @@ $user = get_logged_user();
             }
         }
 
-        /**
-         * Exportar envíos seleccionados
-         */
-        function exportSelected(format) {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            const orderIds = Array.from(checkboxes).map(cb => cb.value);
-
-            if (orderIds.length === 0) {
-                showModal({
-                    title: 'Sin Envíos Seleccionados',
-                    message: 'Debes seleccionar al menos un envío para exportar.',
-                    icon: '⚠️',
-                    confirmText: 'Entendido',
-                    confirmType: 'primary',
-                    cancelText: null,
-                    onConfirm: function() {}
-                });
-                return;
-            }
-
-            // Create form and submit
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '<?php echo url('/api/?endpoint=export-archived-orders'); ?>';
-            form.target = '_blank';
-
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrf_token';
-            csrfInput.value = token;
-            form.appendChild(csrfInput);
-
-            const formatInput = document.createElement('input');
-            formatInput.type = 'hidden';
-            formatInput.name = 'format';
-            formatInput.value = format;
-            form.appendChild(formatInput);
-
-            orderIds.forEach(id => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'order_ids[]';
-                input.value = id;
-                form.appendChild(input);
-            });
-
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-        }
-
-        /**
-         * Exportar un solo envío desde el modal
-         */
-        function exportSingleOrder(orderId, format) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '<?php echo url('/api/?endpoint=export-archived-orders'); ?>';
-            form.target = '_blank';
-
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrf_token';
-            csrfInput.value = token;
-            form.appendChild(csrfInput);
-
-            const formatInput = document.createElement('input');
-            formatInput.type = 'hidden';
-            formatInput.name = 'format';
-            formatInput.value = format;
-            form.appendChild(formatInput);
-
-            const idInput = document.createElement('input');
-            idInput.type = 'hidden';
-            idInput.name = 'order_ids[]';
-            idInput.value = orderId;
-            form.appendChild(idInput);
-
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-        }
-
         // === Wrappers for Event Delegation System ===
         (function() {
-            const _exportSelected = exportSelected;
-            window.exportSelected = function(eventOrFormat, element, params) {
-                const format = params?.format || (typeof eventOrFormat === 'string' ? eventOrFormat : null);
-                if (format) return _exportSelected(format);
-            };
-
             const _confirmBulkAction = confirmBulkAction;
             window.confirmBulkAction = function(event, element, params) {
                 return _confirmBulkAction();
@@ -1265,14 +1287,80 @@ $user = get_logged_user();
                 const orderNumber = params?.orderNumber || (typeof element === 'string' ? element : '');
                 if (id) return _confirmDeleteOrder(id, orderNumber);
             };
-
-            const _exportSingleOrder = exportSingleOrder;
-            window.exportSingleOrder = function(eventOrId, element, params) {
-                const id = params?.orderId || (typeof eventOrId === 'string' ? eventOrId : null);
-                const format = params?.format || (typeof element === 'string' ? element : 'csv');
-                if (id) return _exportSingleOrder(id, format);
-            };
         })();
+
+        /**
+         * Muestra una notificación toast
+         */
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        /**
+         * Solicita e imprime la etiqueta de envío
+         */
+        function printShippingLabel(event, element, params) {
+            const orderId = params?.orderId;
+            const shipmentId = params?.shipmentId;
+
+            if (!orderId && !shipmentId) {
+                showToast('⚠️ Error: No se pudo identificar el envío', 'warning');
+                return;
+            }
+
+            // Disable button
+            if (element) {
+                element.disabled = true;
+                element.textContent = '⏳ Obteniendo...';
+            }
+
+            // Build API URL
+            const apiUrl = '<?php echo url('/api/?endpoint=print-shipping-label'); ?>' +
+                          (orderId ? '&order_id=' + encodeURIComponent(orderId) : '') +
+                          (shipmentId ? '&shipment_id=' + encodeURIComponent(shipmentId) : '') +
+                          '&format=pdf&action=download';
+
+            // Usar fetch para detectar errores antes de abrir ventana
+            fetch(apiUrl, {
+                method: 'HEAD',
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Todo bien, abrir PDF en nueva ventana
+                    window.open(apiUrl, '_blank');
+                    showToast('✅ Abriendo etiqueta...', 'success');
+                } else if (response.status === 409) {
+                    showToast('⏳ La etiqueta se está generando. Espera unos segundos y vuelve a intentar.', 'warning');
+                } else if (response.status === 404) {
+                    showToast('❌ Etiqueta no encontrada. Verifica que el envío esté creado.', 'error');
+                } else {
+                    showToast('❌ Error al obtener la etiqueta. Código: ' + response.status, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error checking label:', error);
+                showToast('❌ Error de conexión al obtener la etiqueta', 'error');
+            })
+            .finally(() => {
+                // Restore button
+                if (element) {
+                    element.disabled = false;
+                    element.textContent = '🖨️ Etiqueta';
+                }
+            });
+        }
+
+        // Export for event delegation
+        window.printShippingLabel = printShippingLabel;
     </script>
 
     <!-- Event Delegation System for CSP -->
