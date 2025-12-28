@@ -357,7 +357,7 @@ $current_page = $_GET['page'] ?? 'index';
                 <span>⚙️ Configuracion</span>
                 <span class="menu-arrow" id="arrow-configuraciones">▶</span>
             </div>
-            <ul class="submenu config-container <?php echo in_array($current_page, ['config-sistema', 'config-rutas-sistema', 'config-backup', 'config-sitio', 'config-dashboard', 'config-themes', 'generador-themes', 'config-hero', 'config-carrusel', 'config-footer', 'config-payment', 'config-moneda', 'reprocesar-pago-mp', 'config-shipping', 'notificaciones', 'config-analytics']) ? 'open' : ''; ?>" id="submenu-configuraciones">
+            <ul class="submenu config-container <?php echo in_array($current_page, ['config-sistema', 'config-rutas-sistema', 'config-backup', 'config-sitio', 'config-dashboard', 'config-themes', 'generador-themes', 'config-hero', 'config-carrusel', 'config-footer', 'config-payment', 'config-moneda', 'reprocesar-pago-mp', 'config-shipping', 'notificaciones', 'config-email-templates', 'config-analytics']) ? 'open' : ''; ?>" id="submenu-configuraciones">
                 <!-- Sistema -->
                 <li>
                     <div class="menu-item" data-action="toggleSubmenu" data-menu-id="config-sistema-group">
@@ -485,10 +485,25 @@ $current_page = $_GET['page'] ?? 'index';
                 </li>
                 <!-- Email y Notificaciones -->
                 <li>
-                    <a href="<?php echo url('/admin/?page=notificaciones'); ?>"
-                       class="<?php echo $current_page === 'notificaciones' ? 'active' : ''; ?>">
-                        🔔 Email y Notificaciones
-                    </a>
+                    <div class="menu-item" data-action="toggleSubmenu" data-menu-id="config-email-group">
+                        <span>🔔 Email y Notificaciones</span>
+                        <span class="menu-arrow" id="arrow-config-email-group">▶</span>
+                    </div>
+                    <ul class="submenu <?php echo in_array($current_page, ['notificaciones', 'config-email-templates']) ? 'open' : ''; ?>"
+                        id="submenu-config-email-group">
+                        <li>
+                            <a href="<?php echo url('/admin/?page=notificaciones'); ?>"
+                               class="<?php echo $current_page === 'notificaciones' ? 'active' : ''; ?>">
+                                ⚙️ Configuración de Email
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo url('/admin/?page=config-email-templates'); ?>"
+                               class="<?php echo $current_page === 'config-email-templates' ? 'active' : ''; ?>">
+                                📧 Templates de Email
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <!-- Tracking & Analytics -->
                 <li>

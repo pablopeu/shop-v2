@@ -453,63 +453,22 @@ function send_order_shipped_email($order) {
     }
 
     $to = $order['customer_email'];
-    $subject = "🚚 ¡Tu Pedido Está en Camino! - #{$order['order_number']}";
 
-    // Build order items list
-    $items_html = '<ul class="items-list">';
-    foreach ($order['items'] as $item) {
-        $items_html .= "<li><strong>{$item['name']}</strong> x{$item['quantity']}</li>";
+    // Get template from JSON
+    $template = get_email_template_config('order_shipped', $order);
+
+    if (!$template) {
+        error_log("Failed to load email template: order_shipped");
+        return false;
     }
-    $items_html .= '</ul>';
-
-    // Build tracking info if available
-    $tracking_html = '';
-    if (!empty($order['tracking_number'])) {
-        $tracking_html = "
-        <div class='order-info' style='background: #e3f2fd; border-left-color: #2196F3;'>
-            <p><strong>📦 Número de seguimiento:</strong> {$order['tracking_number']}</p>";
-
-        if (!empty($order['tracking_url'])) {
-            $tracking_html .= "
-            <p><a href='{$order['tracking_url']}' class='button' style='background: #2196F3;'>Rastrear Envío</a></p>";
-        }
-
-        $tracking_html .= "</div>";
-    }
-
-    $content = "
-    <p>¡Buenas noticias! Tu pedido ha sido despachado y está en camino.</p>
-
-    <div class='order-info'>
-        <p><strong>📝 Orden:</strong> #{$order['order_number']}</p>
-        <p><strong>📅 Fecha de envío:</strong> " . date('d/m/Y H:i') . "</p>
-    </div>
-
-    <h3>📦 Productos enviados:</h3>
-    $items_html
-
-    $tracking_html
-
-    <p><strong>📬 ¿Cuándo llega mi pedido?</strong></p>
-    <p>El tiempo de entrega estimado es de 3 a 7 días hábiles, dependiendo de tu ubicación. Te enviaremos otra notificación cuando el paquete esté cerca de ser entregado.</p>
-
-    <p><strong>💡 Consejos para recibir tu pedido:</strong></p>
-    <ul>
-        <li>Asegúrate de que haya alguien disponible en la dirección de entrega</li>
-        <li>Verifica que el número de contacto proporcionado esté correcto</li>
-        <li>Si no estás, el transportista dejará un aviso para coordinar la entrega</li>
-    </ul>
-
-    <p style='margin-top: 30px;'>Si tienes alguna pregunta sobre tu envío, no dudes en contactarnos.</p>
-    ";
 
     $html = get_default_email_template([
         'order' => $order,
-        'title' => '🚚 Tu pedido está en camino',
-        'content' => $content
+        'title' => $template['title'],
+        'content' => $template['content']
     ]);
 
-    return send_email($to, $subject, $html);
+    return send_email($to, $template['subject'], $html);
 }
 
 /**
@@ -543,71 +502,22 @@ function send_order_in_delivery_email($order) {
     }
 
     $to = $order['customer_email'];
-    $subject = "🚴 ¡Tu Pedido Está Muy Cerca! - #{$order['order_number']}";
 
-    // Build order items list
-    $items_html = '<ul class="items-list">';
-    foreach ($order['items'] as $item) {
-        $items_html .= "<li><strong>{$item['name']}</strong> x{$item['quantity']}</li>";
+    // Get template from JSON
+    $template = get_email_template_config('order_in_delivery', $order);
+
+    if (!$template) {
+        error_log("Failed to load email template: order_in_delivery");
+        return false;
     }
-    $items_html .= '</ul>';
-
-    // Build tracking info if available
-    $tracking_html = '';
-    if (!empty($order['tracking_number'])) {
-        $tracking_html = "
-        <div class='order-info' style='background: #e3f2fd; border-left-color: #2196F3;'>
-            <p><strong>📦 Número de seguimiento:</strong> {$order['tracking_number']}</p>";
-
-        if (!empty($order['tracking_url'])) {
-            $tracking_html .= "
-            <p><a href='{$order['tracking_url']}' class='button' style='background: #2196F3;'>Rastrear Envío</a></p>";
-        }
-
-        $tracking_html .= "</div>";
-    }
-
-    $content = "
-    <p>¡Excelentes noticias! 🎉</p>
-    <p>Tu pedido salió para entrega y <strong>llegará hoy</strong> o en las próximas horas.</p>
-
-    <div class='order-info' style='background: #fff3cd; border-left-color: #ffc107;'>
-        <p><strong>📝 Orden:</strong> #{$order['order_number']}</p>
-        <p><strong>🚴 Estado:</strong> En Reparto</p>
-        <p><strong>📅 Fecha estimada de entrega:</strong> Hoy</p>
-    </div>
-
-    <h3>📦 Productos en camino:</h3>
-    $items_html
-
-    $tracking_html
-
-    <div style='background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #2196F3;'>
-        <h3 style='margin-top: 0; color: #1976d2;'>📍 Preparate para recibir tu pedido</h3>
-        <p><strong>Consejos importantes:</strong></p>
-        <ul>
-            <li><strong>Estate atento:</strong> El repartidor podría llamar o tocar el timbre pronto</li>
-            <li><strong>Verifica tu teléfono:</strong> Asegúrate de tenerlo cerca por si te contactan</li>
-            <li><strong>Prepara tu DNI:</strong> Algunos envíos requieren verificación de identidad</li>
-            <li><strong>Espacio disponible:</strong> Ten un lugar listo para recibir el paquete</li>
-        </ul>
-    </div>
-
-    <div style='background: #fff9e6; padding: 15px; border-radius: 8px; text-align: center;'>
-        <p style='margin: 0; font-weight: 600;'>⏰ <strong>¡Ya casi llega!</strong></p>
-        <p style='margin: 10px 0;'>Mantente atento a tu puerta o teléfono</p>
-    </div>
-
-    <p style='margin-top: 30px;'>Si tienes alguna pregunta, estamos aquí para ayudarte.</p>
-    ";
 
     $html = get_default_email_template([
         'order' => $order,
-        'title' => '🚴 ¡Tu pedido está muy cerca!',
-        'content' => $content
+        'title' => $template['title'],
+        'content' => $template['content']
     ]);
 
-    return send_email($to, $subject, $html);
+    return send_email($to, $template['subject'], $html);
 }
 
 /**
@@ -621,60 +531,22 @@ function send_order_delivered_email($order) {
     }
 
     $to = $order['customer_email'];
-    $subject = "📦 ¡Tu Pedido Ha Sido Entregado! - #{$order['order_number']}";
 
-    $site_config = read_json(__DIR__ . '/../config/site.json');
-    $site_name = $site_config['site_name'] ?? 'Nuestra Tienda';
+    // Get template from JSON
+    $template = get_email_template_config('order_delivered', $order);
 
-    // Build order items list
-    $items_html = '<ul class="items-list">';
-    foreach ($order['items'] as $item) {
-        $items_html .= "<li><strong>{$item['name']}</strong> x{$item['quantity']}</li>";
+    if (!$template) {
+        error_log("Failed to load email template: order_delivered");
+        return false;
     }
-    $items_html .= '</ul>';
-
-    $content = "
-    <p>¡Tu pedido ha sido entregado exitosamente! 🎉</p>
-
-    <div class='order-info' style='background: #e8f5e9; border-left-color: #4CAF50;'>
-        <p><strong>📝 Orden:</strong> #{$order['order_number']}</p>
-        <p><strong>✅ Estado:</strong> Entregado</p>
-        <p><strong>📅 Fecha de entrega:</strong> " . date('d/m/Y H:i') . "</p>
-    </div>
-
-    <h3>📦 Productos entregados:</h3>
-    $items_html
-
-    <div style='background: #fff9e6; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #ffc107;'>
-        <h3 style='margin-top: 0; color: #f57c00;'>💬 Tu opinión nos importa</h3>
-        <p>Nos encantaría conocer tu experiencia con nosotros. Tu feedback nos ayuda a mejorar cada día.</p>
-        <p><strong>¿Cómo fue tu experiencia con:</strong></p>
-        <ul>
-            <li>La calidad de los productos</li>
-            <li>El tiempo de entrega</li>
-            <li>El servicio de atención</li>
-        </ul>
-        <p>Contáctanos y cuéntanos qué te pareció tu compra. ¡Tu opinión es muy valiosa para nosotros!</p>
-    </div>
-
-    <div style='text-align: center; margin: 40px 0;'>
-        <h3 style='color: #667eea;'>¡Gracias por confiar en $site_name!</h3>
-        <p style='font-size: 16px;'>Esperamos verte pronto por aquí. 😊</p>
-    </div>
-
-    <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;'>
-        <p style='margin: 0; font-weight: 600; color: #667eea;'>¿Te gustó tu compra?</p>
-        <p style='margin: 10px 0;'>¡Comparte tu experiencia con tus amigos!</p>
-    </div>
-    ";
 
     $html = get_default_email_template([
         'order' => $order,
-        'title' => '📦 ¡Pedido Entregado!',
-        'content' => $content
+        'title' => $template['title'],
+        'content' => $template['content']
     ]);
 
-    return send_email($to, $subject, $html);
+    return send_email($to, $template['subject'], $html);
 }
 
 /**
@@ -763,6 +635,87 @@ function get_email_template($template_name, $vars = []) {
     $html = ob_get_clean();
 
     return $html;
+}
+
+/**
+ * Get email template from JSON configuration
+ *
+ * @param string $template_name Template name (order_created, order_shipped, etc.)
+ * @param array $order Order data
+ * @return array Template data with subject, title, content
+ */
+function get_email_template_config($template_name, $order = null) {
+    $templates_file = __DIR__ . '/../config/email-templates.json';
+    $templates = read_json($templates_file);
+
+    if (!isset($templates[$template_name])) {
+        error_log("Email template not found: $template_name");
+        return null;
+    }
+
+    $template = $templates[$template_name];
+
+    // Process variables if order is provided
+    if ($order) {
+        $template = process_template_variables($template, $order);
+    }
+
+    return $template;
+}
+
+/**
+ * Process template variables with order data
+ *
+ * @param array $template Template with subject, title, content
+ * @param array $order Order data
+ * @return array Template with variables replaced
+ */
+function process_template_variables($template, $order) {
+    $site_config = read_json(__DIR__ . '/../config/site.json');
+    $site_name = $site_config['site_name'] ?? 'Nuestra Tienda';
+
+    // Build items list
+    $items_html = '<ul class="items-list">';
+    foreach ($order['items'] as $item) {
+        $items_html .= "<li><strong>{$item['name']}</strong> x{$item['quantity']}</li>";
+    }
+    $items_html .= '</ul>';
+
+    // Build tracking info if available
+    $tracking_html = '';
+    if (!empty($order['tracking_number'])) {
+        $tracking_html = "
+        <div class='order-info' style='background: #e3f2fd; border-left-color: #2196F3;'>
+            <p><strong>📦 Número de seguimiento:</strong> {$order['tracking_number']}</p>";
+
+        if (!empty($order['tracking_url'])) {
+            $tracking_html .= "
+            <p><a href='{$order['tracking_url']}' class='button' style='background: #2196F3;'>Rastrear Envío</a></p>";
+        }
+
+        $tracking_html .= "</div>";
+    }
+
+    // Calculate total
+    $currency = $order['currency'] === 'USD' ? 'U$D' : '$';
+    $total = $currency . ' ' . number_format($order['total'], 2);
+
+    // Variables to replace
+    $variables = [
+        '{order_number}' => $order['order_number'],
+        '{date}' => date('d/m/Y H:i'),
+        '{items_list}' => $items_html,
+        '{tracking_info}' => $tracking_html,
+        '{total}' => $total,
+        '{site_name}' => $site_name
+    ];
+
+    // Replace in subject, title, and content
+    $template['subject'] = str_replace(array_keys($variables), array_values($variables), $template['subject']);
+    $template['title'] = str_replace(array_keys($variables), array_values($variables), $template['title']);
+    $template['content'] = str_replace(array_keys($variables), array_values($variables), $template['content']);
+
+    return $template;
 }
 
 /**
