@@ -478,7 +478,7 @@ function zipnova_create_shipment($shipment_data) {
         zipnova_save_shipment($shipment_id, [
             'zipnova_id' => $shipment_id,
             'reference' => $shipment_data['reference'] ?? '',
-            'status' => 'pending',
+            'status' => 'pendiente',  // Estado en español (consistente con sistema)
             'created_at' => date('Y-m-d H:i:s'),
             'data' => $result['data']
         ]);
