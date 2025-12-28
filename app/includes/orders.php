@@ -800,12 +800,29 @@ function restore_archived_order($order_id) {
 }
 
 /**
- * Create shipment in Zipnova for an order
+ * DEPRECATED: Create shipment in Zipnova for an order
+ *
+ * ⚠️ ESTA FUNCIÓN ES LEGACY Y NO DEBE USARSE ⚠️
+ *
+ * Problemas de seguridad y formato:
+ * 1. Usa estructura de datos antigua que NO coincide con API de Zipnova
+ * 2. Falta campos requeridos: external_id, service_type, origin_id, items
+ * 3. declared_value incluye shipping (incorrecto - solo debe ser valor de productos)
+ * 4. No incluye document (DNI/CUIT) requerido por Zipnova
+ * 5. Usa nombres de campos incorrectos (province vs state, postal_code vs zipcode)
+ *
+ * La lógica correcta está en:
+ * - Auto-creación al marcar como pagado (líneas 367-460 de este archivo)
+ * - API endpoint: /api/create-shipment-from-order
+ *
+ * @deprecated No usar - mantener solo por compatibilidad legacy
  * @param string $order_id Order ID
  * @return array Result with success status
  */
 function create_zipnova_shipment_for_order($order_id) {
-    require_once __DIR__ . '/zipnova.php';
+    error_log("WARNING: Llamado a función DEPRECATED create_zipnova_shipment_for_order() para orden $order_id");
+
+    require_once __DIR__ . '/carriers.php'; // Cambio: zipnova.php no existe
 
     // Check if Zipnova is enabled and configured to auto-create
     $config = zipnova_get_config();
