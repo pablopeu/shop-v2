@@ -111,30 +111,89 @@ try {
         exit;
     }
 
-    // Preparar datos para crear envío en Zipnova
+    // Obtener configuración de Zipnova para origin_id
+    $shipping_config = read_json(APP_PATH . '/config/shipping.json');
+    $znva_config = $shipping_config['carriers']['ZNVA'] ?? null;
+
+    if (!$znva_config || empty($znva_config['origin']['origin_id'])) {
+        error_log("API CreateShipment: Configuración de Zipnova no encontrada");
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Configuración de envío no encontrada'
+        ]);
+        exit;
+    }
+
+    // Separar calle y número de calle
+    $street_full = $shipping_address['street'] ?? $shipping_address['address'] ?? '';
+    $street_parts = preg_match('/^(.+?)\s+(\d+.*)$/', $street_full, $matches);
+    $street = $street_parts ? trim($matches[1]) : $street_full;
+    $street_number = $street_parts ? trim($matches[2]) : '';
+
+    // Construir items desde la orden (igual que en quote)
+    $items = [];
+    if (isset($order['items']) && is_array($order['items'])) {
+        foreach ($order['items'] as $item) {
+            $product = get_product_by_slug($item['slug'] ?? '');
+            $items[] = [
+                'sku' => $item['slug'] ?? 'ITEM',
+                'weight' => (int)($product['weight'] ?? 500), // gramos
+                'height' => (int)($product['height'] ?? 10),  // cm
+                'width' => (int)($product['width'] ?? 10),    // cm
+                'length' => (int)($product['length'] ?? 10),  // cm
+                'description' => $item['name'] ?? 'Producto',
+                'classification_id' => 1
+            ];
+        }
+    }
+
+    // Si no hay items, usar defaults
+    if (empty($items)) {
+        $items[] = [
+            'sku' => 'ORDER-ITEM',
+            'weight' => 500,
+            'height' => 10,
+            'width' => 10,
+            'length' => 10,
+            'description' => 'Pedido ' . ($order['order_number'] ?? $order_id),
+            'classification_id' => 1
+        ];
+    }
+
+    // Preparar datos para crear envío en Zipnova (formato correcto según API)
     $shipment_data = [
+        // IDs y referencias
         'rate_id' => $quote_data['rate_id'],
         'tariff_id' => $quote_data['tariff_id'] ?? null,
+        'external_id' => $order['order_number'] ?? 'ORD-' . $order_id,
         'reference' => $order['order_number'] ?? $order_id,
+
+        // Tipo de servicio (código, no ID)
+        'service_type' => $quote_data['service_type_code'] ?? $quote_data['service_id'] ?? 'standard_delivery',
+
+        // Valor declarado
+        'declared_value' => (int)($order['total'] ?? 0),
+
+        // Origen (solo el ID, no el objeto completo)
+        'origin_id' => $znva_config['origin']['origin_id'],
+
+        // Items del paquete
+        'items' => $items,
+
+        // Destino (con campos correctos: zipcode, state, street_number, document)
         'destination' => [
             'name' => $shipping_address['name'] ?? $order['customer_name'],
-            'street' => $shipping_address['street'] ?? $shipping_address['address'] ?? '',
+            'street' => $street,
+            'street_number' => $street_number,
             'city' => $shipping_address['city'] ?? '',
-            'province' => $shipping_address['province'] ?? $shipping_address['state'] ?? '',
-            'postal_code' => $shipping_address['postal_code'] ?? '',
+            'state' => $shipping_address['province'] ?? $shipping_address['state'] ?? '',
+            'zipcode' => $shipping_address['postal_code'] ?? '',
             'country' => $shipping_address['country'] ?? 'AR',
             'phone' => $shipping_address['phone'] ?? $order['customer_phone'] ?? '',
-            'email' => $order['customer_email'] ?? ''
-        ],
-        'customer' => [
-            'name' => $order['customer_name'] ?? '',
             'email' => $order['customer_email'] ?? '',
-            'phone' => $order['customer_phone'] ?? ''
-        ],
-        // Datos opcionales de la cotización
-        'service_id' => $quote_data['service_id'] ?? null,
-        'carrier_id' => $quote_data['carrier_id'] ?? null,
-        'logistic_type' => $quote_data['logistic_type'] ?? null
+            'document' => $shipping_address['document'] ?? null // DNI/CUIT (pendiente agregar en checkout)
+        ]
     ];
 
     error_log("API CreateShipment: Creando envío para orden $order_id");

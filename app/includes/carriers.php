@@ -459,18 +459,9 @@ function zipnova_create_shipment($shipment_data) {
         return ['success' => false, 'error' => 'Zipnova no está habilitado'];
     }
 
-    // Usar origen por defecto si no se proporciona
-    if (!isset($shipment_data['origin'])) {
-        $shipment_data['origin'] = [
-            'name' => $config['origin']['name'],
-            'address' => $config['origin']['address'],
-            'city' => $config['origin']['city'],
-            'province' => $config['origin']['province'],
-            'postal_code' => $config['origin']['postal_code'],
-            'country' => $config['origin']['country'],
-            'phone' => $config['origin']['phone'],
-            'email' => $config['origin']['email']
-        ];
+    // Agregar origin_id si no se proporciona (solo el ID, no el objeto completo)
+    if (!isset($shipment_data['origin_id'])) {
+        $shipment_data['origin_id'] = $config['origin']['origin_id'] ?? '';
     }
 
     // Agregar account_id al request (CRÍTICO para Zipnova)
