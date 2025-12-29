@@ -418,7 +418,10 @@ function zipnova_get_quotes($destination, $items, $declared_value = null, $order
                     'rate_source' => $zipnova_quote['rate']['source'] ?? null,
 
                     // Tags (cheapest, fastest, etc.)
-                    'tags' => $zipnova_quote['tags'] ?? []
+                    'tags' => $zipnova_quote['tags'] ?? [],
+
+                    // Puntos de entrega (si es pickup_point)
+                    'pickup_points' => $zipnova_quote['pickup_points'] ?? []
                 ];
             }
             $result['data']['quotes'] = $quotes;
