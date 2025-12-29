@@ -606,37 +606,44 @@ export function sendCustomMessage(event, orderId) {
 export function saveAllChanges() {
     const btnSave = document.getElementById('btnSaveChanges');
 
-    // Get current tab to know which form to submit
-    const activeTab = document.querySelector('.modal-tab-content.active');
-
-    if (!activeTab) {
-        // No active tab, just close
-        closeOrderModal();
-        return;
-    }
-
-    // Find forms in the active tab
-    const forms = activeTab.querySelectorAll('form');
-
-    if (forms.length === 0) {
-        // No forms in this tab, just close
-        closeOrderModal();
-        return;
-    }
-
-    // Check if forms have changed
+    // Check if there are unsaved changes
     if (!modalHasUnsavedChanges) {
         // No changes to save, just close
         closeOrderModal();
         return;
     }
 
-    // Submit the first form found (should be the only one per tab that needs backend submission)
-    const form = forms[0];
+    // Find ALL forms in ALL tabs that have changed values
+    const modalContent = document.getElementById('modalOrderContent');
+    const allForms = modalContent.querySelectorAll('form');
+    let formToSubmit = null;
 
-    // Check if this is the sendCustomMessage form (skip it)
-    if (form.getAttribute('onsubmit') && form.getAttribute('onsubmit').includes('sendCustomMessage')) {
-        showToast('ℹ️ Usa el botón "Enviar Mensaje" para este formulario');
+    // Check each form to find the one with changes
+    for (const form of allForms) {
+        // Skip sendCustomMessage forms
+        if (form.getAttribute('onsubmit') && form.getAttribute('onsubmit').includes('sendCustomMessage')) {
+            continue;
+        }
+
+        // Check if this form has changed inputs
+        const inputs = form.querySelectorAll('input, select, textarea');
+        for (const input of inputs) {
+            const key = input.name || input.id;
+            if (key && modalOriginalValues[key] !== undefined) {
+                const currentValue = input.type === 'checkbox' ? input.checked : input.value;
+                if (currentValue !== modalOriginalValues[key]) {
+                    formToSubmit = form;
+                    break;
+                }
+            }
+        }
+
+        if (formToSubmit) break;
+    }
+
+    if (!formToSubmit) {
+        // No form with changes found, just close
+        closeOrderModal();
         return;
     }
 
@@ -645,10 +652,10 @@ export function saveAllChanges() {
     btnSave.textContent = '⏳ Guardando...';
 
     // Remove the onsubmit="return false;" temporarily to allow real submission
-    form.removeAttribute('onsubmit');
+    formToSubmit.removeAttribute('onsubmit');
 
-    // Submit the form
-    form.submit();
+    // Submit the form with changes
+    formToSubmit.submit();
 }
 
 function setupModalChangeDetection() {
