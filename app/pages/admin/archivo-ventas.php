@@ -521,10 +521,10 @@ $user = get_logged_user();
                                 <td>
                                     <div class="actions">
                                         <button type="button" class="btn btn-primary btn-sm" data-action="confirmRestore" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                            ↩️ Restaurar
+                                            Restaurar
                                         </button>
                                         <button type="button" class="btn btn-danger btn-sm" data-action="confirmDelete" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                            🗑️ Eliminar
+                                            Eliminar
                                         </button>
                                     </div>
                                 </td>

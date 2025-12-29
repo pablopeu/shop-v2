@@ -129,7 +129,7 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $destination_raw = $data['destination'];
-    $packages = $data['packages'] ?? [];
+    $items_raw = $data['items'] ?? [];
 
     // Formatear destino según API v2
     $destination = [
@@ -138,12 +138,12 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'zipcode' => $destination_raw['zipcode'] ?? $destination_raw['postal_code'] ?? ''
     ];
 
-    // Convertir packages a items según API v2
+    // Formatear items
     $items = [];
     $total_declared_value = 0;
 
-    if (empty($packages)) {
-        // Si no hay packages, usar valores por defecto
+    if (empty($items_raw)) {
+        // Si no hay items, usar valores por defecto
         $weight = (float)($data['weight'] ?? 0);
         $declared_value = (float)($data['declared_value'] ?? 0);
         $total_declared_value = $declared_value;
@@ -151,25 +151,21 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $items = [[
             'sku' => 'CART-ITEM',
             'weight' => (int)($weight > 0 ? ($weight * 1000) : 100), // convertir kg a gramos
-            'height' => 10,
-            'width' => 10,
-            'length' => 10,
+            'quantity' => 1,
             'description' => 'Producto del carrito',
             'classification_id' => 1
         ]];
     } else {
-        // Convertir cada package a item
-        foreach ($packages as $pkg) {
+        // Formatear cada item
+        foreach ($items_raw as $item) {
             $items[] = [
-                'sku' => $pkg['sku'] ?? 'ITEM-' . uniqid(),
-                'weight' => (int)($pkg['weight'] ?? 100),
-                'height' => (int)($pkg['height'] ?? 10),
-                'width' => (int)($pkg['width'] ?? 10),
-                'length' => (int)($pkg['length'] ?? 10),
-                'description' => $pkg['description'] ?? 'Producto',
-                'classification_id' => (int)($pkg['classification_id'] ?? 1)
+                'sku' => $item['sku'] ?? 'ITEM-' . uniqid(),
+                'weight' => (int)($item['weight'] ?? 100),
+                'quantity' => (int)($item['quantity'] ?? 1),
+                'description' => $item['description'] ?? 'Producto',
+                'classification_id' => (int)($item['classification_id'] ?? 1)
             ];
-            $total_declared_value += (float)($pkg['declared_value'] ?? 0);
+            $total_declared_value += (float)($item['declared_value'] ?? 0);
         }
     }
 

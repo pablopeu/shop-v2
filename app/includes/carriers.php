@@ -305,6 +305,55 @@ function calculate_delivery_days($delivery_time) {
 }
 
 /**
+ * Selecciona la caja estándar apropiada basada en peso total de items
+ *
+ * @param array $items Items del carrito con peso
+ * @return array Box con dimensiones (length, width, height) y metadata
+ */
+function zipnova_select_standard_box($items) {
+    $config = zipnova_get_config();
+    $standard_boxes = $config['standard_boxes'] ?? [];
+
+    // Si no hay cajas configuradas, usar default_package
+    if (empty($standard_boxes)) {
+        $default = $config['default_package'] ?? [
+            'length' => 20,
+            'width' => 15,
+            'height' => 10,
+            'max_weight' => 10000
+        ];
+        return [
+            'id' => 'default',
+            'name' => 'Caja estándar',
+            'length' => $default['length'],
+            'width' => $default['width'],
+            'height' => $default['height'],
+            'max_weight' => $default['max_weight'] ?? 10000,
+            'volume' => $default['length'] * $default['width'] * $default['height']
+        ];
+    }
+
+    // Calcular peso total (considerando quantity)
+    $total_weight = 0;
+    foreach ($items as $item) {
+        $item_weight = (int)($item['weight'] ?? 0);
+        $item_quantity = (int)($item['quantity'] ?? 1);
+        $total_weight += $item_weight * $item_quantity;
+    }
+
+    // Seleccionar la caja más pequeña que soporte el peso
+    // Las cajas deben estar ordenadas de menor a mayor en la config
+    foreach ($standard_boxes as $box) {
+        if ($total_weight <= ($box['max_weight'] ?? 10000)) {
+            return $box;
+        }
+    }
+
+    // Si ninguna caja es suficiente, usar la más grande
+    return end($standard_boxes);
+}
+
+/**
  * Cotiza envíos usando API v2 de Zipnova
  *
  * @param array $destination Datos de destino (city, state, zipcode)
@@ -348,31 +397,68 @@ function zipnova_get_quotes($destination, $items, $declared_value = null, $order
         }
     }
 
-    // Formatear items según estructura de Zipnova
+    // Seleccionar caja estándar apropiada
+    $box = zipnova_select_standard_box($items);
+
+    // Calcular peso total del package (suma de items considerando quantity)
+    $total_weight = 0;
     $formatted_items = [];
+
     foreach ($items as $item) {
+        $item_weight = (int)($item['weight'] ?? 0);
+        $item_quantity = (int)($item['quantity'] ?? 1);
+
+        // Sumar peso total (peso_unitario * cantidad)
+        $total_weight += $item_weight * $item_quantity;
+
+        // Formatear item con dimensiones individuales
+        // (requerido por Zipnova cuando el SKU no está en su catálogo)
         $formatted_items[] = [
             'sku' => $item['sku'] ?? 'PROD-' . uniqid(),
-            'weight' => (int)($item['weight'] ?? $config['default_package']['weight']),
-            'height' => (int)($item['height'] ?? $config['default_package']['height']),
-            'width' => (int)($item['width'] ?? $config['default_package']['width']),
-            'length' => (int)($item['length'] ?? $config['default_package']['length']),
+            'quantity' => $item_quantity,
             'description' => $item['description'] ?? 'Producto',
-            'classification_id' => (int)($item['classification_id'] ?? 1)
+            'classification_id' => (int)($item['classification_id'] ?? 1),
+            'weight' => $item_weight, // Peso unitario
+            'height' => (int)($item['height'] ?? 5), // Dimensiones estimadas del item
+            'width' => (int)($item['width'] ?? 5),
+            'length' => (int)($item['length'] ?? 5)
         ];
     }
+
+    // Si no hay peso, usar mínimo de 100g
+    if ($total_weight === 0) {
+        $total_weight = 100;
+    }
+
+    // Construir package (el bulto real)
+    $package = [
+        'weight' => $total_weight,
+        'height' => (int)$box['height'],
+        'width' => (int)$box['width'],
+        'length' => (int)$box['length'],
+        'classification_id' => 1, // Clasificación del paquete (1 = General)
+        'items' => $formatted_items
+    ];
 
     $request_data = [
         'account_id' => $account_id,
         'origin_id' => $origin_id,
         'declared_value' => (float)$declared_value,
-        'items' => $formatted_items,
+        'packages' => [$package], // UN package con todos los items
         'destination' => [
             'city' => $destination['city'] ?? '',
             'state' => $destination['state'] ?? $destination['province'] ?? '',
             'zipcode' => $destination['zipcode'] ?? $destination['postal_code'] ?? ''
         ]
     ];
+
+    zipnova_log('Box Selected', [
+        'box_id' => $box['id'],
+        'box_name' => $box['name'],
+        'dimensions' => $box['length'] . 'x' . $box['width'] . 'x' . $box['height'],
+        'total_weight' => $total_weight,
+        'items_count' => count($formatted_items)
+    ], $order_id);
 
     $result = zipnova_api_request('/shipments/quote', 'POST', $request_data, true, $order_id);
 
@@ -418,7 +504,10 @@ function zipnova_get_quotes($destination, $items, $declared_value = null, $order
                     'rate_source' => $zipnova_quote['rate']['source'] ?? null,
 
                     // Tags (cheapest, fastest, etc.)
-                    'tags' => $zipnova_quote['tags'] ?? []
+                    'tags' => $zipnova_quote['tags'] ?? [],
+
+                    // Puntos de entrega (si es pickup_point)
+                    'pickup_points' => $zipnova_quote['pickup_points'] ?? []
                 ];
             }
             $result['data']['quotes'] = $quotes;
@@ -652,7 +741,26 @@ function zipnova_get_label($shipment_id, $format = 'pdf', $order_id = null) {
         ];
     }
 
-    // Validar que el envío está en un estado que permite generar etiqueta
+    // Verificar PRIMERO si ya tenemos una etiqueta guardada (caché)
+    // Si existe, retornarla sin importar el estado del envío
+    if (isset($shipment['label_url']) && !empty($shipment['label_url'])) {
+        zipnova_log('Label Retrieved from Cache', [
+            'shipment_id' => $shipment_id,
+            'format' => $format,
+            'status' => $shipment['status'] ?? 'unknown'
+        ], $order_id);
+
+        return [
+            'success' => true,
+            'data' => [
+                'label_url' => $shipment['label_url'],
+                'format' => $shipment['label_format'] ?? $format,
+                'cached' => true
+            ]
+        ];
+    }
+
+    // Validar que el envío está en un estado que permite generar etiqueta NUEVA
     // Típicamente solo se puede generar etiqueta si el envío fue creado exitosamente
     $valid_statuses = ['pendiente', 'en_transito', 'en_reparto'];
     if (!in_array($shipment['status'] ?? '', $valid_statuses)) {
@@ -665,23 +773,6 @@ function zipnova_get_label($shipment_id, $format = 'pdf', $order_id = null) {
         return [
             'success' => false,
             'error' => 'El envío debe estar pendiente o en tránsito para generar la etiqueta'
-        ];
-    }
-
-    // Verificar si ya tenemos una etiqueta guardada
-    if (isset($shipment['label_url']) && !empty($shipment['label_url'])) {
-        zipnova_log('Label Retrieved from Cache', [
-            'shipment_id' => $shipment_id,
-            'format' => $format
-        ], $order_id);
-
-        return [
-            'success' => true,
-            'data' => [
-                'label_url' => $shipment['label_url'],
-                'format' => $shipment['label_format'] ?? $format,
-                'cached' => true
-            ]
         ];
     }
 
@@ -932,7 +1023,11 @@ function zipnova_log($event, $data = [], $order_id = null) {
 }
 
 /**
- * Guarda respuesta de API en archivo JSON separado para debug
+ * Guarda respuesta de API en archivos JSON separados para debug
+ * Genera dos archivos:
+ * - REQUEST: Lo que se envía a Zipnova
+ * - RESPONSE: La respuesta de Zipnova
+ *
  * @param string $endpoint El endpoint llamado (ej: '/shipments/quote')
  * @param string $method El método HTTP usado (GET, POST, etc)
  * @param array $data Array con request, response, http_code, etc
@@ -945,30 +1040,47 @@ function zipnova_save_response_json($endpoint, $method, $data, $order_id = null)
         mkdir($logs_dir, 0755, true);
     }
 
-    // Generar nombre de archivo con timestamp, order_id (si existe) y endpoint
+    // Generar nombres base de archivo con timestamp, order_id (si existe) y endpoint
     $timestamp = date('Y-m-d_H-i-s');
     $endpoint_name = trim(str_replace('/', '_', $endpoint), '_');
     $order_prefix = $order_id ? "ORDER-{$order_id}_" : '';
-    $filename = sprintf('%s_%s%s_%s.json', $timestamp, $order_prefix, $endpoint_name, $method);
-    $filepath = $logs_dir . '/' . $filename;
+    $base_filename = sprintf('%s_%s%s_%s', $timestamp, $order_prefix, $endpoint_name, $method);
 
-    // Preparar datos completos para el log
-    $log_data = [
+    // === ARCHIVO 1: REQUEST (lo que se envía a Zipnova) ===
+    $request_filename = $base_filename . '_REQUEST.json';
+    $request_filepath = $logs_dir . '/' . $request_filename;
+
+    $request_data = [
         'timestamp' => date('Y-m-d H:i:s'),
-        'order_id' => $order_id,  // Agregar order_id al JSON
+        'order_id' => $order_id,
+        'endpoint' => $endpoint,
+        'method' => $method,
+        'request' => $data['request'] ?? null
+    ];
+
+    file_put_contents(
+        $request_filepath,
+        json_encode($request_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+    );
+
+    // === ARCHIVO 2: RESPONSE (lo que devuelve Zipnova) ===
+    $response_filename = $base_filename . '_RESPONSE.json';
+    $response_filepath = $logs_dir . '/' . $response_filename;
+
+    $response_data = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'order_id' => $order_id,
         'endpoint' => $endpoint,
         'method' => $method,
         'http_code' => $data['http_code'] ?? 0,
-        'request' => $data['request'] ?? null,
         'response' => $data['response'] ?? null,
         'error' => $data['error'] ?? null,
         'raw_response' => $data['raw_response'] ?? null
     ];
 
-    // Guardar con formato legible
     file_put_contents(
-        $filepath,
-        json_encode($log_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        $response_filepath,
+        json_encode($response_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
     );
 }
 

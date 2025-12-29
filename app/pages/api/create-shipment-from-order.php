@@ -89,12 +89,41 @@ try {
 
     // Verificar que la orden tenga datos de cotización
     $quote_data = $order['shipping_quote_data'] ?? [];
-    if (empty($quote_data) || empty($quote_data['rate_id'])) {
+
+    // Log para debug
+    error_log("API CreateShipment: Verificando quote_data para orden $order_id");
+    error_log("API CreateShipment: shipping_quote_data presente: " . (isset($order['shipping_quote_data']) ? 'SI' : 'NO'));
+    if (isset($order['shipping_quote_data'])) {
+        error_log("API CreateShipment: rate_id presente: " . (isset($quote_data['rate_id']) ? 'SI (' . $quote_data['rate_id'] . ')' : 'NO'));
+        error_log("API CreateShipment: quote_data keys: " . implode(', ', array_keys($quote_data)));
+    }
+    error_log("API CreateShipment: delivery_method: " . ($order['delivery_method'] ?? 'NO SET'));
+
+    // Validar que haya rate_id O tariff_id (Zipnova acepta cualquiera de los dos)
+    $has_rate_id = !empty($quote_data['rate_id']);
+    $has_tariff_id = !empty($quote_data['tariff_id']);
+
+    if (empty($quote_data) || (!$has_rate_id && !$has_tariff_id)) {
         error_log("API CreateShipment: Orden sin datos de cotización: $order_id");
+        error_log("API CreateShipment: has_rate_id: " . ($has_rate_id ? 'SI' : 'NO'));
+        error_log("API CreateShipment: has_tariff_id: " . ($has_tariff_id ? 'SI' : 'NO'));
+
+        // Verificar si es una orden de retiro en persona
+        $delivery_method = $order['delivery_method'] ?? '';
+        if ($delivery_method === 'pickup') {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Esta orden fue creada con retiro en persona y no tiene datos de envío. No se puede crear una etiqueta de envío para órdenes de retiro en persona.'
+            ]);
+            exit;
+        }
+
+        // Otro caso: datos de cotización faltantes
         http_response_code(400);
         echo json_encode([
             'success' => false,
-            'error' => 'La orden no tiene datos de cotización de envío'
+            'error' => 'La orden no tiene datos de cotización de envío. Los datos no se guardaron correctamente durante el checkout.'
         ]);
         exit;
     }
@@ -177,11 +206,18 @@ try {
         $declared_value = max(0, $declared_value - $shipping_cost);
     }
 
+    // Determinar qué ID enviar (rate_id o tariff_id, nunca ambos)
+    // Si rate_id existe y no es null, usar rate_id. Sino, usar tariff_id.
+    if (!empty($quote_data['rate_id'])) {
+        $rate_identifier = ['rate_id' => $quote_data['rate_id']];
+        error_log("API CreateShipment: Usando rate_id: " . $quote_data['rate_id']);
+    } else {
+        $rate_identifier = ['tariff_id' => $quote_data['tariff_id']];
+        error_log("API CreateShipment: Usando tariff_id: " . $quote_data['tariff_id']);
+    }
+
     // Preparar datos para crear envío en Zipnova (formato correcto según API)
-    $shipment_data = [
-        // IDs y referencias
-        'rate_id' => $quote_data['rate_id'],
-        'tariff_id' => $quote_data['tariff_id'] ?? null,
+    $shipment_data = array_merge($rate_identifier, [
         'external_id' => $order['order_number'] ?? 'ORD-' . $order_id,
         'reference' => $order['order_number'] ?? $order_id,
 
@@ -210,9 +246,33 @@ try {
             'email' => $order['customer_email'] ?? '',
             'document' => $shipping_address['document'] ?? $order['customer_document'] ?? '' // DNI/CUIT (REQUERIDO)
         ]
-    ];
+    ]);
+
+    // Validar que si es pickup_point, debe tener pickup_point_id
+    $service_type_code = $quote_data['service_type_code'] ?? '';
+    $pickup_point_id = $quote_data['pickup_point_id'] ?? '';
+
+    error_log("API CreateShipment: service_type_code: " . ($service_type_code ?: 'NO SET'));
+    error_log("API CreateShipment: pickup_point_id en quote_data: " . ($pickup_point_id ?: 'EMPTY'));
+
+    if ($service_type_code === 'pickup_point' && empty($pickup_point_id)) {
+        error_log("API CreateShipment: ERROR - Es pickup_point pero no hay pickup_point_id!");
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Esta orden requiere selección de punto de entrega pero no se guardó el punto seleccionado. Por favor, cree una nueva orden y asegúrese de seleccionar un punto de entrega específico.'
+        ]);
+        exit;
+    }
+
+    // Si es entrega en punto de retiro, agregar el point_id
+    if (!empty($pickup_point_id)) {
+        $shipment_data['destination']['point_id'] = $pickup_point_id;
+        error_log("API CreateShipment: Envío a punto de retiro - point_id: " . $pickup_point_id);
+    }
 
     error_log("API CreateShipment: Creando envío para orden $order_id");
+    error_log("API CreateShipment: Datos de envío: " . json_encode($shipment_data, JSON_UNESCAPED_UNICODE));
 
     // Crear envío en Zipnova (pasar order_number o order_id para logs)
     $result = zipnova_create_shipment($shipment_data, $order['order_number'] ?? $order_id);
@@ -222,20 +282,31 @@ try {
         $shipment_id = $result['data']['id'] ?? null;
 
         if ($shipment_id) {
-            // Obtener la orden actualizada
-            $order = get_order_by_id($order_id);
+            // Guardar envío localmente para poder obtener la etiqueta después
+            $shipment_local_data = [
+                'id' => $shipment_id,
+                'order_id' => $order_id,
+                'order_number' => $order['order_number'] ?? null,
+                'status' => 'pendiente',
+                'carrier' => $quote_data['carrier_name'] ?? 'ZNVA',
+                'tracking_number' => $result['data']['tracking_number'] ?? null,
+                'created_at' => date('Y-m-d H:i:s'),
+                'data' => $result['data'] // Guardar toda la respuesta de Zipnova
+            ];
 
-            if (!isset($order['shipping'])) {
-                $order['shipping'] = [];
-            }
+            zipnova_save_shipment($shipment_id, $shipment_local_data);
+            error_log("API CreateShipment: Envío guardado localmente: $shipment_id");
 
-            $order['shipping']['carrier_shipment_id'] = $shipment_id;
-            $order['shipping']['carrier'] = $quote_data['carrier_name'] ?? 'ZNVA';
-            $order['shipping']['status'] = 'pendiente';
-            $order['shipping']['created_at'] = date('Y-m-d H:i:s');
+            // Preparar datos de envío para actualizar orden
+            $shipping_info = [
+                'carrier_shipment_id' => $shipment_id,
+                'carrier' => $quote_data['carrier_name'] ?? 'ZNVA',
+                'status' => 'pendiente',
+                'created_at' => date('Y-m-d H:i:s')
+            ];
 
-            // Guardar orden actualizada
-            if (update_order_data($order_id, $order)) {
+            // Actualizar orden con info de envío
+            if (update_order_shipping_info($order_id, $shipping_info)) {
                 error_log("API CreateShipment: Envío creado exitosamente: $shipment_id para orden $order_id");
 
                 http_response_code(200);
@@ -244,10 +315,11 @@ try {
                     'data' => [
                         'shipment_id' => $shipment_id,
                         'order_id' => $order_id,
-                        'carrier' => $order['shipping']['carrier']
+                        'carrier' => $shipping_info['carrier']
                     ],
                     'message' => 'Envío creado exitosamente'
                 ]);
+                exit;
             } else {
                 error_log("API CreateShipment: Error al actualizar orden con shipment_id: $order_id");
                 http_response_code(500);
@@ -255,6 +327,7 @@ try {
                     'success' => false,
                     'error' => 'Envío creado pero error al actualizar orden'
                 ]);
+                exit;
             }
         } else {
             error_log("API CreateShipment: Respuesta de Zipnova sin shipment_id");
@@ -263,6 +336,7 @@ try {
                 'success' => false,
                 'error' => 'Error al obtener ID del envío creado'
             ]);
+            exit;
         }
     } else {
         error_log("API CreateShipment: Error al crear envío: " . ($result['error'] ?? 'Unknown'));
@@ -271,6 +345,7 @@ try {
             'success' => false,
             'error' => $result['error'] ?? 'Error al crear envío en el carrier'
         ]);
+        exit;
     }
 
 } catch (Exception $e) {
@@ -280,4 +355,5 @@ try {
         'success' => false,
         'error' => 'Error al procesar la solicitud'
     ]);
+    exit;
 }

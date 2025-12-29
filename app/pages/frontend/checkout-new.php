@@ -174,6 +174,7 @@ foreach ($cart as $key => $value) {
         'product_id' => $product_id,
         'name' => $product['name'],
         'thumbnail' => $product['thumbnail'] ?? '',
+        'slug' => $product['slug'] ?? '',
         'price_ars' => $price_ars,
         'price_usd' => $price_usd,
         'final_price_ars' => $final_price_ars,
@@ -183,7 +184,12 @@ foreach ($cart as $key => $value) {
         'subtotal_usd' => $item_subtotal_usd,
         'promotion' => $promotion,
         'promotion_discount_ars' => $item_promotion_discount_ars,
-        'promotion_discount_usd' => $item_promotion_discount_usd
+        'promotion_discount_usd' => $item_promotion_discount_usd,
+        // Dimensiones para cotización de envío
+        'weight' => (int)($product['weight'] ?? 500), // gramos
+        'height' => (int)($product['height'] ?? 10), // cm
+        'width' => (int)($product['width'] ?? 10), // cm
+        'length' => (int)($product['length'] ?? 10) // cm
     ];
 
     $subtotal_ars += $item_subtotal_ars;
@@ -323,7 +329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $errors[] = 'El teléfono es requerido';
     }
 
-    if (!in_array($delivery_method, ['pickup', 'shipping'])) {
+    if (!in_array($delivery_method, ['pickup', 'home_delivery', 'pickup_point'])) {
         $errors[] = 'Método de entrega inválido';
     }
 
@@ -333,7 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
     // Shipping address (only for delivery)
     $shipping_address = null;
-    $needs_shipping = ($delivery_method === 'shipping');
+    $needs_shipping = ($delivery_method === 'home_delivery' || $delivery_method === 'pickup_point');
 
     if ($needs_shipping) {
         $address = sanitize_input($_POST['shipping_address'] ?? '');
@@ -432,6 +438,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $shipping_tags_json = sanitize_input($_POST['shipping_tags'] ?? '[]');
         $shipping_tags = json_decode($shipping_tags_json, true) ?: [];
 
+        // Punto de entrega (si aplica)
+        $shipping_pickup_point_id = sanitize_input($_POST['shipping_pickup_point_id'] ?? '');
+
         // DEBUG: Log shipping data received
         error_log("DEBUG Checkout POST - shipping_service_id: " . ($shipping_service_id ?: 'EMPTY'));
         error_log("DEBUG Checkout POST - shipping_rate_id: " . ($shipping_rate_id ?: 'EMPTY'));
@@ -485,7 +494,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 'rate_id' => $shipping_rate_id,
                 'tariff_id' => $shipping_tariff_id,
                 'rate_source' => $shipping_rate_source,
-                'tags' => $shipping_tags
+                'tags' => $shipping_tags,
+                'pickup_point_id' => $shipping_pickup_point_id
             ],
             'total' => $total_with_shipping,
             'payment_method' => $payment_method,
@@ -1644,13 +1654,24 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                         </div>
                                     </label>
                                     <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
-                                        <input type="radio" name="delivery_method" value="shipping"
-                                               <?php echo $saved_delivery_method === 'shipping' ? 'checked' : ''; ?>
+                                        <input type="radio" name="delivery_method" value="home_delivery"
+                                               <?php echo $saved_delivery_method === 'home_delivery' ? 'checked' : ''; ?>
                                                <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
                                         <div>
-                                            <strong>📦 Envío a domicilio</strong>
+                                            <strong>🏠 Envío a domicilio</strong>
                                             <p class="option-description">
-                                                <?php echo $has_pickup_only ? 'No disponible para estos productos' : 'Completa tu dirección'; ?>
+                                                <?php echo $has_pickup_only ? 'No disponible para estos productos' : 'El paquete llega a tu dirección'; ?>
+                                            </p>
+                                        </div>
+                                    </label>
+                                    <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
+                                        <input type="radio" name="delivery_method" value="pickup_point"
+                                               <?php echo $saved_delivery_method === 'pickup_point' ? 'checked' : ''; ?>
+                                               <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
+                                        <div>
+                                            <strong>📍 Punto de entrega</strong>
+                                            <p class="option-description">
+                                                <?php echo $has_pickup_only ? 'No disponible para estos productos' : 'Retirás en un punto cercano'; ?>
                                             </p>
                                         </div>
                                     </label>
@@ -1791,6 +1812,9 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
                                 <!-- Tags -->
                                 <input type="hidden" id="shipping_tags" name="shipping_tags">
+
+                                <!-- Punto de entrega (si aplica) -->
+                                <input type="hidden" id="shipping_pickup_point_id" name="shipping_pickup_point_id">
                             </div>
                         </div>
                     </div>
@@ -2159,21 +2183,24 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         });
 
         function validateStep2() {
-            const method = document.querySelector('input[name="delivery_method"]:checked').value;
+            const methodElement = document.querySelector('input[name="delivery_method"]:checked');
+            if (!methodElement) return; // Salir si no hay nada seleccionado
+
+            const method = methodElement.value;
             const step2 = document.getElementById('step-2');
 
             // Show/hide shipping fields
             const shippingFields = document.getElementById('shipping-fields');
-            shippingFields.classList.toggle('hidden', method !== 'shipping');
+            shippingFields.classList.toggle('hidden', method === 'pickup');
 
             // Solo completar paso si:
             // - Es pickup (no requiere cotización)
-            // - Es shipping Y se ha seleccionado una cotización
+            // - Es home_delivery o pickup_point Y se ha seleccionado una cotización
             if (method === 'pickup') {
                 document.getElementById('step-2-summary').textContent = '🏪 Retiro en persona';
                 markStepCompleted(2);
                 unlockNextStep(2);
-            } else if (method === 'shipping') {
+            } else if (method === 'home_delivery' || method === 'pickup_point') {
                 // Asegurar que el paso permanezca abierto para mostrar campos de envío
                 if (!step2.classList.contains('active')) {
                     step2.classList.add('active');
@@ -2183,15 +2210,30 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     // Cotización ya seleccionada
                     const selectedQuote = document.querySelector('input[name="shipping_method_quote"]:checked');
                     if (selectedQuote) {
+                        // Validar que si es pickup_point, se haya seleccionado un punto
+                        const serviceTypeCode = selectedQuote.dataset.serviceTypeCode || '';
+                        const pickupPointId = document.getElementById('shipping_pickup_point_id')?.value || '';
+
+                        if (serviceTypeCode === 'pickup_point' && !pickupPointId) {
+                            // Es pickup_point pero no hay punto seleccionado
+                            const icon = method === 'pickup_point' ? '📍' : '📦';
+                            document.getElementById('step-2-summary').textContent = `${icon} Envío (seleccione punto de entrega)`;
+                            markStepIncomplete(2);
+                            console.warn('⚠️ Cotización de pickup_point seleccionada pero falta seleccionar punto específico');
+                            return;
+                        }
+
                         const cost = selectedQuote.dataset.cost || '0';
                         const days = selectedQuote.dataset.days || '';
-                        document.getElementById('step-2-summary').textContent = `📦 Envío (${days} días)`;
+                        const icon = method === 'pickup_point' ? '📍' : '📦';
+                        document.getElementById('step-2-summary').textContent = `${icon} Envío (${days} días)`;
                         markStepCompleted(2);
                         unlockNextStep(2);
                     }
                 } else {
                     // Envío seleccionado pero sin cotización
-                    document.getElementById('step-2-summary').textContent = '📦 Envío (cotización pendiente)';
+                    const icon = method === 'pickup_point' ? '📍' : '📦';
+                    document.getElementById('step-2-summary').textContent = `${icon} Envío (cotización pendiente)`;
                     markStepIncomplete(2);
                 }
             }
@@ -2200,6 +2242,12 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         // Listen for shipping quote selection
         document.addEventListener('shippingSelected', function(e) {
             shippingQuoteSelected = true;
+            validateStep2(); // Re-validate to complete step
+        });
+
+        // Listen for pickup point selection
+        document.addEventListener('pickupPointSelected', function(e) {
+            console.log('📍 Pickup point selected event received:', e.detail.pointId);
             validateStep2(); // Re-validate to complete step
         });
 

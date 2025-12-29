@@ -51,16 +51,26 @@ console.log('📦 shipping.js: Archivo cargado');
     }
 
     /**
-     * Handle delivery method change (pickup vs shipping)
+     * Handle delivery method change (pickup, home_delivery, pickup_point)
      */
     function handleDeliveryMethodChange(event) {
         const shippingFields = document.getElementById('shipping-fields');
+        const deliveryMethod = event.target.value;
 
-        if (event.target.value === 'shipping') {
+        console.log('🔄 Método de entrega cambiado a:', deliveryMethod);
+
+        if (deliveryMethod === 'home_delivery' || deliveryMethod === 'pickup_point') {
+            // Mostrar campos de dirección
             shippingFields.classList.remove('hidden');
             // Reset shipping selection
             resetShipping();
+
+            // Si ya hay cotizaciones cargadas, volver a filtrarlas
+            if (shippingQuotes.length > 0) {
+                displayQuotes(shippingQuotes);
+            }
         } else {
+            // Ocultar campos de dirección (retiro en persona)
             shippingFields.classList.add('hidden');
             // Clear shipping cost if pickup selected
             updateShippingCost(0);
@@ -98,8 +108,8 @@ console.log('📦 shipping.js: Archivo cargado');
         hideError();
         hideQuotes();
 
-        // Calculate total weight from cart
-        const weight = calculateCartWeight();
+        // Construir items desde cart data (el backend los agrupará en un package)
+        const items = buildPackagesFromCart();
         const declaredValue = calculateCartValue();
 
         // Build request
@@ -111,7 +121,8 @@ console.log('📦 shipping.js: Archivo cargado');
         };
 
         try {
-            console.log('📦 Calculando peso y valor:', { weight, declaredValue });
+            console.log('📦 Items construidos:', items);
+            console.log('💰 Valor declarado:', declaredValue);
             console.log('🌐 Llamando a API:', window.BASE_PATH + '/api/?endpoint=shipping&action=quotes');
 
             // Call API
@@ -122,7 +133,7 @@ console.log('📦 shipping.js: Archivo cargado');
                 },
                 body: JSON.stringify({
                     destination: destination,
-                    weight: weight,
+                    items: items, // Items individuales - backend los agrupa en package
                     declared_value: declaredValue
                 })
             });
@@ -174,6 +185,36 @@ console.log('📦 shipping.js: Archivo cargado');
             showError('No hay métodos de envío disponibles para esta dirección');
             return;
         }
+
+        // Filtrar según el método de entrega elegido
+        const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked')?.value || 'home_delivery';
+        console.log('🔍 Método de entrega seleccionado:', deliveryMethod);
+
+        const filteredQuotes = quotes.filter(quote => {
+            if (deliveryMethod === 'pickup_point') {
+                // Mostrar solo opciones de punto de entrega
+                return quote.service_type_code === 'pickup_point';
+            } else if (deliveryMethod === 'home_delivery') {
+                // Mostrar solo opciones de entrega a domicilio
+                return quote.service_type_code !== 'pickup_point';
+            } else {
+                // Si es 'pickup', no mostrar ninguna cotización (retiro en persona)
+                return false;
+            }
+        });
+
+        console.log('✅ Cotizaciones filtradas:', filteredQuotes.length, 'de', quotes.length);
+
+        if (filteredQuotes.length === 0) {
+            const errorMsg = deliveryMethod === 'pickup_point'
+                ? 'No hay opciones de punto de entrega disponibles para esta dirección'
+                : 'No hay opciones de envío a domicilio disponibles para esta dirección';
+            showError(errorMsg);
+            return;
+        }
+
+        // Usar las cotizaciones filtradas
+        quotes = filteredQuotes;
 
         const INITIAL_DISPLAY = 4;
         let showingAll = false;
@@ -249,6 +290,21 @@ console.log('📦 shipping.js: Archivo cargado');
             autoSelectedRadio.checked = true;
             handleQuoteSelection(autoSelectedQuote);
             console.log('✅ Opción auto-seleccionada:', autoSelectedQuote.service_name);
+
+            // Si es pickup_point, mostrar el contenedor de puntos de entrega
+            if (autoSelectedQuote.service_type_code === 'pickup_point') {
+                // Ocultar todos los contenedores primero
+                document.querySelectorAll('.pickup-points-container').forEach(container => {
+                    container.classList.add('hidden');
+                });
+
+                // Mostrar el contenedor del quote auto-seleccionado
+                const container = autoSelectedRadio.closest('label').querySelector('.pickup-points-container');
+                if (container) {
+                    container.classList.remove('hidden');
+                    console.log('✅ Contenedor de pickup points mostrado automáticamente');
+                }
+            }
         } else {
             console.log('⚠️ No se auto-seleccionó ninguna opción - usuario debe elegir manualmente');
         }
@@ -357,6 +413,79 @@ console.log('📦 shipping.js: Archivo cargado');
         contentDiv.appendChild(description);
         contentDiv.appendChild(cost);
 
+        // Si es una opción de punto de entrega, mostrar los puntos disponibles
+        console.log('📍 Verificando pickup points para quote:', quote.service_name);
+        console.log('   - service_type_code:', quote.service_type_code);
+        console.log('   - pickup_points:', quote.pickup_points);
+        console.log('   - length:', quote.pickup_points ? quote.pickup_points.length : 'N/A');
+
+        if (quote.service_type_code === 'pickup_point' && quote.pickup_points && quote.pickup_points.length > 0) {
+            console.log('✅ Creando contenedor de pickup points con', quote.pickup_points.length, 'puntos');
+            const pickupPointsContainer = document.createElement('div');
+            pickupPointsContainer.className = 'pickup-points-container hidden';
+            pickupPointsContainer.style.cssText = 'margin-top: 1rem; padding: 0.75rem; background: var(--checkout-bg-secondary); border-radius: 8px;';
+            pickupPointsContainer.dataset.serviceId = quote.service_id;
+
+            const pickupPointsTitle = document.createElement('p');
+            pickupPointsTitle.style.cssText = 'font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem;';
+            pickupPointsTitle.textContent = '📍 Seleccioná un punto de retiro:';
+            pickupPointsContainer.appendChild(pickupPointsTitle);
+
+            const pickupPointsSelect = document.createElement('select');
+            pickupPointsSelect.className = 'pickup-point-select';
+            pickupPointsSelect.style.cssText = 'width: 100%; padding: 0.5rem; border: 1px solid var(--checkout-border); border-radius: 4px; font-size: 0.875rem;';
+            pickupPointsSelect.required = true;
+
+            // Opción por defecto
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Seleccionar punto de retiro...';
+            pickupPointsSelect.appendChild(defaultOption);
+
+            // Agregar cada punto de entrega
+            quote.pickup_points.forEach((point, idx) => {
+                const option = document.createElement('option');
+                option.value = point.point_id;
+                option.dataset.pointData = JSON.stringify(point);
+
+                const distance = point.location?.geolocation?.distance;
+                const distanceText = distance ? ` (${distance}m)` : '';
+                option.textContent = `${point.description} - ${point.location.street} ${point.location.street_number}, ${point.location.city}${distanceText}`;
+
+                pickupPointsSelect.appendChild(option);
+            });
+
+            pickupPointsContainer.appendChild(pickupPointsSelect);
+            contentDiv.appendChild(pickupPointsContainer);
+
+            // Mostrar/ocultar puntos de entrega cuando se selecciona/deselecciona el radio
+            radio.addEventListener('change', function() {
+                // Ocultar todos los contenedores de puntos de entrega
+                document.querySelectorAll('.pickup-points-container').forEach(container => {
+                    container.classList.add('hidden');
+                });
+
+                // Mostrar el contenedor correspondiente si este radio está seleccionado
+                if (this.checked) {
+                    pickupPointsContainer.classList.remove('hidden');
+                }
+            });
+
+            // Guardar el punto seleccionado cuando cambia el select
+            pickupPointsSelect.addEventListener('change', function() {
+                const selectedPointId = this.value;
+                console.log('📍 Punto de entrega seleccionado:', selectedPointId);
+
+                // Guardar en campo hidden
+                setHiddenField('shipping_pickup_point_id', selectedPointId);
+
+                // Disparar evento para re-validar el paso 2 del checkout
+                document.dispatchEvent(new CustomEvent('pickupPointSelected', {
+                    detail: { pointId: selectedPointId }
+                }));
+            });
+        }
+
         label.appendChild(radio);
         label.appendChild(contentDiv);
 
@@ -368,6 +497,8 @@ console.log('📦 shipping.js: Archivo cargado');
      */
     function handleQuoteSelection(quote) {
         console.log('🚢 handleQuoteSelection called with quote:', quote);
+        console.log('🔑 rate_id en quote:', quote.rate_id);
+        console.log('🔑 tariff_id en quote:', quote.tariff_id);
         selectedShippingService = quote.service_id;
         shippingCost = parseFloat(quote.cost) || 0;
 
@@ -409,6 +540,11 @@ console.log('📦 shipping.js: Archivo cargado');
         // Tags
         setHiddenField('shipping_tags', JSON.stringify(quote.tags || []));
 
+        // Limpiar pickup_point_id si no es una opción de punto de entrega
+        if (quote.service_type_code !== 'pickup_point') {
+            setHiddenField('shipping_pickup_point_id', '');
+        }
+
         // Update total
         updateShippingCost(shippingCost);
 
@@ -430,6 +566,9 @@ console.log('📦 shipping.js: Archivo cargado');
         const field = document.getElementById(id);
         if (field) {
             field.value = value;
+            console.log(`✅ Campo ${id} seteado a:`, value);
+        } else {
+            console.error(`❌ Campo ${id} NO ENCONTRADO en el DOM`);
         }
     }
 
@@ -478,6 +617,43 @@ console.log('📦 shipping.js: Archivo cargado');
             totalEl.textContent = formatCurrency(total);
             totalEl.dataset.value = total;
         }
+    }
+
+    /**
+     * Construir packages desde checkoutCartData con dimensiones reales
+     */
+    function buildPackagesFromCart() {
+        // checkoutCartData está definido en checkout-new.php
+        if (typeof checkoutCartData === 'undefined' || !Array.isArray(checkoutCartData)) {
+            console.warn('⚠️ checkoutCartData no disponible, usando valores por defecto');
+            return [{
+                sku: 'CART-ITEM',
+                weight: 500,
+                height: 10,
+                width: 10,
+                length: 10,
+                description: 'Producto del carrito',
+                classification_id: 1
+            }];
+        }
+
+        const items = [];
+
+        checkoutCartData.forEach(item => {
+            // Construir items con quantity explícita
+            // El backend los agrupará en un package (caja) único
+            items.push({
+                sku: item.slug || item.product_id || 'ITEM',
+                weight: item.weight || 500, // gramos por unidad
+                quantity: item.quantity || 1,
+                description: item.name || 'Producto',
+                classification_id: 1,
+                declared_value: item.final_price_ars || item.price_ars || 0
+            });
+        });
+
+        console.log('📦 Construidos ' + items.length + ' items desde checkoutCartData (backend los agrupará en package)');
+        return items;
     }
 
     /**

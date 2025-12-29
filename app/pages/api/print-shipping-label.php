@@ -29,14 +29,19 @@ require_admin();
 // Include carriers functions for zipnova_get_label()
 require_once APP_PATH . '/includes/carriers.php';
 
-// Set JSON response header
-header('Content-Type: application/json');
-
 // Get request parameters
+error_log("PRINT LABEL: Endpoint called - " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 $order_id = sanitize_input($_REQUEST['order_id'] ?? '');
 $shipment_id = sanitize_input($_REQUEST['shipment_id'] ?? '');
 $format = sanitize_input($_REQUEST['format'] ?? 'pdf');
 $action = sanitize_input($_REQUEST['action'] ?? 'download');
+error_log("PRINT LABEL: Params - order_id: $order_id, shipment_id: $shipment_id, format: $format, action: $action");
+
+// Set JSON response header ONLY if not downloading
+// (download will set PDF headers instead)
+if ($action !== 'download') {
+    header('Content-Type: application/json');
+}
 
 // Validate format
 $valid_formats = ['pdf', 'png', 'zpl'];
@@ -89,9 +94,12 @@ if (!empty($order_id)) {
 }
 
 // Get label from Zipnova (pasar order_number para logs)
+error_log("PRINT LABEL: Calling zipnova_get_label for shipment_id: $shipment_id");
 $result = zipnova_get_label($shipment_id, $format, $order_number);
+error_log("PRINT LABEL: Result success: " . ($result['success'] ? 'true' : 'false'));
 
 if (!$result['success']) {
+    error_log("PRINT LABEL: Error getting label: " . ($result['error'] ?? 'unknown'));
     // Log admin action
     log_admin_action('print_label_failed', $_SESSION['username'], [
         'shipment_id' => $shipment_id,
@@ -126,7 +134,15 @@ if ($action === 'download') {
     $label_url = $result['data']['label_url'];
     $filepath = APP_PATH . $label_url;
 
+    error_log("PRINT LABEL: Action=download, label_url: $label_url");
+    error_log("PRINT LABEL: Filepath: $filepath");
+    error_log("PRINT LABEL: File exists: " . (file_exists($filepath) ? 'YES' : 'NO'));
+
     if (file_exists($filepath)) {
+        error_log("PRINT LABEL: Serving PDF file");
+        // Limpiar cualquier header JSON establecido previamente
+        header_remove('Content-Type');
+
         // Headers para PDF
         header('Content-Type: application/pdf');
         header('Content-Disposition: attachment; filename="etiqueta_' . $shipment_id . '.pdf"');
