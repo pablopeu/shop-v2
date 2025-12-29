@@ -264,7 +264,22 @@ try {
         $shipment_id = $result['data']['id'] ?? null;
 
         if ($shipment_id) {
-            // Preparar datos de envío para actualizar
+            // Guardar envío localmente para poder obtener la etiqueta después
+            $shipment_local_data = [
+                'id' => $shipment_id,
+                'order_id' => $order_id,
+                'order_number' => $order['order_number'] ?? null,
+                'status' => 'pendiente',
+                'carrier' => $quote_data['carrier_name'] ?? 'ZNVA',
+                'tracking_number' => $result['data']['tracking_number'] ?? null,
+                'created_at' => date('Y-m-d H:i:s'),
+                'data' => $result['data'] // Guardar toda la respuesta de Zipnova
+            ];
+
+            zipnova_save_shipment($shipment_id, $shipment_local_data);
+            error_log("API CreateShipment: Envío guardado localmente: $shipment_id");
+
+            // Preparar datos de envío para actualizar orden
             $shipping_info = [
                 'carrier_shipment_id' => $shipment_id,
                 'carrier' => $quote_data['carrier_name'] ?? 'ZNVA',
