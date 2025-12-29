@@ -1,68 +1,53 @@
 <?php
 /**
- * Admin - Archived Sales/Orders
+ * Admin - Archivo de Ventas
+ * Listado de ventas archivadas con opciones de restaurar o eliminar
  */
 
-
-
-// Check admin authentication
-require_admin();
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
 // Get configurations
 $site_config = read_json(APP_PATH . '/config/site.json');
 $page_title = 'Archivo de Ventas';
+$currency_config = read_json(APP_PATH . '/config/currency.json');
+$csrf_token = generate_csrf_token();
 
 // Handle actions
 $message = '';
 $error = '';
 
-// Check for message from session
-if (isset($_SESSION['archivo_ventas_message'])) {
-    $message = $_SESSION['archivo_ventas_message'];
-    unset($_SESSION['archivo_ventas_message']);
+// Check for messages in URL
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] === 'order_restored') {
+        $message = 'Venta restaurada exitosamente';
+    } elseif ($_GET['msg'] === 'order_deleted') {
+        $message = 'Venta eliminada exitosamente';
+    }
 }
 
 // Restore order
 if (isset($_GET['action']) && $_GET['action'] === 'restore' && isset($_GET['id'])) {
     $order_id = $_GET['id'];
+
     if (restore_archived_order($order_id)) {
-        // Check if there are more archived orders
-        $remaining_archived = get_archived_orders();
-        if (empty($remaining_archived)) {
-            // No more archived orders, redirect to main sales page
-            $_SESSION['ventas_message'] = 'Orden restaurada exitosamente';
-            header('Location: ' . url('/admin/?page=ventas'), true, 303);
-            exit;
-        } else {
-            // Still have archived orders, stay on archive page
-            $_SESSION['archivo_ventas_message'] = 'Orden restaurada exitosamente';
-            header('Location: ' . url('/admin/?page=archivo-ventas'), true, 303);
-            exit;
-        }
+        $message = 'Venta restaurada exitosamente';
+        log_admin_action('order_restored', $_SESSION['username'], ['order_id' => $order_id]);
     } else {
-        $error = 'Error al restaurar la orden';
+        $error = 'Error al restaurar la venta';
     }
 }
 
-// Permanently delete order
+// Delete order permanently
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $order_id = $_GET['id'];
+
     if (delete_archived_order($order_id)) {
-        // Check if there are more archived orders
-        $remaining_archived = get_archived_orders();
-        if (empty($remaining_archived)) {
-            // No more archived orders, redirect to main sales page
-            $_SESSION['ventas_message'] = 'Orden eliminada permanentemente';
-            header('Location: ' . url('/admin/?page=ventas'), true, 303);
-            exit;
-        } else {
-            // Still have archived orders, stay on archive page
-            $_SESSION['archivo_ventas_message'] = 'Orden eliminada permanentemente';
-            header('Location: ' . url('/admin/?page=archivo-ventas'), true, 303);
-            exit;
-        }
+        $message = 'Venta eliminada exitosamente';
+        log_admin_action('order_deleted', $_SESSION['username'], ['order_id' => $order_id]);
     } else {
-        $error = 'Error al eliminar la orden';
+        $error = 'Error al eliminar la venta';
     }
 }
 
@@ -85,54 +70,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
             }
         }
 
-        if ($success_count > 0) {
-            // Check if there are more archived orders
-            $remaining_archived = get_archived_orders();
-            if (empty($remaining_archived)) {
-                // No more archived orders, redirect to main sales page
-                redirect('?page=ventas&message=' . urlencode("$success_count orden(es) procesada(s) exitosamente"));
-            } else {
-                // Still have archived orders, stay on archive page
-                redirect('?page=archivo-ventas&message=' . urlencode("$success_count orden(es) procesada(s) exitosamente"));
-            }
-        }
+        $message = "$success_count venta(s) procesada(s) exitosamente";
+        log_admin_action('bulk_archived_orders_action', $_SESSION['username'], [
+            'action' => $action,
+            'count' => $success_count
+        ]);
     } else {
-        $error = 'No se seleccionaron órdenes';
+        $error = 'No se seleccionaron ventas';
     }
 }
 
-// Check for message from redirect
-if (isset($_GET['message'])) {
-    $message = $_GET['message'];
+// Get all archived orders
+$all_archived = get_archived_orders();
+
+// Apply filters
+$filter_status = $_GET['filter'] ?? 'all';
+$search_query = $_GET['search'] ?? '';
+
+// Apply status filter
+if ($filter_status === 'all') {
+    $orders = $all_archived;
+} else {
+    $orders = array_filter($all_archived, fn($o) => $o['status'] === $filter_status);
 }
 
-// Get all archived orders
-$archived_orders = get_archived_orders();
+// Apply search filter
+if (!empty($search_query)) {
+    $orders = array_filter($orders, function($order) use ($search_query) {
+        $search_lower = mb_strtolower($search_query);
+        return stripos($order['order_number'], $search_query) !== false ||
+               stripos($order['id'], $search_query) !== false ||
+               stripos(mb_strtolower($order['customer_name'] ?? ''), $search_lower) !== false ||
+               stripos(mb_strtolower($order['customer_email'] ?? ''), $search_lower) !== false;
+    });
+}
 
-// Sort by archived date (newest first)
-usort($archived_orders, function($a, $b) {
+// Sort orders by archived date (newest first)
+usort($orders, function($a, $b) {
     $date_a = $a['archived_date'] ?? $a['date'];
     $date_b = $b['archived_date'] ?? $b['date'];
     return strtotime($date_b) - strtotime($date_a);
 });
 
-// Generate CSRF token
-$csrf_token = generate_csrf_token();
+// Calculate stats
+$total_archived = count($all_archived);
+$impagos = count(array_filter($all_archived, fn($o) => $o['status'] === 'impago'));
+$pagados = count(array_filter($all_archived, fn($o) => $o['status'] === 'pagado'));
+$cobradas = count(array_filter($all_archived, fn($o) => $o['status'] === 'cobrada'));
+$canceladas = count(array_filter($all_archived, fn($o) => in_array($o['status'], ['cancelada', 'rechazada'])));
 
 // Get logged user
 $user = get_logged_user();
-
-// Status labels
-$status_labels = [
-    'pending' => ['label' => 'Pendiente', 'color' => '#FFA726'],
-    'confirmed' => ['label' => 'Confirmado', 'color' => '#4CAF50'],
-    'shipped' => ['label' => 'Enviado', 'color' => '#2196F3'],
-    'delivered' => ['label' => 'Entregado', 'color' => '#4CAF50'],
-    'cancelled' => ['label' => 'Cancelado', 'color' => '#f44336'],
-    'cobrada' => ['label' => 'Cobrada', 'color' => '#4CAF50'],
-    'rechazada' => ['label' => 'Rechazada', 'color' => '#f44336'],
-    'pendiente' => ['label' => 'Pendiente de Pago', 'color' => '#FFA726']
-];
 
 ?>
 <!DOCTYPE html>
@@ -140,7 +128,7 @@ $status_labels = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archivo de Ventas - Admin</title>
+    <title><?php echo htmlspecialchars($page_title); ?> - Admin</title>
 
     <style nonce="<?= csp_nonce() ?>">
         * {
@@ -151,74 +139,150 @@ $status_labels = [
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
             background: #f5f7fa;
         }
 
-        /* Main Content */
         .main-content {
-            margin-left: 260px;
-            padding: 15px 20px;
+            margin-left: 250px;
+            padding: 20px;
         }
 
-        /* Messages */
+        h1 {
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
         .message {
-            padding: 15px 20px;
+            padding: 12px 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+            font-weight: 500;
         }
 
         .message.success {
             background: #d4edda;
-            border-left: 4px solid #28a745;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .message.error {
             background: #f8d7da;
-            border-left: 4px solid #dc3545;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
-        /* Buttons */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .filters-card {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
         .btn {
             padding: 10px 20px;
-            border-radius: 6px;
+            border: none;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
             cursor: pointer;
-            transition: all 0.3s;
-            border: none;
+            transition: all 0.2s;
         }
 
         .btn-primary {
-            background: #4CAF50;
+            background: #667eea;
             color: white;
         }
 
         .btn-primary:hover {
-            background: #45a049;
+            background: #5568d3;
         }
 
         .btn-secondary {
-            background: #6c757d;
+            background: #64748b;
             color: white;
         }
 
         .btn-secondary:hover {
-            background: #5a6268;
+            background: #475569;
         }
 
         .btn-danger {
-            background: #dc3545;
+            background: #ef4444;
             color: white;
         }
 
         .btn-danger:hover {
-            background: #c82333;
+            background: #dc2626;
         }
 
         .btn-sm {
@@ -226,49 +290,35 @@ $status_labels = [
             font-size: 13px;
         }
 
-        /* Card */
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            margin-bottom: 15px;
-        }
-
-        /* Table */
-        .orders-table {
+        table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .orders-table th,
-        .orders-table td {
-            padding: 10px 12px;
+        thead {
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        th {
+            padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .orders-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #2c3e50;
             font-size: 13px;
-        }
-
-        .orders-table td {
-            font-size: 14px;
-        }
-
-        .orders-table tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
             font-weight: 600;
-            color: white;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        tr:hover {
+            background: #f8fafc;
         }
 
         .actions {
@@ -276,837 +326,278 @@ $status_labels = [
             gap: 8px;
         }
 
-        .info-banner {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-            color: #856404;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        /* Confirmation Modal */
-        .confirm-modal-content {
-            max-width: 500px;
+        .empty-state {
             text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
         }
 
-        .confirm-modal-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
+        .compact-actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        .confirm-modal-icon.warning {
-            color: #ffc107;
+        .bulk-actions-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
-        .confirm-modal-icon.danger {
-            color: #dc3545;
-        }
-
-        .confirm-modal-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-
-        .confirm-modal-description {
-            font-size: 15px;
-            color: #666;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .confirm-modal-details {
-            background: #f8f9fa;
-            padding: 15px;
+        .bulk-actions-section select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .confirm-modal-details ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-
-        .confirm-modal-details li {
-            margin: 5px 0;
             font-size: 14px;
         }
 
-        .confirm-modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .modal-btn {
-            padding: 12px 30px;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .modal-btn-cancel {
-            background: #6c757d;
-            color: white;
-        }
-
-        .modal-btn-cancel:hover {
-            background: #5a6268;
-        }
-
-        .modal-btn-confirm {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .modal-btn-confirm:hover {
-            background: #45a049;
-        }
-
-        .modal-btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .modal-btn-danger:hover {
-            background: #c82333;
-        }
-
-        /* Table Container for Mobile Scroll */
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin: 0 -15px;
-            padding: 0 15px;
-        }
-
-        @media (min-width: 1025px) {
-            .table-container {
-                overflow-x: visible;
-                margin: 0;
-                padding: 0;
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .main-content {
-                margin-left: 0;
-                padding: 15px;
-            }
-
-            .filters-row {
-                grid-template-columns: 1fr !important;
-            }
-
-            table {
-                min-width: 900px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 10px;
-            }
-
-            table {
-                font-size: 12px;
-                min-width: 800px;
-            }
-
-            table th,
-            table td {
-                padding: 8px 6px !important;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
-                gap: 8px;
-            }
-
-            .actions {
-                flex-direction: column !important;
-                gap: 5px !important;
-            }
-
-            .actions .btn {
-                width: 100%;
-                padding: 6px 10px;
-            }
-
-            .bulk-actions-bar {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .bulk-actions-bar select,
-            .bulk-actions-bar .btn {
-                width: 100%;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr !important;
-            }
-
-            .form-row {
-                flex-direction: column;
-            }
-
-            /* Better touch targets */
-            .btn {
-                min-height: 44px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            input[type="text"],
-            input[type="email"],
-            input[type="number"],
-            input[type="password"],
-            select,
-            textarea {
-                font-size: 16px !important;
-            }
-        }
-
-        /* Mobile Cards View */
-        .mobile-cards {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .table-container {
-                display: none !important;
-            }
-
-            .mobile-cards {
-                display: block;
-            }
-
-            .mobile-card {
-                background: white;
-                border-radius: 8px;
-                padding: 15px;
-                margin-bottom: 12px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-                border-left: 4px solid #3498db;
-            }
-
-            .mobile-card-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: 12px;
-                padding-bottom: 10px;
-                border-bottom: 1px solid #f0f0f0;
-            }
-
-            .mobile-card-title {
-                font-weight: 600;
-                color: #2c3e50;
-                font-size: 15px;
-                flex: 1;
-            }
-
-            .mobile-card-body {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                margin-bottom: 12px;
-            }
-
-            .mobile-card-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 14px;
-            }
-
-            .mobile-card-label {
-                color: #666;
-                font-weight: 500;
-            }
-
-            .mobile-card-value {
-                color: #2c3e50;
-                text-align: right;
-            }
-
-            .mobile-card-actions {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                padding-top: 10px;
-                border-top: 1px solid #f0f0f0;
-            }
-
-            .mobile-card-actions .btn {
-                width: 100%;
-                margin: 0;
-            }
-
-            .mobile-card-checkbox {
-                margin-right: 10px;
-            }
+        #selectedCount {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <?php include APP_PATH . '/includes/admin/sidebar.php'; ?>
 
-    <!-- Main Content -->
     <div class="main-content">
-        <div>
-            <?php include APP_PATH . '/includes/admin/header.php'; ?>
+        <?php include APP_PATH . '/includes/admin/header.php'; ?>
 
-            <?php if ($message): ?>
-                <div class="message success"><?php echo htmlspecialchars($message); ?></div>
-            <?php endif; ?>
+        <h1>📁 Archivo de Ventas</h1>
 
-            <?php if ($error): ?>
-                <div class="message error"><?php echo htmlspecialchars($error); ?></div>
-            <?php endif; ?>
+        <?php if ($message): ?>
+            <div class="message success"><?php echo htmlspecialchars($message); ?></div>
+        <?php endif; ?>
 
-            <div class="info-banner">
-                ⚠️ <strong>Archivo de Ventas:</strong> Las órdenes archivadas no aparecen en el listado principal.
-                Puedes restaurarlas o eliminarlas permanentemente.
+        <?php if ($error): ?>
+            <div class="message error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $total_archived; ?></div>
+                <div class="stat-label">Total Archivadas</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $cobradas; ?></div>
+                <div class="stat-label">Cobradas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $pagados; ?></div>
+                <div class="stat-label">Pagadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $canceladas; ?></div>
+                <div class="stat-label">Canceladas</div>
+            </div>
+        </div>
 
-            <!-- Bulk Actions -->
-            <form method="POST" id="bulkForm">
-                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-                <div class="bulk-actions-bar" style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
-                    <select name="bulk_action" id="bulkAction" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <option value="">Seleccionar acción...</option>
-                        <option value="restore">Restaurar a Ventas Activas</option>
-                        <option value="delete">Eliminar Permanentemente</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary btn-sm" data-action="confirmBulkAction" data-prevent-submit="true">Aplicar a Seleccionadas</button>
-                    <a href="<?php echo url('/admin/?page=ventas'); ?>" class="btn btn-secondary btn-sm">← Volver a Ventas</a>
-                    <span id="selectedCount" style="color: #666; font-size: 13px;"></span>
-                </div>
-
-            <!-- Archived Orders Table -->
-            <div class="card">
-                <div class="table-container">
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 40px;">
-                                <input type="checkbox" id="selectAll" data-onchange="toggleAllCheckboxes">
-                            </th>
-                            <th>Pedido #</th>
-                            <th>Cliente</th>
-                            <th>Fecha Original</th>
-                            <th>Fecha Archivo</th>
-                            <th>Total</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($archived_orders)): ?>
-                            <tr>
-                                <td colspan="8" style="text-align: center; padding: 40px; color: #999;">
-                                    No hay órdenes archivadas.
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($archived_orders as $order): ?>
-                                <tr>
-                                    <td>
-                                        <input type="checkbox" name="selected_orders[]"
-                                               value="<?php echo htmlspecialchars($order['id']); ?>"
-                                               class="order-checkbox"
-                                               data-onchange="updateSelectedCount">
-                                    </td>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($order['order_number']); ?></strong>
-                                    </td>
-                                    <td>
-                                        <?php echo htmlspecialchars($order['customer_name'] ?? 'N/A'); ?><br>
-                                        <small style="color: #666;"><?php echo htmlspecialchars($order['customer_email'] ?? ''); ?></small>
-                                    </td>
-                                    <td>
-                                        <?php echo date('d/m/Y', strtotime($order['date'])); ?><br>
-                                        <small style="color: #666;"><?php echo date('H:i', strtotime($order['date'])); ?></small>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        $archived_date = $order['archived_date'] ?? $order['date'];
-                                        echo date('d/m/Y', strtotime($archived_date));
-                                        ?><br>
-                                        <small style="color: #666;"><?php echo date('H:i', strtotime($archived_date)); ?></small>
-                                    </td>
-                                    <td>
-                                        <strong>
-                                            <?php if ($order['currency'] === 'USD'): ?>
-                                                U$D <?php echo number_format($order['total'], 2, ',', '.'); ?>
-                                            <?php else: ?>
-                                                $ <?php echo number_format($order['total'], 2, ',', '.'); ?>
-                                            <?php endif; ?>
-                                        </strong>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        $status = $order['status'];
-                                        $status_info = $status_labels[$status] ?? ['label' => $status, 'color' => '#666'];
-                                        ?>
-                                        <span class="status-badge" style="background: <?php echo $status_info['color']; ?>">
-                                            <?php echo $status_info['label']; ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="actions">
-                                            <a href="#"
-                                               class="btn btn-sm btn-secondary"
-                                               data-action="confirmSingleAction" data-action-type="restore" data-order-id="<?php echo htmlspecialchars($order['id']); ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                                ↩️ Restaurar
-                                            </a>
-                                            <a href="#"
-                                               class="btn btn-sm btn-danger"
-                                               data-action="confirmSingleAction" data-action-type="delete" data-order-id="<?php echo htmlspecialchars($order['id']); ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                                🗑️ Eliminar
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+        <!-- Filters -->
+        <div class="card filters-card">
+            <form method="GET" action="">
+                <input type="hidden" name="page" value="archivo-ventas">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="search">Buscar</label>
+                        <input type="text" id="search" name="search" placeholder="Número de orden, cliente..." value="<?php echo htmlspecialchars($search_query); ?>">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter">Estado</label>
+                        <select id="filter" name="filter">
+                            <option value="all" <?php echo $filter_status === 'all' ? 'selected' : ''; ?>>Todos</option>
+                            <option value="impago" <?php echo $filter_status === 'impago' ? 'selected' : ''; ?>>Impagos</option>
+                            <option value="pagado" <?php echo $filter_status === 'pagado' ? 'selected' : ''; ?>>Pagados</option>
+                            <option value="cobrada" <?php echo $filter_status === 'cobrada' ? 'selected' : ''; ?>>Cobradas</option>
+                            <option value="cancelada" <?php echo $filter_status === 'cancelada' ? 'selected' : ''; ?>>Canceladas</option>
+                            <option value="rechazada" <?php echo $filter_status === 'rechazada' ? 'selected' : ''; ?>>Rechazadas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+                        <a href="?page=archivo-ventas" class="btn btn-secondary">Limpiar</a>
+                    </div>
+                    <div class="filter-group">
+                        <a href="<?php echo url('/admin/?page=ventas'); ?>" class="btn btn-secondary">
+                            ← Volver a Ventas
+                        </a>
+                    </div>
                 </div>
             </form>
+        </div>
 
-            <!-- Mobile Cards View -->
-            <div class="mobile-cards">
-                <?php if (empty($archived_orders)): ?>
-                    <div class="card">
-                        <p style="text-align: center; color: #999; padding: 20px;">
-                            No hay órdenes archivadas.
-                        </p>
-                    </div>
-                <?php else: ?>
-                    <?php foreach ($archived_orders as $order): ?>
-                        <div class="mobile-card">
-                            <div class="mobile-card-header">
-                                <div style="display: flex; align-items: center; flex: 1;">
-                                    <input type="checkbox" name="selected_orders[]"
-                                           value="<?php echo htmlspecialchars($order['id']); ?>"
-                                           class="order-checkbox mobile-card-checkbox"
-                                           form="bulkForm"
-                                           data-onchange="updateSelectedCount">
-                                    <div>
-                                        <div class="mobile-card-title">Pedido #<?php echo htmlspecialchars($order['order_number']); ?></div>
-                                        <small style="color: #999;"><?php echo htmlspecialchars($order['customer_name'] ?? 'N/A'); ?></small>
+        <!-- Orders Table -->
+        <div class="card">
+            <div class="compact-actions-bar">
+                <form method="POST" id="bulkForm" class="bulk-actions-section">
+                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                    <select name="bulk_action" id="bulkAction">
+                        <option value="">Acciones en lote...</option>
+                        <option value="restore">Restaurar</option>
+                        <option value="delete">Eliminar Permanentemente</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Aplicar a Seleccionadas</button>
+                    <span id="selectedCount"></span>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox" id="selectAll">
+                        </th>
+                        <th>Orden</th>
+                        <th>Cliente</th>
+                        <th>Fecha Archivado</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Método de Pago</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($orders)): ?>
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                <p><strong>No hay ventas archivadas</strong></p>
+                                <p style="font-size: 13px; margin-top: 8px;">Las ventas archivadas aparecerán aquí</p>
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($orders as $order): ?>
+                            <?php
+                            $total = $order['total'] ?? 0;
+                            $currency = $order['currency'] ?? $currency_config['primary'];
+                            $exchange_rate = $order['exchange_rate'] ?? 1;
+                            $status = $order['status'] ?? 'impago';
+                            $archived_date = $order['archived_date'] ?? $order['date'];
+                            $payment_method = $order['payment_method'] ?? 'N/A';
+                            ?>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="selected_orders[]" value="<?php echo $order['id']; ?>" form="bulkForm" class="order-checkbox">
+                                </td>
+                                <td>
+                                    <strong><?php echo htmlspecialchars($order['order_number']); ?></strong><br>
+                                    <small style="color: #94a3b8;"><?php echo htmlspecialchars(substr($order['id'], 0, 20)); ?>...</small>
+                                </td>
+                                <td>
+                                    <?php echo htmlspecialchars($order['customer_name'] ?? 'N/A'); ?><br>
+                                    <small style="color: #94a3b8;"><?php echo htmlspecialchars($order['customer_email'] ?? ''); ?></small>
+                                </td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($archived_date)); ?></td>
+                                <td>
+                                    <strong>$<?php echo number_format($total, 2); ?></strong><br>
+                                    <small style="color: #94a3b8;"><?php echo $currency; ?></small>
+                                </td>
+                                <td>
+                                    <?php
+                                    $status_colors = [
+                                        'impago' => '#fbbf24',
+                                        'pagado' => '#10b981',
+                                        'cobrada' => '#3b82f6',
+                                        'cancelada' => '#ef4444',
+                                        'rechazada' => '#ef4444'
+                                    ];
+                                    $color = $status_colors[$status] ?? '#64748b';
+                                    ?>
+                                    <span style="display: inline-block; padding: 4px 8px; background: <?php echo $color; ?>22; color: <?php echo $color; ?>; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                        <?php echo ucfirst($status); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="font-size: 12px; color: #64748b;">
+                                        <?php echo htmlspecialchars(ucfirst($payment_method)); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button type="button" class="btn btn-primary btn-sm" data-action="confirmRestore" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
+                                            ↩️ Restaurar
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm" data-action="confirmDelete" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
+                                            🗑️ Eliminar
+                                        </button>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="mobile-card-body">
-                                <div class="mobile-card-row">
-                                    <span class="mobile-card-label">Cliente:</span>
-                                    <span class="mobile-card-value">
-                                        <?php echo htmlspecialchars($order['customer_name'] ?? 'N/A'); ?><br>
-                                        <small><?php echo htmlspecialchars($order['customer_email'] ?? ''); ?></small>
-                                    </span>
-                                </div>
-                                <div class="mobile-card-row">
-                                    <span class="mobile-card-label">Fecha Original:</span>
-                                    <span class="mobile-card-value">
-                                        <?php echo date('d/m/Y', strtotime($order['date'])); ?><br>
-                                        <small><?php echo date('H:i', strtotime($order['date'])); ?></small>
-                                    </span>
-                                </div>
-                                <div class="mobile-card-row">
-                                    <span class="mobile-card-label">Fecha Archivo:</span>
-                                    <span class="mobile-card-value">
-                                        <?php
-                                        $archived_date = $order['archived_date'] ?? $order['date'];
-                                        echo date('d/m/Y', strtotime($archived_date));
-                                        ?><br>
-                                        <small><?php echo date('H:i', strtotime($archived_date)); ?></small>
-                                    </span>
-                                </div>
-                                <div class="mobile-card-row">
-                                    <span class="mobile-card-label">Total:</span>
-                                    <span class="mobile-card-value">
-                                        <strong>
-                                            <?php if ($order['currency'] === 'USD'): ?>
-                                                U$D <?php echo number_format($order['total'], 2, ',', '.'); ?>
-                                            <?php else: ?>
-                                                $ <?php echo number_format($order['total'], 2, ',', '.'); ?>
-                                            <?php endif; ?>
-                                        </strong>
-                                    </span>
-                                </div>
-                                <div class="mobile-card-row">
-                                    <span class="mobile-card-label">Estado:</span>
-                                    <span class="mobile-card-value">
-                                        <?php
-                                        $status = $order['status'];
-                                        $status_info = $status_labels[$status] ?? ['label' => $status, 'color' => '#666'];
-                                        ?>
-                                        <span class="status-badge" style="background: <?php echo $status_info['color']; ?>">
-                                            <?php echo $status_info['label']; ?>
-                                        </span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="mobile-card-actions">
-                                <a href="#"
-                                   class="btn btn-sm btn-secondary"
-                                   data-action="confirmSingleAction" data-action-type="restore" data-order-id="<?php echo htmlspecialchars($order['id']); ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                    Restaurar
-                                </a>
-                                <a href="#"
-                                   class="btn btn-sm btn-danger"
-                                   data-action="confirmSingleAction" data-action-type="delete" data-order-id="<?php echo htmlspecialchars($order['id']); ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                    Eliminar
-                                </a>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bulk Action Confirmation Modal -->
-    <div id="confirmBulkModal" class="modal">
-        <div class="modal-content confirm-modal-content">
-            <div class="confirm-modal-icon" id="confirmIcon">⚠️</div>
-            <h2 class="confirm-modal-title" id="confirmTitle">Confirmar Acción</h2>
-            <p class="confirm-modal-description" id="confirmDescription"></p>
-            <div class="confirm-modal-details" id="confirmDetails"></div>
-            <div class="confirm-modal-actions">
-                <button class="modal-btn modal-btn-cancel" data-action="closeConfirmModal">
-                    Cancelar
-                </button>
-                <button class="modal-btn" id="confirmButton" data-action="executeBulkAction">
-                    Confirmar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Individual Action Confirmation Modal -->
-    <div id="confirmSingleModal" class="modal">
-        <div class="modal-content confirm-modal-content">
-            <div class="confirm-modal-icon" id="singleConfirmIcon">⚠️</div>
-            <h2 class="confirm-modal-title" id="singleConfirmTitle">Confirmar Acción</h2>
-            <p class="confirm-modal-description" id="singleConfirmDescription"></p>
-            <div class="confirm-modal-details" id="singleConfirmDetails"></div>
-            <div class="confirm-modal-actions">
-                <button class="modal-btn modal-btn-cancel" data-action="closeSingleConfirmModal">
-                    Cancelar
-                </button>
-                <a class="modal-btn" id="singleConfirmButton" href="#">
-                    Confirmar
-                </a>
-            </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script nonce="<?= csp_nonce() ?>">
-        // Checkbox management
-        function toggleAllCheckboxes(source) {
+        // Select all checkbox
+        document.getElementById('selectAll').addEventListener('change', function() {
             const checkboxes = document.querySelectorAll('.order-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = source.checked;
-            });
+            checkboxes.forEach(cb => cb.checked = this.checked);
             updateSelectedCount();
-        }
+        });
 
+        // Update selected count
         function updateSelectedCount() {
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-            const count = checkboxes.length;
-            const countElement = document.getElementById('selectedCount');
-
-            if (count > 0) {
-                countElement.textContent = `${count} orden(es) seleccionada(s)`;
-                countElement.style.fontWeight = 'bold';
-                countElement.style.color = '#4CAF50';
+            const checked = document.querySelectorAll('.order-checkbox:checked').length;
+            const countEl = document.getElementById('selectedCount');
+            if (checked > 0) {
+                countEl.textContent = `${checked} seleccionada${checked > 1 ? 's' : ''}`;
             } else {
-                countElement.textContent = '';
+                countEl.textContent = '';
             }
-
-            // Update "select all" checkbox state
-            const allCheckboxes = document.querySelectorAll('.order-checkbox');
-            const selectAllCheckbox = document.getElementById('selectAll');
-            selectAllCheckbox.checked = allCheckboxes.length > 0 && count === allCheckboxes.length;
         }
 
-        function confirmBulkAction() {
-            const action = document.getElementById('bulkAction').value;
-            const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-
-            if (!action) {
-                showNotification('Por favor selecciona una acción', 'warning');
-                return false;
-            }
-
-            if (checkboxes.length === 0) {
-                showNotification('Por favor selecciona al menos una orden', 'warning');
-                return false;
-            }
-
-            // Show confirmation modal
-            showBulkActionModal(action, checkboxes.length);
-            return false; // Prevent form submission, will be handled by modal
-        }
-
-        function showBulkActionModal(action, count) {
-            const modal = document.getElementById('confirmBulkModal');
-            const icon = document.getElementById('confirmIcon');
-            const title = document.getElementById('confirmTitle');
-            const description = document.getElementById('confirmDescription');
-            const details = document.getElementById('confirmDetails');
-            const confirmBtn = document.getElementById('confirmButton');
-
-            const actionConfig = {
-                'restore': {
-                    icon: '↩️',
-                    iconClass: 'warning',
-                    title: 'Restaurar Órdenes',
-                    description: 'Las siguientes órdenes serán restauradas al listado activo de ventas:',
-                    effects: ['Las órdenes volverán al listado principal de ventas', 'Se eliminarán del archivo', 'Podrán ser gestionadas normalmente'],
-                    btnClass: 'modal-btn-confirm',
-                    btnText: 'Restaurar Órdenes'
-                },
-                'delete': {
-                    icon: '🗑️',
-                    iconClass: 'danger',
-                    title: 'Eliminar Permanentemente',
-                    description: '⚠️ ATENCIÓN: Esta acción eliminará permanentemente las órdenes seleccionadas:',
-                    effects: ['Las órdenes serán ELIMINADAS PERMANENTEMENTE', '❌ Esta acción NO se puede deshacer', '❌ No podrás recuperar esta información', '⚠️ Solo elimina si estás completamente seguro'],
-                    btnClass: 'modal-btn-danger',
-                    btnText: 'Eliminar Permanentemente'
-                }
-            };
-
-            const config = actionConfig[action];
-
-            // Set icon
-            icon.textContent = config.icon;
-            icon.className = 'confirm-modal-icon ' + config.iconClass;
-
-            // Set title and description
-            title.textContent = config.title;
-            description.textContent = config.description;
-
-            // Set details
-            details.innerHTML = `
-                <strong>${count} orden(es) seleccionada(s)</strong>
-                <p style="margin: 10px 0; font-size: 13px; color: #666;">${action === 'delete' ? '⚠️ Ten en cuenta que:' : 'Esta acción:'}</p>
-                <ul>
-                    ${config.effects.map(effect => `<li>${effect}</li>`).join('')}
-                </ul>
-            `;
-
-            // Configure button
-            confirmBtn.className = 'modal-btn ' + config.btnClass;
-            confirmBtn.textContent = config.btnText;
-
-            // Show modal
-            modal.classList.add('active');
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmBulkModal').classList.remove('active');
-        }
-
-        function executeBulkAction() {
-            // Close modal
-            closeConfirmModal();
-
-            // Submit form
-            document.getElementById('bulkForm').submit();
-        }
-
-        function showNotification(message, type = 'info') {
-            // Simple notification
-            const notification = document.createElement('div');
-            notification.className = 'message ' + (type === 'warning' ? 'error' : 'success');
-            notification.textContent = message;
-            notification.style.position = 'fixed';
-            notification.style.top = '20px';
-            notification.style.right = '20px';
-            notification.style.zIndex = '10000';
-            notification.style.minWidth = '300px';
-            notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Show single action confirmation modal
-        function confirmSingleAction(action, orderId, orderNumber) {
-            const modal = document.getElementById('confirmSingleModal');
-            const icon = document.getElementById('singleConfirmIcon');
-            const title = document.getElementById('singleConfirmTitle');
-            const description = document.getElementById('singleConfirmDescription');
-            const details = document.getElementById('singleConfirmDetails');
-            const confirmBtn = document.getElementById('singleConfirmButton');
-
-            // Construir URL completa base para asegurar que las redirecciones funcionen
-            const baseUrl = window.location.pathname + '?page=archivo-ventas';
-
-            const actionConfig = {
-                'restore': {
-                    icon: '↩️',
-                    iconClass: 'warning',
-                    title: 'Restaurar Orden',
-                    description: `¿Deseas restaurar la orden ${orderNumber} al listado activo?`,
-                    effects: ['La orden volverá al listado principal de ventas', 'Se eliminará del archivo'],
-                    btnClass: 'modal-btn-confirm',
-                    btnText: 'Restaurar',
-                    url: `${baseUrl}&action=restore&id=${orderId}`
-                },
-                'delete': {
-                    icon: '🗑️',
-                    iconClass: 'danger',
-                    title: 'Eliminar Permanentemente',
-                    description: `⚠️ ¿Estás seguro de eliminar PERMANENTEMENTE la orden ${orderNumber}?`,
-                    effects: ['La orden será ELIMINADA PERMANENTEMENTE', '❌ Esta acción NO se puede deshacer', '❌ No podrás recuperar esta información'],
-                    btnClass: 'modal-btn-danger',
-                    btnText: 'Eliminar Permanentemente',
-                    url: `${baseUrl}&action=delete&id=${orderId}`
-                }
-            };
-
-            const config = actionConfig[action];
-
-            // Set icon
-            icon.textContent = config.icon;
-            icon.className = 'confirm-modal-icon ' + config.iconClass;
-
-            // Set title and description
-            title.textContent = config.title;
-            description.textContent = config.description;
-
-            // Set details
-            details.innerHTML = `
-                <p style="margin: 10px 0; font-size: 13px; color: #666;">${action === 'delete' ? '⚠️ Ten en cuenta que:' : 'Esta acción:'}</p>
-                <ul>
-                    ${config.effects.map(effect => `<li>${effect}</li>`).join('')}
-                </ul>
-            `;
-
-            // Configure button
-            confirmBtn.className = 'modal-btn ' + config.btnClass;
-            confirmBtn.textContent = config.btnText;
-            confirmBtn.href = config.url;
-
-            // Show modal
-            modal.classList.add('active');
-        }
-
-        function closeSingleConfirmModal() {
-            document.getElementById('confirmSingleModal').classList.remove('active');
-        }
-
-        // Close modals when clicking outside
-        document.getElementById('confirmBulkModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeConfirmModal();
-            }
+        document.querySelectorAll('.order-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateSelectedCount);
         });
 
-        document.getElementById('confirmSingleModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeSingleConfirmModal();
-            }
-        });
+        // Confirm restore
+        function confirmRestore(event, element, params) {
+            const orderId = params?.orderId;
+            const orderNumber = params?.orderNumber || orderId;
 
-        // Initialize selected count on page load
-        document.addEventListener('DOMContentLoaded', updateSelectedCount);
+            showModal({
+                title: 'Restaurar Venta',
+                message: `¿Restaurar la venta ${orderNumber}? Volverá a la lista de ventas activas.`,
+                icon: '↩️',
+                confirmType: 'primary',
+                onConfirm: function() {
+                    window.location.href = `?page=archivo-ventas&action=restore&id=${encodeURIComponent(orderId)}`;
+                }
+            });
+        }
 
-        // === Wrappers for Event Delegation System ===
-        (function() {
-            const _confirmBulkAction = confirmBulkAction;
-            window.confirmBulkAction = function(event, element, params) {
-                if (event && event.preventDefault) event.preventDefault();
-                return _confirmBulkAction();
-            };
+        // Confirm delete
+        function confirmDelete(event, element, params) {
+            const orderId = params?.orderId;
+            const orderNumber = params?.orderNumber || orderId;
 
-            const _toggleAllCheckboxes = toggleAllCheckboxes;
-            window.toggleAllCheckboxes = function(event, element, params) {
-                return _toggleAllCheckboxes(element);
-            };
+            showModal({
+                title: 'Eliminar Permanentemente',
+                message: `¿Eliminar permanentemente la venta ${orderNumber}? Esta acción NO se puede deshacer.`,
+                icon: '⚠️',
+                confirmType: 'danger',
+                onConfirm: function() {
+                    window.location.href = `?page=archivo-ventas&action=delete&id=${encodeURIComponent(orderId)}`;
+                }
+            });
+        }
 
-            const _updateSelectedCount = updateSelectedCount;
-            window.updateSelectedCount = function(event, element, params) {
-                return _updateSelectedCount();
-            };
-
-            const _confirmSingleAction = confirmSingleAction;
-            window.confirmSingleAction = function(eventOrAction, element, params) {
-                if (event && event.preventDefault) event.preventDefault();
-                const action = params?.actionType || (typeof eventOrAction === 'string' ? eventOrAction : null);
-                const orderId = params?.orderId || '';
-                const orderNumber = params?.orderNumber || '';
-                if (action) return _confirmSingleAction(action, orderId, orderNumber);
-            };
-
-            const _closeConfirmModal = closeConfirmModal;
-            window.closeConfirmModal = function(event, element, params) {
-                return _closeConfirmModal();
-            };
-
-            const _executeBulkAction = executeBulkAction;
-            window.executeBulkAction = function(event, element, params) {
-                return _executeBulkAction();
-            };
-
-            const _closeSingleConfirmModal = closeSingleConfirmModal;
-            window.closeSingleConfirmModal = function(event, element, params) {
-                return _closeSingleConfirmModal();
-            };
-        })();
+        // Export for event delegation
+        window.confirmRestore = confirmRestore;
+        window.confirmDelete = confirmDelete;
     </script>
+
+    <!-- Modal Component -->
+    <?php include APP_PATH . '/includes/admin/modal.php'; ?>
 
     <!-- Event Delegation System for CSP -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
