@@ -944,6 +944,49 @@ function queue_email($type, $data, $priority = 'normal') {
 }
 
 /**
+ * Clean old sent emails from queue
+ * Removes emails with status 'sent' older than $days_old
+ *
+ * @param int $days_old Days to keep sent emails (default: 7)
+ * @return int Number of emails removed
+ */
+function clean_old_sent_emails($days_old = 7) {
+    $queue_file = APP_PATH . '/data/email_queue.json';
+
+    if (!file_exists($queue_file)) {
+        return 0;
+    }
+
+    $queue = read_json($queue_file);
+    $original_count = count($queue);
+    $cutoff_date = date('Y-m-d H:i:s', strtotime("-$days_old days"));
+
+    // Filter out old sent emails
+    $queue = array_filter($queue, function($email) use ($cutoff_date) {
+        // Keep if not sent, or if sent recently
+        if ($email['status'] !== 'sent') {
+            return true;
+        }
+
+        // Remove if sent before cutoff date
+        $sent_at = $email['sent_at'] ?? $email['created_at'];
+        return $sent_at >= $cutoff_date;
+    });
+
+    // Reindex array
+    $queue = array_values($queue);
+
+    $removed = $original_count - count($queue);
+
+    if ($removed > 0) {
+        write_json($queue_file, $queue);
+        error_log("Email queue cleanup: Removed $removed old sent emails");
+    }
+
+    return $removed;
+}
+
+/**
  * Process email queue (called by cron job)
  *
  * @param int $batch_size Maximum emails to process per run (default: 10)
@@ -1036,6 +1079,15 @@ function process_email_queue($batch_size = 10) {
     // Save failed log
     if (!empty($failed_emails)) {
         write_json($failed_log_file, $failed_emails);
+    }
+
+    // Clean old sent emails (once per day - check last cleanup time)
+    $cleanup_lock_file = APP_PATH . '/data/email_cleanup_lock.json';
+    $last_cleanup = file_exists($cleanup_lock_file) ? read_json($cleanup_lock_file) : ['last_run' => 0];
+
+    if (time() - $last_cleanup['last_run'] > 86400) { // 24 hours
+        $removed = clean_old_sent_emails(7); // Remove emails older than 7 days
+        write_json($cleanup_lock_file, ['last_run' => time(), 'last_removed' => $removed]);
     }
 
     return $stats;

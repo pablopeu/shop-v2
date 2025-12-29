@@ -55,7 +55,7 @@ $cron_command = "wget -q -O - \"$site_url\" >> $log_path 2>&1";
 // Comando alternativo (PHP CLI - si wget no funciona)
 $detected_php_path = '/usr/bin/php'; // Default
 $script_path = APP_PATH . '/scripts/process-email-queue.php';
-$cron_command_alt = "$detected_php_path $script_path >> $log_path 2>&1";
+$cron_command_alt = "$detected_php_path $script_path 2>/dev/null >> $log_path";
 
 $user = get_logged_user();
 ?>
