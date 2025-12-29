@@ -491,6 +491,8 @@ console.log('📦 shipping.js: Archivo cargado');
      */
     function handleQuoteSelection(quote) {
         console.log('🚢 handleQuoteSelection called with quote:', quote);
+        console.log('🔑 rate_id en quote:', quote.rate_id);
+        console.log('🔑 tariff_id en quote:', quote.tariff_id);
         selectedShippingService = quote.service_id;
         shippingCost = parseFloat(quote.cost) || 0;
 
@@ -558,6 +560,9 @@ console.log('📦 shipping.js: Archivo cargado');
         const field = document.getElementById(id);
         if (field) {
             field.value = value;
+            console.log(`✅ Campo ${id} seteado a:`, value);
+        } else {
+            console.error(`❌ Campo ${id} NO ENCONTRADO en el DOM`);
         }
     }
 
