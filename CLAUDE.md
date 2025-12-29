@@ -177,6 +177,38 @@ write_json(APP_PATH . '/data/usuarios.json', $datos);
 
 ---
 
+## ❌ RULE 7: NO LOCAL DEBUGGING - ALWAYS USE PRODUCTION
+
+### NEVER do this when debugging:
+```bash
+cat app/data/ventas.json                    # ❌ PROHIBIDO
+grep "error" /var/log/apache2/error.log     # ❌ PROHIBIDO
+tail -f app/logs/debug.log                  # ❌ PROHIBIDO
+cat app/data/productos.json                 # ❌ PROHIBIDO
+```
+
+### ALWAYS do this instead:
+```
+1. Ask user to check production logs/files   # ✅ CORRECTO
+2. Add error_log() to production code        # ✅ CORRECTO
+3. Create diagnostic scripts if needed       # ✅ CORRECTO
+4. Wait for user feedback from production    # ✅ CORRECTO
+```
+
+**Why**:
+- Local git repository does NOT have production data
+- Local environment does NOT have real sales, products, or payment data
+- ALL testing happens at https://peu.net/shopv2 (production)
+- Local JSON files and logs are IRRELEVANT for debugging
+
+**When user reports an error**:
+1. ❌ NEVER inspect local `app/data/*.json` files
+2. ❌ NEVER check local logs
+3. ✅ ALWAYS add debug code and push to production
+4. ✅ ALWAYS ask user to provide production error details
+
+---
+
 # END CRITICAL RULES
 **Review these BEFORE writing any code**
 
@@ -199,14 +231,19 @@ write_json(APP_PATH . '/data/usuarios.json', $datos);
 - **Production URL**: https://peu.net/shopv2
 - Never try to test local, it won't work, ask user to test in production.
 - When user reports errors, they refer to **production** (peu.net/shopv2), NOT local git
-- Local git does NOT have:
-  - Sales data (ventas)
-  - Products (artículos)
-  - MercadoPago payments
+- **CRITICAL**: Local git does NOT have production data:
+  - ❌ NO sales data (ventas)
+  - ❌ NO products (artículos)
+  - ❌ NO MercadoPago payments
+  - ❌ NO real logs
+  - ❌ Local JSON files are EMPTY or have dummy data
+- **NEVER read local files for debugging** (`app/data/*.json`, logs, etc.)
 - To diagnose production issues:
-  - Add debug logs (`error_log()`) to relevant sections
-  - Create diagnostic scripts if needed
-  - Never assume local behavior matches production
+  - ✅ Add debug logs (`error_log()`) to code
+  - ✅ Create diagnostic scripts if needed
+  - ✅ Push to production and ask user for feedback
+  - ✅ Request production error details from user
+  - ❌ NEVER assume local files/logs reflect production state
 
 ### 4. Code Quality Standards
 - If you encounter **hardcoded paths** during editing, FIX them immediately
