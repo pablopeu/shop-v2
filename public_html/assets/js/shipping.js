@@ -398,7 +398,13 @@ console.log('📦 shipping.js: Archivo cargado');
         contentDiv.appendChild(cost);
 
         // Si es una opción de punto de entrega, mostrar los puntos disponibles
+        console.log('📍 Verificando pickup points para quote:', quote.service_name);
+        console.log('   - service_type_code:', quote.service_type_code);
+        console.log('   - pickup_points:', quote.pickup_points);
+        console.log('   - length:', quote.pickup_points ? quote.pickup_points.length : 'N/A');
+
         if (quote.service_type_code === 'pickup_point' && quote.pickup_points && quote.pickup_points.length > 0) {
+            console.log('✅ Creando contenedor de pickup points con', quote.pickup_points.length, 'puntos');
             const pickupPointsContainer = document.createElement('div');
             pickupPointsContainer.className = 'pickup-points-container hidden';
             pickupPointsContainer.style.cssText = 'margin-top: 1rem; padding: 0.75rem; background: var(--checkout-bg-secondary); border-radius: 8px;';

@@ -2177,21 +2177,24 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         });
 
         function validateStep2() {
-            const method = document.querySelector('input[name="delivery_method"]:checked').value;
+            const methodElement = document.querySelector('input[name="delivery_method"]:checked');
+            if (!methodElement) return; // Salir si no hay nada seleccionado
+
+            const method = methodElement.value;
             const step2 = document.getElementById('step-2');
 
             // Show/hide shipping fields
             const shippingFields = document.getElementById('shipping-fields');
-            shippingFields.classList.toggle('hidden', method !== 'shipping');
+            shippingFields.classList.toggle('hidden', method === 'pickup');
 
             // Solo completar paso si:
             // - Es pickup (no requiere cotización)
-            // - Es shipping Y se ha seleccionado una cotización
+            // - Es home_delivery o pickup_point Y se ha seleccionado una cotización
             if (method === 'pickup') {
                 document.getElementById('step-2-summary').textContent = '🏪 Retiro en persona';
                 markStepCompleted(2);
                 unlockNextStep(2);
-            } else if (method === 'shipping') {
+            } else if (method === 'home_delivery' || method === 'pickup_point') {
                 // Asegurar que el paso permanezca abierto para mostrar campos de envío
                 if (!step2.classList.contains('active')) {
                     step2.classList.add('active');
@@ -2203,13 +2206,15 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     if (selectedQuote) {
                         const cost = selectedQuote.dataset.cost || '0';
                         const days = selectedQuote.dataset.days || '';
-                        document.getElementById('step-2-summary').textContent = `📦 Envío (${days} días)`;
+                        const icon = method === 'pickup_point' ? '📍' : '📦';
+                        document.getElementById('step-2-summary').textContent = `${icon} Envío (${days} días)`;
                         markStepCompleted(2);
                         unlockNextStep(2);
                     }
                 } else {
                     // Envío seleccionado pero sin cotización
-                    document.getElementById('step-2-summary').textContent = '📦 Envío (cotización pendiente)';
+                    const icon = method === 'pickup_point' ? '📍' : '📦';
+                    document.getElementById('step-2-summary').textContent = `${icon} Envío (cotización pendiente)`;
                     markStepIncomplete(2);
                 }
             }
