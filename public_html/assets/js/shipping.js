@@ -108,8 +108,8 @@ console.log('📦 shipping.js: Archivo cargado');
         hideError();
         hideQuotes();
 
-        // Calculate total weight from cart
-        const weight = calculateCartWeight();
+        // Construir packages desde cart data con dimensiones reales
+        const packages = buildPackagesFromCart();
         const declaredValue = calculateCartValue();
 
         // Build request
@@ -121,7 +121,8 @@ console.log('📦 shipping.js: Archivo cargado');
         };
 
         try {
-            console.log('📦 Calculando peso y valor:', { weight, declaredValue });
+            console.log('📦 Packages construidos:', packages);
+            console.log('💰 Valor declarado:', declaredValue);
             console.log('🌐 Llamando a API:', window.BASE_PATH + '/api/?endpoint=shipping&action=quotes');
 
             // Call API
@@ -132,7 +133,7 @@ console.log('📦 shipping.js: Archivo cargado');
                 },
                 body: JSON.stringify({
                     destination: destination,
-                    weight: weight,
+                    packages: packages,
                     declared_value: declaredValue
                 })
             });
@@ -616,6 +617,47 @@ console.log('📦 shipping.js: Archivo cargado');
             totalEl.textContent = formatCurrency(total);
             totalEl.dataset.value = total;
         }
+    }
+
+    /**
+     * Construir packages desde checkoutCartData con dimensiones reales
+     */
+    function buildPackagesFromCart() {
+        // checkoutCartData está definido en checkout-new.php
+        if (typeof checkoutCartData === 'undefined' || !Array.isArray(checkoutCartData)) {
+            console.warn('⚠️ checkoutCartData no disponible, usando valores por defecto');
+            return [{
+                sku: 'CART-ITEM',
+                weight: 500,
+                height: 10,
+                width: 10,
+                length: 10,
+                description: 'Producto del carrito',
+                classification_id: 1
+            }];
+        }
+
+        const packages = [];
+
+        checkoutCartData.forEach(item => {
+            // Crear un package por cada item (considerando cantidad)
+            // Zipnova espera items individuales, no multiplicados por cantidad
+            for (let i = 0; i < (item.quantity || 1); i++) {
+                packages.push({
+                    sku: item.slug || item.product_id || 'ITEM',
+                    weight: item.weight || 500, // gramos
+                    height: item.height || 10,  // cm
+                    width: item.width || 10,    // cm
+                    length: item.length || 10,  // cm
+                    description: item.name || 'Producto',
+                    classification_id: 1,
+                    declared_value: item.final_price_ars || item.price_ars || 0
+                });
+            }
+        });
+
+        console.log('📦 Construidos ' + packages.length + ' packages desde ' + checkoutCartData.length + ' items del carrito');
+        return packages;
     }
 
     /**

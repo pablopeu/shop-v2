@@ -174,6 +174,7 @@ foreach ($cart as $key => $value) {
         'product_id' => $product_id,
         'name' => $product['name'],
         'thumbnail' => $product['thumbnail'] ?? '',
+        'slug' => $product['slug'] ?? '',
         'price_ars' => $price_ars,
         'price_usd' => $price_usd,
         'final_price_ars' => $final_price_ars,
@@ -183,7 +184,12 @@ foreach ($cart as $key => $value) {
         'subtotal_usd' => $item_subtotal_usd,
         'promotion' => $promotion,
         'promotion_discount_ars' => $item_promotion_discount_ars,
-        'promotion_discount_usd' => $item_promotion_discount_usd
+        'promotion_discount_usd' => $item_promotion_discount_usd,
+        // Dimensiones para cotización de envío
+        'weight' => (int)($product['weight'] ?? 500), // gramos
+        'height' => (int)($product['height'] ?? 10), // cm
+        'width' => (int)($product['width'] ?? 10), // cm
+        'length' => (int)($product['length'] ?? 10) // cm
     ];
 
     $subtotal_ars += $item_subtotal_ars;

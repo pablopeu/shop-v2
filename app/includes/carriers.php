@@ -937,7 +937,11 @@ function zipnova_log($event, $data = [], $order_id = null) {
 }
 
 /**
- * Guarda respuesta de API en archivo JSON separado para debug
+ * Guarda respuesta de API en archivos JSON separados para debug
+ * Genera dos archivos:
+ * - REQUEST: Lo que se envía a Zipnova
+ * - RESPONSE: La respuesta de Zipnova
+ *
  * @param string $endpoint El endpoint llamado (ej: '/shipments/quote')
  * @param string $method El método HTTP usado (GET, POST, etc)
  * @param array $data Array con request, response, http_code, etc
@@ -950,30 +954,47 @@ function zipnova_save_response_json($endpoint, $method, $data, $order_id = null)
         mkdir($logs_dir, 0755, true);
     }
 
-    // Generar nombre de archivo con timestamp, order_id (si existe) y endpoint
+    // Generar nombres base de archivo con timestamp, order_id (si existe) y endpoint
     $timestamp = date('Y-m-d_H-i-s');
     $endpoint_name = trim(str_replace('/', '_', $endpoint), '_');
     $order_prefix = $order_id ? "ORDER-{$order_id}_" : '';
-    $filename = sprintf('%s_%s%s_%s.json', $timestamp, $order_prefix, $endpoint_name, $method);
-    $filepath = $logs_dir . '/' . $filename;
+    $base_filename = sprintf('%s_%s%s_%s', $timestamp, $order_prefix, $endpoint_name, $method);
 
-    // Preparar datos completos para el log
-    $log_data = [
+    // === ARCHIVO 1: REQUEST (lo que se envía a Zipnova) ===
+    $request_filename = $base_filename . '_REQUEST.json';
+    $request_filepath = $logs_dir . '/' . $request_filename;
+
+    $request_data = [
         'timestamp' => date('Y-m-d H:i:s'),
-        'order_id' => $order_id,  // Agregar order_id al JSON
+        'order_id' => $order_id,
+        'endpoint' => $endpoint,
+        'method' => $method,
+        'request' => $data['request'] ?? null
+    ];
+
+    file_put_contents(
+        $request_filepath,
+        json_encode($request_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+    );
+
+    // === ARCHIVO 2: RESPONSE (lo que devuelve Zipnova) ===
+    $response_filename = $base_filename . '_RESPONSE.json';
+    $response_filepath = $logs_dir . '/' . $response_filename;
+
+    $response_data = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'order_id' => $order_id,
         'endpoint' => $endpoint,
         'method' => $method,
         'http_code' => $data['http_code'] ?? 0,
-        'request' => $data['request'] ?? null,
         'response' => $data['response'] ?? null,
         'error' => $data['error'] ?? null,
         'raw_response' => $data['raw_response'] ?? null
     ];
 
-    // Guardar con formato legible
     file_put_contents(
-        $filepath,
-        json_encode($log_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        $response_filepath,
+        json_encode($response_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
     );
 }
 

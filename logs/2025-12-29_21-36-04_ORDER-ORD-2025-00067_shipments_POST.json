@@ -1,0 +1,150 @@
+{
+    "timestamp": "2025-12-29 21:36:04",
+    "order_id": "ORD-2025-00067",
+    "endpoint": "\/shipments",
+    "method": "POST",
+    "http_code": 201,
+    "request": {
+        "tariff_id": "84",
+        "external_id": "ORD-2025-00067",
+        "reference": "ORD-2025-00067",
+        "service_type": "standard_delivery",
+        "declared_value": 500,
+        "origin_id": "373621",
+        "items": [
+            {
+                "sku": "ITEM",
+                "weight": 500,
+                "height": 10,
+                "width": 10,
+                "length": 10,
+                "description": "Llavero PEU",
+                "classification_id": 1
+            }
+        ],
+        "destination": {
+            "name": "pablo",
+            "street": "allende",
+            "street_number": "4279",
+            "city": "caba",
+            "state": "CABA",
+            "zipcode": "1419",
+            "country": "AR",
+            "phone": "+54 12",
+            "email": "pablou@gmail.com",
+            "document": "20009200"
+        },
+        "account_id": "20347"
+    },
+    "response": {
+        "id": 24370404,
+        "external_id": "ORD-2025-00067",
+        "delivery_id": "0999-24370404",
+        "carrier_tracking_id": null,
+        "carrier_tracking_id_alt": null,
+        "created_at": "2025-12-29T21:36:09+0000",
+        "delivery_time": {
+            "estimated_delivery": "2026-01-06T23:59:00+0000",
+            "dropoff_deadline_at": "2025-12-30T21:00:00+0000",
+            "times": {
+                "preparation": "P1DT12H",
+                "crossdocking": "PT0S",
+                "carrier": "P3D",
+                "total": "P4DT12H"
+            }
+        },
+        "account_id": 20347,
+        "parent_shipment_id": null,
+        "logistic_type": "carrier_dropoff",
+        "service_type": "standard_delivery",
+        "carrier": {
+            "id": 208,
+            "name": "OCA",
+            "logo": "https:\/\/zippincore.s3.amazonaws.com\/carriers\/oca\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png"
+        },
+        "status": "new",
+        "status_name": "Procesando",
+        "tracking": "https:\/\/app.zipnova.com.ar\/track\/1CWbhU8g3arEqMrBGTBCKm",
+        "tracking_external": "https:\/\/app.zipnova.com.ar\/track\/20347\/ORD-2025-00067",
+        "return_instructions": null,
+        "destination": {
+            "name": "pablo",
+            "pickup_point": null,
+            "document": "20009200",
+            "street": "allende",
+            "street_number": "4279",
+            "street_extras": null,
+            "city": "Villa Urquiza",
+            "state": "Capital Federal",
+            "zipcode": "1419",
+            "phone": "+54 12",
+            "email": "pablou@gmail.com"
+        },
+        "origin": {
+            "id": 373621,
+            "name": "PEU Cuchillos",
+            "document": null,
+            "street": "SUIPACHA",
+            "street_number": "834",
+            "street_extras": "Piso:5 Dpto:a",
+            "city": "Capital Federal",
+            "state": "Capital Federal",
+            "zipcode": "1008",
+            "phone": "+541155556666",
+            "email": null,
+            "is_dropshipping": false
+        },
+        "declared_value": 500,
+        "price": 7139.670000000000072759576141834259033203125,
+        "price_incl_tax": 8639,
+        "total_weight": 500,
+        "total_volume": 1000,
+        "packages": [
+            {
+                "id": 29240671,
+                "label_code": "0999-24370404-0001",
+                "sku_id": null,
+                "weight": 500,
+                "height": 10,
+                "width": 10,
+                "length": 10,
+                "volume": 1000,
+                "description_1": "Llavero PEU",
+                "description_2": null,
+                "description_3": null,
+                "classification": {
+                    "id": 1,
+                    "name": "General"
+                },
+                "tax_class_code": null,
+                "items": [
+                    {
+                        "id": 52272034,
+                        "sku": {
+                            "sku": "ITEM",
+                            "sku_id": null
+                        },
+                        "description": "Llavero PEU",
+                        "tax_class_code": null,
+                        "must_keep_vertical": 0,
+                        "weight": 500,
+                        "width": 10,
+                        "length": 10,
+                        "height": 10,
+                        "pos_x": 0,
+                        "pos_y": 0,
+                        "pos_z": 0
+                    }
+                ]
+            }
+        ],
+        "tags": [],
+        "related_shipments": [],
+        "source": null,
+        "marketplace": null,
+        "order": null,
+        "fulfillment_order": null
+    },
+    "error": null,
+    "raw_response": "{\"id\":24370404,\"external_id\":\"ORD-2025-00067\",\"delivery_id\":\"0999-24370404\",\"carrier_tracking_id\":null,\"carrier_tracking_id_alt\":null,\"created_at\":\"2025-12-29T21:36:09+0000\",\"delivery_time\":{\"estimated_delivery\":\"2026-01-06T23:59:00+0000\",\"dropoff_deadline_at\":\"2025-12-30T21:00:00+0000\",\"times\":{\"preparation\":\"P1DT12H\",\"crossdocking\":\"PT0S\",\"carrier\":\"P3D\",\"total\":\"P4DT12H\"}},\"account_id\":20347,\"parent_shipment_id\":null,\"logistic_type\":\"carrier_dropoff\",\"service_type\":\"standard_delivery\",\"carrier\":{\"id\":208,\"name\":\"OCA\",\"logo\":\"https:\\\/\\\/zippincore.s3.amazonaws.com\\\/carriers\\\/oca\\\/aLab6HCfv1UmADtKn2Gnl8ZucTYroDIxIS5mVN7m.png\"},\"status\":\"new\",\"status_name\":\"Procesando\",\"tracking\":\"https:\\\/\\\/app.zipnova.com.ar\\\/track\\\/1CWbhU8g3arEqMrBGTBCKm\",\"tracking_external\":\"https:\\\/\\\/app.zipnova.com.ar\\\/track\\\/20347\\\/ORD-2025-00067\",\"return_instructions\":null,\"destination\":{\"name\":\"pablo\",\"pickup_point\":null,\"document\":\"20009200\",\"street\":\"allende\",\"street_number\":\"4279\",\"street_extras\":null,\"city\":\"Villa Urquiza\",\"state\":\"Capital Federal\",\"zipcode\":\"1419\",\"phone\":\"+54 12\",\"email\":\"pablou@gmail.com\"},\"origin\":{\"id\":373621,\"name\":\"PEU Cuchillos\",\"document\":null,\"street\":\"SUIPACHA\",\"street_number\":\"834\",\"street_extras\":\"Piso:5 Dpto:a\",\"city\":\"Capital Federal\",\"state\":\"Capital Federal\",\"zipcode\":\"1008\",\"phone\":\"+541155556666\",\"email\":null,\"is_dropshipping\":false},\"declared_value\":500,\"price\":7139.67,\"price_incl_tax\":8639,\"total_weight\":500,\"total_volume\":1000,\"packages\":[{\"id\":29240671,\"label_code\":\"0999-24370404-0001\",\"sku_id\":null,\"weight\":500,\"height\":10,\"width\":10,\"length\":10,\"volume\":1000,\"description_1\":\"Llavero PEU\",\"description_2\":null,\"description_3\":null,\"classification\":{\"id\":1,\"name\":\"General\"},\"tax_class_code\":null,\"items\":[{\"id\":52272034,\"sku\":{\"sku\":\"ITEM\",\"sku_id\":null},\"description\":\"Llavero PEU\",\"tax_class_code\":null,\"must_keep_vertical\":0,\"weight\":500,\"width\":10,\"length\":10,\"height\":10,\"pos_x\":0,\"pos_y\":0,\"pos_z\":0}]}],\"tags\":[],\"related_shipments\":[],\"source\":null,\"marketplace\":null,\"order\":null,\"fulfillment_order\":null}"
+}
