@@ -41,6 +41,14 @@ if (isset($_SESSION['applied_coupon'])) {
     unset($_SESSION['applied_coupon']);
 }
 
+// Clear checkout timer and session data
+if (isset($_SESSION['checkout_start_time'])) {
+    unset($_SESSION['checkout_start_time']);
+}
+if (isset($_SESSION['checkout_id'])) {
+    unset($_SESSION['checkout_id']);
+}
+
 // Get configurations
 $site_config = read_json(APP_PATH . '/config/site.json');
 $footer_config = read_json(APP_PATH . '/config/footer.json');
