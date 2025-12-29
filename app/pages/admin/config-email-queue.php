@@ -46,12 +46,16 @@ if (isset($_POST['process_now'])) {
 $system_info = get_email_queue_system_info();
 
 // Detect paths for cron command
-$detected_php_path = '/usr/bin/php'; // Default
-$script_path = APP_PATH . '/scripts/process-email-queue.php';
+$site_url = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'peu.net') . url('/api/process-email-queue.php?secret=email_queue_cron_2024');
 $log_path = dirname(APP_PATH) . '/logs/email-queue.log';
 
-// Generate cron command
-$cron_command = "$detected_php_path $script_path >> $log_path 2>&1";
+// Generate cron command (usando wget - más compatible con cPanel)
+$cron_command = "wget -q -O - \"$site_url\" >> $log_path 2>&1";
+
+// Comando alternativo (PHP CLI - si wget no funciona)
+$detected_php_path = '/usr/bin/php'; // Default
+$script_path = APP_PATH . '/scripts/process-email-queue.php';
+$cron_command_alt = "$detected_php_path $script_path >> $log_path 2>&1";
 
 $user = get_logged_user();
 ?>
@@ -433,7 +437,7 @@ $user = get_logged_user();
                                     <li>Día de la semana: <code>*</code></li>
                                 </ul>
                             </li>
-                            <li>Copia y pega este comando:</li>
+                            <li>Copia y pega este comando (RECOMENDADO - más compatible con cPanel):</li>
                         </ol>
                     </div>
 
@@ -444,6 +448,17 @@ $user = get_logged_user();
                         <code id="cron-command"><?php echo htmlspecialchars($cron_command); ?></code>
                     </div>
 
+                    <div class="info-box" style="margin-top: 20px;">
+                        <h4>💡 Comando Alternativo (Si wget no funciona)</h4>
+                        <p>Si el comando de arriba no funciona, prueba con PHP CLI:</p>
+                        <div class="code-block" style="margin-top: 10px;">
+                            <button class="copy-btn" data-action="copyToClipboard" data-text="<?php echo htmlspecialchars($cron_command_alt); ?>">
+                                📋 Copiar
+                            </button>
+                            <code><?php echo htmlspecialchars($cron_command_alt); ?></code>
+                        </div>
+                    </div>
+
                     <div class="instructions">
                         <ol start="5">
                             <li>Haz click en <strong>"Add New Cron Job"</strong></li>
@@ -451,10 +466,9 @@ $user = get_logged_user();
                         </ol>
                     </div>
 
-                    <h3>Rutas Detectadas:</h3>
+                    <h3>Configuración:</h3>
                     <ul style="margin-left: 20px; line-height: 1.8; color: #495057;">
-                        <li><strong>PHP:</strong> <code><?php echo $detected_php_path; ?></code></li>
-                        <li><strong>Script:</strong> <code><?php echo $script_path; ?></code></li>
+                        <li><strong>URL del endpoint:</strong> <code><?php echo htmlspecialchars($site_url); ?></code></li>
                         <li><strong>Log:</strong> <code><?php echo $log_path; ?></code></li>
                     </ul>
 

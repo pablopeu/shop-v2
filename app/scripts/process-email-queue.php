@@ -5,15 +5,16 @@
  * Este script es COMPLETAMENTE autónomo - NO carga functions.php ni bootstrap
  */
 
-// Modo CLI estricto - sin output buffering para evitar conflictos
-if (php_sapi_name() !== 'cli') {
-    die("This script can only be run from command line\n");
-}
-
 // Suppress ALL errors and warnings (solo log a archivo)
 error_reporting(0);
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
+
+// Prevent execution via web browser (check if running via command line)
+if (isset($_SERVER['REQUEST_METHOD'])) {
+    http_response_code(403);
+    die("Access denied\n");
+}
 
 // Define constants
 define('CLI_MODE', true);
