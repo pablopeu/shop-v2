@@ -8,6 +8,8 @@ if (!defined('APP_ENTRY_POINT')) {
     die('Direct access not permitted');
 }
 
+error_log("ENVIOS-ARCHIVO - Starting file execution");
+
 // Get configurations
 $site_config = read_json(APP_PATH . '/config/site.json');
 $page_title = 'Envíos Archivados';
@@ -1367,3 +1369,6 @@ $user = get_logged_user();
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
 </body>
 </html>
+<?php
+error_log("ENVIOS-ARCHIVO - Reached end of file successfully");
+?>
