@@ -432,6 +432,7 @@ function zipnova_get_quotes($destination, $items, $declared_value = null, $order
         'height' => (int)$box['height'],
         'width' => (int)$box['width'],
         'length' => (int)$box['length'],
+        'classification_id' => 1, // Clasificación del paquete (1 = General)
         'items' => $formatted_items
     ];
 
