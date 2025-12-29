@@ -206,11 +206,18 @@ try {
         $declared_value = max(0, $declared_value - $shipping_cost);
     }
 
+    // Determinar qué ID enviar (rate_id o tariff_id, nunca ambos)
+    // Si rate_id existe y no es null, usar rate_id. Sino, usar tariff_id.
+    if (!empty($quote_data['rate_id'])) {
+        $rate_identifier = ['rate_id' => $quote_data['rate_id']];
+        error_log("API CreateShipment: Usando rate_id: " . $quote_data['rate_id']);
+    } else {
+        $rate_identifier = ['tariff_id' => $quote_data['tariff_id']];
+        error_log("API CreateShipment: Usando tariff_id: " . $quote_data['tariff_id']);
+    }
+
     // Preparar datos para crear envío en Zipnova (formato correcto según API)
-    $shipment_data = [
-        // IDs y referencias
-        'rate_id' => $quote_data['rate_id'],
-        'tariff_id' => $quote_data['tariff_id'] ?? null,
+    $shipment_data = array_merge($rate_identifier, [
         'external_id' => $order['order_number'] ?? 'ORD-' . $order_id,
         'reference' => $order['order_number'] ?? $order_id,
 
