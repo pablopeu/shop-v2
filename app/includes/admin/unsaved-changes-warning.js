@@ -202,8 +202,37 @@
         if (stayBtn) {
             stayBtn.addEventListener('click', () => {
                 hideModal();
-                focusOnSaveButton();
-                pendingNavigation = null;
+
+                // Find and submit the form
+                const saveButton = findSaveButton();
+                if (saveButton) {
+                    const form = saveButton.closest('form');
+                    if (form) {
+                        // Mark as submitted to avoid triggering unsaved changes warning again
+                        formSubmitted = true;
+                        hasUnsavedChanges = false;
+
+                        // Submit the form
+                        form.submit();
+
+                        // If there was a pending navigation, navigate after a short delay
+                        // (form submission will reload page, so this only applies if submission fails)
+                        if (pendingNavigation) {
+                            setTimeout(() => {
+                                if (document.readyState === 'complete') {
+                                    window.location.href = pendingNavigation;
+                                }
+                            }, 1000);
+                        }
+                    } else {
+                        // No form found, just focus on save button
+                        focusOnSaveButton();
+                        pendingNavigation = null;
+                    }
+                } else {
+                    // No save button found, clear pending navigation
+                    pendingNavigation = null;
+                }
             });
         }
 
@@ -211,6 +240,7 @@
             leaveBtn.addEventListener('click', () => {
                 hideModal();
                 hasUnsavedChanges = false; // Allow navigation
+                formSubmitted = true; // Mark as submitted to prevent warning
                 if (pendingNavigation) {
                     window.location.href = pendingNavigation;
                 }

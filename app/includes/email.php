@@ -482,13 +482,22 @@ function send_order_paid_email($order) {
     }
 
     $to = $order['customer_email'];
-    $subject = "¡Pago Confirmado! - #{$order['order_number']}";
 
-    $html = get_email_template('order_paid', [
-        'order' => $order
+    // Get template from JSON
+    $template = get_email_template_config('order_paid', $order);
+
+    if (!$template) {
+        error_log("Failed to load email template: order_paid");
+        return false;
+    }
+
+    $html = get_default_email_template([
+        'order' => $order,
+        'title' => $template['title'],
+        'content' => $template['content']
     ]);
 
-    return send_email($to, $subject, $html);
+    return send_email($to, $template['subject'], $html);
 }
 
 /**
