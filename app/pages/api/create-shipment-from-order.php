@@ -101,10 +101,23 @@ try {
 
     if (empty($quote_data) || empty($quote_data['rate_id'])) {
         error_log("API CreateShipment: Orden sin datos de cotización: $order_id");
+
+        // Verificar si es una orden de retiro en persona
+        $delivery_method = $order['delivery_method'] ?? '';
+        if ($delivery_method === 'pickup') {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Esta orden fue creada con retiro en persona y no tiene datos de envío. No se puede crear una etiqueta de envío para órdenes de retiro en persona.'
+            ]);
+            exit;
+        }
+
+        // Otro caso: datos de cotización faltantes
         http_response_code(400);
         echo json_encode([
             'success' => false,
-            'error' => 'La orden no tiene datos de cotización de envío. Puede ser una orden creada con el sistema anterior o los datos no se guardaron correctamente.'
+            'error' => 'La orden no tiene datos de cotización de envío. Los datos no se guardaron correctamente durante el checkout.'
         ]);
         exit;
     }
