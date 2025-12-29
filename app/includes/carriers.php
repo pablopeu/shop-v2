@@ -432,7 +432,6 @@ function zipnova_get_quotes($destination, $items, $declared_value = null, $order
         'height' => (int)$box['height'],
         'width' => (int)$box['width'],
         'length' => (int)$box['length'],
-        'volume' => (int)$box['volume'],
         'items' => $formatted_items
     ];
 
