@@ -108,8 +108,8 @@ console.log('📦 shipping.js: Archivo cargado');
         hideError();
         hideQuotes();
 
-        // Construir packages desde cart data con dimensiones reales
-        const packages = buildPackagesFromCart();
+        // Construir items desde cart data (el backend los agrupará en un package)
+        const items = buildPackagesFromCart();
         const declaredValue = calculateCartValue();
 
         // Build request
@@ -121,7 +121,7 @@ console.log('📦 shipping.js: Archivo cargado');
         };
 
         try {
-            console.log('📦 Packages construidos:', packages);
+            console.log('📦 Items construidos:', items);
             console.log('💰 Valor declarado:', declaredValue);
             console.log('🌐 Llamando a API:', window.BASE_PATH + '/api/?endpoint=shipping&action=quotes');
 
@@ -133,7 +133,7 @@ console.log('📦 shipping.js: Archivo cargado');
                 },
                 body: JSON.stringify({
                     destination: destination,
-                    packages: packages,
+                    items: items, // Items individuales - backend los agrupa en package
                     declared_value: declaredValue
                 })
             });
@@ -637,27 +637,23 @@ console.log('📦 shipping.js: Archivo cargado');
             }];
         }
 
-        const packages = [];
+        const items = [];
 
         checkoutCartData.forEach(item => {
-            // Crear un package por cada item (considerando cantidad)
-            // Zipnova espera items individuales, no multiplicados por cantidad
-            for (let i = 0; i < (item.quantity || 1); i++) {
-                packages.push({
-                    sku: item.slug || item.product_id || 'ITEM',
-                    weight: item.weight || 500, // gramos
-                    height: item.height || 10,  // cm
-                    width: item.width || 10,    // cm
-                    length: item.length || 10,  // cm
-                    description: item.name || 'Producto',
-                    classification_id: 1,
-                    declared_value: item.final_price_ars || item.price_ars || 0
-                });
-            }
+            // Construir items con quantity explícita
+            // El backend los agrupará en un package (caja) único
+            items.push({
+                sku: item.slug || item.product_id || 'ITEM',
+                weight: item.weight || 500, // gramos por unidad
+                quantity: item.quantity || 1,
+                description: item.name || 'Producto',
+                classification_id: 1,
+                declared_value: item.final_price_ars || item.price_ars || 0
+            });
         });
 
-        console.log('📦 Construidos ' + packages.length + ' packages desde ' + checkoutCartData.length + ' items del carrito');
-        return packages;
+        console.log('📦 Construidos ' + items.length + ' items desde checkoutCartData (backend los agrupará en package)');
+        return items;
     }
 
     /**
