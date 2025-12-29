@@ -1042,7 +1042,7 @@ $user = get_logged_user();
                                             <div class="actions">
                                                 <button type="button" class="btn btn-primary btn-sm"
                                                         data-action="viewOrder" data-order-id="<?php echo $order['id']; ?>">
-                                                    👁️ Ver
+                                                    Ver
                                                 </button>
                                                 <?php
                                                 // Debug: ver estado de los datos
@@ -1063,7 +1063,7 @@ $user = get_logged_user();
                                                             data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
                                                             data-shipment-id="<?php echo htmlspecialchars($order['shipping']['carrier_shipment_id']); ?>"
                                                             title="<?php echo $has_label ? 'Re-imprimir etiqueta de envío' : 'Imprimir etiqueta de envío'; ?>">
-                                                        🖨️ Etiqueta<?php echo $has_label ? ' ✓' : ''; ?>
+                                                        Etiqueta<?php echo $has_label ? ' ✓' : ''; ?>
                                                     </button>
                                                 <?php elseif (($has_rate_id || $has_service_id) && $order['status'] === 'pagado'): ?>
                                                     <!-- Botón: Crear envío primero, luego obtener etiqueta (SOLO si está pagado) -->
@@ -1072,7 +1072,7 @@ $user = get_logged_user();
                                                             data-action="createAndPrintShippingLabel"
                                                             data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
                                                             title="Crear envío y obtener etiqueta">
-                                                        📦 Crear
+                                                        Crear
                                                     </button>
                                                 <?php elseif (($has_rate_id || $has_service_id) && $order['status'] !== 'pagado'): ?>
                                                     <!-- Tiene datos pero no está pagado -->
@@ -1083,7 +1083,7 @@ $user = get_logged_user();
                                                 <?php endif; ?>
                                                 <button type="button" class="btn btn-danger btn-sm"
                                                         data-action="confirmArchiveOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                                    📦 Archivar
+                                                    Archivar
                                                 </button>
                                             </div>
                                         </td>
@@ -1302,7 +1302,7 @@ $user = get_logged_user();
                                 if (shipping.carrier_shipment_id) {
                                     shippingHtml += 'data-shipment-id="' + shipping.carrier_shipment_id + '" ';
                                 }
-                                shippingHtml += 'class="btn btn-sm btn-primary" style="background: #28a745; width: 100%;">🖨️ Ver/Imprimir Etiqueta</button>';
+                                shippingHtml += 'class="btn btn-sm btn-primary" style="background: #28a745; width: 100%;">Ver/Imprimir Etiqueta</button>';
                             }
 
                             shippingHtml += '</div>';
@@ -1596,7 +1596,7 @@ $user = get_logged_user();
                 // Restore button
                 if (element) {
                     element.disabled = false;
-                    element.textContent = '🖨️ Etiqueta';
+                    element.textContent = 'Etiqueta';
                 }
             });
         }
