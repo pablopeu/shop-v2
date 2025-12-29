@@ -254,6 +254,7 @@ try {
                     ],
                     'message' => 'Envío creado exitosamente'
                 ]);
+                exit;
             } else {
                 error_log("API CreateShipment: Error al actualizar orden con shipment_id: $order_id");
                 http_response_code(500);
@@ -261,6 +262,7 @@ try {
                     'success' => false,
                     'error' => 'Envío creado pero error al actualizar orden'
                 ]);
+                exit;
             }
         } else {
             error_log("API CreateShipment: Respuesta de Zipnova sin shipment_id");
@@ -269,6 +271,7 @@ try {
                 'success' => false,
                 'error' => 'Error al obtener ID del envío creado'
             ]);
+            exit;
         }
     } else {
         error_log("API CreateShipment: Error al crear envío: " . ($result['error'] ?? 'Unknown'));
@@ -277,6 +280,7 @@ try {
             'success' => false,
             'error' => $result['error'] ?? 'Error al crear envío en el carrier'
         ]);
+        exit;
     }
 
 } catch (Exception $e) {
@@ -286,4 +290,5 @@ try {
         'success' => false,
         'error' => 'Error al procesar la solicitud'
     ]);
+    exit;
 }
