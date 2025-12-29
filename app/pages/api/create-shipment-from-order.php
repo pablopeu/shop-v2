@@ -99,8 +99,14 @@ try {
     }
     error_log("API CreateShipment: delivery_method: " . ($order['delivery_method'] ?? 'NO SET'));
 
-    if (empty($quote_data) || empty($quote_data['rate_id'])) {
+    // Validar que haya rate_id O tariff_id (Zipnova acepta cualquiera de los dos)
+    $has_rate_id = !empty($quote_data['rate_id']);
+    $has_tariff_id = !empty($quote_data['tariff_id']);
+
+    if (empty($quote_data) || (!$has_rate_id && !$has_tariff_id)) {
         error_log("API CreateShipment: Orden sin datos de cotización: $order_id");
+        error_log("API CreateShipment: has_rate_id: " . ($has_rate_id ? 'SI' : 'NO'));
+        error_log("API CreateShipment: has_tariff_id: " . ($has_tariff_id ? 'SI' : 'NO'));
 
         // Verificar si es una orden de retiro en persona
         $delivery_method = $order['delivery_method'] ?? '';
