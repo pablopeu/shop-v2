@@ -489,7 +489,7 @@ $current_page = $_GET['page'] ?? 'index';
                         <span>🔔 Email y Notificaciones</span>
                         <span class="menu-arrow" id="arrow-config-email-group">▶</span>
                     </div>
-                    <ul class="submenu <?php echo in_array($current_page, ['notificaciones', 'config-email-templates']) ? 'open' : ''; ?>"
+                    <ul class="submenu <?php echo in_array($current_page, ['notificaciones', 'config-email-templates', 'config-email-queue', 'emails-fallidos']) ? 'open' : ''; ?>"
                         id="submenu-config-email-group">
                         <li>
                             <a href="<?php echo url('/admin/?page=notificaciones'); ?>"
@@ -501,6 +501,18 @@ $current_page = $_GET['page'] ?? 'index';
                             <a href="<?php echo url('/admin/?page=config-email-templates'); ?>"
                                class="<?php echo $current_page === 'config-email-templates' ? 'active' : ''; ?>">
                                 📧 Templates de Email
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo url('/admin/?page=config-email-queue'); ?>"
+                               class="<?php echo $current_page === 'config-email-queue' ? 'active' : ''; ?>">
+                                📬 Cola de Emails
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo url('/admin/?page=emails-fallidos'); ?>"
+                               class="<?php echo $current_page === 'emails-fallidos' ? 'active' : ''; ?>">
+                                ⚠️ Emails Fallidos
                             </a>
                         </li>
                     </ul>
