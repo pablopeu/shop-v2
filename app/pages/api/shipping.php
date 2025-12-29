@@ -326,6 +326,32 @@ if ($action === 'webhook' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'status' => $new_status
     ]);
 
+    // Guardar webhook en zipnova-responses para debugging
+    // Intentar obtener order_id del tracking_id para mejor trazabilidad
+    $order_id = null;
+    if ($tracking_id) {
+        $orders = get_all_orders();
+        foreach ($orders as $o) {
+            if (isset($o['shipping']['tracking_id']) && $o['shipping']['tracking_id'] === $tracking_id) {
+                $order_id = $o['id'];
+                break;
+            }
+        }
+    }
+
+    zipnova_save_response_json(
+        '/webhook',
+        'POST',
+        [
+            'request' => $data, // Lo que Zipnova nos envió
+            'response' => ['success' => true, 'message' => 'Webhook processed'], // Nuestra respuesta
+            'http_code' => 200,
+            'signature' => $signature,
+            'signature_verified' => !empty($webhook_secret)
+        ],
+        $order_id
+    );
+
     // Update local shipment status
     if ($shipment_id && $new_status) {
         zipnova_update_shipment_status($shipment_id, [
