@@ -246,7 +246,7 @@ try {
             'email' => $order['customer_email'] ?? '',
             'document' => $shipping_address['document'] ?? $order['customer_document'] ?? '' // DNI/CUIT (REQUERIDO)
         ]
-    ];
+    ]);
 
     // Si es entrega en punto de retiro, agregar el point_id
     if (!empty($quote_data['pickup_point_id'])) {
