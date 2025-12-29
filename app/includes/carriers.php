@@ -411,13 +411,17 @@ function zipnova_get_quotes($destination, $items, $declared_value = null, $order
         // Sumar peso total (peso_unitario * cantidad)
         $total_weight += $item_weight * $item_quantity;
 
-        // Formatear item SIN dimensiones (solo metadata descriptiva)
+        // Formatear item con dimensiones individuales
+        // (requerido por Zipnova cuando el SKU no está en su catálogo)
         $formatted_items[] = [
             'sku' => $item['sku'] ?? 'PROD-' . uniqid(),
             'quantity' => $item_quantity,
             'description' => $item['description'] ?? 'Producto',
             'classification_id' => (int)($item['classification_id'] ?? 1),
-            'weight' => $item_weight // Peso unitario (para registro interno de Zipnova)
+            'weight' => $item_weight, // Peso unitario
+            'height' => (int)($item['height'] ?? 5), // Dimensiones estimadas del item
+            'width' => (int)($item['width'] ?? 5),
+            'length' => (int)($item['length'] ?? 5)
         ];
     }
 
