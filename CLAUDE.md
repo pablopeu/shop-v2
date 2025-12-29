@@ -191,13 +191,13 @@ write_json(APP_PATH . '/data/usuarios.json', $datos);
 - Focus on completing the task efficiently
 
 ### 2. Repository and Deployment Context
-- **Origin repository**: https://github.com/pablopeu/shop (V1 - legacy)
-- **Current repository**: https://github.com/pablopeu/shop-v2 (V2 - refactored)
+- **Current repository**: https://github.com/pablopeu/shop-v2 
 - **Every local commit MUST be pushed to GitHub** - no exceptions
 - GitHub Actions auto-deploys via FTP to production on every push
 
 ### 3. Testing and Debugging Context
 - **Production URL**: https://peu.net/shopv2
+- Never try to test local, it won't work, ask user to test in production.
 - When user reports errors, they refer to **production** (peu.net/shopv2), NOT local git
 - Local git does NOT have:
   - Sales data (ventas)
