@@ -48,6 +48,24 @@ console.log('📦 shipping.js: Archivo cargado');
         deliveryMethodRadios.forEach(radio => {
             radio.addEventListener('change', handleDeliveryMethodChange);
         });
+
+        // Listen to delivery type changes (home_delivery vs pickup_point)
+        const deliveryTypeRadios = document.querySelectorAll('input[name="delivery_type"]');
+        deliveryTypeRadios.forEach(radio => {
+            radio.addEventListener('change', handleDeliveryTypeChange);
+        });
+    }
+
+    /**
+     * Handle delivery type change (home_delivery vs pickup_point)
+     */
+    function handleDeliveryTypeChange(event) {
+        console.log('🔄 Tipo de entrega cambiado a:', event.target.value);
+
+        // Si ya hay cotizaciones cargadas, volver a mostrarlas con el nuevo filtro
+        if (shippingQuotes.length > 0) {
+            displayQuotes(shippingQuotes);
+        }
     }
 
     /**
@@ -174,6 +192,30 @@ console.log('📦 shipping.js: Archivo cargado');
             showError('No hay métodos de envío disponibles para esta dirección');
             return;
         }
+
+        // Filtrar según el tipo de entrega elegido
+        const deliveryType = document.querySelector('input[name="delivery_type"]:checked')?.value || 'home_delivery';
+        console.log('🔍 Tipo de entrega seleccionado:', deliveryType);
+
+        const filteredQuotes = quotes.filter(quote => {
+            if (deliveryType === 'pickup_point') {
+                // Mostrar solo opciones de punto de entrega
+                return quote.service_type_code === 'pickup_point';
+            } else {
+                // Mostrar solo opciones de entrega a domicilio
+                return quote.service_type_code !== 'pickup_point';
+            }
+        });
+
+        console.log('✅ Cotizaciones filtradas:', filteredQuotes.length, 'de', quotes.length);
+
+        if (filteredQuotes.length === 0) {
+            showError(`No hay opciones de ${deliveryType === 'pickup_point' ? 'punto de entrega' : 'envío a domicilio'} disponibles para esta dirección`);
+            return;
+        }
+
+        // Usar las cotizaciones filtradas
+        quotes = filteredQuotes;
 
         const INITIAL_DISPLAY = 4;
         let showingAll = false;
@@ -357,6 +399,68 @@ console.log('📦 shipping.js: Archivo cargado');
         contentDiv.appendChild(description);
         contentDiv.appendChild(cost);
 
+        // Si es una opción de punto de entrega, mostrar los puntos disponibles
+        if (quote.service_type_code === 'pickup_point' && quote.pickup_points && quote.pickup_points.length > 0) {
+            const pickupPointsContainer = document.createElement('div');
+            pickupPointsContainer.className = 'pickup-points-container hidden';
+            pickupPointsContainer.style.cssText = 'margin-top: 1rem; padding: 0.75rem; background: var(--checkout-bg-secondary); border-radius: 8px;';
+            pickupPointsContainer.dataset.serviceId = quote.service_id;
+
+            const pickupPointsTitle = document.createElement('p');
+            pickupPointsTitle.style.cssText = 'font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem;';
+            pickupPointsTitle.textContent = '📍 Seleccioná un punto de retiro:';
+            pickupPointsContainer.appendChild(pickupPointsTitle);
+
+            const pickupPointsSelect = document.createElement('select');
+            pickupPointsSelect.className = 'pickup-point-select';
+            pickupPointsSelect.style.cssText = 'width: 100%; padding: 0.5rem; border: 1px solid var(--checkout-border); border-radius: 4px; font-size: 0.875rem;';
+            pickupPointsSelect.required = true;
+
+            // Opción por defecto
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Seleccionar punto de retiro...';
+            pickupPointsSelect.appendChild(defaultOption);
+
+            // Agregar cada punto de entrega
+            quote.pickup_points.forEach((point, idx) => {
+                const option = document.createElement('option');
+                option.value = point.point_id;
+                option.dataset.pointData = JSON.stringify(point);
+
+                const distance = point.location?.geolocation?.distance;
+                const distanceText = distance ? ` (${distance}m)` : '';
+                option.textContent = `${point.description} - ${point.location.street} ${point.location.street_number}, ${point.location.city}${distanceText}`;
+
+                pickupPointsSelect.appendChild(option);
+            });
+
+            pickupPointsContainer.appendChild(pickupPointsSelect);
+            contentDiv.appendChild(pickupPointsContainer);
+
+            // Mostrar/ocultar puntos de entrega cuando se selecciona/deselecciona el radio
+            radio.addEventListener('change', function() {
+                // Ocultar todos los contenedores de puntos de entrega
+                document.querySelectorAll('.pickup-points-container').forEach(container => {
+                    container.classList.add('hidden');
+                });
+
+                // Mostrar el contenedor correspondiente si este radio está seleccionado
+                if (this.checked) {
+                    pickupPointsContainer.classList.remove('hidden');
+                }
+            });
+
+            // Guardar el punto seleccionado cuando cambia el select
+            pickupPointsSelect.addEventListener('change', function() {
+                const selectedPointId = this.value;
+                console.log('📍 Punto de entrega seleccionado:', selectedPointId);
+
+                // Guardar en campo hidden
+                setHiddenField('shipping_pickup_point_id', selectedPointId);
+            });
+        }
+
         label.appendChild(radio);
         label.appendChild(contentDiv);
 
@@ -408,6 +512,11 @@ console.log('📦 shipping.js: Archivo cargado');
 
         // Tags
         setHiddenField('shipping_tags', JSON.stringify(quote.tags || []));
+
+        // Limpiar pickup_point_id si no es una opción de punto de entrega
+        if (quote.service_type_code !== 'pickup_point') {
+            setHiddenField('shipping_pickup_point_id', '');
+        }
 
         // Update total
         updateShippingCost(shippingCost);

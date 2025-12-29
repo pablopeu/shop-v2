@@ -432,6 +432,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $shipping_tags_json = sanitize_input($_POST['shipping_tags'] ?? '[]');
         $shipping_tags = json_decode($shipping_tags_json, true) ?: [];
 
+        // Punto de entrega (si aplica)
+        $shipping_pickup_point_id = sanitize_input($_POST['shipping_pickup_point_id'] ?? '');
+
         // DEBUG: Log shipping data received
         error_log("DEBUG Checkout POST - shipping_service_id: " . ($shipping_service_id ?: 'EMPTY'));
         error_log("DEBUG Checkout POST - shipping_rate_id: " . ($shipping_rate_id ?: 'EMPTY'));
@@ -485,7 +488,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 'rate_id' => $shipping_rate_id,
                 'tariff_id' => $shipping_tariff_id,
                 'rate_source' => $shipping_rate_source,
-                'tags' => $shipping_tags
+                'tags' => $shipping_tags,
+                'pickup_point_id' => $shipping_pickup_point_id
             ],
             'total' => $total_with_shipping,
             'payment_method' => $payment_method,
@@ -1722,6 +1726,27 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
                                 </div>
 
+                                <!-- Tipo de entrega -->
+                                <div class="form-group">
+                                    <label>Tipo de entrega *</label>
+                                    <div class="radio-group">
+                                        <label class="radio-option">
+                                            <input type="radio" name="delivery_type" value="home_delivery" checked required>
+                                            <div>
+                                                <strong>🏠 Entrega a domicilio</strong>
+                                                <p class="option-description">El paquete se entrega en tu dirección</p>
+                                            </div>
+                                        </label>
+                                        <label class="radio-option">
+                                            <input type="radio" name="delivery_type" value="pickup_point" required>
+                                            <div>
+                                                <strong>📍 Entrega en punto de retiro</strong>
+                                                <p class="option-description">Retirás el paquete en un punto cercano</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <!-- Botón para cotizar -->
                                 <div class="form-group">
                                     <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote">
@@ -1791,6 +1816,9 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
                                 <!-- Tags -->
                                 <input type="hidden" id="shipping_tags" name="shipping_tags">
+
+                                <!-- Punto de entrega (si aplica) -->
+                                <input type="hidden" id="shipping_pickup_point_id" name="shipping_pickup_point_id">
                             </div>
                         </div>
                     </div>

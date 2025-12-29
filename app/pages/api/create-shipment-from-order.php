@@ -212,6 +212,12 @@ try {
         ]
     ];
 
+    // Si es entrega en punto de retiro, agregar el point_id
+    if (!empty($quote_data['pickup_point_id'])) {
+        $shipment_data['destination']['point'] = $quote_data['pickup_point_id'];
+        error_log("API CreateShipment: Envío a punto de retiro - point_id: " . $quote_data['pickup_point_id']);
+    }
+
     error_log("API CreateShipment: Creando envío para orden $order_id");
 
     // Crear envío en Zipnova (pasar order_number o order_id para logs)
