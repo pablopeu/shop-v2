@@ -16,6 +16,11 @@ if (isset($_SERVER['REQUEST_METHOD'])) {
     die("Access denied\n");
 }
 
+// Remove automatic PHP headers (some servers send them even in CLI mode)
+if (function_exists('header_remove')) {
+    @header_remove();
+}
+
 // Define constants
 define('CLI_MODE', true);
 define('APP_ENTRY_POINT', true);
