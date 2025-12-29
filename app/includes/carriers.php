@@ -655,7 +655,26 @@ function zipnova_get_label($shipment_id, $format = 'pdf', $order_id = null) {
         ];
     }
 
-    // Validar que el envío está en un estado que permite generar etiqueta
+    // Verificar PRIMERO si ya tenemos una etiqueta guardada (caché)
+    // Si existe, retornarla sin importar el estado del envío
+    if (isset($shipment['label_url']) && !empty($shipment['label_url'])) {
+        zipnova_log('Label Retrieved from Cache', [
+            'shipment_id' => $shipment_id,
+            'format' => $format,
+            'status' => $shipment['status'] ?? 'unknown'
+        ], $order_id);
+
+        return [
+            'success' => true,
+            'data' => [
+                'label_url' => $shipment['label_url'],
+                'format' => $shipment['label_format'] ?? $format,
+                'cached' => true
+            ]
+        ];
+    }
+
+    // Validar que el envío está en un estado que permite generar etiqueta NUEVA
     // Típicamente solo se puede generar etiqueta si el envío fue creado exitosamente
     $valid_statuses = ['pendiente', 'en_transito', 'en_reparto'];
     if (!in_array($shipment['status'] ?? '', $valid_statuses)) {
@@ -668,23 +687,6 @@ function zipnova_get_label($shipment_id, $format = 'pdf', $order_id = null) {
         return [
             'success' => false,
             'error' => 'El envío debe estar pendiente o en tránsito para generar la etiqueta'
-        ];
-    }
-
-    // Verificar si ya tenemos una etiqueta guardada
-    if (isset($shipment['label_url']) && !empty($shipment['label_url'])) {
-        zipnova_log('Label Retrieved from Cache', [
-            'shipment_id' => $shipment_id,
-            'format' => $format
-        ], $order_id);
-
-        return [
-            'success' => true,
-            'data' => [
-                'label_url' => $shipment['label_url'],
-                'format' => $shipment['label_format'] ?? $format,
-                'cached' => true
-            ]
         ];
     }
 
