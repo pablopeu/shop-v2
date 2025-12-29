@@ -128,6 +128,11 @@ function render_shipping_status($order) {
 
 ### Archivo: `/app/config/shipping.json`
 
+**IMPORTANTE - Credenciales:**
+- Las credenciales de sandbox y producción son las mismas (NO hay que crear campos separados).
+- El campo `mode` solo es un flag para diferenciar el entorno.
+- Zipnova pasa las credenciales a producción cuando sea necesario.
+
 ```json
 {
   "carriers": {
@@ -136,10 +141,10 @@ function render_shipping_status($order) {
       "name": "Zipnova Principal",  // Nombre descriptivo (personalizable)
       "type": "zipnova",       // Tipo de carrier (determina qué integración usar)
       "enabled": false,
-      "mode": "sandbox",
+      "mode": "sandbox",       // "sandbox" o "production" - NO afecta credenciales
       "credentials": {
-        "client_id": "",
-        "client_secret": "",
+        "client_id": "",       // Mismas credenciales para sandbox Y producción
+        "client_secret": "",   // Mismas credenciales para sandbox Y producción
         "access_token": "",
         "refresh_token": "",
         "token_expires_at": null

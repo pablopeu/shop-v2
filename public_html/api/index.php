@@ -96,6 +96,11 @@ $endpoints_map = [
 
     // Shipping (Zipnova Integration)
     'shipping' => APP_PATH . '/pages/api/shipping.php',
+    'create-shipment-from-order' => APP_PATH . '/pages/api/create-shipment-from-order.php',
+    'print-shipping-label' => APP_PATH . '/pages/api/print-shipping-label.php',
+
+    // Email Templates (Admin only)
+    'preview-email-template' => APP_PATH . '/pages/api/preview-email-template.php',
 ];
 
 // Verificar que el endpoint existe

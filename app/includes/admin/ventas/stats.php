@@ -25,30 +25,30 @@ function calculate_order_stats($all_orders) {
         return $sum + floatval($order['total']);
     }, 0);
 
-    // 2. Pending Orders: count + total amount in pesos
-    $pending_orders_data = array_filter($non_archived_orders, fn($o) => $o['status'] === 'pending' || $o['status'] === 'pendiente');
-    $pending_orders = count($pending_orders_data);
-    $pending_amount = array_reduce($pending_orders_data, function($sum, $order) {
+    // 2. Unpaid Orders (Impago): count + total amount in pesos
+    $unpaid_orders_data = array_filter($non_archived_orders, fn($o) => $o['status'] === 'impago');
+    $unpaid_orders = count($unpaid_orders_data);
+    $unpaid_amount = array_reduce($unpaid_orders_data, function($sum, $order) {
         return $sum + floatval($order['total']);
     }, 0);
 
-    // 3. Cobradas (Confirmed): count + gross amount (without discounting fees)
-    $cobradas_orders = array_filter($non_archived_orders, fn($o) => $o['status'] === 'cobrada');
-    $confirmed_orders = count($cobradas_orders);
-    $cobradas_amount_gross = array_reduce($cobradas_orders, function($sum, $order) {
+    // 3. Paid Orders (Pagado): count + gross amount (without discounting fees)
+    $paid_orders = array_filter($non_archived_orders, fn($o) => $o['status'] === 'pagado');
+    $confirmed_orders = count($paid_orders);
+    $paid_amount_gross = array_reduce($paid_orders, function($sum, $order) {
         return $sum + floatval($order['total']);
     }, 0);
 
-    // 4. Total Fees: sum of all MP fees from non-archived collected orders
-    $total_fees = array_reduce($cobradas_orders, function($sum, $order) {
+    // 4. Total Fees: sum of all MP fees from non-archived paid orders
+    $total_fees = array_reduce($paid_orders, function($sum, $order) {
         if (isset($order['mercadopago_data']['total_fees'])) {
             return $sum + floatval($order['mercadopago_data']['total_fees']);
         }
         return $sum;
     }, 0);
 
-    // 5. Net Revenue: collected amount - fees
-    $net_revenue = array_reduce($cobradas_orders, function($sum, $order) {
+    // 5. Net Revenue: paid amount - fees
+    $net_revenue = array_reduce($paid_orders, function($sum, $order) {
         if (isset($order['mercadopago_data']['net_received_amount'])) {
             return $sum + floatval($order['mercadopago_data']['net_received_amount']);
         } else {
@@ -60,10 +60,10 @@ function calculate_order_stats($all_orders) {
     return [
         'total_orders' => $total_orders,
         'total_orders_amount' => $total_orders_amount,
-        'pending_orders' => $pending_orders,
-        'pending_amount' => $pending_amount,
+        'unpaid_orders' => $unpaid_orders,
+        'unpaid_amount' => $unpaid_amount,
         'confirmed_orders' => $confirmed_orders,
-        'cobradas_amount_gross' => $cobradas_amount_gross,
+        'paid_amount_gross' => $paid_amount_gross,
         'total_fees' => $total_fees,
         'net_revenue' => $net_revenue
     ];

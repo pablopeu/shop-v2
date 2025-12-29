@@ -44,6 +44,7 @@ require_once APP_PATH . '/includes/orders.php';
 require_once APP_PATH . '/includes/coupons.php';
 require_once APP_PATH . '/includes/promotions.php';
 require_once APP_PATH . '/includes/email.php';
+require_once APP_PATH . '/includes/pseudo-cron.php';
 require_once APP_PATH . '/includes/telegram.php';
 require_once APP_PATH . '/includes/mercadopago.php';
 require_once APP_PATH . '/includes/mp-logger.php';
@@ -76,11 +77,19 @@ session_start([
     'use_strict_mode' => true,
 ]);
 
-// Set security headers
-set_security_headers();
+// Set security headers (only in web mode)
+if (!defined('CLI_MODE')) {
+    set_security_headers();
+}
 
-// Check maintenance mode
-if (is_maintenance_mode() && !is_admin_area()) {
+// Check maintenance mode (only in web mode)
+if (!defined('CLI_MODE') && is_maintenance_mode() && !is_admin_area()) {
     require_once APP_PATH . '/pages/maintenance.php';
     exit;
+}
+
+// Run pseudo-cron for email queue processing (only in web mode)
+// Executes automatically every 60 seconds with minimal overhead
+if (!defined('CLI_MODE')) {
+    run_pseudo_cron(60);
 }

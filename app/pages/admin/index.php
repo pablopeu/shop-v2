@@ -57,6 +57,9 @@ $active_coupons = array_filter($coupons_data['coupons'] ?? [], function($c) {
     return $c['active'] ?? false;
 });
 
+// Get failed emails count
+$failed_emails_count = get_failed_emails_count();
+
 // Load dashboard config
 $dashboard_config = read_json(APP_PATH . '/config/dashboard.json');
 
@@ -345,12 +348,33 @@ $user = get_logged_user();
             </div>
             <?php endif; ?>
 
+            <!-- Emails Fallidos Widget -->
+            <?php if ($failed_emails_count > 0): ?>
+            <div class="stat-card danger">
+                <h3>⚠️ Emails Fallidos</h3>
+                <div class="value"><?php echo $failed_emails_count; ?></div>
+                <div class="label">necesitan atención</div>
+            </div>
+            <?php endif; ?>
+
         </div>
 
         <!-- Alerts -->
-        <?php if (count($out_of_stock) > 0 || count($low_stock) > 0): ?>
+        <?php if (count($out_of_stock) > 0 || count($low_stock) > 0 || $failed_emails_count > 0): ?>
         <div class="alerts">
             <h2 style="margin-bottom: 15px; color: #2c3e50;">⚠️ Alertas</h2>
+
+            <?php if ($failed_emails_count > 0): ?>
+            <div class="alert alert-danger">
+                <div class="alert-icon">📧</div>
+                <div class="alert-content">
+                    <h4>Emails Fallidos</h4>
+                    <p><?php echo $failed_emails_count; ?> emails fallaron después de 3 intentos.
+                       <a href="<?php echo url('/admin/?page=emails-fallidos'); ?>" style="color: #2980b9; text-decoration: underline;">Ver detalles →</a>
+                    </p>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <?php if (count($out_of_stock) > 0): ?>
             <div class="alert alert-danger">

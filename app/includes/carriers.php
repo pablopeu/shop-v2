@@ -99,8 +99,9 @@ function zipnova_get_api_url() {
 /**
  * Realiza una petición HTTP a la API de Zipnova
  * Usa HTTP Basic Authentication con API Token y API Secret
+ * @param string|null $order_id Identificador de orden (para rastrear conversación completa)
  */
-function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth = true) {
+function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth = true, $order_id = null) {
     $config = zipnova_get_config();
     if (!$config) {
         return ['success' => false, 'error' => 'Configuración de Zipnova no encontrada'];
@@ -170,14 +171,14 @@ function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth
     $curl_error = curl_error($ch);
     curl_close($ch);
 
-    // Log de la request
+    // Log de la request (con order_id si está presente)
     zipnova_log('API Request', [
         'method' => $method,
         'endpoint' => $endpoint,
         'http_code' => $http_code,
         'retries' => $retries,
         'success' => $response !== false
-    ]);
+    ], $order_id);
 
     if ($response === false) {
         // Guardar error en archivo JSON separado
@@ -185,7 +186,7 @@ function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth
             'request' => $data,
             'error' => $curl_error,
             'http_code' => 0
-        ]);
+        ], $order_id);
         return ['success' => false, 'error' => 'Error de conexión: ' . $curl_error];
     }
 
@@ -197,7 +198,7 @@ function zipnova_api_request($endpoint, $method = 'GET', $data = null, $use_auth
         'response' => $result,
         'http_code' => $http_code,
         'raw_response' => $response
-    ]);
+    ], $order_id);
 
     if ($http_code >= 200 && $http_code < 300) {
         return ['success' => true, 'data' => $result];
@@ -309,20 +310,21 @@ function calculate_delivery_days($delivery_time) {
  * @param array $destination Datos de destino (city, state, zipcode)
  * @param array $items Array de items con sku, weight, height, width, length, description, classification_id
  * @param float|null $declared_value Valor declarado total (se calcula automáticamente si es null)
+ * @param string|null $order_id Identificador de orden (para rastrear conversación completa)
  * @return array Resultado con cotizaciones disponibles
  */
-function zipnova_get_quotes($destination, $items, $declared_value = null) {
+function zipnova_get_quotes($destination, $items, $declared_value = null, $order_id = null) {
     // Log al inicio para confirmar que se llama la función
     zipnova_log('zipnova_get_quotes CALLED', [
         'destination' => $destination,
         'items_count' => count($items),
         'declared_value' => $declared_value
-    ]);
+    ], $order_id);
 
     $config = zipnova_get_config();
 
     if (!$config || !$config['enabled']) {
-        zipnova_log('zipnova_get_quotes ERROR', ['error' => 'Zipnova no está habilitado']);
+        zipnova_log('zipnova_get_quotes ERROR', ['error' => 'Zipnova no está habilitado'], $order_id);
         return ['success' => false, 'error' => 'Zipnova no está habilitado'];
     }
 
@@ -372,7 +374,7 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
         ]
     ];
 
-    $result = zipnova_api_request('/shipments/quote', 'POST', $request_data);
+    $result = zipnova_api_request('/shipments/quote', 'POST', $request_data, true, $order_id);
 
     if ($result['success']) {
         // Transformar respuesta de Zipnova al formato esperado por el frontend
@@ -384,17 +386,77 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
                 $estimated_days = calculate_delivery_days($delivery_time);
 
                 $quotes[] = [
+                    // Identificadores de servicio
                     'service_id' => $zipnova_quote['service_type']['code'] ?? 'unknown',
+                    'service_type_id' => $zipnova_quote['service_type']['id'] ?? null,
+                    'service_type_code' => $zipnova_quote['service_type']['code'] ?? '',
                     'service_name' => ($zipnova_quote['carrier']['name'] ?? 'Carrier') . ' - ' . ($zipnova_quote['service_type']['name'] ?? 'Service'),
-                    'cost' => (float)($zipnova_quote['amounts']['price_incl_tax'] ?? 0),
-                    'estimated_days' => $estimated_days,
+
+                    // Información del carrier
+                    'carrier_id' => $zipnova_quote['carrier']['id'] ?? null,
                     'carrier_name' => $zipnova_quote['carrier']['name'] ?? '',
                     'carrier_logo' => $zipnova_quote['carrier']['logo'] ?? '',
+                    'carrier_rating' => $zipnova_quote['carrier']['rating'] ?? null,
+
+                    // Tipo de logística
                     'logistic_type' => $zipnova_quote['logistic_type'] ?? '',
-                    'service_type_code' => $zipnova_quote['service_type']['code'] ?? ''
+
+                    // Tiempos de entrega
+                    'estimated_days' => $estimated_days,
+                    'estimated_delivery' => $zipnova_quote['delivery_time']['estimated_delivery'] ?? null,
+                    'estimation_expires_at' => $zipnova_quote['delivery_time']['estimation_expires_at'] ?? null,
+
+                    // Costos (desglosados)
+                    'cost' => (float)($zipnova_quote['amounts']['price_incl_tax'] ?? 0),
+                    'price_shipment' => (float)($zipnova_quote['amounts']['price_shipment'] ?? 0),
+                    'price_insurance' => (float)($zipnova_quote['amounts']['price_insurance'] ?? 0),
+                    'price_base' => (float)($zipnova_quote['amounts']['price'] ?? 0),
+
+                    // IDs de tarifa (necesarios para crear envío)
+                    'rate_id' => $zipnova_quote['rate']['id'] ?? null,
+                    'tariff_id' => $zipnova_quote['rate']['tariff_id'] ?? null,
+                    'rate_source' => $zipnova_quote['rate']['source'] ?? null,
+
+                    // Tags (cheapest, fastest, etc.)
+                    'tags' => $zipnova_quote['tags'] ?? []
                 ];
             }
             $result['data']['quotes'] = $quotes;
+
+            // Filtrar cotizaciones según método de despacho preferido del vendedor
+            $dispatch_method = $config['dispatch_method'] ?? null;
+            if ($dispatch_method && isset($dispatch_method['preferred'])) {
+                $preferred = $dispatch_method['preferred'];
+                $valid_logistic_types = $dispatch_method['options'][$preferred]['logistic_types'] ?? [];
+
+                if (!empty($valid_logistic_types) && !empty($quotes)) {
+                    $filtered_quotes = [];
+                    foreach ($quotes as $quote) {
+                        $quote_logistic_type = $quote['logistic_type'] ?? '';
+                        // Verificar si el logistic_type de la cotización coincide con los permitidos
+                        if (in_array($quote_logistic_type, $valid_logistic_types)) {
+                            $filtered_quotes[] = $quote;
+                        }
+                    }
+
+                    // Solo reemplazar si hay quotes filtradas, sino mantener todas
+                    if (!empty($filtered_quotes)) {
+                        $result['data']['quotes'] = $filtered_quotes;
+                        zipnova_log('Quotes Filtered by Dispatch Method', [
+                            'preferred_method' => $preferred,
+                            'valid_logistic_types' => $valid_logistic_types,
+                            'total_quotes' => count($quotes),
+                            'filtered_quotes' => count($filtered_quotes)
+                        ], $order_id);
+                    } else {
+                        zipnova_log('No Quotes Match Preferred Dispatch Method', [
+                            'preferred_method' => $preferred,
+                            'valid_logistic_types' => $valid_logistic_types,
+                            'available_logistic_types' => array_unique(array_column($quotes, 'logistic_type'))
+                        ], $order_id);
+                    }
+                }
+            }
         }
 
         // Aplicar margen de costo si está configurado
@@ -416,7 +478,7 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
         'items_count' => count($items),
         'declared_value' => $declared_value,
         'full_response' => $result  // <-- RESPUESTA COMPLETA PARA DEBUG
-    ]);
+    ], $order_id);
 
     return $result;
 }
@@ -425,30 +487,74 @@ function zipnova_get_quotes($destination, $items, $declared_value = null) {
  * Crea un envío en Zipnova
  *
  * @param array $shipment_data Datos del envío completos
+ * @param string|null $order_id Identificador de orden (para rastrear conversación completa)
  * @return array Resultado con ID del envío creado
  */
-function zipnova_create_shipment($shipment_data) {
+function zipnova_create_shipment($shipment_data, $order_id = null) {
     $config = zipnova_get_config();
 
     if (!$config || !$config['enabled']) {
         return ['success' => false, 'error' => 'Zipnova no está habilitado'];
     }
 
-    // Usar origen por defecto si no se proporciona
-    if (!isset($shipment_data['origin'])) {
-        $shipment_data['origin'] = [
-            'name' => $config['origin']['name'],
-            'address' => $config['origin']['address'],
-            'city' => $config['origin']['city'],
-            'province' => $config['origin']['province'],
-            'postal_code' => $config['origin']['postal_code'],
-            'country' => $config['origin']['country'],
-            'phone' => $config['origin']['phone'],
-            'email' => $config['origin']['email']
-        ];
+    // Determinar método de despacho y configurar origin según preferencia del vendedor
+    $dispatch_method = $config['dispatch_method'] ?? null;
+    $preferred_method = $dispatch_method['preferred'] ?? 'pickup';
+
+    if ($preferred_method === 'dropoff') {
+        // Drop-off: el vendedor entrega en un punto Zipnova
+        if (!isset($shipment_data['origin'])) {
+            $point_id = $dispatch_method['options']['dropoff']['point_id'] ?? null;
+
+            // Si hay point_id configurado, usarlo
+            // Si NO hay point_id, significa que se puede entregar en cualquier punto de la red
+            if (!empty($point_id)) {
+                $shipment_data['origin'] = [
+                    'point_id' => $point_id
+                ];
+
+                zipnova_log('Using Specific Drop-off Point', [
+                    'point_id' => $point_id,
+                    'point_name' => $dispatch_method['options']['dropoff']['point_name'] ?? 'N/A'
+                ], $order_id);
+            } else {
+                // No especificar origin ni origin_id
+                // El logistic_type del rate_id indica que es dropoff
+                // Zipnova permite entregar en cualquier punto de su red
+                zipnova_log('Using Flexible Drop-off', [
+                    'note' => 'No point_id specified - can deliver to any Zipnova network point'
+                ], $order_id);
+            }
+        }
+    } else {
+        // Pickup: recolección en domicilio del vendedor
+        if (!isset($shipment_data['origin_id'])) {
+            $shipment_data['origin_id'] = $config['origin']['origin_id'] ?? '';
+
+            zipnova_log('Using Pickup from Origin', [
+                'origin_id' => $shipment_data['origin_id']
+            ], $order_id);
+        }
     }
 
-    $result = zipnova_api_request('/shipments', 'POST', $shipment_data);
+    // Agregar account_id al request (CRÍTICO para Zipnova)
+    $account_id = $config['credentials']['account_id'] ?? '';
+    if (!empty($account_id)) {
+        $shipment_data['account_id'] = $account_id;
+    }
+
+    // Controlar envío de email del cliente a Zipnova
+    // Si send_customer_email = false, NO enviar el email para evitar que Zipnova envíe notificaciones duplicadas
+    $send_customer_email = $config['options']['send_customer_email'] ?? false;
+    if (!$send_customer_email && isset($shipment_data['destination']['email'])) {
+        zipnova_log('Customer Email Removed', [
+            'note' => 'Email no enviado a Zipnova (send_customer_email=false)',
+            'removed_email' => $shipment_data['destination']['email']
+        ], $order_id);
+        unset($shipment_data['destination']['email']);
+    }
+
+    $result = zipnova_api_request('/shipments', 'POST', $shipment_data, true, $order_id);
 
     if ($result['success']) {
         // Guardar el envío localmente
@@ -456,7 +562,7 @@ function zipnova_create_shipment($shipment_data) {
         zipnova_save_shipment($shipment_id, [
             'zipnova_id' => $shipment_id,
             'reference' => $shipment_data['reference'] ?? '',
-            'status' => 'pending',
+            'status' => 'pendiente',  // Estado en español (consistente con sistema)
             'created_at' => date('Y-m-d H:i:s'),
             'data' => $result['data']
         ]);
@@ -465,7 +571,7 @@ function zipnova_create_shipment($shipment_data) {
     zipnova_log('Shipment Created', [
         'success' => $result['success'],
         'reference' => $shipment_data['reference'] ?? 'N/A'
-    ]);
+    ], $order_id);
 
     return $result;
 }
@@ -474,10 +580,11 @@ function zipnova_create_shipment($shipment_data) {
  * Consulta el estado de un envío
  *
  * @param string $shipment_id ID del envío en Zipnova
+ * @param string|null $order_id Identificador de orden (para rastrear conversación completa)
  * @return array Resultado con datos del envío
  */
-function zipnova_get_shipment($shipment_id) {
-    $result = zipnova_api_request('/shipments/' . $shipment_id, 'GET');
+function zipnova_get_shipment($shipment_id, $order_id = null) {
+    $result = zipnova_api_request('/shipments/' . $shipment_id, 'GET', null, true, $order_id);
 
     if ($result['success']) {
         // Actualizar datos locales
@@ -487,7 +594,7 @@ function zipnova_get_shipment($shipment_id) {
     zipnova_log('Shipment Status Check', [
         'shipment_id' => $shipment_id,
         'success' => $result['success']
-    ]);
+    ], $order_id);
 
     return $result;
 }
@@ -496,10 +603,11 @@ function zipnova_get_shipment($shipment_id) {
  * Cancela un envío
  *
  * @param string $shipment_id ID del envío en Zipnova
+ * @param string|null $order_id Identificador de orden (para rastrear conversación completa)
  * @return array Resultado de la cancelación
  */
-function zipnova_cancel_shipment($shipment_id) {
-    $result = zipnova_api_request('/shipments/' . $shipment_id . '/cancel', 'POST');
+function zipnova_cancel_shipment($shipment_id, $order_id = null) {
+    $result = zipnova_api_request('/shipments/' . $shipment_id . '/cancel', 'POST', null, true, $order_id);
 
     if ($result['success']) {
         zipnova_update_shipment_status($shipment_id, ['status' => 'cancelled']);
@@ -508,7 +616,194 @@ function zipnova_cancel_shipment($shipment_id) {
     zipnova_log('Shipment Cancelled', [
         'shipment_id' => $shipment_id,
         'success' => $result['success']
-    ]);
+    ], $order_id);
+
+    return $result;
+}
+
+/**
+ * Obtiene la etiqueta de envío (PDF o imagen)
+ *
+ * NOTA: Esta función es un stub/esqueleto pendiente de implementación
+ * cuando se obtengan las credenciales de sandbox de Zipnova.
+ *
+ * El endpoint exacto puede variar según la documentación de Zipnova.
+ * Opciones típicas:
+ * - GET /shipments/{id}/label
+ * - GET /shipments/{id}/label/pdf
+ * - GET /shipments/{id}/documents
+ *
+ * @param string $shipment_id ID del envío en Zipnova
+ * @param string $format Formato deseado: 'pdf', 'png', 'zpl' (default: 'pdf')
+ * @return array ['success' => bool, 'data' => ['label_url' => string, 'format' => string], 'error' => string]
+ */
+function zipnova_get_label($shipment_id, $format = 'pdf', $order_id = null) {
+    // Validar que el envío existe
+    $shipment = zipnova_load_shipment($shipment_id);
+    if (!$shipment) {
+        zipnova_log('Label Request Failed - Shipment Not Found', [
+            'shipment_id' => $shipment_id,
+            'error' => 'Envío no encontrado'
+        ], $order_id);
+
+        return [
+            'success' => false,
+            'error' => 'Envío no encontrado'
+        ];
+    }
+
+    // Validar que el envío está en un estado que permite generar etiqueta
+    // Típicamente solo se puede generar etiqueta si el envío fue creado exitosamente
+    $valid_statuses = ['pendiente', 'en_transito', 'en_reparto'];
+    if (!in_array($shipment['status'] ?? '', $valid_statuses)) {
+        zipnova_log('Label Request Failed - Invalid Status', [
+            'shipment_id' => $shipment_id,
+            'status' => $shipment['status'] ?? 'unknown',
+            'error' => 'El envío no está en un estado válido para generar etiqueta'
+        ], $order_id);
+
+        return [
+            'success' => false,
+            'error' => 'El envío debe estar pendiente o en tránsito para generar la etiqueta'
+        ];
+    }
+
+    // Verificar si ya tenemos una etiqueta guardada
+    if (isset($shipment['label_url']) && !empty($shipment['label_url'])) {
+        zipnova_log('Label Retrieved from Cache', [
+            'shipment_id' => $shipment_id,
+            'format' => $format
+        ], $order_id);
+
+        return [
+            'success' => true,
+            'data' => [
+                'label_url' => $shipment['label_url'],
+                'format' => $shipment['label_format'] ?? $format,
+                'cached' => true
+            ]
+        ];
+    }
+
+    // Endpoint correcto según documentación de Zipnova:
+    // GET /shipments/{id}/documentation?what=label&format=pdf
+    // La respuesta incluye el PDF en base64 en el campo 'content'
+    $endpoint = '/shipments/' . $shipment_id . '/documentation?what=label&format=' . $format;
+
+    $result = zipnova_api_request($endpoint, 'GET', null, true, $order_id);
+
+    if ($result['success']) {
+        // Zipnova devuelve el PDF en base64 en el campo 'body'
+        $base64_content = $result['data']['body'] ?? '';
+
+        if (empty($base64_content)) {
+            zipnova_log('Label Generation Failed - No Content', [
+                'shipment_id' => $shipment_id,
+                'error' => 'Respuesta de Zipnova sin contenido base64'
+            ], $order_id);
+
+            return [
+                'success' => false,
+                'error' => 'La etiqueta no contiene datos'
+            ];
+        }
+
+        // Decodificar base64
+        $pdf_content = base64_decode($base64_content);
+
+        if ($pdf_content === false) {
+            zipnova_log('Label Generation Failed - Invalid Base64', [
+                'shipment_id' => $shipment_id,
+                'error' => 'Error al decodificar base64'
+            ], $order_id);
+
+            return [
+                'success' => false,
+                'error' => 'Error al decodificar la etiqueta'
+            ];
+        }
+
+        // Crear directorio para etiquetas si no existe
+        $labels_dir = __DIR__ . '/../data/labels';
+        if (!is_dir($labels_dir)) {
+            mkdir($labels_dir, 0755, true);
+        }
+
+        // Guardar PDF en el servidor
+        $filename = 'label_' . $shipment_id . '_' . time() . '.' . $format;
+        $filepath = $labels_dir . '/' . $filename;
+
+        if (file_put_contents($filepath, $pdf_content) === false) {
+            zipnova_log('Label Generation Failed - Save Error', [
+                'shipment_id' => $shipment_id,
+                'error' => 'Error al guardar archivo PDF'
+            ], $order_id);
+
+            return [
+                'success' => false,
+                'error' => 'Error al guardar la etiqueta'
+            ];
+        }
+
+        // Generar URL relativa del PDF
+        $label_url = '/data/labels/' . $filename;
+
+        // Guardar en datos locales y cambiar estado a "en_preparacion"
+        $shipment['label_url'] = $label_url;
+        $shipment['label_format'] = $format;
+        $shipment['label_generated_at'] = date('Y-m-d H:i:s');
+        $shipment['status'] = 'en_preparacion'; // Cambiar estado cuando se genera etiqueta
+
+        zipnova_save_shipment($shipment_id, $shipment);
+
+        zipnova_log('Label Generated Successfully', [
+            'shipment_id' => $shipment_id,
+            'format' => $format,
+            'label_url' => $label_url,
+            'filesize' => strlen($pdf_content),
+            'new_status' => 'en_preparacion'
+        ], $order_id);
+
+        // Actualizar estado de la orden y enviar email al cliente
+        require_once __DIR__ . '/orders.php';
+        require_once __DIR__ . '/email.php';
+
+        // Buscar la orden por shipment_id
+        $orders = get_all_orders();
+        foreach ($orders as $ord) {
+            if (isset($ord['shipping']['carrier_shipment_id']) &&
+                $ord['shipping']['carrier_shipment_id'] === $shipment_id) {
+
+                // Actualizar estado del envío en la orden
+                update_order_shipping_status($ord['id'], 'en_preparacion');
+
+                // Enviar email de notificación al cliente
+                send_shipping_preparation_email($ord);
+
+                zipnova_log('Order Status Updated to en_preparacion', [
+                    'order_id' => $ord['id'],
+                    'order_number' => $ord['order_number'],
+                    'shipment_id' => $shipment_id
+                ], $order_id ?? $ord['order_number']);
+
+                break;
+            }
+        }
+
+        return [
+            'success' => true,
+            'data' => [
+                'label_url' => $label_url,
+                'format' => $format,
+                'cached' => false
+            ]
+        ];
+    }
+
+    zipnova_log('Label Generation Failed', [
+        'shipment_id' => $shipment_id,
+        'error' => $result['error'] ?? 'Unknown error'
+    ], $order_id);
 
     return $result;
 }
@@ -606,8 +901,11 @@ function zipnova_get_all_shipments($filter = []) {
 
 /**
  * Log de eventos de Zipnova
+ * @param string $event Tipo de evento
+ * @param array $data Datos del evento
+ * @param string|null $order_id Identificador de orden (para rastrear conversación completa)
  */
-function zipnova_log($event, $data = []) {
+function zipnova_log($event, $data = [], $order_id = null) {
     // Usar ruta absoluta desde la raíz del proyecto
     $logs_dir = dirname(dirname(__DIR__)) . '/logs/zipnova';
     if (!is_dir($logs_dir)) {
@@ -616,9 +914,16 @@ function zipnova_log($event, $data = []) {
 
     $log_file = $logs_dir . '/' . date('Y-m-d') . '.log';
     $timestamp = date('Y-m-d H:i:s');
+
+    // Agregar order_id al contexto si está presente
+    if ($order_id !== null) {
+        $data['order_id'] = $order_id;
+    }
+
     $log_entry = sprintf(
-        "[%s] %s: %s\n",
+        "[%s]%s %s: %s\n",
         $timestamp,
+        $order_id ? " [ORDER: $order_id]" : "",
         $event,
         json_encode($data, JSON_UNESCAPED_UNICODE)
     );
@@ -631,23 +936,26 @@ function zipnova_log($event, $data = []) {
  * @param string $endpoint El endpoint llamado (ej: '/shipments/quote')
  * @param string $method El método HTTP usado (GET, POST, etc)
  * @param array $data Array con request, response, http_code, etc
+ * @param string|null $order_id Identificador de orden (para rastrear conversación completa)
  */
-function zipnova_save_response_json($endpoint, $method, $data) {
+function zipnova_save_response_json($endpoint, $method, $data, $order_id = null) {
     // Usar ruta absoluta desde la raíz del proyecto
     $logs_dir = dirname(dirname(__DIR__)) . '/logs/zipnova-responses';
     if (!is_dir($logs_dir)) {
         mkdir($logs_dir, 0755, true);
     }
 
-    // Generar nombre de archivo con timestamp y endpoint
+    // Generar nombre de archivo con timestamp, order_id (si existe) y endpoint
     $timestamp = date('Y-m-d_H-i-s');
     $endpoint_name = trim(str_replace('/', '_', $endpoint), '_');
-    $filename = sprintf('%s_%s_%s.json', $timestamp, $endpoint_name, $method);
+    $order_prefix = $order_id ? "ORDER-{$order_id}_" : '';
+    $filename = sprintf('%s_%s%s_%s.json', $timestamp, $order_prefix, $endpoint_name, $method);
     $filepath = $logs_dir . '/' . $filename;
 
     // Preparar datos completos para el log
     $log_data = [
         'timestamp' => date('Y-m-d H:i:s'),
+        'order_id' => $order_id,  // Agregar order_id al JSON
         'endpoint' => $endpoint,
         'method' => $method,
         'http_code' => $data['http_code'] ?? 0,
@@ -857,6 +1165,7 @@ function map_carrier_status_to_base($carrier_type, $carrier_status) {
     $mappings = [
         'zipnova' => [
             'pending' => 'pendiente',
+            'ready' => 'en_preparacion',
             'in_transit' => 'en_transito',
             'out_for_delivery' => 'en_reparto',
             'delivered' => 'entregada',
@@ -882,6 +1191,7 @@ function map_carrier_status_to_base($carrier_type, $carrier_status) {
 function get_status_label($base_status) {
     $labels = [
         'pendiente' => 'Pendiente',
+        'en_preparacion' => 'En preparación',
         'en_transito' => 'En tránsito',
         'en_reparto' => 'En reparto',
         'entregada' => 'Entregada',

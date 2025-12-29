@@ -53,12 +53,14 @@ function get_order_by_token($token) {
 }
 
 /**
- * Generate order number
- * @return string Order number in format ORD-YYYY-XXXXX
+ * Generate order number (internal - NO escribe al archivo)
+ * Esta función solo calcula el próximo número, NO incrementa el contador
+ * El contador se incrementa en create_order() bajo file lock
+ *
+ * @param array $data Datos del archivo orders.json
+ * @return array ['number' => 'ORD-2025-00001', 'counter_value' => 1]
  */
-function generate_order_number() {
-    $orders_file = APP_PATH . '/data/orders.json';
-    $data = read_json($orders_file);
+function calculate_next_order_number($data) {
     $year = date('Y');
 
     // Inicializar estructura de contadores si no existe
@@ -82,14 +84,14 @@ function generate_order_number() {
         $data['counters'][$year] = $max_number;
     }
 
-    // Incrementar el contador (nunca decrementa)
-    $data['counters'][$year]++;
-    $next_number = $data['counters'][$year];
+    // Incrementar el contador
+    $next_counter = $data['counters'][$year] + 1;
+    $order_number = sprintf("ORD-%s-%05d", $year, $next_counter);
 
-    // Guardar el contador actualizado
-    write_json($orders_file, $data);
-
-    return sprintf("ORD-%s-%05d", $year, $next_number);
+    return [
+        'number' => $order_number,
+        'counter_value' => $next_counter
+    ];
 }
 
 /**
@@ -152,11 +154,6 @@ function build_shipping_data($order_data) {
  */
 function create_order($order_data) {
     $orders_file = __DIR__ . '/../data/orders.json';
-    $data = read_json($orders_file);
-
-    if (!isset($data['orders'])) {
-        $data = ['orders' => []];
-    }
 
     // Validate required fields
     $required = ['items', 'total', 'currency', 'payment_method'];
@@ -178,9 +175,54 @@ function create_order($order_data) {
         }
     }
 
-    // Generate order ID and number
+    // Generate order ID (but NOT order number yet)
     $order_id = generate_id('order-');
-    $order_number = generate_order_number();
+
+    // CRÍTICO: TODO bajo file lock para atomicidad
+    // Ensure directory exists
+    $orders_dir = dirname($orders_file);
+    if (!is_dir($orders_dir)) {
+        if (!mkdir($orders_dir, 0755, true)) {
+            error_log("Failed to create orders directory: $orders_dir");
+            return ['error' => 'System error: Could not create order (dir)'];
+        }
+    }
+
+    // Open file for read/write, create if doesn't exist
+    $fp = @fopen($orders_file, 'c+');
+    if (!$fp) {
+        $error_msg = error_get_last();
+        error_log("Failed to open orders file: " . ($error_msg['message'] ?? 'unknown error'));
+        return ['error' => 'System error: Could not create order (open)'];
+    }
+
+    // Acquire exclusive lock (SIMPLIFIED: simple blocking lock)
+    // This will block until lock is available, much simpler and more reliable
+    if (!flock($fp, LOCK_EX)) {
+        fclose($fp);
+        error_log("Failed to acquire lock for order creation");
+        return ['error' => 'System error: Could not create order (lock)'];
+    }
+
+    // Read current data UNDER LOCK
+    $content = stream_get_contents($fp);
+    $data = $content ? json_decode($content, true) : [];
+
+    if (!isset($data['orders'])) {
+        $data['orders'] = [];
+    }
+
+    if (!isset($data['counters'])) {
+        $data['counters'] = [];
+    }
+
+    // Calculate next order number (NO escribe, solo calcula)
+    $order_number_data = calculate_next_order_number($data);
+    $order_number = $order_number_data['number'];
+    $year = date('Y');
+
+    // Update counter in memory
+    $data['counters'][$year] = $order_number_data['counter_value'];
     $tracking_token = generate_token(32);
     $timestamp = get_timestamp();
 
@@ -202,11 +244,13 @@ function create_order($order_data) {
         'discount_coupon' => $order_data['discount_coupon'] ?? 0,
         'coupon_code' => $order_data['coupon_code'] ?? null,
         'shipping_cost' => $order_data['shipping_cost'] ?? 0,
+        'shipping_service_id' => $order_data['shipping_service_id'] ?? null,
+        'shipping_quote_data' => $order_data['shipping_quote_data'] ?? null,
         'total' => $order_data['total'],
-        'status' => 'pending',
+        'status' => 'impago',
         'status_history' => [
             [
-                'status' => 'pending',
+                'status' => 'impago',
                 'date' => $timestamp,
                 'user' => 'system'
             ]
@@ -234,11 +278,20 @@ function create_order($order_data) {
         'stock_reduced' => false
     ];
 
-    // Add order to array
+    // Add order to array IN MEMORY
     $data['orders'][] = $order;
 
-    // Save to file
-    if (write_json($orders_file, $data)) {
+    // Write EVERYTHING (order + counter) in ONE atomic operation
+    ftruncate($fp, 0);
+    rewind($fp);
+    $json_written = fwrite($fp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    fflush($fp);
+
+    // Release lock and close file
+    flock($fp, LOCK_UN);
+    fclose($fp);
+
+    if ($json_written !== false) {
         // IMPORTANT: Stock is NOT reduced when order is created
         // Stock will be reduced when:
         // 1. Payment status is updated to 'completed' (MercadoPago webhook)
@@ -256,6 +309,7 @@ function create_order($order_data) {
         return ['success' => true, 'order' => $order];
     }
 
+    error_log("Failed to write order to file");
     return ['error' => 'Failed to save order'];
 }
 
@@ -286,10 +340,10 @@ function update_order_status($order_id, $new_status, $user = 'system') {
                 'user' => $user
             ];
 
-            // Reduce stock when changing to "cobrada" if not already reduced
-            if ($new_status === 'cobrada' && !($order['stock_reduced'] ?? false)) {
+            // Reduce stock when changing to "pagado" (payment confirmed) if not already reduced
+            if ($new_status === 'pagado' && !($order['stock_reduced'] ?? false)) {
                 foreach ($order['items'] as $item) {
-                    update_stock($item['product_id'], -$item['quantity'], "Orden {$order['order_number']} marcada como cobrada por {$user}");
+                    update_stock($item['product_id'], -$item['quantity'], "Orden {$order['order_number']} marcada como pagado (pago confirmado) por {$user}");
                 }
                 $order['stock_reduced'] = true;
 
@@ -297,6 +351,121 @@ function update_order_status($order_id, $new_status, $user = 'system') {
                     'order_id' => $order_id,
                     'order_number' => $order['order_number']
                 ]);
+            }
+
+            // Crear envío automáticamente al marcar como pagado si es envío a domicilio
+            // y aún no tiene carrier_shipment_id
+            if ($new_status === 'pagado' &&
+                ($order['delivery_method'] ?? 'pickup') === 'shipping' &&
+                empty($order['shipping']['carrier_shipment_id'] ?? null)) {
+
+                // Require carriers.php si no está incluido
+                $carriers_file = __DIR__ . '/carriers.php';
+                if (file_exists($carriers_file)) {
+                    require_once $carriers_file;
+
+                    // Intentar crear el envío en Zipnova
+                    try {
+                        // IMPORTANTE: NO enviar toda la orden a Zipnova (leak de información)
+                        // Solo enviar los campos específicos que la API requiere
+
+                        // La auto-creación no funcionará si no tiene quote_data (orden legacy)
+                        // Solo las órdenes nuevas con cotización pueden auto-crear el envío
+                        $quote_data = $order['shipping_quote_data'] ?? [];
+                        if (empty($quote_data['rate_id'])) {
+                            throw new Exception('Orden sin datos de cotización - no se puede crear envío automático');
+                        }
+
+                        $shipping_address = $order['shipping_address'] ?? [];
+                        $shipping_config = read_json(APP_PATH . '/config/shipping.json');
+                        $znva_config = $shipping_config['carriers']['ZNVA'] ?? null;
+
+                        // Separar calle y número
+                        $street_full = $shipping_address['address'] ?? '';
+                        $street_parts = preg_match('/^(.+?)\s+(\d+.*)$/', $street_full, $matches);
+                        $street = $street_parts ? trim($matches[1]) : $street_full;
+                        $street_number = $street_parts ? trim($matches[2]) : '';
+
+                        // Construir items desde la orden
+                        $items = [];
+                        if (isset($order['items']) && is_array($order['items'])) {
+                            foreach ($order['items'] as $item) {
+                                $items[] = [
+                                    'sku' => 'ITEM',
+                                    'weight' => 500,
+                                    'height' => 10,
+                                    'width' => 10,
+                                    'length' => 10,
+                                    'description' => $item['name'] ?? 'Producto',
+                                    'classification_id' => 1
+                                ];
+                            }
+                        }
+
+                        // Calcular valor declarado (solo productos, SIN envío)
+                        $declared_value = 0;
+                        if (isset($order['items']) && is_array($order['items'])) {
+                            foreach ($order['items'] as $item) {
+                                $declared_value += ((float)($item['price'] ?? 0)) * ((int)($item['quantity'] ?? 1));
+                            }
+                        }
+
+                        // Construir request limpio (solo lo que Zipnova necesita)
+                        $shipment_data = [
+                            'rate_id' => $quote_data['rate_id'],
+                            'tariff_id' => $quote_data['tariff_id'] ?? null,
+                            'external_id' => $order['order_number'] ?? 'ORD-' . $order_id,
+                            'reference' => $order['order_number'] ?? $order_id,
+                            'service_type' => $quote_data['service_type_code'] ?? 'standard_delivery',
+                            'declared_value' => (int)$declared_value,
+                            'origin_id' => $znva_config['origin']['origin_id'] ?? '',
+                            'items' => $items,
+                            'destination' => [
+                                'name' => $shipping_address['name'] ?? $order['customer_name'],
+                                'street' => $street,
+                                'street_number' => $street_number,
+                                'city' => $shipping_address['city'] ?? '',
+                                'state' => $shipping_address['state'] ?? '',
+                                'zipcode' => $shipping_address['postal_code'] ?? '',
+                                'country' => $shipping_address['country'] ?? 'AR',
+                                'phone' => $shipping_address['phone'] ?? $order['customer_phone'] ?? '',
+                                'email' => $order['customer_email'] ?? '',
+                                'document' => $shipping_address['document'] ?? $order['customer_document'] ?? ''
+                            ]
+                        ];
+
+                        $result = zipnova_create_shipment($shipment_data, $order['order_number'] ?? $order_id);
+
+                        if ($result['success']) {
+                            // Actualizar orden con los datos del envío
+                            if (!isset($order['shipping'])) {
+                                $order['shipping'] = [];
+                            }
+                            $order['shipping']['carrier'] = 'ZNVA';
+                            $order['shipping']['carrier_shipment_id'] = $result['data']['id'] ?? null;
+                            $order['shipping']['tracking_id'] = $result['data']['tracking_number'] ?? null;
+                            $order['shipping']['status'] = 'pendiente';
+                            $order['shipping']['carrier_status'] = $result['data']['status'] ?? 'pending';
+                            $order['shipping']['created_at'] = date('Y-m-d H:i:s');
+
+                            log_admin_action('shipment_auto_created', $user, [
+                                'order_id' => $order_id,
+                                'order_number' => $order['order_number'],
+                                'shipment_id' => $result['data']['shipment_id'] ?? null
+                            ]);
+                        } else {
+                            // Log el error pero no fallar la actualización de estado
+                            log_admin_action('shipment_auto_creation_failed', $user, [
+                                'order_id' => $order_id,
+                                'order_number' => $order['order_number'],
+                                'error' => $result['error'] ?? 'Unknown error'
+                            ]);
+                        }
+                    } catch (Exception $e) {
+                        // Log el error pero continuar
+                        error_log("Error al crear envío automático para orden {$order_id}: " . $e->getMessage());
+                    }
+                }
             }
 
             // Restore stock when order is cancelled or rejected
@@ -631,12 +800,29 @@ function restore_archived_order($order_id) {
 }
 
 /**
- * Create shipment in Zipnova for an order
+ * DEPRECATED: Create shipment in Zipnova for an order
+ *
+ * ⚠️ ESTA FUNCIÓN ES LEGACY Y NO DEBE USARSE ⚠️
+ *
+ * Problemas de seguridad y formato:
+ * 1. Usa estructura de datos antigua que NO coincide con API de Zipnova
+ * 2. Falta campos requeridos: external_id, service_type, origin_id, items
+ * 3. declared_value incluye shipping (incorrecto - solo debe ser valor de productos)
+ * 4. No incluye document (DNI/CUIT) requerido por Zipnova
+ * 5. Usa nombres de campos incorrectos (province vs state, postal_code vs zipcode)
+ *
+ * La lógica correcta está en:
+ * - Auto-creación al marcar como pagado (líneas 367-460 de este archivo)
+ * - API endpoint: /api/create-shipment-from-order
+ *
+ * @deprecated No usar - mantener solo por compatibilidad legacy
  * @param string $order_id Order ID
  * @return array Result with success status
  */
 function create_zipnova_shipment_for_order($order_id) {
-    require_once __DIR__ . '/zipnova.php';
+    error_log("WARNING: Llamado a función DEPRECATED create_zipnova_shipment_for_order() para orden $order_id");
+
+    require_once __DIR__ . '/carriers.php'; // Cambio: zipnova.php no existe
 
     // Check if Zipnova is enabled and configured to auto-create
     $config = zipnova_get_config();
@@ -685,7 +871,7 @@ function create_zipnova_shipment_for_order($order_id) {
     ];
 
     // Create shipment in Zipnova
-    $result = zipnova_create_shipment($shipment_data);
+    $result = zipnova_create_shipment($shipment_data, $order['order_number'] ?? $order_id);
 
     if ($result['success']) {
         // Update order with shipment info

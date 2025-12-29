@@ -772,6 +772,7 @@ $user = get_logged_user();
                                 <th>Nombre</th>
                                 <th>Precio</th>
                                 <th>Stock</th>
+                                <th>Peso/Dim</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -779,7 +780,7 @@ $user = get_logged_user();
                         <tbody>
                             <?php if (empty($products)): ?>
                                 <tr>
-                                    <td colspan="8" style="text-align: center; padding: 40px; color: #999;">
+                                    <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
                                         No hay productos que coincidan con los filtros.
                                         <a href="<?php echo url('/admin/?page=productos-nuevo'); ?>" style="color: #4CAF50;">Crear nuevo producto</a>
                                     </td>
@@ -813,6 +814,16 @@ $user = get_logged_user();
                                             <?php elseif ($product['stock'] <= $product['stock_alert']): ?>
                                                 <span class="badge low-stock">Bajo</span>
                                             <?php endif; ?>
+                                        </td>
+                                        <td style="font-size: 0.85rem; color: #666;">
+                                            <?php
+                                            $weight = $product['weight'] ?? 500;
+                                            $length = $product['dimensions']['length'] ?? 20;
+                                            $width = $product['dimensions']['width'] ?? 15;
+                                            $height = $product['dimensions']['height'] ?? 10;
+                                            echo number_format($weight, 0) . 'g<br>';
+                                            echo number_format($length, 1) . '×' . number_format($width, 1) . '×' . number_format($height, 1) . 'cm';
+                                            ?>
                                         </td>
                                         <td>
                                             <span class="badge <?php echo $product['active'] ? 'active' : 'inactive'; ?>">

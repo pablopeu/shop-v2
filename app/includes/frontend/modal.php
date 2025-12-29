@@ -38,14 +38,25 @@
     .modal-container {
         background: var(--color-bg, white);
         border-radius: var(--border-radius-xl, 12px);
-        padding: var(--spacing-2xl, 30px);
-        max-width: 500px;
+        padding: var(--spacing-xl, 24px);
+        max-width: 480px;
         width: 90%;
-        max-height: 80vh;
+        max-height: 90vh;
         overflow-y: auto;
         text-align: center;
         box-shadow: var(--shadow-2xl, 0 20px 40px rgba(0,0,0,0.25));
         animation: modalSlideIn var(--transition-base, 0.3s) ease;
+    }
+
+    /* Hide scrollbar but keep functionality */
+    .modal-container::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+    }
+
+    .modal-container {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
     }
 
     @keyframes modalSlideIn {
@@ -284,7 +295,8 @@
 
         // Set content
         title.textContent = options.title || 'Confirmar Acción';
-        message.textContent = options.message || '¿Estás seguro?';
+        // Use innerHTML to allow HTML formatting (like <strong>, <br>, etc.)
+        message.innerHTML = options.message || '¿Estás seguro?';
 
         // Set details (optional)
         if (options.details) {

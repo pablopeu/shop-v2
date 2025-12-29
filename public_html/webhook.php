@@ -700,23 +700,24 @@ if ($notification_type === 'payment' || $notification_type === 'payments') {
 
         switch ($payment_status) {
             case 'approved':
-                $new_order_status = 'cobrada';
+                // Payment approved - order is now paid (estado: pagado)
+                $new_order_status = 'pagado';
                 break;
 
             case 'authorized':
-                // Payment authorized but not yet captured - treat as pending
-                $new_order_status = 'pendiente';
+                // Payment authorized but not yet captured - still unpaid
+                $new_order_status = 'impago';
                 log_webhook('Payment authorized - pending capture', ['order_id' => $order_id]);
                 break;
 
             case 'pending':
             case 'in_process':
-                $new_order_status = 'pendiente';
+                $new_order_status = 'impago';
                 break;
 
             case 'in_mediation':
-                // Payment is being disputed - keep current status but log it
-                $new_order_status = 'pendiente';
+                // Payment is being disputed - keep as unpaid
+                $new_order_status = 'impago';
                 log_webhook('Payment in mediation (dispute)', [
                     'order_id' => $order_id,
                     'status_detail' => $status_detail
@@ -914,7 +915,7 @@ if ($notification_type === 'payment' || $notification_type === 'payments') {
             // Send notifications based on new status (outside lock)
             // Las notificaciones se pueden enviar fuera del lock crítico
 
-            if ($new_order_status === 'cobrada') {
+            if ($new_order_status === 'pagado' && $payment_status === 'approved') {
                 // Payment approved - send to customer based on preference
                 $customer_notif_sent = false;
                 if (($updated_order['contact_preference'] ?? 'email') === 'telegram') {
@@ -943,7 +944,7 @@ if ($notification_type === 'payment' || $notification_type === 'payments') {
                     'telegram_sent' => $telegram_sent,
                     'admin_email_sent' => $admin_email_sent
                 ]);
-            } elseif ($new_order_status === 'pendiente' && in_array($payment_status, ['pending', 'in_process', 'authorized', 'in_mediation'])) {
+            } elseif ($new_order_status === 'impago' && in_array($payment_status, ['pending', 'in_process', 'authorized', 'in_mediation'])) {
                 // Payment pending - send to customer based on preference
                 $customer_notif_sent = false;
                 if (($updated_order['contact_preference'] ?? 'email') === 'telegram') {

@@ -159,6 +159,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_product'])) {
             'stock_alert' => intval($_POST['stock_alert'] ?? 5),
             'active' => isset($_POST['active']) ? true : false,
             'pickup_only' => isset($_POST['pickup_only']) ? true : false,
+            'weight' => floatval($_POST['weight'] ?? 500),
+            'dimensions' => [
+                'length' => floatval($_POST['length'] ?? 20),
+                'width' => floatval($_POST['width'] ?? 15),
+                'height' => floatval($_POST['height'] ?? 10)
+            ],
             'images' => $current_images,
             'thumbnail' => !empty($current_images) ? $current_images[0] : '',
             'seo' => [
@@ -685,6 +691,42 @@ $user = get_logged_user();
                             <label for="stock_alert">Alerta de Stock Bajo</label>
                             <input type="number" id="stock_alert" name="stock_alert"
                                    value="<?php echo $product['stock_alert']; ?>" min="0">
+                        </div>
+                    </div>
+
+                    <!-- Dimensions & Weight -->
+                    <div class="section-divider">📐 Dimensiones y Peso</div>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                        Estos datos se usan para calcular gastos de envío.
+                    </p>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="weight">Peso (gramos)</label>
+                            <input type="number" id="weight" name="weight" step="1" min="0"
+                                   value="<?php echo $product['weight'] ?? 500; ?>"
+                                   placeholder="500">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="length">Largo (cm)</label>
+                            <input type="number" id="length" name="length" step="0.1" min="0"
+                                   value="<?php echo $product['dimensions']['length'] ?? 20; ?>"
+                                   placeholder="20">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="width">Ancho (cm)</label>
+                            <input type="number" id="width" name="width" step="0.1" min="0"
+                                   value="<?php echo $product['dimensions']['width'] ?? 15; ?>"
+                                   placeholder="15">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="height">Alto (cm)</label>
+                            <input type="number" id="height" name="height" step="0.1" min="0"
+                                   value="<?php echo $product['dimensions']['height'] ?? 10; ?>"
+                                   placeholder="10">
                         </div>
                     </div>
 

@@ -24,16 +24,16 @@ function render_stats_cards($stats) {
                 <?php echo $stats['total_orders']; ?> operaciones
             </div>
         </div>
-        <div class="stat-card" style="border-left: 4px solid #FFA726;">
-            <div class="stat-value">$<?php echo number_format($stats['pending_amount'], 2, ',', '.'); ?></div>
-            <div class="stat-label">Pendientes</div>
+        <div class="stat-card" style="border-left: 4px solid #FF9800;">
+            <div class="stat-value">$<?php echo number_format($stats['unpaid_amount'], 2, ',', '.'); ?></div>
+            <div class="stat-label">Impago</div>
             <div style="font-size: 13px; color: #999; margin-top: 4px;">
-                <?php echo $stats['pending_orders']; ?> operaciones
+                <?php echo $stats['unpaid_orders']; ?> operaciones
             </div>
         </div>
         <div class="stat-card" style="border-left: 4px solid #4CAF50;">
-            <div class="stat-value">$<?php echo number_format($stats['cobradas_amount_gross'], 2, ',', '.'); ?></div>
-            <div class="stat-label">Cobradas (Bruto)</div>
+            <div class="stat-value">$<?php echo number_format($stats['paid_amount_gross'], 2, ',', '.'); ?></div>
+            <div class="stat-label">Pagado (Bruto)</div>
             <div style="font-size: 13px; color: #999; margin-top: 4px;">
                 <?php echo $stats['confirmed_orders']; ?> operaciones
             </div>
@@ -42,14 +42,14 @@ function render_stats_cards($stats) {
             <div class="stat-value">$<?php echo number_format($stats['total_fees'], 2, ',', '.'); ?></div>
             <div class="stat-label">Comisiones MP</div>
             <div style="font-size: 13px; color: #999; margin-top: 4px;">
-                de <?php echo $stats['confirmed_orders']; ?> ventas cobradas
+                de <?php echo $stats['confirmed_orders']; ?> ventas pagadas
             </div>
         </div>
         <div class="stat-card" style="border-left: 4px solid #27ae60;">
             <div class="stat-value">$<?php echo number_format($stats['net_revenue'], 2, ',', '.'); ?></div>
             <div class="stat-label">Ingreso Neto</div>
             <div style="font-size: 13px; color: #999; margin-top: 4px;">
-                Cobrado - Comisiones
+                Pagado - Comisiones
             </div>
         </div>
     </div>
@@ -111,11 +111,13 @@ function render_compact_actions_bar($filters, $csrf_token) {
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                 <select name="bulk_action" id="bulkAction">
                     <option value="">Seleccionar acción...</option>
-                    <option value="pending">Marcar como Pendiente</option>
-                    <option value="cobrada">Marcar como Cobrada</option>
-                    <option value="shipped">Marcar como Enviada</option>
-                    <option value="delivered">Marcar como Entregada</option>
-                    <option value="cancel">Cancelar</option>
+                    <option value="impago">Marcar como Impago</option>
+                    <option value="pagado">Marcar como Pagado</option>
+                    <option value="lista_retiro">Marcar Lista para Retiro</option>
+                    <option value="en_transito">Marcar En Tránsito</option>
+                    <option value="en_reparto">Marcar En Reparto</option>
+                    <option value="entregada">Marcar como Entregada</option>
+                    <option value="cancelada">Cancelar</option>
                     <option value="archive">Archivar</option>
                 </select>
                 <button type="submit" class="btn btn-primary btn-sm" data-action="confirmBulkAction">Aplicar a Seleccionadas</button>
@@ -127,11 +129,12 @@ function render_compact_actions_bar($filters, $csrf_token) {
             <!-- Status Filters -->
             <div class="status-filters-section">
                 <a href="?page=ventas&filter=all" class="filter-btn <?php echo $filters['status'] === 'all' ? 'active' : ''; ?>">Todas</a>
-                <a href="?page=ventas&filter=pending" class="filter-btn <?php echo $filters['status'] === 'pending' ? 'active' : ''; ?>">Pendientes</a>
-                <a href="?page=ventas&filter=cobrada" class="filter-btn <?php echo $filters['status'] === 'cobrada' ? 'active' : ''; ?>">Cobradas</a>
-                <a href="?page=ventas&filter=shipped" class="filter-btn <?php echo $filters['status'] === 'shipped' ? 'active' : ''; ?>">Enviadas</a>
-                <a href="?page=ventas&filter=delivered" class="filter-btn <?php echo $filters['status'] === 'delivered' ? 'active' : ''; ?>">Entregadas</a>
-                <a href="?page=ventas&filter=cancelled" class="filter-btn <?php echo $filters['status'] === 'cancelled' ? 'active' : ''; ?>">Canceladas</a>
+                <a href="?page=ventas&filter=impago" class="filter-btn <?php echo $filters['status'] === 'impago' ? 'active' : ''; ?>">Impago</a>
+                <a href="?page=ventas&filter=pagado" class="filter-btn <?php echo $filters['status'] === 'pagado' ? 'active' : ''; ?>">Pagado</a>
+                <a href="?page=ventas&filter=lista_retiro" class="filter-btn <?php echo $filters['status'] === 'lista_retiro' ? 'active' : ''; ?>">Lista Retiro</a>
+                <a href="?page=ventas&filter=en_transito" class="filter-btn <?php echo $filters['status'] === 'en_transito' ? 'active' : ''; ?>">En Tránsito</a>
+                <a href="?page=ventas&filter=entregada" class="filter-btn <?php echo $filters['status'] === 'entregada' ? 'active' : ''; ?>">Entregada</a>
+                <a href="?page=ventas&filter=cancelada" class="filter-btn <?php echo $filters['status'] === 'cancelada' ? 'active' : ''; ?>">Cancelada</a>
             </div>
         </div>
     <?php
@@ -161,13 +164,14 @@ function render_orders_table($orders, $filters, $status_labels) {
                     <th>Cotiz. $</th>
                     <th>Método de Pago</th>
                     <th>Estado</th>
+                    <th>Envío</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($orders)): ?>
                     <tr>
-                        <td colspan="10" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="11" style="text-align: center; padding: 40px; color: #999;">
                             No hay órdenes<?php echo $filters['status'] !== 'all' ? ' con este estado' : ''; ?>.
                         </td>
                     </tr>
@@ -247,6 +251,53 @@ function render_orders_table($orders, $filters, $status_labels) {
                                 <span class="status-badge" style="background: <?php echo $color; ?>;">
                                     <?php echo $label; ?>
                                 </span>
+                            </td>
+                            <td>
+                                <?php
+                                // Check if order has shipping
+                                $has_carrier_shipment = !empty($order['shipping']['carrier_shipment_id']);
+                                $has_rate_id = !empty($order['shipping_quote_data']['rate_id']);
+                                $has_service_id = !empty($order['shipping_service_id']);
+                                $has_shipping_data = $has_rate_id || $has_service_id;
+                                $shipment_id = $order['shipping']['carrier_shipment_id'] ?? '';
+                                $carrier = $order['shipping']['carrier'] ?? ($order['shipping_quote_data']['carrier_name'] ?? '');
+                                $delivery_method = $order['delivery_method'] ?? '';
+                                ?>
+                                <?php if ($has_carrier_shipment): ?>
+                                    <!-- Ya existe envío creado -->
+                                    <div style="display: flex; flex-direction: column; gap: 5px; align-items: center;">
+                                        <small style="color: #666; font-size: 11px;">
+                                            <?php echo htmlspecialchars($carrier); ?> #<?php echo htmlspecialchars(substr($shipment_id, -6)); ?>
+                                        </small>
+                                        <button type="button" class="btn btn-sm"
+                                                style="background: #667eea; color: white; font-size: 11px; padding: 4px 8px;"
+                                                data-action="printShippingLabel"
+                                                data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
+                                                data-shipment-id="<?php echo htmlspecialchars($shipment_id); ?>"
+                                                title="Imprimir etiqueta de envío">
+                                            🖨️ Etiqueta
+                                        </button>
+                                    </div>
+                                <?php elseif ($has_shipping_data && $order['status'] === 'pagado'): ?>
+                                    <!-- Tiene datos de shipping pero no se ha creado envío aún (SOLO si está pagado) -->
+                                    <div style="display: flex; flex-direction: column; gap: 5px; align-items: center;">
+                                        <small style="color: #28a745; font-size: 11px;">
+                                            <?php echo htmlspecialchars($carrier); ?>
+                                        </small>
+                                        <button type="button" class="btn btn-sm"
+                                                style="background: #28a745; color: white; font-size: 11px; padding: 4px 8px;"
+                                                data-action="createAndPrintShippingLabel"
+                                                data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
+                                                title="Crear envío y obtener etiqueta">
+                                            📦 Crear
+                                        </button>
+                                    </div>
+                                <?php elseif ($has_shipping_data && $order['status'] !== 'pagado'): ?>
+                                    <!-- Tiene datos pero no está pagado -->
+                                    <span style="display: inline-block; padding: 4px 8px; background: #fff3cd; border: 1px solid #FF9800; border-radius: 4px; color: #856404; font-size: 11px; font-weight: 600;">⏳ Pendiente</span>
+                                <?php else: ?>
+                                    <small style="color: #999;">-</small>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <div class="actions">

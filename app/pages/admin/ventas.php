@@ -72,13 +72,23 @@ $csrf_token = generate_csrf_token();
 // 5. Get logged user info
 $user = get_logged_user();
 
-// 6. Status labels for UI display
+// 6. Status labels for UI display (estados universales)
 $status_labels = [
-    'pending' => ['label' => 'Pendiente', 'color' => '#FFA726'],
-    'cobrada' => ['label' => 'Cobrada', 'color' => '#4CAF50'],
-    'shipped' => ['label' => 'Enviado', 'color' => '#2196F3'],
-    'delivered' => ['label' => 'Entregado', 'color' => '#4CAF50'],
-    'cancelled' => ['label' => 'Cancelado', 'color' => '#f44336'],
+    // Estados de pago
+    'impago' => ['label' => 'Impago', 'color' => '#FF9800'],
+    'pagado' => ['label' => 'Pagado', 'color' => '#4CAF50'],
+
+    // Estados de logística
+    'pendiente' => ['label' => 'Pendiente de Envío', 'color' => '#9E9E9E'],
+    'lista_retiro' => ['label' => 'Lista para Retiro', 'color' => '#00BCD4'],
+    'en_transito' => ['label' => 'En Tránsito', 'color' => '#2196F3'],
+    'en_reparto' => ['label' => 'En Reparto', 'color' => '#03A9F4'],
+    'entregada' => ['label' => 'Entregada', 'color' => '#4CAF50'],
+
+    // Estados de problema
+    'fallida' => ['label' => 'Fallida', 'color' => '#FF5722'],
+    'devuelta' => ['label' => 'Devuelta', 'color' => '#9C27B0'],
+    'cancelada' => ['label' => 'Cancelada', 'color' => '#f44336'],
     'rechazada' => ['label' => 'Rechazada', 'color' => '#f44336']
 ];
 
@@ -229,6 +239,9 @@ $status_labels = [
         const ordersData = <?php echo json_encode($orders); ?>;
         const token = '<?php echo $csrf_token; ?>';
 
+        // Export CSRF token to global scope for API calls
+        window.csrfToken = token;
+
         // Initialize immediately (before DOMContentLoaded)
         initModal(ordersData, token);
 
@@ -331,6 +344,170 @@ $status_labels = [
                 window.showToast('📊 Exportando ' + orderIds.length + ' venta(s) a CSV...');
             }
         }
+
+        /**
+         * Solicita e imprime la etiqueta de envío
+         */
+        function printShippingLabel(event, element, params) {
+            const orderId = params?.orderId;
+            const shipmentId = params?.shipmentId;
+
+            if (!orderId && !shipmentId) {
+                if (window.showToast) {
+                    window.showToast('⚠️ Error: No se pudo identificar el envío');
+                }
+                return;
+            }
+
+            // Disable button
+            if (element) {
+                element.disabled = true;
+                element.textContent = '⏳ Obteniendo...';
+            }
+
+            // Build API URL para verificar primero si hay error
+            const apiUrl = '<?php echo url('/api/?endpoint=print-shipping-label'); ?>' +
+                          (orderId ? '&order_id=' + encodeURIComponent(orderId) : '') +
+                          (shipmentId ? '&shipment_id=' + encodeURIComponent(shipmentId) : '') +
+                          '&format=pdf&action=download';
+
+            // Usar fetch para detectar errores antes de abrir ventana
+            fetch(apiUrl, {
+                method: 'HEAD', // Solo headers para verificar sin descargar
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Todo bien, abrir PDF en nueva ventana
+                    window.open(apiUrl, '_blank');
+                    if (window.showToast) {
+                        window.showToast('✅ Abriendo etiqueta...');
+                    }
+                } else if (response.status === 409) {
+                    // Error 409: Etiqueta aún no disponible
+                    if (window.showToast) {
+                        window.showToast('⏳ La etiqueta se está generando. Espera unos segundos y vuelve a intentar.');
+                    }
+                } else if (response.status === 404) {
+                    if (window.showToast) {
+                        window.showToast('❌ Etiqueta no encontrada. Verifica que el envío esté creado.');
+                    }
+                } else {
+                    if (window.showToast) {
+                        window.showToast('❌ Error al obtener la etiqueta. Código: ' + response.status);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking label:', error);
+                if (window.showToast) {
+                    window.showToast('❌ Error de conexión al obtener la etiqueta');
+                }
+            })
+            .finally(() => {
+                // Restore button
+                if (element) {
+                    element.disabled = false;
+                    element.textContent = '🖨️ Etiqueta';
+                }
+            });
+        }
+
+        /**
+         * Crea un envío en Zipnova y luego imprime la etiqueta
+         */
+        function createAndPrintShippingLabel(event, element, params) {
+            const orderId = params?.orderId;
+
+            if (!orderId) {
+                if (window.showToast) {
+                    window.showToast('⚠️ Error: No se pudo identificar la orden');
+                }
+                return;
+            }
+
+            // Disable button and show loading state
+            const originalText = element ? element.textContent : '';
+            if (element) {
+                element.disabled = true;
+                element.textContent = '⏳ Creando envío...';
+            }
+
+            // Get CSRF token (usar la variable global window.csrfToken)
+            const csrfToken = window.csrfToken || '<?php echo $csrf_token; ?>';
+
+            // Build API URL
+            const apiUrl = '<?php echo url('/api/?endpoint=create-shipment-from-order'); ?>';
+
+            // Create shipment via API
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    order_id: orderId,
+                    csrf_token: csrfToken
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (window.showToast) {
+                        window.showToast('✅ Envío creado exitosamente');
+                    }
+
+                    // Wait a moment for UI feedback, then print label
+                    setTimeout(() => {
+                        // Update button to show we're getting label
+                        if (element) {
+                            element.textContent = '⏳ Obteniendo etiqueta...';
+                        }
+
+                        // Now get the label using the created shipment_id
+                        const shipmentId = data.data.shipment_id;
+
+                        // Call printShippingLabel with the new shipment_id
+                        printShippingLabel(event, element, {
+                            orderId: orderId,
+                            shipmentId: shipmentId
+                        });
+
+                        // Reload page after a delay to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }, 500);
+                } else {
+                    if (window.showToast) {
+                        window.showToast('❌ Error: ' + (data.error || 'No se pudo crear el envío'));
+                    }
+
+                    // Restore button state
+                    if (element) {
+                        element.disabled = false;
+                        element.textContent = originalText;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error creating shipment:', error);
+                if (window.showToast) {
+                    window.showToast('❌ Error de conexión al crear el envío');
+                }
+
+                // Restore button state
+                if (element) {
+                    element.disabled = false;
+                    element.textContent = originalText;
+                }
+            });
+        }
+
+        // Export for event delegation
+        window.printShippingLabel = printShippingLabel;
+        window.createAndPrintShippingLabel = createAndPrintShippingLabel;
     </script>
 
     <!-- Modal Component -->

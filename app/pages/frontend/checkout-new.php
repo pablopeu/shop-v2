@@ -337,6 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
     if ($needs_shipping) {
         $address = sanitize_input($_POST['shipping_address'] ?? '');
+        $document = sanitize_input($_POST['shipping_document'] ?? '');
         $city = sanitize_input($_POST['shipping_city'] ?? '');
         $postal_code = sanitize_input($_POST['shipping_postal_code'] ?? '');
         $state = sanitize_input($_POST['shipping_province'] ?? '');
@@ -344,6 +345,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
         if (empty($address)) {
             $errors[] = 'La dirección es requerida para envío';
+        }
+
+        if (empty($document)) {
+            $errors[] = 'El DNI/CUIT es requerido para envío';
         }
 
         if (empty($city)) {
@@ -366,6 +371,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             $shipping_address = [
                 'name' => $customer_name,
                 'address' => $address,
+                'document' => $document,
                 'city' => $city,
                 'postal_code' => $postal_code,
                 'state' => $state,
@@ -389,10 +395,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     // If no errors, create order
     if (empty($errors)) {
 
-        // Get shipping data from form
+        // Get shipping data from form - datos completos de cotización
         $shipping_cost = floatval($_POST['shipping_cost'] ?? 0);
         $shipping_service_id = sanitize_input($_POST['shipping_service_id'] ?? '');
         $shipping_estimated_days = sanitize_input($_POST['shipping_estimated_days'] ?? '');
+        $shipping_service_name = sanitize_input($_POST['shipping_service_name'] ?? '');
+
+        // IDs de servicio
+        $shipping_service_type_id = sanitize_input($_POST['shipping_service_type_id'] ?? '');
+        $shipping_service_type_code = sanitize_input($_POST['shipping_service_type_code'] ?? '');
+
+        // Información del carrier
+        $shipping_carrier_id = sanitize_input($_POST['shipping_carrier_id'] ?? '');
+        $shipping_carrier_name = sanitize_input($_POST['shipping_carrier_name'] ?? '');
+        $shipping_carrier_logo = sanitize_input($_POST['shipping_carrier_logo'] ?? '');
+        $shipping_carrier_rating = floatval($_POST['shipping_carrier_rating'] ?? 0);
+
+        // Tipo de logística
+        $shipping_logistic_type = sanitize_input($_POST['shipping_logistic_type'] ?? '');
+
+        // Tiempos de entrega
+        $shipping_estimated_delivery = sanitize_input($_POST['shipping_estimated_delivery'] ?? '');
+        $shipping_estimation_expires_at = sanitize_input($_POST['shipping_estimation_expires_at'] ?? '');
+
+        // Desglose de costos
+        $shipping_price_shipment = floatval($_POST['shipping_price_shipment'] ?? 0);
+        $shipping_price_insurance = floatval($_POST['shipping_price_insurance'] ?? 0);
+        $shipping_price_base = floatval($_POST['shipping_price_base'] ?? 0);
+
+        // IDs de tarifa (críticos para crear envío)
+        $shipping_rate_id = sanitize_input($_POST['shipping_rate_id'] ?? '');
+        $shipping_tariff_id = sanitize_input($_POST['shipping_tariff_id'] ?? '');
+        $shipping_rate_source = sanitize_input($_POST['shipping_rate_source'] ?? '');
+
+        // Tags
+        $shipping_tags_json = sanitize_input($_POST['shipping_tags'] ?? '[]');
+        $shipping_tags = json_decode($shipping_tags_json, true) ?: [];
+
+        // DEBUG: Log shipping data received
+        error_log("DEBUG Checkout POST - shipping_service_id: " . ($shipping_service_id ?: 'EMPTY'));
+        error_log("DEBUG Checkout POST - shipping_rate_id: " . ($shipping_rate_id ?: 'EMPTY'));
+        error_log("DEBUG Checkout POST - shipping_carrier_name: " . ($shipping_carrier_name ?: 'EMPTY'));
+        error_log("DEBUG Checkout POST - delivery_method: " . $delivery_method);
 
         // Calculate final total including shipping
         $total_with_shipping = $total + $shipping_cost;
@@ -420,19 +464,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             'shipping_cost' => $shipping_cost,
             'shipping_service_id' => $shipping_service_id,
             'shipping_estimated_days' => $shipping_estimated_days,
+            // Datos completos de la cotización de envío (para recrear envío después)
+            'shipping_quote_data' => [
+                'service_id' => $shipping_service_id,
+                'service_name' => $shipping_service_name,
+                'service_type_id' => $shipping_service_type_id,
+                'service_type_code' => $shipping_service_type_code,
+                'carrier_id' => $shipping_carrier_id,
+                'carrier_name' => $shipping_carrier_name,
+                'carrier_logo' => $shipping_carrier_logo,
+                'carrier_rating' => $shipping_carrier_rating,
+                'logistic_type' => $shipping_logistic_type,
+                'estimated_days' => $shipping_estimated_days,
+                'estimated_delivery' => $shipping_estimated_delivery,
+                'estimation_expires_at' => $shipping_estimation_expires_at,
+                'cost' => $shipping_cost,
+                'price_shipment' => $shipping_price_shipment,
+                'price_insurance' => $shipping_price_insurance,
+                'price_base' => $shipping_price_base,
+                'rate_id' => $shipping_rate_id,
+                'tariff_id' => $shipping_tariff_id,
+                'rate_source' => $shipping_rate_source,
+                'tags' => $shipping_tags
+            ],
             'total' => $total_with_shipping,
             'payment_method' => $payment_method,
             'shipping_address' => $shipping_address,
             'customer_name' => $customer_name,
             'customer_email' => $customer_email,
             'customer_phone' => $full_phone,
+            'customer_document' => $shipping_address['document'] ?? '',
             'contact_preference' => $contact_preference,
             'delivery_method' => $delivery_method,
             'notes' => sanitize_input($_POST['notes'] ?? '')
         ];
 
-        // Create order
-        $result = create_order($order_data);
+        // Create order with error handling to ensure JSON response
+        try {
+            $result = create_order($order_data);
+        } catch (Exception $e) {
+            error_log("Exception during order creation: " . $e->getMessage());
+            $result = ['error' => 'Error del sistema al crear la orden'];
+        } catch (Error $e) {
+            error_log("Fatal error during order creation: " . $e->getMessage());
+            $result = ['error' => 'Error crítico del sistema'];
+        }
 
         if (isset($result['success']) && $result['success']) {
             $order = $result['order'];
@@ -442,8 +518,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 increment_coupon_usage($coupon_code);
             }
 
-            // Send order confirmation to customer (siempre por email)
-            send_order_confirmation_email($order);
+            // Queue order confirmation email to customer (async)
+            queue_email('order_confirmation', ['order' => $order], 'high');
 
             // Save customer data to cookies for future checkouts (1 year expiration)
             $cookie_expiry = time() + (365 * 24 * 60 * 60); // 1 year
@@ -460,6 +536,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             // Save shipping address if provided
             if ($shipping_address) {
                 setcookie('checkout_address', $shipping_address['address'], $cookie_expiry, $cookie_path);
+                setcookie('checkout_document', $shipping_address['document'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_city', $shipping_address['city'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_postal_code', $shipping_address['postal_code'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_state', $shipping_address['state'], $cookie_expiry, $cookie_path);
@@ -473,8 +550,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
             // For non-mercadopago payments: send admin notifications immediately
             if ($payment_method !== 'mercadopago') {
-                send_admin_new_order_email($order);
+                queue_email('admin_new_order', ['order' => $order], 'high');
                 send_telegram_new_order($order);
+
+                // Log the redirect for debugging
+                error_log("Redirecting to gracias page for order: {$order['id']}, method: {$payment_method}");
+
+                // Ensure no output before redirect
+                if (ob_get_level()) {
+                    ob_end_clean();
+                }
 
                 // Redirect to thank you page
                 header("Location: " . url("/gracias?order={$order['id']}&token={$order['tracking_token']}"));
@@ -1445,7 +1530,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
     </style>
 </head>
 <body>
-    <?php include APP_PATH . '/includes/admin/modal.php'; ?>
+    <?php include APP_PATH . '/includes/frontend/modal.php'; ?>
 
     <!-- Header -->
     <div class="header">
@@ -1579,6 +1664,13 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                            value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
                                 </div>
 
+                                <div class="form-group">
+                                    <label for="shipping_document">DNI / CUIT *</label>
+                                    <input type="text" id="shipping_document" name="shipping_document" placeholder="Ej: 12345678 o 20-12345678-9"
+                                           value="<?php echo htmlspecialchars($_POST['shipping_document'] ?? $_COOKIE['checkout_document'] ?? ''); ?>">
+                                    <small>Requerido por la empresa de envío</small>
+                                </div>
+
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="shipping_postal_code">Código Postal *</label>
@@ -1640,7 +1732,13 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <!-- Cotizaciones de envío -->
                                 <div id="shipping-quotes-container" class="hidden">
                                     <div class="form-group">
-                                        <label>Seleccioná tu método de envío *</label>
+                                        <label style="font-size: 1.1em; font-weight: 600; color: var(--checkout-text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                                            📦 Seleccioná tu método de envío
+                                            <span style="color: #e74c3c; font-weight: 700;">*</span>
+                                        </label>
+                                        <p style="font-size: 0.875rem; color: var(--checkout-text-secondary); margin-top: 0.25rem; margin-bottom: 0.75rem;">
+                                            Elegí la opción de envío que mejor se adapte a tus necesidades. La opción más económica está pre-seleccionada.
+                                        </p>
                                         <div id="shipping-quotes" class="radio-group">
                                             <!-- Las cotizaciones se cargarán aquí dinámicamente -->
                                         </div>
@@ -1658,9 +1756,41 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 </div>
 
                                 <!-- Hidden fields para guardar el método seleccionado -->
+                                <!-- Campos básicos -->
                                 <input type="hidden" id="shipping_service_id" name="shipping_service_id">
                                 <input type="hidden" id="shipping_cost" name="shipping_cost" value="0">
                                 <input type="hidden" id="shipping_estimated_days" name="shipping_estimated_days">
+                                <input type="hidden" id="shipping_service_name" name="shipping_service_name">
+
+                                <!-- IDs de servicio -->
+                                <input type="hidden" id="shipping_service_type_id" name="shipping_service_type_id">
+                                <input type="hidden" id="shipping_service_type_code" name="shipping_service_type_code">
+
+                                <!-- Información del carrier -->
+                                <input type="hidden" id="shipping_carrier_id" name="shipping_carrier_id">
+                                <input type="hidden" id="shipping_carrier_name" name="shipping_carrier_name">
+                                <input type="hidden" id="shipping_carrier_logo" name="shipping_carrier_logo">
+                                <input type="hidden" id="shipping_carrier_rating" name="shipping_carrier_rating">
+
+                                <!-- Tipo de logística -->
+                                <input type="hidden" id="shipping_logistic_type" name="shipping_logistic_type">
+
+                                <!-- Tiempos de entrega -->
+                                <input type="hidden" id="shipping_estimated_delivery" name="shipping_estimated_delivery">
+                                <input type="hidden" id="shipping_estimation_expires_at" name="shipping_estimation_expires_at">
+
+                                <!-- Desglose de costos -->
+                                <input type="hidden" id="shipping_price_shipment" name="shipping_price_shipment">
+                                <input type="hidden" id="shipping_price_insurance" name="shipping_price_insurance">
+                                <input type="hidden" id="shipping_price_base" name="shipping_price_base">
+
+                                <!-- IDs de tarifa (críticos para crear envío) -->
+                                <input type="hidden" id="shipping_rate_id" name="shipping_rate_id">
+                                <input type="hidden" id="shipping_tariff_id" name="shipping_tariff_id">
+                                <input type="hidden" id="shipping_rate_source" name="shipping_rate_source">
+
+                                <!-- Tags -->
+                                <input type="hidden" id="shipping_tags" name="shipping_tags">
                             </div>
                         </div>
                     </div>
@@ -2165,6 +2295,36 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
         // Submit order function
         function submitOrder() {
+            // Validar método de entrega
+            const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked');
+            if (!deliveryMethod) {
+                showModal({
+                    title: 'Error',
+                    message: 'Por favor selecciona un método de entrega',
+                    icon: '⚠️',
+                    confirmText: 'Entendido'
+                });
+                return;
+            }
+
+            // Si es envío, validar que se haya seleccionado cotización
+            if (deliveryMethod.value === 'shipping') {
+                const shippingServiceId = document.getElementById('shipping_service_id').value;
+                if (!shippingServiceId) {
+                    showModal({
+                        title: 'Cotización de envío requerida',
+                        message: 'Por favor hace clic en "📦 Calcular Costo de Envío" y seleccioná una opción de envío antes de continuar.',
+                        icon: '⚠️',
+                        iconClass: 'warning',
+                        confirmText: 'Entendido',
+                        showCancel: false
+                    });
+                    // Scroll hacia el paso 2 para que vea el botón de cotizar
+                    document.getElementById('step-2').scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+            }
+
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
 
             if (!paymentMethod) {
@@ -2181,15 +2341,97 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             if (paymentMethod.value === 'mercadopago') {
                 showMercadopagoModalWithoutOrder();
             } else {
-                // For other payment methods, submit form normally
-                const form = document.getElementById('checkout-form');
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'place_order';
-                hiddenInput.value = '1';
-                form.appendChild(hiddenInput);
-                form.submit();
+                // For other payment methods, show stock warning modal
+                showStockWarningModal(paymentMethod.value);
             }
+        }
+
+        // Show stock warning modal for non-Mercadopago payments
+        function showStockWarningModal(paymentMethod) {
+            const paymentLabels = {
+                'arrangement': 'Arreglo con el vendedor',
+                'pickup_payment': 'Pago al retirar'
+            };
+
+            const paymentLabel = paymentLabels[paymentMethod] || paymentMethod;
+
+            showModal({
+                title: '⚠️ Importante: Stock no reservado',
+                message: `Has elegido pagar con "<strong>${paymentLabel}</strong>". Tu pedido será confirmado, pero <strong>los productos no quedan reservados hasta que se confirme el pago</strong>.`,
+                details: `
+                    <div style="text-align: left; margin-top: 15px;">
+                        <p style="margin-bottom: 10px;"><strong>Esto significa que:</strong></p>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>Los productos pueden agotarse antes de que pagues</li>
+                            <li>No garantizamos disponibilidad hasta recibir el pago</li>
+                            <li>Te contactaremos para coordinar el pago y confirmar stock</li>
+                        </ul>
+                        <p style="margin-bottom: 10px;"><strong>¿Prefieres pagar ahora con MercadoPago?</strong></p>
+                        <p style="color: #666; font-size: 14px;">El pago con MercadoPago es instantáneo y reserva tu stock inmediatamente.</p>
+                    </div>
+                `,
+                icon: '⚠️',
+                iconClass: 'warning',
+                confirmText: '💳 Pagar con MercadoPago',
+                confirmType: 'primary',
+                cancelText: '✅ Continuar con ' + paymentLabel,
+                onConfirm: function() {
+                    // Switch to Mercadopago and show modal (WITHOUT submitting form)
+                    const mpRadio = document.getElementById('mercadopago-radio');
+                    if (mpRadio) {
+                        mpRadio.checked = true;
+
+                        // Update step 3 summary manually
+                        document.getElementById('step-3-summary').textContent = '💳 Mercadopago';
+                        markStepCompleted(3);
+
+                        // Show MP modal WITHOUT creating order yet
+                        // Order will be created when user clicks MP payment button
+                        setTimeout(() => {
+                            showMercadopagoModalWithoutOrder();
+                        }, 100);
+                    }
+                },
+                onCancel: function() {
+                    // Continue with selected payment method - submit form to create order
+                    submitFormWithPaymentMethod(paymentMethod);
+                }
+            });
+        }
+
+        // Submit form with selected payment method
+        function submitFormWithPaymentMethod(paymentMethod) {
+            const form = document.getElementById('checkout-form');
+
+            // DEBUG: Verificar valores de campos de shipping antes de enviar
+            const shippingServiceId = document.getElementById('shipping_service_id')?.value;
+            const shippingRateId = document.getElementById('shipping_rate_id')?.value;
+            const shippingCarrierName = document.getElementById('shipping_carrier_name')?.value;
+            console.log('📤 Enviando formulario con shipping data:');
+            console.log('  - shipping_service_id:', shippingServiceId || 'EMPTY');
+            console.log('  - shipping_rate_id:', shippingRateId || 'EMPTY');
+            console.log('  - shipping_carrier_name:', shippingCarrierName || 'EMPTY');
+
+            // Remove any existing place_order inputs to avoid duplicates
+            const existingInputs = form.querySelectorAll('input[name="place_order"]');
+            existingInputs.forEach(input => input.remove());
+
+            // Add new hidden input
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'place_order';
+            hiddenInput.value = '1';
+            form.appendChild(hiddenInput);
+
+            // Disable submit buttons to prevent double submission
+            const submitButtons = document.querySelectorAll('[data-action="submitOrder"]');
+            submitButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Procesando...';
+            });
+
+            // Submit form
+            form.submit();
         }
 
         // Show Mercadopago modal WITHOUT creating order (order will be created when user clicks MP button)
@@ -2356,7 +2598,28 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 },
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                // Check if response is ok
+                if (!response.ok) {
+                    console.error('HTTP Error:', response.status, response.statusText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                // Get text first to see what we're receiving
+                return response.text();
+            })
+            .then(text => {
+                console.log('Raw response (first 500 chars):', text.substring(0, 500));
+
+                // Try to parse as JSON
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('JSON Parse Error:', e);
+                    console.error('Full response text:', text);
+                    throw new Error('El servidor retornó una respuesta inválida. Ver consola para detalles.');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     // Vaciar el carrito inmediatamente después de crear la orden
@@ -2370,7 +2633,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     submitBtn.innerHTML = originalText;
                 } else {
                     showModal({
-                        title: 'Error',
+                        title: 'Error al Crear Orden',
                         message: data.error || 'Error desconocido',
                         icon: '❌',
                         confirmText: 'Entendido'
@@ -2380,10 +2643,12 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error completo:', error);
+                console.error('Error stack:', error.stack);
                 showModal({
-                    title: 'Error',
-                    message: 'Por favor intenta nuevamente.',
+                    title: 'Error al Crear Orden',
+                    message: 'No se pudo crear el pedido. ' + (error.message || 'Error desconocido'),
+                    details: '<p style="color: #666; font-size: 14px; margin-top: 10px;">Abre la consola del navegador (F12 → Console) para ver detalles técnicos del error.</p>',
                     icon: '❌',
                     confirmText: 'Entendido'
                 });

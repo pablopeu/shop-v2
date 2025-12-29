@@ -1,21 +1,19 @@
 <?php
 /**
  * Thank You Page - Order Confirmation
+ * Unificada para manejar tanto órdenes pagadas como impagadas
  */
 
-// Define security constant to prevent direct file access
-
-
-// Set security headers
-
-// Start session
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
 // Get order info from URL
 $order_id = $_GET['order'] ?? '';
 $token = $_GET['token'] ?? '';
 
 if (empty($order_id) || empty($token)) {
-    header('Location: ' . url('/'));
+    redirect(url('/'));
     exit;
 }
 
@@ -23,12 +21,16 @@ if (empty($order_id) || empty($token)) {
 $order = get_order_by_token($token);
 
 if (!$order || $order['id'] !== $order_id) {
-    header('Location: ' . url('/'));
+    redirect(url('/'));
     exit;
 }
 
-// Clear cart and coupon for successful orders
-// This handles Mercadopago payments where cart wasn't cleared at checkout
+// Determinar el estado del pago
+$order_status = $order['status'] ?? 'impago';
+$is_paid = in_array($order_status, ['pagado', 'cobrada', 'entregada', 'lista_retiro']);
+$is_pending = in_array($order_status, ['impago', 'pendiente', 'pending']);
+
+// Clear cart and coupon
 if (isset($_SESSION['cart'])) {
     unset($_SESSION['cart']);
 }
@@ -43,17 +45,18 @@ if (isset($_SESSION['applied_coupon'])) {
 $site_config = read_json(APP_PATH . '/config/site.json');
 $footer_config = read_json(APP_PATH . '/config/footer.json');
 $theme_config = read_json(APP_PATH . '/config/theme.json');
+$payment_config = read_json(APP_PATH . '/config/payment.json');
 
 $active_theme = $theme_config['active_theme'] ?? 'minimal';
 
-// Get payment status from URL if provided
-$payment_status = $_GET['payment_status'] ?? null;
-$payment_status_detail = $_GET['payment_status_detail'] ?? '';
-$payment_message = null;
-
-// Get specific message for non-approved payments
-if ($payment_status && $payment_status !== 'approved') {
-    $payment_message = get_payment_message($payment_status, $payment_status_detail);
+// Get MercadoPago public key for retry payment (solo si está pendiente)
+$mp_public_key = '';
+if ($is_pending) {
+    $payment_credentials = get_payment_credentials();
+    $mp_mode = $payment_config['mercadopago']['mode'] ?? 'sandbox';
+    $mp_public_key = $mp_mode === 'sandbox' ?
+        ($payment_credentials['mercadopago']['public_key_sandbox'] ?? '') :
+        ($payment_credentials['mercadopago']['public_key_prod'] ?? '');
 }
 
 ?>
@@ -62,7 +65,7 @@ if ($payment_status && $payment_status !== 'approved') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Gracias por tu compra! - <?php echo htmlspecialchars($site_config['site_name']); ?></title>
+    <title><?php echo $is_paid ? '¡Gracias por tu compra!' : 'Pedido Creado'; ?> - <?php echo htmlspecialchars($site_config['site_name']); ?></title>
 
     <!-- Theme System CSS -->
     <?php render_theme_css($active_theme); ?>
@@ -71,7 +74,93 @@ if ($payment_status && $payment_status !== 'approved') {
     <link rel="stylesheet" href="<?php echo url('/assets/css/mobile-menu.css'); ?>">
 
     <style nonce="<?= csp_nonce() ?>">
-        /* Info Box - Payment suggestions */
+        .success-container {
+            max-width: 600px;
+            margin: 4rem auto;
+            padding: 3rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-text, #333);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--color-text-secondary, #666);
+            margin-bottom: 2rem;
+        }
+
+        .order-info {
+            background: var(--color-bg-light, #f8f9fa);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--color-border, #e9ecef);
+        }
+
+        .order-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-label {
+            font-weight: 600;
+            color: var(--color-text-secondary, #495057);
+        }
+
+        .order-value {
+            color: var(--color-text, #212529);
+        }
+
+        .order-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--color-primary, #667eea);
+        }
+
+        .items-list {
+            margin: 2rem 0;
+        }
+
+        .items-list h3 {
+            margin-bottom: 15px;
+            color: var(--color-text, #2c3e50);
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--color-border, #e9ecef);
+        }
+
+        .item-name {
+            color: var(--color-text, #333);
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: var(--color-primary, #667eea);
+        }
+
         .info-box {
             background: var(--color-warning-bg, #fff3cd);
             border-left: 4px solid var(--color-warning, #ffc107);
@@ -95,26 +184,61 @@ if ($payment_status && $payment_status !== 'approved') {
             margin: 5px 0;
         }
 
-        /* Items list heading */
-        .items-list h3 {
-            margin-bottom: 15px;
-            color: var(--color-text, #2c3e50);
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
         }
 
-        /* Shipping info */
-        .shipping-info {
-            margin-top: 10px;
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
         }
 
-        /* Tracking info */
-        .tracking-info {
-            margin-top: 30px;
-            color: var(--color-text-lighter, #999);
-            font-size: 14px;
+        .btn-primary {
+            background: var(--color-success, #48bb78);
+            color: white;
         }
 
-        .tracking-link {
-            color: var(--color-primary, #667eea);
+        .btn-primary:hover {
+            background: var(--color-success-dark, #38a169);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-light, #f7fafc);
+            color: var(--color-text-secondary, #4a5568);
+            border: 2px solid var(--color-border, #e2e8f0);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-bg-lighter, #edf2f7);
+            border-color: var(--color-border-dark, #cbd5e0);
+        }
+
+        @media (max-width: 600px) {
+            .success-container {
+                margin: 2rem 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .success-icon {
+                font-size: 3rem;
+            }
         }
     </style>
 </head>
@@ -130,35 +254,22 @@ if ($payment_status && $payment_status !== 'approved') {
     </header>
 
     <div class="success-container">
-        <?php if ($payment_message): ?>
-        <div class="success-icon"><?php echo $payment_message['icon']; ?></div>
-
-        <h1><?php echo htmlspecialchars($payment_message['title']); ?></h1>
-        <p class="subtitle"><?php echo htmlspecialchars($payment_message['message']); ?></p>
-
-        <?php if (!empty($payment_message['suggestions'])): ?>
-        <div class="info-box">
-            <h3>ℹ️ Información importante:</h3>
-            <ul>
-                <?php foreach ($payment_message['suggestions'] as $suggestion): ?>
-                <li><?php echo htmlspecialchars($suggestion); ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-        <?php endif; ?>
-
-        <p class="subtitle">Detalles de tu pedido, <?php echo htmlspecialchars($order['customer_name']); ?>:</p>
+        <?php if ($is_paid): ?>
+            <!-- Orden pagada exitosamente -->
+            <div class="success-icon">✅</div>
+            <h1>¡Pedido Confirmado!</h1>
+            <p class="subtitle">Gracias por tu compra, <?php echo htmlspecialchars($order['customer_name']); ?></p>
         <?php else: ?>
-        <div class="success-icon">✅</div>
-
-        <h1>¡Pedido Confirmado!</h1>
-        <p class="subtitle">Gracias por tu compra, <?php echo htmlspecialchars($order['customer_name']); ?></p>
+            <!-- Orden pendiente de pago -->
+            <div class="success-icon">⏳</div>
+            <h1>Pedido Creado</h1>
+            <p class="subtitle">Tu pedido fue creado exitosamente, pero el pago aún no se ha completado.</p>
         <?php endif; ?>
 
         <div class="order-info">
             <div class="order-row">
                 <span class="order-label">Número de pedido:</span>
-                <span class="order-value order-number"><?php echo htmlspecialchars($order['order_number']); ?></span>
+                <span class="order-value order-number">#<?php echo htmlspecialchars($order['order_number']); ?></span>
             </div>
 
             <div class="order-row">
@@ -175,7 +286,13 @@ if ($payment_status && $payment_status !== 'approved') {
                 <span class="order-label">Método de pago:</span>
                 <span class="order-value">
                     <?php
-                    echo $order['payment_method'] === 'presencial' ? '💵 Pago Presencial' : '💳 Mercadopago';
+                    $payment_labels = [
+                        'mercadopago' => '💳 Mercadopago',
+                        'arrangement' => '🤝 Arreglo con el vendedor',
+                        'pickup_payment' => '💵 Pago al retirar',
+                        'presencial' => '💵 Pago Presencial'
+                    ];
+                    echo $payment_labels[$order['payment_method']] ?? '💳 ' . htmlspecialchars($order['payment_method']);
                     ?>
                 </span>
             </div>
@@ -185,12 +302,14 @@ if ($payment_status && $payment_status !== 'approved') {
                 <span class="order-value">
                     <?php
                     $status_labels = [
-                        'pending' => '📦 Pendiente',
-                        'confirmed' => '✅ Confirmado',
-                        'shipped' => '🚚 Enviado',
-                        'delivered' => '🏠 Entregado'
+                        'impago' => '⏳ Pendiente de pago',
+                        'pendiente' => '⏳ Pendiente de pago',
+                        'pagado' => '✅ Pagado',
+                        'cobrada' => '✅ Pagado',
+                        'lista_retiro' => '📦 Listo para retiro',
+                        'entregada' => '🏠 Entregado'
                     ];
-                    echo $status_labels[$order['status']] ?? '📦 Pendiente';
+                    echo $status_labels[$order_status] ?? $order_status;
                     ?>
                 </span>
             </div>
@@ -213,47 +332,181 @@ if ($payment_status && $payment_status !== 'approved') {
         </div>
         <?php endif; ?>
 
-        <?php if ($order['payment_method'] === 'presencial'): ?>
+        <?php if ($is_pending): ?>
+        <!-- Orden pendiente - Mostrar advertencia y opciones -->
         <div class="info-box">
-            <h3>ℹ️ Instrucciones para el retiro</h3>
+            <h3>⚠️ Importante: Stock no reservado</h3>
+            <p>Tu pedido fue creado pero <strong>el pago no se completó</strong>. Los productos <strong>no quedan reservados</strong> hasta que se confirme el pago.</p>
+            <ul style="margin-top: 10px;">
+                <li>Los productos pueden agotarse antes de que pagues</li>
+                <li>No garantizamos disponibilidad hasta recibir el pago</li>
+                <li>Te contactaremos para coordinar el pago</li>
+            </ul>
+        </div>
+
+        <div class="buttons">
+            <?php if (!empty($mp_public_key)): ?>
+            <button data-action="retryPayment" class="btn btn-primary">
+                💳 Pagar con MercadoPago
+            </button>
+            <?php endif; ?>
+
+            <a href="<?php echo url('/'); ?>" class="btn btn-secondary">
+                🏠 Volver a la Tienda
+            </a>
+        </div>
+
+        <?php else: ?>
+        <!-- Orden pagada - Mostrar solo volver a la tienda -->
+        <div class="info-box">
+            <h3>ℹ️ Próximos pasos</h3>
             <p>
-                <strong>Tu pedido está confirmado.</strong><br>
-                <?php if ($order['shipping_address']): ?>
+                <?php if (($order['delivery_method'] ?? 'pickup') === 'shipping'): ?>
                     Recibirás tu pedido en la dirección indicada. Te contactaremos pronto para coordinar la entrega.
                 <?php else: ?>
-                    Puedes retirar tu pedido en nuestro local. Te contactaremos pronto para coordinar el retiro y el pago.
+                    Puedes retirar tu pedido en nuestro local. Te contactaremos pronto para coordinar el retiro.
                 <?php endif; ?>
             </p>
-            <p class="shipping-info">
+            <p style="margin-top: 10px;">
                 <strong>Hemos enviado un email de confirmación a:</strong><br>
                 <?php echo htmlspecialchars($order['customer_email']); ?>
             </p>
         </div>
-        <?php else: ?>
-        <div class="info-box">
-            <h3>ℹ️ Próximos pasos</h3>
-            <p>
-                Una vez que se confirme el pago, comenzaremos a procesar tu pedido.
-                Te mantendremos informado por email sobre el estado de tu compra.
-            </p>
-        </div>
-        <?php endif; ?>
 
         <div class="buttons">
-            <a href="<?php echo url('/pedido?order=' . urlencode($order['id']) . '&token=' . urlencode($order['tracking_token'])); ?>"
-               class="btn btn-primary">
-                📦 Seguir mi pedido
-            </a>
-            <a href="<?php echo url('/'); ?>" class="btn btn-secondary">
-                🏠 Volver al inicio
+            <a href="<?php echo url('/'); ?>" class="btn btn-primary">
+                🏠 Volver a la Tienda
             </a>
         </div>
-
-        <p class="tracking-info">
-            Guarda este enlace para hacer seguimiento de tu pedido.<br>
-            También puedes rastrearlo en cualquier momento desde <a href="<?php echo url('/track'); ?>" class="tracking-link">aquí</a> usando tu email y número de pedido.
-        </p>
+        <?php endif; ?>
     </div>
+
+    <?php if ($is_pending && !empty($mp_public_key)): ?>
+    <!-- MercadoPago Payment Modal -->
+    <div id="mercadopago-modal" class="mp-modal mp-modal-scrollable">
+        <div class="mp-modal-content mp-modal-content-small">
+            <button data-action="closeMercadopagoModal" class="mp-close-btn">✕</button>
+            <div class="mb-md">
+                <h2 class="mp-title mp-title-small">💳 Pagar con Mercadopago</h2>
+                <p class="mp-order-info mp-order-info-small">Pedido #<?php echo htmlspecialchars($order['order_number']); ?></p>
+            </div>
+            <div class="mp-summary mp-summary-compact">
+                <div class="mp-summary-total mp-summary-total-simple">
+                    <span>Total a pagar</span>
+                    <span><?php echo format_price($order['total'], $order['currency']); ?></span>
+                </div>
+            </div>
+            <div id="mp-loading" class="mp-loading mp-loading-compact">
+                <div class="mp-loading-flex mp-loading-flex-small">
+                    <div class="spinner spinner-small"></div>
+                    <p class="mp-loading-text mp-loading-text-small">Cargando pasarela de pago...</p>
+                </div>
+            </div>
+            <div id="walletBrick_container"></div>
+        </div>
+    </div>
+
+    <style nonce="<?= csp_nonce() ?>">
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <!-- MercadoPago SDK -->
+    <script nonce="<?= csp_nonce() ?>" src="https://sdk.mercadopago.com/js/v2"></script>
+
+    <script nonce="<?= csp_nonce() ?>">
+        const mp = new MercadoPago('<?php echo $mp_public_key; ?>', {
+            locale: 'es-AR'
+        });
+
+        function retryPayment() {
+            // Show modal
+            document.getElementById('mercadopago-modal').classList.add('active');
+
+            // Create new preference for this order
+            fetch('<?php echo url('/api/?endpoint=crear-preferencia-mp'); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    order_id: '<?php echo $order['id']; ?>',
+                    tracking_token: '<?php echo $token; ?>'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.preference_id) {
+                    // Initialize Wallet Brick
+                    const bricksBuilder = mp.bricks();
+
+                    const renderWalletBrick = async () => {
+                        const settings = {
+                            initialization: {
+                                preferenceId: data.preference_id,
+                            },
+                            customization: {
+                                texts: {
+                                    valueProp: 'security_safety',
+                                },
+                            },
+                            callbacks: {
+                                onReady: () => {
+                                    document.getElementById('mp-loading').classList.add('hidden');
+                                },
+                                onSubmit: () => {
+                                    return new Promise((resolve, reject) => {
+                                        resolve();
+                                    });
+                                },
+                                onError: (error) => {
+                                    console.error('Error en Wallet Brick:', error);
+                                    document.getElementById('mp-loading').classList.add('hidden');
+                                    alert('Error al cargar el pago. Por favor intenta nuevamente.');
+                                }
+                            }
+                        };
+
+                        await bricksBuilder.create('wallet', 'walletBrick_container', settings);
+                    };
+
+                    renderWalletBrick();
+                } else {
+                    alert('Error al crear la preferencia de pago. Por favor intenta nuevamente.');
+                    closeMercadopagoModal();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al procesar el pago. Por favor intenta nuevamente más tarde.');
+                closeMercadopagoModal();
+            });
+        }
+
+        function closeMercadopagoModal() {
+            document.getElementById('mercadopago-modal').classList.remove('active');
+            // Reload page to check payment status
+            location.reload();
+        }
+
+        // Wrappers for event delegation
+        // Save original functions before overwriting
+        const _retryPayment = retryPayment;
+        window.retryPayment = function(event, element, params) {
+            return _retryPayment();
+        };
+
+        const _closeMercadopagoModal = closeMercadopagoModal;
+        window.closeMercadopagoModal = function(event, element, params) {
+            return _closeMercadopagoModal();
+        };
+    </script>
+
+    <!-- Event Delegation System -->
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
+    <?php endif; ?>
 
     <script nonce="<?= csp_nonce() ?>">
         // Clear cart and customer data after successful purchase

@@ -1,54 +1,55 @@
 <?php
 /**
- * Admin - Envíos Pendientes
- * Listado de envíos con estados: cobrada, enviada, entregada
+ * Admin - Envíos Archivados
+ * Listado de envíos archivados con opciones de restaurar o eliminar
  */
 
+if (!defined('APP_ENTRY_POINT')) {
+    die('Direct access not permitted');
+}
 
-
-// Check admin authentication
-require_admin();
+error_log("ENVIOS-ARCHIVO - Starting file execution");
 
 // Get configurations
 $site_config = read_json(APP_PATH . '/config/site.json');
-$page_title = 'Envíos Pendientes';
+$page_title = 'Envíos Archivados';
 $currency_config = read_json(APP_PATH . '/config/currency.json');
 $csrf_token = generate_csrf_token();
-
-// Get available carriers for filter
-require_once APP_PATH . '/includes/carriers.php';
-$available_carriers = get_all_carriers();
 
 // Handle actions
 $message = '';
 $error = '';
 
-// Check for message from session
-if (isset($_SESSION['envios_message'])) {
-    $message = $_SESSION['envios_message'];
-    unset($_SESSION['envios_message']);
-}
-
 // Check for messages in URL
 if (isset($_GET['msg'])) {
-    if ($_GET['msg'] === 'order_archived') {
-        $message = 'Envío archivado exitosamente';
-    } elseif ($_GET['msg'] === 'order_updated') {
-        $message = 'Envío actualizado exitosamente';
+    if ($_GET['msg'] === 'order_restored') {
+        $message = 'Envío restaurado exitosamente';
+    } elseif ($_GET['msg'] === 'order_deleted') {
+        $message = 'Envío eliminado exitosamente';
     }
 }
 
-// Archive order
-if (isset($_GET['action']) && $_GET['action'] === 'archive' && isset($_GET['id'])) {
+// Restore order
+if (isset($_GET['action']) && $_GET['action'] === 'restore' && isset($_GET['id'])) {
     $order_id = $_GET['id'];
 
-    if (archive_order($order_id)) {
-        log_admin_action('order_archived', $_SESSION['username'], ['order_id' => $order_id]);
-        $_SESSION['envios_message'] = 'Envío archivado exitosamente';
-        header('Location: ' . url('/admin/?page=envios-pendientes'), true, 303);
-        exit;
+    if (restore_archived_order($order_id)) {
+        $message = 'Envío restaurado exitosamente';
+        log_admin_action('order_restored', $_SESSION['username'], ['order_id' => $order_id]);
     } else {
-        $error = 'Error al archivar el envío';
+        $error = 'Error al restaurar el envío';
+    }
+}
+
+// Delete order permanently
+if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    $order_id = $_GET['id'];
+
+    if (delete_archived_order($order_id)) {
+        $message = 'Envío eliminado exitosamente';
+        log_admin_action('order_deleted', $_SESSION['username'], ['order_id' => $order_id]);
+    } else {
+        $error = 'Error al eliminar el envío';
     }
 }
 
@@ -60,23 +61,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
     if (!empty($selected_orders)) {
         $success_count = 0;
         foreach ($selected_orders as $order_id) {
-            if ($action === 'archive') {
-                if (archive_order($order_id)) {
+            if ($action === 'restore') {
+                if (restore_archived_order($order_id)) {
                     $success_count++;
                 }
-            } elseif ($action === 'mark_sent') {
-                if (update_order_status($order_id, 'en_transito', $_SESSION['username'])) {
-                    $success_count++;
-                }
-            } elseif ($action === 'mark_delivered') {
-                if (update_order_status($order_id, 'entregada', $_SESSION['username'])) {
+            } elseif ($action === 'delete') {
+                if (delete_archived_order($order_id)) {
                     $success_count++;
                 }
             }
         }
 
         $message = "$success_count envío(s) procesado(s) exitosamente";
-        log_admin_action('bulk_orders_action', $_SESSION['username'], [
+        log_admin_action('bulk_archived_orders_action', $_SESSION['username'], [
             'action' => $action,
             'count' => $success_count
         ]);
@@ -85,53 +82,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
     }
 }
 
-// Get all orders
-$all_orders = get_all_orders();
-
-// Filter only orders with shipping-related statuses
-$shipping_orders = array_filter($all_orders, function($order) {
-    return in_array($order['status'], ['impago', 'pagado', 'lista_retiro', 'en_transito', 'en_reparto', 'entregada', 'fallida', 'devuelta']);
-});
+// Get all archived orders
+$all_archived = get_archived_orders();
 
 // Apply filters
 $filter_status = $_GET['filter'] ?? 'all';
-$filter_delivery = $_GET['delivery'] ?? 'all';
-$filter_carrier = $_GET['carrier'] ?? 'all';
 $search_query = $_GET['search'] ?? '';
 
 // Apply status filter
 if ($filter_status === 'all') {
-    $orders = $shipping_orders;
-} elseif ($filter_status === 'impago') {
-    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'impago');
-} elseif ($filter_status === 'pagado') {
-    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'pagado');
-} elseif ($filter_status === 'lista_retiro') {
-    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'lista_retiro');
-} elseif ($filter_status === 'en_transito') {
-    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'en_transito');
-} elseif ($filter_status === 'entregada') {
-    $orders = array_filter($shipping_orders, fn($o) => $o['status'] === 'entregada');
+    $orders = $all_archived;
 } else {
-    $orders = $shipping_orders;
-}
-
-// Apply delivery method filter
-if ($filter_delivery === 'pickup') {
-    $orders = array_filter($orders, fn($o) => ($o['delivery_method'] ?? 'pickup') === 'pickup');
-} elseif ($filter_delivery === 'shipping') {
-    $orders = array_filter($orders, fn($o) => ($o['delivery_method'] ?? 'pickup') === 'shipping');
-}
-
-// Apply carrier filter
-if ($filter_carrier !== 'all') {
-    if ($filter_carrier === 'manual') {
-        // Orders without carrier (manual shipping)
-        $orders = array_filter($orders, fn($o) => empty($o['shipping']['carrier'] ?? null));
-    } else {
-        // Orders with specific carrier
-        $orders = array_filter($orders, fn($o) => ($o['shipping']['carrier'] ?? null) === $filter_carrier);
-    }
+    $orders = array_filter($all_archived, fn($o) => $o['status'] === $filter_status);
 }
 
 // Apply search filter
@@ -145,19 +107,21 @@ if (!empty($search_query)) {
     });
 }
 
-// Sort orders by date (newest first)
+// Sort orders by archived date (newest first)
 usort($orders, function($a, $b) {
-    return strtotime($b['date']) - strtotime($a['date']);
+    $date_a = $a['archived_date'] ?? $a['date'];
+    $date_b = $b['archived_date'] ?? $b['date'];
+    return strtotime($date_b) - strtotime($date_a);
 });
 
 // Calculate stats
-$total_orders = count($shipping_orders);
-$impagos = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'impago'));
-$pagados = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'pagado'));
-$lista_retiro = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'lista_retiro'));
-$en_transito = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'en_transito'));
-$enviadas = count(array_filter($shipping_orders, fn($o) => !empty($o['shipping']['carrier_shipment_id'])));
-$entregadas = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'entregada'));
+$total_archived = count($all_archived);
+$impagos = count(array_filter($all_archived, fn($o) => $o['status'] === 'impago'));
+$pagados = count(array_filter($all_archived, fn($o) => $o['status'] === 'pagado'));
+$lista_retiro = count(array_filter($all_archived, fn($o) => $o['status'] === 'lista_retiro'));
+$en_transito = count(array_filter($all_archived, fn($o) => $o['status'] === 'en_transito'));
+$enviadas = $en_transito; // Alias para stats card
+$entregadas = count(array_filter($all_archived, fn($o) => $o['status'] === 'entregada'));
 
 // Get logged user
 $user = get_logged_user();
@@ -168,7 +132,7 @@ $user = get_logged_user();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Envíos Pendientes - Admin</title>
+    <title>Envíos Archivados - Admin</title>
 
     <style nonce="<?= csp_nonce() ?>">
         * {
@@ -378,33 +342,19 @@ $user = get_logged_user();
             color: #0c5460;
         }
 
-        .badge.pickup {
+        .badge.cancelada {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.pending {
             background: #fff3cd;
             color: #856404;
         }
 
-        .badge.shipping {
-            background: #e2e3e5;
-            color: #383d41;
-        }
-
         .actions {
             display: flex;
-            align-items: center;
             gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .actions .btn {
-            white-space: nowrap;
-        }
-
-        /* Botones de estado de envío con ancho fijo para alineación */
-        .actions .btn-shipping-action,
-        .actions .shipping-status-badge {
-            min-width: 100px;
-            text-align: center;
-            display: inline-block;
         }
 
         /* Filters */
@@ -418,7 +368,7 @@ $user = get_logged_user();
 
         .filters-row {
             display: grid;
-            grid-template-columns: auto 1fr 1fr 1fr auto auto auto;
+            grid-template-columns: auto 1fr 1fr auto auto auto;
             gap: 12px;
             align-items: end;
         }
@@ -470,70 +420,6 @@ $user = get_logged_user();
         .bulk-actions-bar,
         .card {
             max-width: 100%;
-        }
-
-        /* Compact Actions Bar */
-        .compact-actions-bar {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .bulk-actions-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .bulk-actions-section select {
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            min-width: 180px;
-        }
-
-        .bulk-actions-section #selectedCount {
-            color: #4CAF50;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        /* Status Filter Buttons */
-        .status-filters-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            background: #f5f5f5;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            color: #666;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .filter-btn:hover {
-            background: #e8e8e8;
-            border-color: #d0d0d0;
-            color: #333;
-        }
-
-        .filter-btn.active {
-            background: #667eea;
-            border-color: #667eea;
-            color: white;
         }
 
         /* Bulk Actions Bar */
@@ -605,25 +491,6 @@ $user = get_logged_user();
         @media (max-width: 768px) {
             .main-content {
                 padding: 10px;
-            }
-
-            .compact-actions-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .bulk-actions-section {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .bulk-actions-section select,
-            .bulk-actions-section .btn {
-                width: 100%;
-            }
-
-            .status-filters-section {
-                justify-content: center;
             }
 
             .orders-table {
@@ -743,7 +610,6 @@ $user = get_logged_user();
                 min-width: auto;
                 bottom: 10px;
             }
-
             .table-container {
                 display: none !important;
             }
@@ -758,7 +624,7 @@ $user = get_logged_user();
                 padding: 15px;
                 margin-bottom: 12px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-                border-left: 4px solid #3498db;
+                border-left: 4px solid #999;
             }
 
             .mobile-card-header {
@@ -839,8 +705,8 @@ $user = get_logged_user();
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-value"><?php echo $total_orders; ?></div>
-                <div class="stat-label">Total Envíos</div>
+                <div class="stat-value"><?php echo $total_archived; ?></div>
+                <div class="stat-label">Total Archivados</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value"><?php echo $enviadas; ?></div>
@@ -852,99 +718,61 @@ $user = get_logged_user();
             </div>
         </div>
 
-        <!-- Filtros Avanzados -->
-        <div class="card">
-            <div class="card-header">Filtros Avanzados</div>
-            <form method="GET" action="<?php echo url('/admin/'); ?>" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; align-items: end;">
-                <input type="hidden" name="page" value="envios-pendientes">
-                <input type="hidden" name="filter" value="<?php echo htmlspecialchars($filter_status); ?>">
+        <!-- Filters -->
+        <div class="filters-card">
+            <form method="GET" action="">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <a href="<?php echo url('/admin/?page=envios-pendientes'); ?>" class="btn btn-secondary">
+                            Volver a Envíos
+                        </a>
+                    </div>
 
-                <div class="form-group" style="margin: 0;">
-                    <label for="search" style="font-size: 13px; margin-bottom: 5px; display: block;">Buscar (Nº Orden, Cliente, Email)</label>
-                    <input type="text" id="search" name="search"
-                           value="<?php echo htmlspecialchars($search_query); ?>"
-                           placeholder="Ej: 1001 o Juan Perez"
-                           style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%;">
-                </div>
+                    <div class="filter-group">
+                        <label for="search">Buscar</label>
+                        <input type="text" id="search" name="search"
+                               value="<?php echo htmlspecialchars($search_query); ?>"
+                               placeholder="Nº Orden, Cliente, Email">
+                    </div>
 
-                <div class="form-group" style="margin: 0;">
-                    <label for="delivery" style="font-size: 13px; margin-bottom: 5px; display: block;">Método Entrega</label>
-                    <select id="delivery" name="delivery" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%;">
-                        <option value="all" <?php echo $filter_delivery === 'all' ? 'selected' : ''; ?>>Todos</option>
-                        <option value="pickup" <?php echo $filter_delivery === 'pickup' ? 'selected' : ''; ?>>Retiro</option>
-                        <option value="shipping" <?php echo $filter_delivery === 'shipping' ? 'selected' : ''; ?>>Envío</option>
-                    </select>
-                </div>
+                    <div class="filter-group">
+                        <label for="filter">Estado</label>
+                        <select id="filter" name="filter">
+                            <option value="all" <?php echo $filter_status === 'all' ? 'selected' : ''; ?>>Todos</option>
+                            <option value="pending" <?php echo $filter_status === 'pending' ? 'selected' : ''; ?>>Pendiente</option>
+                            <option value="cobrada" <?php echo $filter_status === 'cobrada' ? 'selected' : ''; ?>>Cobrada</option>
+                            <option value="enviada" <?php echo $filter_status === 'enviada' ? 'selected' : ''; ?>>Enviada</option>
+                            <option value="entregada" <?php echo $filter_status === 'entregada' ? 'selected' : ''; ?>>Entregada</option>
+                            <option value="cancelada" <?php echo $filter_status === 'cancelada' ? 'selected' : ''; ?>>Cancelada</option>
+                        </select>
+                    </div>
 
-                <div class="form-group" style="margin: 0;">
-                    <label for="carrier" style="font-size: 13px; margin-bottom: 5px; display: block;">Carrier</label>
-                    <select id="carrier" name="carrier" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%;">
-                        <option value="all" <?php echo $filter_carrier === 'all' ? 'selected' : ''; ?>>Todos</option>
-                        <option value="manual" <?php echo $filter_carrier === 'manual' ? 'selected' : ''; ?>>Manual</option>
-                        <?php foreach ($available_carriers as $tag => $carrier): ?>
-                            <option value="<?php echo htmlspecialchars($tag); ?>"
-                                    <?php echo $filter_carrier === $tag ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($carrier['name'] ?? $tag); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div style="display: flex; gap: 8px;">
-                    <button type="submit" class="btn btn-primary btn-sm">Aplicar Filtros</button>
-                    <a href="?page=envios-pendientes" class="btn btn-secondary btn-sm">Limpiar</a>
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
                 </div>
             </form>
         </div>
 
-        <!-- Compact Actions Bar: Bulk Actions + Status Filters -->
-        <div class="card">
-            <div class="compact-actions-bar">
-                <!-- Bulk Actions Form -->
-                <form method="POST" id="bulkForm" class="bulk-actions-section">
-                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-                    <select name="bulk_action" id="bulkAction">
-                        <option value="">Seleccionar acción...</option>
-                        <option value="mark_sent">Marcar como Enviada</option>
-                        <option value="mark_delivered">Marcar como Entregada</option>
-                        <option value="archive">Archivar</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary btn-sm" data-action="confirmBulkAction">Aplicar a Seleccionadas</button>
-                    <a href="?page=envios-archivo" class="btn btn-secondary btn-sm">Ver Archivo</a>
-                    <span id="selectedCount"></span>
-                </form>
-
-                <!-- Status Filters -->
-                <div class="status-filters-section">
-                    <a href="?page=envios-pendientes&filter=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'all' ? 'active' : ''; ?>">Todas</a>
-                    <a href="?page=envios-pendientes&filter=impago<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'impago' ? 'active' : ''; ?>">Impago</a>
-                    <a href="?page=envios-pendientes&filter=pagado<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'pagado' ? 'active' : ''; ?>">Pagado</a>
-                    <a href="?page=envios-pendientes&filter=lista_retiro<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'lista_retiro' ? 'active' : ''; ?>">Lista Retiro</a>
-                    <a href="?page=envios-pendientes&filter=en_transito<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'en_transito' ? 'active' : ''; ?>">En Tránsito</a>
-                    <a href="?page=envios-pendientes&filter=en_reparto<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'en_reparto' ? 'active' : ''; ?>">En Reparto</a>
-                    <a href="?page=envios-pendientes&filter=entregada<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'entregada' ? 'active' : ''; ?>">Entregada</a>
-                    <a href="?page=envios-pendientes&filter=fallida<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'fallida' ? 'active' : ''; ?>">Fallida</a>
-                    <a href="?page=envios-pendientes&filter=devuelta<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo $filter_delivery !== 'all' ? '&delivery=' . $filter_delivery : ''; ?><?php echo $filter_carrier !== 'all' ? '&carrier=' . $filter_carrier : ''; ?>"
-                       class="filter-btn <?php echo $filter_status === 'devuelta' ? 'active' : ''; ?>">Devuelta</a>
-                </div>
+        <!-- Bulk Actions Bar -->
+        <form method="POST" id="bulkForm">
+            <div class="bulk-actions-bar" id="bulkActionsBar">
+                <span id="selectedCount">0 envíos seleccionados</span>
+                <select name="bulk_action" id="bulkAction">
+                    <option value="">Seleccionar acción...</option>
+                    <option value="restore">Restaurar</option>
+                    <option value="delete">Eliminar Permanentemente</option>
+                </select>
+                <button type="button" class="btn btn-sm btn-primary" data-action="confirmBulkAction">
+                    Aplicar
+                </button>
             </div>
-        </div>
 
-        <!-- Orders List -->
-        <div class="card">
+            <!-- Orders List -->
+            <div class="card">
                 <div class="card-header">
                     <?php if (empty($orders)): ?>
-                        Todos los Envíos
+                        Todos los Envíos Archivados
                     <?php else: ?>
-                        Mostrando <?php echo count($orders); ?> de <?php echo $total_orders; ?> envíos
+                        Mostrando <?php echo count($orders); ?> de <?php echo $total_archived; ?> envíos archivados
                     <?php endif; ?>
                 </div>
 
@@ -957,39 +785,22 @@ $user = get_logged_user();
                                 </th>
                                 <th>Nº Orden</th>
                                 <th>Cliente</th>
-                                <th>Fecha</th>
-                                <th>Total ARS</th>
-                                <th>Total USD</th>
-                                <th>Cotiz. $</th>
+                                <th>Fecha Orden</th>
+                                <th>Fecha Archivo</th>
+                                <th>Total</th>
                                 <th>Estado</th>
-                                <th>Carrier</th>
-                                <th>Entrega</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($orders)): ?>
                                 <tr>
-                                    <td colspan="10" style="text-align: center; padding: 40px; color: #999;">
-                                        No hay envíos que coincidan con los filtros.
+                                    <td colspan="8" style="text-align: center; padding: 40px; color: #999;">
+                                        No hay envíos archivados que coincidan con los filtros.
                                     </td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($orders as $order): ?>
-                                    <?php
-                                    // Calculate amounts in ARS and USD
-                                    $exchange_rate = $order['exchange_rate'] ?? 1000;
-                                    $total = $order['total'];
-                                    $currency = $order['currency'];
-
-                                    if ($currency === 'USD') {
-                                        $total_usd = $total;
-                                        $total_ars = $total * $exchange_rate;
-                                    } else {
-                                        $total_ars = $total;
-                                        $total_usd = $total / $exchange_rate;
-                                    }
-                                    ?>
                                     <tr data-id="<?php echo htmlspecialchars($order['id']); ?>">
                                         <td>
                                             <input type="checkbox" name="selected_orders[]"
@@ -1010,32 +821,36 @@ $user = get_logged_user();
                                             <small style="color: #999;"><?php echo date('H:i', strtotime($order['date'])); ?></small>
                                         </td>
                                         <td>
-                                            <strong>$<?php echo number_format($total_ars, 2, ',', '.'); ?></strong>
-                                        </td>
-                                        <td>
-                                            <strong>U$D <?php echo number_format($total_usd, 2, ',', '.'); ?></strong>
-                                        </td>
-                                        <td>
-                                            <small><?php echo number_format($exchange_rate, 2, ',', '.'); ?></small>
-                                        </td>
-                                        <td>
-                                            <?php echo render_shipping_status($order['shipping'] ?? null); ?>
-                                        </td>
-                                        <td>
                                             <?php
-                                            $carrier = $order['shipping']['carrier'] ?? null;
-                                            if ($carrier) {
-                                                $carrier_name = get_carrier_name($carrier);
-                                                echo '<span class="carrier-badge">' . htmlspecialchars($carrier) . '</span><br>';
-                                                echo '<small style="color: #666;">' . htmlspecialchars($carrier_name) . '</small>';
-                                            } else {
-                                                echo '<span style="color: #999;">Manual</span>';
-                                            }
+                                            $archived_date = $order['archived_date'] ?? null;
+                                            if ($archived_date):
                                             ?>
+                                                <?php echo date('d/m/Y', strtotime($archived_date)); ?><br>
+                                                <small style="color: #999;"><?php echo date('H:i', strtotime($archived_date)); ?></small>
+                                            <?php else: ?>
+                                                <small style="color: #999;">N/A</small>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
-                                            <span class="badge <?php echo $order['delivery_method'] ?? 'pickup'; ?>">
-                                                <?php echo ($order['delivery_method'] ?? 'pickup') === 'pickup' ? 'Retiro' : 'Envío'; ?>
+                                            <strong><?php echo format_price($order['total']); ?></strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge <?php echo $order['status']; ?>">
+                                                <?php
+                                                    $status_labels = [
+                                                        'impago' => 'Impago',
+                                                        'pagado' => 'Pagado',
+                                                        'lista_retiro' => 'Lista para Retiro',
+                                                        'en_transito' => 'En Tránsito',
+                                                        'en_reparto' => 'En Reparto',
+                                                        'entregada' => 'Entregada',
+                                                        'fallida' => 'Fallida',
+                                                        'devuelta' => 'Devuelta',
+                                                        'cancelada' => 'Cancelada',
+                                                        'rechazada' => 'Rechazada'
+                                                    ];
+                                                    echo $status_labels[$order['status']] ?? $order['status'];
+                                                ?>
                                             </span>
                                         </td>
                                         <td>
@@ -1044,46 +859,13 @@ $user = get_logged_user();
                                                         data-action="viewOrder" data-order-id="<?php echo $order['id']; ?>">
                                                     👁️ Ver
                                                 </button>
-                                                <?php
-                                                // Debug: ver estado de los datos
-                                                $has_shipment = !empty($order['shipping']['carrier_shipment_id']);
-                                                $has_rate_id = !empty($order['shipping_quote_data']['rate_id']);
-                                                $has_service_id = !empty($order['shipping_service_id']);
-                                                $delivery_method = $order['delivery_method'] ?? '';
-
-                                                // Verificar si la etiqueta ya fue generada
-                                                $has_label = !empty($order['shipping']['label_url']) || !empty($order['shipping']['label_generated_at']);
-                                                ?>
-
-                                                <?php if ($has_shipment): ?>
-                                                    <!-- Botón: Ya existe envío creado, solo obtener etiqueta -->
-                                                    <button type="button" class="btn btn-sm btn-shipping-action"
-                                                            style="background: <?php echo $has_label ? '#28a745' : '#667eea'; ?>; color: white;"
-                                                            data-action="printShippingLabel"
-                                                            data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
-                                                            data-shipment-id="<?php echo htmlspecialchars($order['shipping']['carrier_shipment_id']); ?>"
-                                                            title="<?php echo $has_label ? 'Re-imprimir etiqueta de envío' : 'Imprimir etiqueta de envío'; ?>">
-                                                        🖨️ Etiqueta<?php echo $has_label ? ' ✓' : ''; ?>
-                                                    </button>
-                                                <?php elseif (($has_rate_id || $has_service_id) && $order['status'] === 'pagado'): ?>
-                                                    <!-- Botón: Crear envío primero, luego obtener etiqueta (SOLO si está pagado) -->
-                                                    <button type="button" class="btn btn-sm btn-shipping-action"
-                                                            style="background: #28a745; color: white;"
-                                                            data-action="createAndPrintShippingLabel"
-                                                            data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
-                                                            title="Crear envío y obtener etiqueta">
-                                                        📦 Crear
-                                                    </button>
-                                                <?php elseif (($has_rate_id || $has_service_id) && $order['status'] !== 'pagado'): ?>
-                                                    <!-- Tiene datos pero no está pagado -->
-                                                    <span class="shipping-status-badge" style="display: inline-block; padding: 4px 8px; background: #fff3cd; border: 1px solid #FF9800; border-radius: 4px; color: #856404; font-size: 11px; font-weight: 600;">⏳ Pendiente</span>
-                                                <?php else: ?>
-                                                    <!-- Sin datos de envío -->
-                                                    <span class="shipping-status-badge" style="color: #999; font-size: 11px;">Sin datos</span>
-                                                <?php endif; ?>
+                                                <button type="button" class="btn btn-warning btn-sm"
+                                                        data-action="confirmRestoreOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
+                                                    ↩️ Restaurar
+                                                </button>
                                                 <button type="button" class="btn btn-danger btn-sm"
-                                                        data-action="confirmArchiveOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                                    📦 Archivar
+                                                        data-action="confirmDeleteOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
+                                                    🗑️ Eliminar
                                                 </button>
                                             </div>
                                         </td>
@@ -1101,7 +883,7 @@ $user = get_logged_user();
             <?php if (empty($orders)): ?>
                 <div class="card">
                     <p style="text-align: center; color: #999; padding: 20px;">
-                        No hay envíos que coincidan con los filtros.
+                        No hay envíos archivados que coincidan con los filtros.
                     </p>
                 </div>
             <?php else: ?>
@@ -1122,35 +904,22 @@ $user = get_logged_user();
                         </div>
 
                         <div class="mobile-card-body">
-                            <?php
-                            // Calculate amounts in ARS and USD for mobile view
-                            $exchange_rate = $order['exchange_rate'] ?? 1000;
-                            $total = $order['total'];
-                            $currency = $order['currency'];
-
-                            if ($currency === 'USD') {
-                                $total_usd = $total;
-                                $total_ars = $total * $exchange_rate;
-                            } else {
-                                $total_ars = $total;
-                                $total_usd = $total / $exchange_rate;
-                            }
-                            ?>
                             <div class="mobile-card-row">
-                                <span class="mobile-card-label">Fecha:</span>
+                                <span class="mobile-card-label">Fecha Orden:</span>
                                 <span class="mobile-card-value"><?php echo date('d/m/Y H:i', strtotime($order['date'])); ?></span>
                             </div>
                             <div class="mobile-card-row">
-                                <span class="mobile-card-label">Total ARS:</span>
-                                <span class="mobile-card-value"><strong>$<?php echo number_format($total_ars, 2, ',', '.'); ?></strong></span>
+                                <span class="mobile-card-label">Archivado:</span>
+                                <span class="mobile-card-value">
+                                    <?php
+                                    $archived_date = $order['archived_date'] ?? null;
+                                    echo $archived_date ? date('d/m/Y H:i', strtotime($archived_date)) : 'N/A';
+                                    ?>
+                                </span>
                             </div>
                             <div class="mobile-card-row">
-                                <span class="mobile-card-label">Total USD:</span>
-                                <span class="mobile-card-value"><strong>U$D <?php echo number_format($total_usd, 2, ',', '.'); ?></strong></span>
-                            </div>
-                            <div class="mobile-card-row">
-                                <span class="mobile-card-label">Cotiz. $:</span>
-                                <span class="mobile-card-value"><?php echo number_format($exchange_rate, 2, ',', '.'); ?></span>
+                                <span class="mobile-card-label">Total:</span>
+                                <span class="mobile-card-value"><strong><?php echo format_price($order['total']); ?></strong></span>
                             </div>
                             <div class="mobile-card-row">
                                 <span class="mobile-card-label">Estado:</span>
@@ -1165,18 +934,12 @@ $user = get_logged_user();
                                                 'en_reparto' => 'En Reparto',
                                                 'entregada' => 'Entregada',
                                                 'fallida' => 'Fallida',
-                                                'devuelta' => 'Devuelta'
+                                                'devuelta' => 'Devuelta',
+                                                'cancelada' => 'Cancelada',
+                                                'rechazada' => 'Rechazada'
                                             ];
                                             echo $status_labels[$order['status']] ?? $order['status'];
                                         ?>
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="mobile-card-row">
-                                <span class="mobile-card-label">Entrega:</span>
-                                <span class="mobile-card-value">
-                                    <span class="badge <?php echo $order['delivery_method'] ?? 'pickup'; ?>">
-                                        <?php echo ($order['delivery_method'] ?? 'pickup') === 'pickup' ? 'Retiro' : 'Envío'; ?>
                                     </span>
                                 </span>
                             </div>
@@ -1187,9 +950,13 @@ $user = get_logged_user();
                                     data-action="viewOrder" data-order-id="<?php echo $order['id']; ?>">
                                 Ver Detalles
                             </button>
+                            <button type="button" class="btn btn-warning btn-sm"
+                                    data-action="confirmRestoreOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
+                                Restaurar
+                            </button>
                             <button type="button" class="btn btn-danger btn-sm"
-                                    data-action="confirmArchiveOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
-                                Archivar
+                                    data-action="confirmDeleteOrder" data-order-id="<?php echo $order['id']; ?>" data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
+                                Eliminar
                             </button>
                         </div>
                     </div>
@@ -1208,25 +975,14 @@ $user = get_logged_user();
         // CSRF Token for API requests
         const token = '<?php echo $csrf_token; ?>';
 
-        // Export to global scope for API calls
-        window.csrfToken = token;
-
         /**
          * Ver detalles de orden en modal
          */
         function viewOrder(orderId) {
-            console.log('viewOrder (función interna) ejecutada con ID:', orderId);
-            // Fetch order details and show in modal
-            const apiUrl = '<?php echo url('/api/?endpoint=get-order'); ?>&id=' + orderId;
-            console.log('Fetching desde:', apiUrl);
-            fetch(apiUrl)
-                .then(response => {
-                    console.log('Response recibida:', response);
-                    console.log('Response status:', response.status);
-                    return response.json();
-                })
+            // Fetch order details from archived orders
+            fetch('<?php echo url('/api/?endpoint=get-archived-order'); ?>&id=' + orderId)
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Data recibida del API:', data);
                     if (data.success) {
                         const order = data.order;
                         let itemsHtml = '<table style="width: 100%; margin-top: 10px; border-collapse: collapse;">';
@@ -1247,7 +1003,6 @@ $user = get_logged_user();
                         if (order.shipping_address) {
                             if (typeof order.shipping_address === 'object') {
                                 const addr = order.shipping_address;
-                                // Soportar ambos formatos: nuevo (street/province) y actual (address/state)
                                 const street = addr.street || addr.address || '';
                                 const province = addr.province || addr.state || '';
                                 const parts = [];
@@ -1317,8 +1072,9 @@ $user = get_logged_user();
                                     <p><strong>Teléfono:</strong> ${order.customer_phone || 'N/A'}</p>
                                 </div>
                                 <div>
-                                    <p><strong>Estado:</strong> <span style="background: #667eea; color: white; padding: 4px 8px; border-radius: 4px;">${order.status}</span></p>
-                                    <p><strong>Fecha:</strong> ${order.date ? new Date(order.date).toLocaleString('es-AR') : 'N/A'}</p>
+                                    <p><strong>Estado:</strong> <span style="background: #999; color: white; padding: 4px 8px; border-radius: 4px;">${order.status}</span></p>
+                                    <p><strong>Fecha Orden:</strong> ${order.date ? new Date(order.date).toLocaleString('es-AR') : 'N/A'}</p>
+                                    ${order.archived_date ? `<p><strong>Fecha Archivo:</strong> ${new Date(order.archived_date).toLocaleString('es-AR')}</p>` : ''}
                                     <p><strong>Método de Entrega:</strong> ${order.delivery_method === 'pickup' ? '🏪 Retiro en Local' : '🚚 Envío a Domicilio'}</p>
                                     <p><strong>Total:</strong> <span style="font-size: 1.2em; color: #28a745;">${order.total_formatted || order.total}</span></p>
                                 </div>
@@ -1332,8 +1088,8 @@ $user = get_logged_user();
                         `;
 
                         showModal({
-                            title: 'Detalles de Envío',
-                            message: 'Información completa del envío',
+                            title: 'Detalles de Envío Archivado',
+                            message: 'Información completa del envío archivado',
                             details: detailsHtml,
                             icon: '📦',
                             iconClass: 'info',
@@ -1356,12 +1112,7 @@ $user = get_logged_user();
                     }
                 })
                 .catch(error => {
-                    console.error('Error en fetch:', error);
-                    console.error('Error details:', {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack
-                    });
+                    console.error('Error:', error);
                     showModal({
                         title: 'Error',
                         message: 'Error de conexión al cargar el envío.',
@@ -1376,21 +1127,37 @@ $user = get_logged_user();
         }
 
         /**
-         * Confirmar archivo de envío
+         * Confirmar restauración de envío
          */
-        function confirmArchiveOrder(orderId, orderNumber) {
+        function confirmRestoreOrder(orderId, orderNumber) {
             showModal({
-                title: 'Archivar Envío',
-                message: `¿Estás seguro de que deseas archivar "${orderNumber}"?`,
-                details: 'El envío se moverá al archivo y no aparecerá en el listado principal. Podrás restaurarlo desde la sección de Envíos Archivados.',
-                icon: '📦',
+                title: 'Restaurar Envío',
+                message: `¿Estás seguro de que deseas restaurar "${orderNumber}"?`,
+                details: 'El envío volverá a la lista principal de envíos pendientes.',
+                icon: '↩️',
                 iconClass: 'warning',
-                confirmText: 'Archivar',
+                confirmText: 'Restaurar',
+                confirmType: 'warning',
+                onConfirm: function() {
+                    window.location.href = `?action=restore&id=${orderId}`;
+                }
+            });
+        }
+
+        /**
+         * Confirmar eliminación permanente de envío
+         */
+        function confirmDeleteOrder(orderId, orderNumber) {
+            showModal({
+                title: 'Eliminar Envío Permanentemente',
+                message: `¿Estás seguro de que deseas eliminar "${orderNumber}"?`,
+                details: 'Esta acción no se puede deshacer. El envío será eliminado permanentemente del sistema.',
+                icon: '🗑️',
+                iconClass: 'danger',
+                confirmText: 'Eliminar Permanentemente',
                 confirmType: 'danger',
                 onConfirm: function() {
-                    // Construir URL completa para asegurar redirección correcta
-                    const baseUrl = window.location.pathname + '?page=envios-pendientes';
-                    window.location.href = `${baseUrl}&action=archive&id=${orderId}`;
+                    window.location.href = `?action=delete&id=${orderId}`;
                 }
             });
         }
@@ -1433,22 +1200,16 @@ $user = get_logged_user();
             // Configurar modal según la acción
             let title, message, icon, iconClass, confirmType;
 
-            if (action === 'mark_sent') {
-                title = 'Marcar como Enviada';
-                message = `¿Marcar ${count} envío${count > 1 ? 's' : ''} como enviada${count > 1 ? 's' : ''}?`;
-                icon = '📦';
-                iconClass = 'info';
-                confirmType = 'primary';
-            } else if (action === 'mark_delivered') {
-                title = 'Marcar como Entregada';
-                message = `¿Marcar ${count} envío${count > 1 ? 's' : ''} como entregada${count > 1 ? 's' : ''}?`;
-                icon = '✅';
-                iconClass = 'success';
-                confirmType = 'primary';
-            } else if (action === 'archive') {
-                title = 'Archivar Envíos';
-                message = `¿Archivar ${count} envío${count > 1 ? 's' : ''}?`;
-                icon = '📦';
+            if (action === 'restore') {
+                title = 'Restaurar Envíos';
+                message = `¿Restaurar ${count} envío${count > 1 ? 's' : ''}?`;
+                icon = '↩️';
+                iconClass = 'warning';
+                confirmType = 'warning';
+            } else if (action === 'delete') {
+                title = 'Eliminar Envíos Permanentemente';
+                message = `¿Eliminar permanentemente ${count} envío${count > 1 ? 's' : ''}?`;
+                icon = '🗑️';
                 iconClass = 'danger';
                 confirmType = 'danger';
             }
@@ -1511,22 +1272,22 @@ $user = get_logged_user();
 
             const _viewOrder = viewOrder;
             window.viewOrder = function(eventOrId, element, params) {
-                console.log('viewOrder llamado con:', { eventOrId, element, params });
                 const id = params?.orderId || (typeof eventOrId === 'string' ? eventOrId : null);
-                console.log('ID extraído:', id);
-                if (id) {
-                    console.log('Llamando a _viewOrder con ID:', id);
-                    return _viewOrder(id);
-                } else {
-                    console.error('viewOrder: No se pudo extraer el ID');
-                }
+                if (id) return _viewOrder(id);
             };
 
-            const _confirmArchiveOrder = confirmArchiveOrder;
-            window.confirmArchiveOrder = function(eventOrId, element, params) {
+            const _confirmRestoreOrder = confirmRestoreOrder;
+            window.confirmRestoreOrder = function(eventOrId, element, params) {
                 const id = params?.orderId || (typeof eventOrId === 'string' ? eventOrId : null);
                 const orderNumber = params?.orderNumber || (typeof element === 'string' ? element : '');
-                if (id) return _confirmArchiveOrder(id, orderNumber);
+                if (id) return _confirmRestoreOrder(id, orderNumber);
+            };
+
+            const _confirmDeleteOrder = confirmDeleteOrder;
+            window.confirmDeleteOrder = function(eventOrId, element, params) {
+                const id = params?.orderId || (typeof eventOrId === 'string' ? eventOrId : null);
+                const orderNumber = params?.orderNumber || (typeof element === 'string' ? element : '');
+                if (id) return _confirmDeleteOrder(id, orderNumber);
             };
         })();
 
@@ -1563,7 +1324,7 @@ $user = get_logged_user();
                 element.textContent = '⏳ Obteniendo...';
             }
 
-            // Build API URL para verificar primero si hay error
+            // Build API URL
             const apiUrl = '<?php echo url('/api/?endpoint=print-shipping-label'); ?>' +
                           (orderId ? '&order_id=' + encodeURIComponent(orderId) : '') +
                           (shipmentId ? '&shipment_id=' + encodeURIComponent(shipmentId) : '') +
@@ -1571,7 +1332,7 @@ $user = get_logged_user();
 
             // Usar fetch para detectar errores antes de abrir ventana
             fetch(apiUrl, {
-                method: 'HEAD', // Solo headers para verificar sin descargar
+                method: 'HEAD',
                 credentials: 'same-origin'
             })
             .then(response => {
@@ -1580,7 +1341,6 @@ $user = get_logged_user();
                     window.open(apiUrl, '_blank');
                     showToast('✅ Abriendo etiqueta...', 'success');
                 } else if (response.status === 409) {
-                    // Error 409: Etiqueta aún no disponible
                     showToast('⏳ La etiqueta se está generando. Espera unos segundos y vuelve a intentar.', 'warning');
                 } else if (response.status === 404) {
                     showToast('❌ Etiqueta no encontrada. Verifica que el envío esté creado.', 'error');
@@ -1601,96 +1361,14 @@ $user = get_logged_user();
             });
         }
 
-        /**
-         * Crea un envío en Zipnova y luego imprime la etiqueta
-         */
-        function createAndPrintShippingLabel(event, element, params) {
-            const orderId = params?.orderId;
-
-            if (!orderId) {
-                showToast('⚠️ Error: No se pudo identificar la orden', 'error');
-                return;
-            }
-
-            // Disable button and show loading state
-            const originalText = element ? element.textContent : '';
-            if (element) {
-                element.disabled = true;
-                element.textContent = '⏳ Creando envío...';
-            }
-
-            // Get CSRF token (usar la variable global window.csrfToken)
-            const csrfToken = window.csrfToken || '<?php echo $csrf_token; ?>';
-
-            // Build API URL
-            const apiUrl = '<?php echo url('/api/?endpoint=create-shipment-from-order'); ?>';
-
-            // Create shipment via API
-            fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({
-                    order_id: orderId,
-                    csrf_token: csrfToken
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('✅ Envío creado exitosamente', 'success');
-
-                    // Wait a moment for UI feedback, then print label
-                    setTimeout(() => {
-                        // Update button to show we're getting label
-                        if (element) {
-                            element.textContent = '⏳ Obteniendo etiqueta...';
-                        }
-
-                        // Now get the label using the created shipment_id
-                        const shipmentId = data.data.shipment_id;
-
-                        // Call printShippingLabel with the new shipment_id
-                        printShippingLabel(event, element, {
-                            orderId: orderId,
-                            shipmentId: shipmentId
-                        });
-
-                        // Reload page after a delay to show updated data
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
-                    }, 500);
-                } else {
-                    showToast('❌ Error: ' + (data.error || 'No se pudo crear el envío'), 'error');
-
-                    // Restore button state
-                    if (element) {
-                        element.disabled = false;
-                        element.textContent = originalText;
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error creating shipment:', error);
-                showToast('❌ Error de conexión al crear el envío', 'error');
-
-                // Restore button state
-                if (element) {
-                    element.disabled = false;
-                    element.textContent = originalText;
-                }
-            });
-        }
-
         // Export for event delegation
         window.printShippingLabel = printShippingLabel;
-        window.createAndPrintShippingLabel = createAndPrintShippingLabel;
     </script>
 
     <!-- Event Delegation System for CSP -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/event-handlers.js'); ?>"></script>
 </body>
 </html>
+<?php
+error_log("ENVIOS-ARCHIVO - Reached end of file successfully");
+?>

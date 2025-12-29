@@ -62,6 +62,7 @@ $pages_map = [
     // Envíos
     'envios-pendientes' => 'pages/admin/envios-pendientes.php',
     'envios-archivo' => 'pages/admin/envios-archivo.php',
+    'envios-archivo-simple' => 'pages/admin/envios-archivo-simple.php',
     
     // Promociones
     'promociones-listado' => 'pages/admin/promociones-listado.php',
@@ -77,6 +78,9 @@ $pages_map = [
     
     // Notificaciones
     'notificaciones' => 'pages/admin/notificaciones.php',
+    'config-email-templates' => 'pages/admin/config-email-templates.php',
+    'config-email-queue' => 'pages/admin/config-email-queue.php',
+    'emails-fallidos' => 'pages/admin/emails-fallidos.php',
 
     // Medios de Pago
     'config-payment' => 'pages/admin/config-payment.php',
@@ -116,8 +120,14 @@ if (!isset($pages_map[$page])) {
 // Cargar la página
 $page_file = APP_PATH . '/' . $pages_map[$page];
 
+// Debug logs
+error_log("ADMIN ROUTER - Requested page: $page");
+error_log("ADMIN ROUTER - Page file: $page_file");
+error_log("ADMIN ROUTER - File exists: " . (file_exists($page_file) ? 'YES' : 'NO'));
+
 if (!file_exists($page_file)) {
     // Archivo no existe, redirigir al dashboard
+    error_log("ADMIN ROUTER - File not found, redirecting to dashboard");
     redirect(url('/admin/'));
     exit;
 }
@@ -128,4 +138,6 @@ if (isset($_GET['debug'])) {
 }
 
 // Incluir la página
+error_log("ADMIN ROUTER - About to require: $page_file");
 require $page_file;
+error_log("ADMIN ROUTER - Page required successfully");
