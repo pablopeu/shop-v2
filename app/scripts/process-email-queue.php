@@ -1,41 +1,52 @@
 #!/usr/bin/env php
 <?php
 /**
- * Email Queue Processor
- *
- * Este script procesa la cola de emails pendientes de envío
- * Debe ejecutarse mediante cron job cada 1-5 minutos
- *
- * Ejemplo de crontab (cada minuto):
- * Minuto: asterisco-slash-1, Resto: asteriscos
- * /usr/bin/php /path/to/process-email-queue.php >> /path/to/email-queue.log 2>&1
+ * Email Queue Processor - Standalone Version
+ * Este script NO usa bootstrap para evitar headers HTTP
  */
 
-// Allow both CLI and web execution (for cPanel cron)
-// cPanel cron jobs sometimes run as web requests
+// Suppress all output except our echoes
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
 
-// Define as CLI mode to prevent HTTP headers and pseudo-cron execution
+// Start output buffering to catch any unwanted output
+ob_start();
+
+// Define constants
 define('CLI_MODE', true);
 define('APP_ENTRY_POINT', true);
 
-// Auto-detect environment and load bootstrap
-$bootstrap_path = null;
-
-// Try relative path (development)
-if (file_exists(__DIR__ . '/../bootstrap.php')) {
-    $bootstrap_path = __DIR__ . '/../bootstrap.php';
-}
-// Try production path
-elseif (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
-    $bootstrap_path = '/home2/uv0023/shop-v2-app/bootstrap.php';
+// Auto-detect app path
+$app_path = __DIR__ . '/../';
+if (!file_exists($app_path . 'includes/functions.php')) {
+    $app_path = '/home2/uv0023/shop-v2-app/';
 }
 
-if (!$bootstrap_path) {
-    die("Error: bootstrap.php not found\n");
+if (!file_exists($app_path . 'includes/functions.php')) {
+    ob_end_clean();
+    die("Error: App path not found\n");
 }
 
-// Load bootstrap (which loads all necessary includes)
-require_once $bootstrap_path;
+// Load config manually
+$config_file = $app_path . 'config/config.php';
+if (file_exists($config_file)) {
+    $config = require $config_file;
+    define('APP_PATH', $config['app_path']);
+    define('PUBLIC_PATH', $config['public_path']);
+    define('APP_ROOT', dirname(APP_PATH));
+} else {
+    // Fallback: use detected path
+    define('APP_PATH', rtrim($app_path, '/'));
+    define('PUBLIC_PATH', APP_PATH . '/../public_html');
+    define('APP_ROOT', dirname(APP_PATH));
+}
+
+// Load minimal dependencies (NO bootstrap - too many headers/sessions)
+require_once APP_PATH . '/includes/functions.php';
+require_once APP_PATH . '/includes/email.php';
+
+// Clean any unwanted output from includes
+ob_end_clean();
 
 // Start processing
 echo "[" . date('Y-m-d H:i:s') . "] Starting email queue processing...\n";
