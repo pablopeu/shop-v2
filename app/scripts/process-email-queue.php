@@ -6,27 +6,35 @@
  * Este script procesa la cola de emails pendientes de envío
  * Debe ejecutarse mediante cron job cada 1-5 minutos
  *
- * Ejemplo de crontab:
- * */1 * * * * /usr/bin/php /home/pablo/shop-v2/app/scripts/process-email-queue.php >> /home/pablo/shop-v2/logs/email-queue.log 2>&1
+ * Ejemplo de crontab (cada minuto):
+ * Minuto: asterisco-slash-1, Resto: asteriscos
+ * /usr/bin/php /path/to/process-email-queue.php >> /path/to/email-queue.log 2>&1
  */
 
-// Prevent direct browser access
-if (php_sapi_name() !== 'cli') {
-    die('This script must be run from the command line');
+// Allow both CLI and web execution (for cPanel cron)
+// cPanel cron jobs sometimes run as web requests
+
+// Define as CLI mode to prevent HTTP headers and pseudo-cron execution
+define('CLI_MODE', true);
+define('APP_ENTRY_POINT', true);
+
+// Auto-detect environment and load bootstrap
+$bootstrap_path = null;
+
+// Try relative path (development)
+if (file_exists(__DIR__ . '/../bootstrap.php')) {
+    $bootstrap_path = __DIR__ . '/../bootstrap.php';
 }
-
-// Bootstrap the application
-$bootstrap_path = __DIR__ . '/../../app/bootstrap.php';
-
-if (!file_exists($bootstrap_path)) {
-    // Try production path
+// Try production path
+elseif (file_exists('/home2/uv0023/shop-v2-app/bootstrap.php')) {
     $bootstrap_path = '/home2/uv0023/shop-v2-app/bootstrap.php';
-
-    if (!file_exists($bootstrap_path)) {
-        die("Error: bootstrap.php not found\n");
-    }
 }
 
+if (!$bootstrap_path) {
+    die("Error: bootstrap.php not found\n");
+}
+
+// Load bootstrap (which loads all necessary includes)
 require_once $bootstrap_path;
 
 // Start processing

@@ -77,15 +77,19 @@ session_start([
     'use_strict_mode' => true,
 ]);
 
-// Set security headers
-set_security_headers();
+// Set security headers (only in web mode)
+if (!defined('CLI_MODE')) {
+    set_security_headers();
+}
 
-// Check maintenance mode
-if (is_maintenance_mode() && !is_admin_area()) {
+// Check maintenance mode (only in web mode)
+if (!defined('CLI_MODE') && is_maintenance_mode() && !is_admin_area()) {
     require_once APP_PATH . '/pages/maintenance.php';
     exit;
 }
 
-// Run pseudo-cron for email queue processing
+// Run pseudo-cron for email queue processing (only in web mode)
 // Executes automatically every 60 seconds with minimal overhead
-run_pseudo_cron(60);
+if (!defined('CLI_MODE')) {
+    run_pseudo_cron(60);
+}
