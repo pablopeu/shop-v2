@@ -264,20 +264,16 @@ try {
         $shipment_id = $result['data']['id'] ?? null;
 
         if ($shipment_id) {
-            // Obtener la orden actualizada
-            $order = get_order_by_id($order_id);
+            // Preparar datos de envío para actualizar
+            $shipping_info = [
+                'carrier_shipment_id' => $shipment_id,
+                'carrier' => $quote_data['carrier_name'] ?? 'ZNVA',
+                'status' => 'pendiente',
+                'created_at' => date('Y-m-d H:i:s')
+            ];
 
-            if (!isset($order['shipping'])) {
-                $order['shipping'] = [];
-            }
-
-            $order['shipping']['carrier_shipment_id'] = $shipment_id;
-            $order['shipping']['carrier'] = $quote_data['carrier_name'] ?? 'ZNVA';
-            $order['shipping']['status'] = 'pendiente';
-            $order['shipping']['created_at'] = date('Y-m-d H:i:s');
-
-            // Guardar orden actualizada
-            if (update_order_data($order_id, $order)) {
+            // Actualizar orden con info de envío
+            if (update_order_shipping_info($order_id, $shipping_info)) {
                 error_log("API CreateShipment: Envío creado exitosamente: $shipment_id para orden $order_id");
 
                 http_response_code(200);
@@ -286,7 +282,7 @@ try {
                     'data' => [
                         'shipment_id' => $shipment_id,
                         'order_id' => $order_id,
-                        'carrier' => $order['shipping']['carrier']
+                        'carrier' => $shipping_info['carrier']
                     ],
                     'message' => 'Envío creado exitosamente'
                 ]);
