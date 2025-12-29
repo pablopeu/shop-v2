@@ -289,6 +289,21 @@ console.log('📦 shipping.js: Archivo cargado');
             autoSelectedRadio.checked = true;
             handleQuoteSelection(autoSelectedQuote);
             console.log('✅ Opción auto-seleccionada:', autoSelectedQuote.service_name);
+
+            // Si es pickup_point, mostrar el contenedor de puntos de entrega
+            if (autoSelectedQuote.service_type_code === 'pickup_point') {
+                // Ocultar todos los contenedores primero
+                document.querySelectorAll('.pickup-points-container').forEach(container => {
+                    container.classList.add('hidden');
+                });
+
+                // Mostrar el contenedor del quote auto-seleccionado
+                const container = autoSelectedRadio.closest('label').querySelector('.pickup-points-container');
+                if (container) {
+                    container.classList.remove('hidden');
+                    console.log('✅ Contenedor de pickup points mostrado automáticamente');
+                }
+            }
         } else {
             console.log('⚠️ No se auto-seleccionó ninguna opción - usuario debe elegir manualmente');
         }
