@@ -477,6 +477,11 @@ console.log('📦 shipping.js: Archivo cargado');
 
                 // Guardar en campo hidden
                 setHiddenField('shipping_pickup_point_id', selectedPointId);
+
+                // Disparar evento para re-validar el paso 2 del checkout
+                document.dispatchEvent(new CustomEvent('pickupPointSelected', {
+                    detail: { pointId: selectedPointId }
+                }));
             });
         }
 

@@ -2204,6 +2204,19 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     // Cotización ya seleccionada
                     const selectedQuote = document.querySelector('input[name="shipping_method_quote"]:checked');
                     if (selectedQuote) {
+                        // Validar que si es pickup_point, se haya seleccionado un punto
+                        const serviceTypeCode = selectedQuote.dataset.serviceTypeCode || '';
+                        const pickupPointId = document.getElementById('shipping_pickup_point_id')?.value || '';
+
+                        if (serviceTypeCode === 'pickup_point' && !pickupPointId) {
+                            // Es pickup_point pero no hay punto seleccionado
+                            const icon = method === 'pickup_point' ? '📍' : '📦';
+                            document.getElementById('step-2-summary').textContent = `${icon} Envío (seleccione punto de entrega)`;
+                            markStepIncomplete(2);
+                            console.warn('⚠️ Cotización de pickup_point seleccionada pero falta seleccionar punto específico');
+                            return;
+                        }
+
                         const cost = selectedQuote.dataset.cost || '0';
                         const days = selectedQuote.dataset.days || '';
                         const icon = method === 'pickup_point' ? '📍' : '📦';
@@ -2223,6 +2236,12 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         // Listen for shipping quote selection
         document.addEventListener('shippingSelected', function(e) {
             shippingQuoteSelected = true;
+            validateStep2(); // Re-validate to complete step
+        });
+
+        // Listen for pickup point selection
+        document.addEventListener('pickupPointSelected', function(e) {
+            console.log('📍 Pickup point selected event received:', e.detail.pointId);
             validateStep2(); // Re-validate to complete step
         });
 
