@@ -32,13 +32,8 @@ if (file_exists($archivo_path)) {
     echo "<p><strong>Tamaño:</strong> " . filesize($archivo_path) . " bytes</p>";
     echo "<p><strong>Última modificación:</strong> " . date('Y-m-d H:i:s', filemtime($archivo_path)) . "</p>";
 
-    // Intentar verificar sintaxis PHP
-    $output = [];
-    $return_var = 0;
-    exec("php -l " . escapeshellarg($archivo_path) . " 2>&1", $output, $return_var);
-    echo "<p><strong>Sintaxis PHP:</strong><br>" . nl2br(htmlspecialchars(implode("\n", $output))) . "</p>";
-
     // Verificar funciones utilizadas
+    echo "<h2>Funciones Requeridas:</h2><ul>";
     $funciones_requeridas = [
         'require_admin',
         'read_json',
@@ -53,7 +48,6 @@ if (file_exists($archivo_path)) {
         'htmlspecialchars'
     ];
 
-    echo "<h2>Funciones Requeridas:</h2><ul>";
     foreach ($funciones_requeridas as $func) {
         $exists = function_exists($func);
         echo "<li>" . htmlspecialchars($func) . ": " . ($exists ? '✅' : '❌') . "</li>";
@@ -66,6 +60,27 @@ if (file_exists($archivo_path)) {
     echo "<li>PUBLIC_PATH: " . (defined('PUBLIC_PATH') ? '✅ ' . htmlspecialchars(PUBLIC_PATH) : '❌') . "</li>";
     echo "<li>APP_ENTRY_POINT: " . (defined('APP_ENTRY_POINT') ? '✅' : '❌') . "</li>";
     echo "</ul>";
+
+    // Intentar incluir el archivo para ver si hay errores
+    echo "<h2>Intentando cargar el archivo:</h2>";
+    echo "<p>Activando error reporting...</p>";
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+
+    echo "<p>Intentando incluir archivo...</p>";
+    ob_start();
+    try {
+        include $archivo_path;
+        echo "<p>✅ Archivo incluido sin errores fatales</p>";
+    } catch (Throwable $e) {
+        echo "<p>❌ Error al incluir: " . htmlspecialchars($e->getMessage()) . "</p>";
+        echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    }
+    $output = ob_get_clean();
+    echo "<div style='border: 1px solid #ccc; padding: 10px; background: #f5f5f5;'>";
+    echo "<strong>Output del archivo:</strong><br>";
+    echo $output ? nl2br(htmlspecialchars($output)) : '<em>(sin output)</em>';
+    echo "</div>";
 }
 
 echo "<hr>";
