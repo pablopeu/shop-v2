@@ -62,6 +62,7 @@ $pages_map = [
     // Envíos
     'envios-pendientes' => 'pages/admin/envios-pendientes.php',
     'envios-archivo' => 'pages/admin/envios-archivo.php',
+    'envios-archivo-simple' => 'pages/admin/envios-archivo-simple.php',
     
     // Promociones
     'promociones-listado' => 'pages/admin/promociones-listado.php',
