@@ -518,8 +518,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 increment_coupon_usage($coupon_code);
             }
 
-            // Send order confirmation to customer (siempre por email)
-            send_order_confirmation_email($order);
+            // Queue order confirmation email to customer (async)
+            queue_email('order_confirmation', ['order' => $order], 'high');
 
             // Save customer data to cookies for future checkouts (1 year expiration)
             $cookie_expiry = time() + (365 * 24 * 60 * 60); // 1 year
@@ -550,7 +550,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
             // For non-mercadopago payments: send admin notifications immediately
             if ($payment_method !== 'mercadopago') {
-                send_admin_new_order_email($order);
+                queue_email('admin_new_order', ['order' => $order], 'high');
                 send_telegram_new_order($order);
 
                 // Log the redirect for debugging

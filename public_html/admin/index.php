@@ -79,6 +79,7 @@ $pages_map = [
     // Notificaciones
     'notificaciones' => 'pages/admin/notificaciones.php',
     'config-email-templates' => 'pages/admin/config-email-templates.php',
+    'emails-fallidos' => 'pages/admin/emails-fallidos.php',
 
     // Medios de Pago
     'config-payment' => 'pages/admin/config-payment.php',

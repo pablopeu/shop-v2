@@ -52,10 +52,10 @@ function handle_order_actions() {
                         $telegram_result = send_telegram_order_shipped_to_customer($updated_order);
                         error_log("Telegram notification result: " . ($telegram_result ? 'SUCCESS' : 'FAILED'));
                     } elseif (!empty($updated_order['customer_email'])) {
-                        // Send via Email (default)
-                        error_log("Sending email notification to: {$updated_order['customer_email']}");
-                        $email_result = send_order_shipped_email($updated_order);
-                        error_log("Email notification result: " . ($email_result ? 'SUCCESS' : 'FAILED'));
+                        // Queue email notification (async)
+                        error_log("Queueing email notification to: {$updated_order['customer_email']}");
+                        $email_result = queue_email('order_shipped', ['order' => $updated_order], 'normal');
+                        error_log("Email queued: " . ($email_result ? 'SUCCESS' : 'FAILED'));
                     } else {
                         error_log("No valid contact method found for order {$order_id}");
                     }
@@ -76,10 +76,10 @@ function handle_order_actions() {
                         $telegram_result = send_telegram_order_in_delivery_to_customer($updated_order);
                         error_log("Telegram notification result: " . ($telegram_result ? 'SUCCESS' : 'FAILED'));
                     } elseif (!empty($updated_order['customer_email'])) {
-                        // Send via Email (default)
-                        error_log("Sending email notification to: {$updated_order['customer_email']}");
-                        $email_result = send_order_in_delivery_email($updated_order);
-                        error_log("Email notification result: " . ($email_result ? 'SUCCESS' : 'FAILED'));
+                        // Queue email notification (async)
+                        error_log("Queueing email notification to: {$updated_order['customer_email']}");
+                        $email_result = queue_email('order_in_delivery', ['order' => $updated_order], 'normal');
+                        error_log("Email queued: " . ($email_result ? 'SUCCESS' : 'FAILED'));
                     } else {
                         error_log("No valid contact method found for order {$order_id}");
                     }
@@ -101,10 +101,10 @@ function handle_order_actions() {
                         $telegram_result = send_telegram_order_paid_to_customer($updated_order);
                         error_log("Telegram notification result: " . ($telegram_result ? 'SUCCESS' : 'FAILED'));
                     } elseif (!empty($updated_order['customer_email'])) {
-                        // Send via Email (default)
-                        error_log("Sending email notification to: {$updated_order['customer_email']}");
-                        $email_result = send_order_paid_email($updated_order);
-                        error_log("Email notification result: " . ($email_result ? 'SUCCESS' : 'FAILED'));
+                        // Queue email notification (async)
+                        error_log("Queueing email notification to: {$updated_order['customer_email']}");
+                        $email_result = queue_email('order_paid', ['order' => $updated_order], 'normal');
+                        error_log("Email queued: " . ($email_result ? 'SUCCESS' : 'FAILED'));
                     } else {
                         error_log("No valid contact method found for order {$order_id}");
                     }
@@ -127,10 +127,10 @@ function handle_order_actions() {
                         $telegram_result = send_telegram_order_delivered_to_customer($updated_order);
                         error_log("Telegram notification result: " . ($telegram_result ? 'SUCCESS' : 'FAILED'));
                     } elseif (!empty($updated_order['customer_email'])) {
-                        // Send via Email (default)
-                        error_log("Sending email notification to: {$updated_order['customer_email']}");
-                        $email_result = send_order_delivered_email($updated_order);
-                        error_log("Email notification result: " . ($email_result ? 'SUCCESS' : 'FAILED'));
+                        // Queue email notification (async)
+                        error_log("Queueing email notification to: {$updated_order['customer_email']}");
+                        $email_result = queue_email('order_delivered', ['order' => $updated_order], 'normal');
+                        error_log("Email queued: " . ($email_result ? 'SUCCESS' : 'FAILED'));
                     } else {
                         error_log("No valid contact method found for order {$order_id}");
                     }
@@ -209,7 +209,7 @@ function handle_order_actions() {
                                 if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
                                     send_telegram_order_shipped_to_customer($updated_order);
                                 } elseif (!empty($updated_order['customer_email'])) {
-                                    send_order_shipped_email($updated_order);
+                                    queue_email('order_shipped', ['order' => $updated_order], 'normal');
                                 }
                             }
                         }
@@ -223,7 +223,7 @@ function handle_order_actions() {
                                 if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
                                     send_telegram_order_in_delivery_to_customer($updated_order);
                                 } elseif (!empty($updated_order['customer_email'])) {
-                                    send_order_in_delivery_email($updated_order);
+                                    queue_email('order_in_delivery', ['order' => $updated_order], 'normal');
                                 }
                             }
                         }
@@ -237,7 +237,7 @@ function handle_order_actions() {
                                 if ($contact_preference === 'telegram' && !empty($updated_order['telegram_chat_id'])) {
                                     send_telegram_order_delivered_to_customer($updated_order);
                                 } elseif (!empty($updated_order['customer_email'])) {
-                                    send_order_delivered_email($updated_order);
+                                    queue_email('order_delivered', ['order' => $updated_order], 'normal');
                                 }
                             }
                         }

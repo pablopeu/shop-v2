@@ -311,9 +311,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reprocess_payment']))
                         log_notification_sent('TELEGRAM_PAYMENT_APPROVED_CUSTOMER', $updated_order['telegram_chat_id'] ?? 'N/A', $customer_notif_sent, $order_id);
                         $reprocess_result['notifications_sent'][] = 'Telegram al cliente: ' . ($customer_notif_sent ? '✅' : '❌');
                     } else {
-                        $customer_notif_sent = send_payment_approved_email($updated_order);
+                        $customer_notif_sent = queue_email('payment_approved', ['order' => $updated_order], 'high');
                         log_notification_sent('EMAIL_PAYMENT_APPROVED', $updated_order['customer_email'], $customer_notif_sent, $order_id);
-                        $reprocess_result['notifications_sent'][] = 'Email al cliente (' . $updated_order['customer_email'] . '): ' . ($customer_notif_sent ? '✅' : '❌');
+                        $reprocess_result['notifications_sent'][] = 'Email al cliente (' . $updated_order['customer_email'] . '): ' . ($customer_notif_sent ? '✅ (en cola)' : '❌');
                     }
                 } catch (Exception $e) {
                     $reprocess_result['notifications_sent'][] = 'Email al cliente: ❌ Error: ' . $e->getMessage();
@@ -336,11 +336,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reprocess_payment']))
                     ]);
                 }
 
-                // Send admin email
+                // Queue admin email
                 try {
-                    $admin_email_sent = send_admin_new_order_email($updated_order);
+                    $admin_email_sent = queue_email('admin_new_order', ['order' => $updated_order], 'high');
                     log_notification_sent('EMAIL_ADMIN_NEW_ORDER', 'admin', $admin_email_sent, $order_id);
-                    $reprocess_result['notifications_sent'][] = 'Email al admin: ' . ($admin_email_sent ? '✅' : '❌');
+                    $reprocess_result['notifications_sent'][] = 'Email al admin: ' . ($admin_email_sent ? '✅ (en cola)' : '❌');
                 } catch (Exception $e) {
                     $reprocess_result['notifications_sent'][] = 'Email al admin: ❌ Error: ' . $e->getMessage();
                     log_mp_error('REPROCESS_NOTIFICATION', 'Error enviando email al admin', [
@@ -367,9 +367,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reprocess_payment']))
                     log_notification_sent('TELEGRAM_PAYMENT_PENDING_CUSTOMER', $updated_order['telegram_chat_id'] ?? 'N/A', $customer_notif_sent, $order_id);
                     $reprocess_result['notifications_sent'][] = 'Telegram al cliente: ' . ($customer_notif_sent ? '✅' : '❌');
                 } else {
-                    $customer_notif_sent = send_payment_pending_email($updated_order);
+                    $customer_notif_sent = queue_email('payment_pending', ['order' => $updated_order], 'normal');
                     log_notification_sent('EMAIL_PAYMENT_PENDING', $updated_order['customer_email'], $customer_notif_sent, $order_id);
-                    $reprocess_result['notifications_sent'][] = 'Email al cliente: ' . ($customer_notif_sent ? '✅' : '❌');
+                    $reprocess_result['notifications_sent'][] = 'Email al cliente: ' . ($customer_notif_sent ? '✅ (en cola)' : '❌');
                 }
             } elseif ($new_order_status === 'rechazada') {
                 // Send to customer based on preference
@@ -379,9 +379,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reprocess_payment']))
                     log_notification_sent('TELEGRAM_PAYMENT_REJECTED_CUSTOMER', $updated_order['telegram_chat_id'] ?? 'N/A', $customer_notif_sent, $order_id);
                     $reprocess_result['notifications_sent'][] = 'Telegram al cliente: ' . ($customer_notif_sent ? '✅' : '❌');
                 } else {
-                    $customer_notif_sent = send_payment_rejected_email($updated_order, $status_detail);
+                    $customer_notif_sent = queue_email('payment_rejected', ['order' => $updated_order, 'status_detail' => $status_detail], 'normal');
                     log_notification_sent('EMAIL_PAYMENT_REJECTED', $updated_order['customer_email'], $customer_notif_sent, $order_id);
-                    $reprocess_result['notifications_sent'][] = 'Email al cliente: ' . ($customer_notif_sent ? '✅' : '❌');
+                    $reprocess_result['notifications_sent'][] = 'Email al cliente: ' . ($customer_notif_sent ? '✅ (en cola)' : '❌');
                 }
 
                 // Always send to admin via Telegram

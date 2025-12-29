@@ -893,3 +893,303 @@ function get_default_email_template($vars) {
 
     return $html;
 }
+
+/**
+ * Queue an email for asynchronous sending
+ *
+ * @param string $type Email type (order_confirmation, order_shipped, etc.)
+ * @param array $data Email data (order, subject, to, etc.)
+ * @param string $priority Priority: high, normal, low (default: normal)
+ * @return bool Success
+ */
+function queue_email($type, $data, $priority = 'normal') {
+    $queue_file = APP_PATH . '/data/email_queue.json';
+
+    // Initialize queue if not exists
+    if (!file_exists($queue_file)) {
+        write_json($queue_file, []);
+    }
+
+    // Load current queue
+    $queue = read_json($queue_file);
+
+    // Generate unique ID
+    $email_id = 'email_' . time() . '_' . bin2hex(random_bytes(4));
+
+    // Create email entry
+    $email_entry = [
+        'id' => $email_id,
+        'type' => $type,
+        'data' => $data,
+        'priority' => $priority,
+        'status' => 'pending',
+        'attempts' => 0,
+        'max_attempts' => 3,
+        'created_at' => date('Y-m-d H:i:s'),
+        'last_attempt' => null,
+        'error' => null
+    ];
+
+    // Add to queue
+    $queue[] = $email_entry;
+
+    // Save queue
+    if (write_json($queue_file, $queue)) {
+        error_log("Email queued successfully: $email_id - Type: $type");
+        return true;
+    } else {
+        error_log("Failed to queue email: $email_id - Type: $type");
+        return false;
+    }
+}
+
+/**
+ * Process email queue (called by cron job)
+ *
+ * @param int $batch_size Maximum emails to process per run (default: 10)
+ * @return array Statistics (sent, failed, pending)
+ */
+function process_email_queue($batch_size = 10) {
+    $queue_file = APP_PATH . '/data/email_queue.json';
+    $failed_log_file = APP_PATH . '/data/email_failed.json';
+
+    if (!file_exists($queue_file)) {
+        return ['sent' => 0, 'failed' => 0, 'pending' => 0];
+    }
+
+    // Load queue
+    $queue = read_json($queue_file);
+    $failed_emails = file_exists($failed_log_file) ? read_json($failed_log_file) : [];
+
+    $stats = ['sent' => 0, 'failed' => 0, 'pending' => 0, 'skipped' => 0];
+    $processed = 0;
+
+    // Sort by priority (high -> normal -> low) and created_at
+    usort($queue, function($a, $b) {
+        $priority_order = ['high' => 0, 'normal' => 1, 'low' => 2];
+        $a_priority = $priority_order[$a['priority']] ?? 1;
+        $b_priority = $priority_order[$b['priority']] ?? 1;
+
+        if ($a_priority !== $b_priority) {
+            return $a_priority - $b_priority;
+        }
+
+        return strtotime($a['created_at']) - strtotime($b['created_at']);
+    });
+
+    foreach ($queue as $key => $email) {
+        // Skip if already processed
+        if ($email['status'] !== 'pending') {
+            if ($email['status'] === 'sent') {
+                $stats['sent']++;
+            } elseif ($email['status'] === 'failed') {
+                $stats['failed']++;
+            }
+            $stats['skipped']++;
+            continue;
+        }
+
+        // Respect batch size
+        if ($processed >= $batch_size) {
+            $stats['pending']++;
+            continue;
+        }
+
+        // Process email
+        $result = send_queued_email($email);
+
+        if ($result['success']) {
+            // Mark as sent
+            $queue[$key]['status'] = 'sent';
+            $queue[$key]['sent_at'] = date('Y-m-d H:i:s');
+            $stats['sent']++;
+
+            error_log("Email sent successfully: {$email['id']} - Type: {$email['type']}");
+        } else {
+            // Increment attempts
+            $queue[$key]['attempts']++;
+            $queue[$key]['last_attempt'] = date('Y-m-d H:i:s');
+            $queue[$key]['error'] = $result['error'];
+
+            if ($queue[$key]['attempts'] >= $queue[$key]['max_attempts']) {
+                // Mark as failed and move to failed log
+                $queue[$key]['status'] = 'failed';
+                $queue[$key]['failed_at'] = date('Y-m-d H:i:s');
+                $stats['failed']++;
+
+                // Add to failed log for dashboard alert
+                $failed_emails[] = $queue[$key];
+
+                error_log("Email FAILED after {$queue[$key]['attempts']} attempts: {$email['id']} - Error: {$result['error']}");
+            } else {
+                error_log("Email attempt {$queue[$key]['attempts']}/{$queue[$key]['max_attempts']} failed: {$email['id']} - Error: {$result['error']}");
+                $stats['pending']++;
+            }
+        }
+
+        $processed++;
+    }
+
+    // Save updated queue
+    write_json($queue_file, $queue);
+
+    // Save failed log
+    if (!empty($failed_emails)) {
+        write_json($failed_log_file, $failed_emails);
+    }
+
+    return $stats;
+}
+
+/**
+ * Send a queued email
+ *
+ * @param array $email Email entry from queue
+ * @return array ['success' => bool, 'error' => string]
+ */
+function send_queued_email($email) {
+    $type = $email['type'];
+    $data = $email['data'];
+
+    try {
+        // Determine which email function to call based on type
+        switch ($type) {
+            case 'order_confirmation':
+                $result = send_order_confirmation_email($data['order']);
+                break;
+
+            case 'payment_approved':
+                $result = send_payment_approved_email($data['order']);
+                break;
+
+            case 'payment_rejected':
+                $result = send_payment_rejected_email($data['order'], $data['status_detail'] ?? '');
+                break;
+
+            case 'payment_pending':
+                $result = send_payment_pending_email($data['order']);
+                break;
+
+            case 'order_shipped':
+                $result = send_order_shipped_email($data['order']);
+                break;
+
+            case 'order_in_delivery':
+                $result = send_order_in_delivery_email($data['order']);
+                break;
+
+            case 'order_delivered':
+                $result = send_order_delivered_email($data['order']);
+                break;
+
+            case 'order_paid':
+                $result = send_order_paid_email($data['order']);
+                break;
+
+            case 'admin_new_order':
+                $result = send_admin_new_order_email($data['order']);
+                break;
+
+            case 'admin_chargeback':
+                $result = send_admin_chargeback_alert($data['order'], $data['chargeback']);
+                break;
+
+            case 'shipping_preparation':
+                $result = send_shipping_preparation_email($data['order']);
+                break;
+
+            default:
+                return ['success' => false, 'error' => "Unknown email type: $type"];
+        }
+
+        if ($result) {
+            return ['success' => true, 'error' => null];
+        } else {
+            return ['success' => false, 'error' => 'Email function returned false'];
+        }
+
+    } catch (Exception $e) {
+        return ['success' => false, 'error' => $e->getMessage()];
+    }
+}
+
+/**
+ * Get failed emails count (for dashboard alert)
+ *
+ * @return int Number of failed emails
+ */
+function get_failed_emails_count() {
+    $failed_log_file = APP_PATH . '/data/email_failed.json';
+
+    if (!file_exists($failed_log_file)) {
+        return 0;
+    }
+
+    $failed = read_json($failed_log_file);
+    return count($failed);
+}
+
+/**
+ * Get failed emails (for admin view)
+ *
+ * @return array Failed emails
+ */
+function get_failed_emails() {
+    $failed_log_file = APP_PATH . '/data/email_failed.json';
+
+    if (!file_exists($failed_log_file)) {
+        return [];
+    }
+
+    return read_json($failed_log_file);
+}
+
+/**
+ * Clear failed emails log
+ *
+ * @return bool Success
+ */
+function clear_failed_emails() {
+    $failed_log_file = APP_PATH . '/data/email_failed.json';
+    return write_json($failed_log_file, []);
+}
+
+/**
+ * Retry a failed email
+ *
+ * @param string $email_id Email ID to retry
+ * @return bool Success
+ */
+function retry_failed_email($email_id) {
+    $queue_file = APP_PATH . '/data/email_queue.json';
+    $failed_log_file = APP_PATH . '/data/email_failed.json';
+
+    if (!file_exists($queue_file) || !file_exists($failed_log_file)) {
+        return false;
+    }
+
+    $queue = read_json($queue_file);
+    $failed = read_json($failed_log_file);
+
+    // Find email in queue and reset status
+    foreach ($queue as $key => $email) {
+        if ($email['id'] === $email_id && $email['status'] === 'failed') {
+            $queue[$key]['status'] = 'pending';
+            $queue[$key]['attempts'] = 0;
+            $queue[$key]['error'] = null;
+
+            // Remove from failed log
+            $failed = array_filter($failed, function($e) use ($email_id) {
+                return $e['id'] !== $email_id;
+            });
+
+            // Save changes
+            write_json($queue_file, $queue);
+            write_json($failed_log_file, array_values($failed));
+
+            return true;
+        }
+    }
+
+    return false;
+}
