@@ -122,7 +122,7 @@ function render_compact_actions_bar($filters, $csrf_token) {
                 </select>
                 <button type="submit" class="btn btn-primary btn-sm" data-action="confirmBulkAction">Aplicar a Seleccionadas</button>
                 <a href="?page=archivo-ventas" class="btn btn-secondary btn-sm">Ver Archivo</a>
-                <button type="button" class="btn btn-primary btn-sm" data-action="exportSelectedToCSV">📊 Exportar CSV</button>
+                <button type="button" class="btn btn-primary btn-sm" data-action="exportSelectedToCSV">Exportar CSV</button>
                 <span id="selectedCount"></span>
             </form>
 
@@ -275,7 +275,7 @@ function render_orders_table($orders, $filters, $status_labels) {
                                                 data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
                                                 data-shipment-id="<?php echo htmlspecialchars($shipment_id); ?>"
                                                 title="Imprimir etiqueta de envío">
-                                            🖨️ Etiqueta
+                                            Etiqueta
                                         </button>
                                     </div>
                                 <?php elseif ($has_shipping_data && $order['status'] === 'pagado'): ?>
@@ -289,7 +289,7 @@ function render_orders_table($orders, $filters, $status_labels) {
                                                 data-action="createAndPrintShippingLabel"
                                                 data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
                                                 title="Crear envío y obtener etiqueta">
-                                            📦 Crear
+                                            Crear
                                         </button>
                                     </div>
                                 <?php elseif ($has_shipping_data && $order['status'] !== 'pagado'): ?>
