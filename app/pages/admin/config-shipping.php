@@ -142,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
 
         // Options
         $config['options']['auto_create_shipment'] = isset($_POST['auto_create_shipment']);
+        $config['options']['send_customer_email'] = isset($_POST['send_customer_email']);
         $config['options']['shipping_cost_margin'] = (float)($_POST['shipping_cost_margin'] ?? 0);
         $config['options']['cache_quotes_minutes'] = (int)($_POST['cache_quotes_minutes'] ?? 5);
         $config['options']['webhook_secret'] = sanitize_input($_POST['webhook_secret'] ?? '');
@@ -745,6 +746,15 @@ $provincias = [
                                    <?php echo ($shipping_config['options']['auto_create_shipment'] ?? true) ? 'checked' : ''; ?>>
                             <span>Crear envío automáticamente al confirmar orden</span>
                         </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="send_customer_email"
+                                   <?php echo ($shipping_config['options']['send_customer_email'] ?? false) ? 'checked' : ''; ?>>
+                            <span>Enviar email del comprador al carrier (Zipnova)</span>
+                        </label>
+                        <div class="help-text">Si está habilitado, el carrier recibirá el email del comprador al generar la etiqueta. Útil para notificaciones de seguimiento.</div>
                     </div>
 
                     <div class="form-group">
