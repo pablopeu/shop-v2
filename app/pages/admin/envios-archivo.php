@@ -8,9 +8,6 @@ if (!defined('APP_ENTRY_POINT')) {
     die('Direct access not permitted');
 }
 
-// Check admin authentication
-require_admin();
-
 // Get configurations
 $site_config = read_json(APP_PATH . '/config/site.json');
 $page_title = 'Envíos Archivados';
