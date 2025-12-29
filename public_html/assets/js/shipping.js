@@ -48,37 +48,29 @@ console.log('📦 shipping.js: Archivo cargado');
         deliveryMethodRadios.forEach(radio => {
             radio.addEventListener('change', handleDeliveryMethodChange);
         });
-
-        // Listen to delivery type changes (home_delivery vs pickup_point)
-        const deliveryTypeRadios = document.querySelectorAll('input[name="delivery_type"]');
-        deliveryTypeRadios.forEach(radio => {
-            radio.addEventListener('change', handleDeliveryTypeChange);
-        });
     }
 
     /**
-     * Handle delivery type change (home_delivery vs pickup_point)
-     */
-    function handleDeliveryTypeChange(event) {
-        console.log('🔄 Tipo de entrega cambiado a:', event.target.value);
-
-        // Si ya hay cotizaciones cargadas, volver a mostrarlas con el nuevo filtro
-        if (shippingQuotes.length > 0) {
-            displayQuotes(shippingQuotes);
-        }
-    }
-
-    /**
-     * Handle delivery method change (pickup vs shipping)
+     * Handle delivery method change (pickup, home_delivery, pickup_point)
      */
     function handleDeliveryMethodChange(event) {
         const shippingFields = document.getElementById('shipping-fields');
+        const deliveryMethod = event.target.value;
 
-        if (event.target.value === 'shipping') {
+        console.log('🔄 Método de entrega cambiado a:', deliveryMethod);
+
+        if (deliveryMethod === 'home_delivery' || deliveryMethod === 'pickup_point') {
+            // Mostrar campos de dirección
             shippingFields.classList.remove('hidden');
             // Reset shipping selection
             resetShipping();
+
+            // Si ya hay cotizaciones cargadas, volver a filtrarlas
+            if (shippingQuotes.length > 0) {
+                displayQuotes(shippingQuotes);
+            }
         } else {
+            // Ocultar campos de dirección (retiro en persona)
             shippingFields.classList.add('hidden');
             // Clear shipping cost if pickup selected
             updateShippingCost(0);
@@ -193,24 +185,30 @@ console.log('📦 shipping.js: Archivo cargado');
             return;
         }
 
-        // Filtrar según el tipo de entrega elegido
-        const deliveryType = document.querySelector('input[name="delivery_type"]:checked')?.value || 'home_delivery';
-        console.log('🔍 Tipo de entrega seleccionado:', deliveryType);
+        // Filtrar según el método de entrega elegido
+        const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked')?.value || 'home_delivery';
+        console.log('🔍 Método de entrega seleccionado:', deliveryMethod);
 
         const filteredQuotes = quotes.filter(quote => {
-            if (deliveryType === 'pickup_point') {
+            if (deliveryMethod === 'pickup_point') {
                 // Mostrar solo opciones de punto de entrega
                 return quote.service_type_code === 'pickup_point';
-            } else {
+            } else if (deliveryMethod === 'home_delivery') {
                 // Mostrar solo opciones de entrega a domicilio
                 return quote.service_type_code !== 'pickup_point';
+            } else {
+                // Si es 'pickup', no mostrar ninguna cotización (retiro en persona)
+                return false;
             }
         });
 
         console.log('✅ Cotizaciones filtradas:', filteredQuotes.length, 'de', quotes.length);
 
         if (filteredQuotes.length === 0) {
-            showError(`No hay opciones de ${deliveryType === 'pickup_point' ? 'punto de entrega' : 'envío a domicilio'} disponibles para esta dirección`);
+            const errorMsg = deliveryMethod === 'pickup_point'
+                ? 'No hay opciones de punto de entrega disponibles para esta dirección'
+                : 'No hay opciones de envío a domicilio disponibles para esta dirección';
+            showError(errorMsg);
             return;
         }
 

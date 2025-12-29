@@ -323,7 +323,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $errors[] = 'El teléfono es requerido';
     }
 
-    if (!in_array($delivery_method, ['pickup', 'shipping'])) {
+    if (!in_array($delivery_method, ['pickup', 'home_delivery', 'pickup_point'])) {
         $errors[] = 'Método de entrega inválido';
     }
 
@@ -333,7 +333,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
     // Shipping address (only for delivery)
     $shipping_address = null;
-    $needs_shipping = ($delivery_method === 'shipping');
+    $needs_shipping = ($delivery_method === 'home_delivery' || $delivery_method === 'pickup_point');
 
     if ($needs_shipping) {
         $address = sanitize_input($_POST['shipping_address'] ?? '');
@@ -1648,13 +1648,24 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                         </div>
                                     </label>
                                     <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
-                                        <input type="radio" name="delivery_method" value="shipping"
-                                               <?php echo $saved_delivery_method === 'shipping' ? 'checked' : ''; ?>
+                                        <input type="radio" name="delivery_method" value="home_delivery"
+                                               <?php echo $saved_delivery_method === 'home_delivery' ? 'checked' : ''; ?>
                                                <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
                                         <div>
-                                            <strong>📦 Envío a domicilio</strong>
+                                            <strong>🏠 Envío a domicilio</strong>
                                             <p class="option-description">
-                                                <?php echo $has_pickup_only ? 'No disponible para estos productos' : 'Completa tu dirección'; ?>
+                                                <?php echo $has_pickup_only ? 'No disponible para estos productos' : 'El paquete llega a tu dirección'; ?>
+                                            </p>
+                                        </div>
+                                    </label>
+                                    <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
+                                        <input type="radio" name="delivery_method" value="pickup_point"
+                                               <?php echo $saved_delivery_method === 'pickup_point' ? 'checked' : ''; ?>
+                                               <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
+                                        <div>
+                                            <strong>📍 Punto de entrega</strong>
+                                            <p class="option-description">
+                                                <?php echo $has_pickup_only ? 'No disponible para estos productos' : 'Retirás en un punto cercano'; ?>
                                             </p>
                                         </div>
                                     </label>
@@ -1724,27 +1735,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <div class="form-group">
                                     <label for="shipping_notes">Referencias de entrega (opcional)</label>
                                     <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
-                                </div>
-
-                                <!-- Tipo de entrega -->
-                                <div class="form-group">
-                                    <label>Tipo de entrega *</label>
-                                    <div class="radio-group">
-                                        <label class="radio-option">
-                                            <input type="radio" name="delivery_type" value="home_delivery" checked required>
-                                            <div>
-                                                <strong>🏠 Entrega a domicilio</strong>
-                                                <p class="option-description">El paquete se entrega en tu dirección</p>
-                                            </div>
-                                        </label>
-                                        <label class="radio-option">
-                                            <input type="radio" name="delivery_type" value="pickup_point" required>
-                                            <div>
-                                                <strong>📍 Entrega en punto de retiro</strong>
-                                                <p class="option-description">Retirás el paquete en un punto cercano</p>
-                                            </div>
-                                        </label>
-                                    </div>
                                 </div>
 
                                 <!-- Botón para cotizar -->
