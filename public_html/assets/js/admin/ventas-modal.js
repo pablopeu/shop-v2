@@ -750,30 +750,8 @@ export function cancelCloseOrderModal() {
     // User wants to stay and save
     document.getElementById('unsavedChangesModal').classList.remove('active');
 
-    // Focus on the first save button in the modal
-    const modalContent = document.getElementById('modalOrderContent');
-    const saveButton = modalContent.querySelector('button[type="submit"]');
-
-    if (saveButton) {
-        // Scroll to the button
-        saveButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // Wait for scroll to finish, then focus and add highlight
-        setTimeout(() => {
-            const originalTransform = saveButton.style.transform || '';
-            const originalBoxShadow = saveButton.style.boxShadow || '';
-
-            saveButton.focus();
-            saveButton.style.transform = 'scale(1.05)';
-            saveButton.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.4)';
-
-            // Remove highlight after 1 second
-            setTimeout(() => {
-                saveButton.style.transform = originalTransform;
-                saveButton.style.boxShadow = originalBoxShadow;
-            }, 1000);
-        }, 500);
-    }
+    // Call saveAllChanges() to save and close automatically
+    saveAllChanges();
 }
 
 export function showArchiveModal(orderId, orderNumber) {

@@ -141,6 +141,11 @@
         const forms = document.querySelectorAll('form');
 
         forms.forEach(form => {
+            // Skip forms inside modals (they have their own unsaved changes handling)
+            if (form.closest('.modal, #orderModal, #unsavedChangesModal')) {
+                return;
+            }
+
             // Track changes on all input types
             const inputs = form.querySelectorAll('input, textarea, select');
 
