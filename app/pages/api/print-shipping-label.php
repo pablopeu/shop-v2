@@ -29,14 +29,17 @@ require_admin();
 // Include carriers functions for zipnova_get_label()
 require_once APP_PATH . '/includes/carriers.php';
 
-// Set JSON response header
-header('Content-Type: application/json');
-
 // Get request parameters
 $order_id = sanitize_input($_REQUEST['order_id'] ?? '');
 $shipment_id = sanitize_input($_REQUEST['shipment_id'] ?? '');
 $format = sanitize_input($_REQUEST['format'] ?? 'pdf');
 $action = sanitize_input($_REQUEST['action'] ?? 'download');
+
+// Set JSON response header ONLY if not downloading
+// (download will set PDF headers instead)
+if ($action !== 'download') {
+    header('Content-Type: application/json');
+}
 
 // Validate format
 $valid_formats = ['pdf', 'png', 'zpl'];
@@ -127,6 +130,9 @@ if ($action === 'download') {
     $filepath = APP_PATH . $label_url;
 
     if (file_exists($filepath)) {
+        // Limpiar cualquier header JSON establecido previamente
+        header_remove('Content-Type');
+
         // Headers para PDF
         header('Content-Type: application/pdf');
         header('Content-Disposition: attachment; filename="etiqueta_' . $shipment_id . '.pdf"');
