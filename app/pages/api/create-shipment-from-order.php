@@ -89,12 +89,22 @@ try {
 
     // Verificar que la orden tenga datos de cotización
     $quote_data = $order['shipping_quote_data'] ?? [];
+
+    // Log para debug
+    error_log("API CreateShipment: Verificando quote_data para orden $order_id");
+    error_log("API CreateShipment: shipping_quote_data presente: " . (isset($order['shipping_quote_data']) ? 'SI' : 'NO'));
+    if (isset($order['shipping_quote_data'])) {
+        error_log("API CreateShipment: rate_id presente: " . (isset($quote_data['rate_id']) ? 'SI (' . $quote_data['rate_id'] . ')' : 'NO'));
+        error_log("API CreateShipment: quote_data keys: " . implode(', ', array_keys($quote_data)));
+    }
+    error_log("API CreateShipment: delivery_method: " . ($order['delivery_method'] ?? 'NO SET'));
+
     if (empty($quote_data) || empty($quote_data['rate_id'])) {
         error_log("API CreateShipment: Orden sin datos de cotización: $order_id");
         http_response_code(400);
         echo json_encode([
             'success' => false,
-            'error' => 'La orden no tiene datos de cotización de envío'
+            'error' => 'La orden no tiene datos de cotización de envío. Puede ser una orden creada con el sistema anterior o los datos no se guardaron correctamente.'
         ]);
         exit;
     }
