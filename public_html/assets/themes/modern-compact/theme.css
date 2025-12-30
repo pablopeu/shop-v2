@@ -1202,9 +1202,10 @@ html {
 /* Layout Grid */
 .cart-layout {
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: 2fr 1fr;
     gap: var(--spacing-2xl);
     align-items: start;
+    max-width: 1400px;
 }
 
 @media (max-width: 1024px) {
