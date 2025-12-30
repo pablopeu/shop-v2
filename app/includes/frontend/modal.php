@@ -242,7 +242,7 @@
         <div class="modal-icon" id="modalIcon">⚠️</div>
         <h2 class="modal-title" id="modalTitle">Confirmar Acción</h2>
         <p class="modal-message" id="modalMessage">¿Estás seguro de que deseas realizar esta acción?</p>
-        <div class="modal-details" id="modalDetails" style="display: none;"></div>
+        <div class="modal-details hidden" id="modalDetails"></div>
         <div class="modal-actions">
             <button class="modal-btn modal-btn-cancel" data-action="closeModal" type="button" id="modalCancelBtn">
                 Cancelar
@@ -301,9 +301,9 @@
         // Set details (optional)
         if (options.details) {
             details.innerHTML = options.details;
-            details.style.display = 'block';
+            details.classList.remove('hidden');
         } else {
-            details.style.display = 'none';
+            details.classList.add('hidden');
         }
 
         // Set button texts
@@ -312,9 +312,9 @@
 
         // Show/hide cancel button
         if (options.showCancel === false) {
-            cancelBtn.style.display = 'none';
+            cancelBtn.classList.add('hidden');
         } else {
-            cancelBtn.style.display = 'inline-block';
+            cancelBtn.classList.remove('hidden');
         }
 
         // Set confirm button type
@@ -335,7 +335,7 @@
 
         // Show modal
         modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
 
         // Focus on confirm button
         setTimeout(() => confirmBtn.focus(), 100);
@@ -348,7 +348,7 @@
     function closeModal(event, element, params) {
         const modal = document.getElementById('confirmModal');
         modal.classList.remove('active');
-        document.body.style.overflow = '';
+        document.body.classList.remove('modal-open');
 
         // Execute cancel callback if exists
         if (modalCancelCallback) {

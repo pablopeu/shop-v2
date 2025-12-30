@@ -296,3 +296,9 @@
 .locked-tooltip.active {
     opacity: 1;
 }
+
+/* === Body Utilities === */
+/* Bloquear scroll del body cuando modal está abierto */
+body.modal-open {
+    overflow: hidden !important;
+}
