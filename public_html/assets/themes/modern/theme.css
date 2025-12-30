@@ -1187,7 +1187,7 @@ html {
 /* Layout Grid */
 .cart-layout {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 11fr 9fr;
     gap: var(--spacing-2xl);
     align-items: start;
     max-width: 1400px;

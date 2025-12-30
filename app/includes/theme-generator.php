@@ -1440,7 +1440,7 @@ function generate_theme_css_basic($config) {
     $css .= ".cart-page-breadcrumb a:hover { color: var(--color-secondary); }\n";
     $css .= ".breadcrumb-current { color: var(--color-text); font-weight: var(--font-weight-semibold); }\n\n";
 
-    $css .= ".cart-layout { display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-2xl); align-items: start; max-width: 1400px; }\n";
+    $css .= ".cart-layout { display: grid; grid-template-columns: 11fr 9fr; gap: var(--spacing-2xl); align-items: start; max-width: 1400px; }\n";
     $css .= "@media (max-width: 1024px) { .cart-layout { grid-template-columns: 1fr; } }\n\n";
 
     $css .= ".cart-items-section { background: var(--color-bg); border: 1px solid var(--color-border-light); border-radius: var(--border-radius-lg); padding: var(--spacing-2xl); box-shadow: var(--shadow-md); }\n";
