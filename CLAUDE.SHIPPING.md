@@ -267,6 +267,288 @@ POST /api/shipping (with webhook signature)
 - Package value validation
 - Service availability checks
 
+## Google Places API - Address Normalization
+
+**Location**: `app/includes/google-places.php`, `public_html/assets/js/address-validator.js`
+
+The system includes **address validation and normalization** using Google Places API to ensure accurate deliveries by validating addresses before shipping quotes are generated.
+
+### Features
+
+- **Address autocomplete** with real-time suggestions
+- **Interactive map** with marker showing exact location
+- **Component extraction** (street, neighborhood, city, province, postal code)
+- **Geocoding** with latitude/longitude coordinates
+- **Country restriction** (Argentina by default)
+- **Optional or mandatory** validation (configurable)
+
+### Configuration
+
+**Admin Panel** (`/admin/?page=config-shipping`):
+
+```php
+// Google Places section in shipping config
+$config['google_places'] = [
+    'enabled' => true,                      // Enable/disable address validation
+    'api_key' => 'AIzaSy...',              // Google Places API Key
+    'country_code' => 'ar',                 // ISO 3166-1 Alpha-2 code
+    'require_confirmation' => true          // Make validation mandatory
+];
+```
+
+**Required Google APIs:**
+- **Places API (New)** - For autocomplete and place details
+- **Maps JavaScript API** - For interactive map display
+
+**Get API Key:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create new project or select existing
+3. Enable "Places API (New)" and "Maps JavaScript API"
+4. Create API Key under Credentials
+5. (Optional) Restrict API key to your domain for security
+
+### PHP Functions
+
+**Configuration:**
+```php
+google_places_get_config()              // Get Google Places config
+google_places_is_enabled()              // Check if enabled and configured
+google_places_get_api_key()             // Get API key
+google_places_get_country_code()        // Get country restriction
+google_places_requires_confirmation()   // Check if validation is mandatory
+```
+
+**Validation:**
+```php
+// Validate address (server-side using Geocoding API)
+google_places_validate_address($address_data)
+
+// Returns:
+[
+    'success' => true,
+    'address' => [
+        'formatted_address' => 'Av. Corrientes 1234, Balvanera, CABA, Argentina',
+        'latitude' => -34.6037,
+        'longitude' => -58.3816,
+        'place_id' => 'ChIJ...',
+        'components' => [
+            'address' => 'Av. Corrientes 1234',
+            'street_number' => '1234',
+            'route' => 'Av. Corrientes',
+            'neighborhood' => 'Balvanera',
+            'city' => 'Buenos Aires',
+            'province' => 'Buenos Aires',
+            'postal_code' => 'C1043',
+            'country' => 'Argentina'
+        ]
+    ]
+]
+```
+
+**Frontend Config:**
+```php
+// Get safe config for JavaScript
+$config = google_places_get_frontend_config();
+
+// Returns:
+[
+    'enabled' => true,
+    'api_key' => 'AIzaSy...',
+    'country_code' => 'ar',
+    'require_confirmation' => true,
+    'maps_js_url' => 'https://maps.googleapis.com/maps/api/js?key=...'
+]
+```
+
+### JavaScript API
+
+**Initialization:**
+```javascript
+// Initialize validator (automatic in checkout)
+initAddressValidator(config);
+
+// Load Google Maps API dynamically
+loadGoogleMapsAPI(function(success) {
+    if (success) {
+        // API loaded successfully
+    }
+});
+```
+
+**Show Validation Modal:**
+```javascript
+// Show address validation modal
+showAddressValidationModal(
+    addressData,           // Current form data
+    onConfirm,            // Callback on confirmation
+    onCancel              // Callback on cancel
+);
+
+// addressData format:
+{
+    address: 'Av. Corrientes 1234',
+    city: 'CABA',
+    province: 'Buenos Aires',
+    postal_code: '1043',
+    country: 'AR'
+}
+
+// Normalized address returned to onConfirm:
+{
+    formatted_address: 'Av. Corrientes 1234, Balvanera, CABA, Argentina',
+    place_id: 'ChIJ...',
+    latitude: -34.6037,
+    longitude: -58.3816,
+    components: {
+        address: 'Av. Corrientes 1234',
+        neighborhood: 'Balvanera',
+        city: 'Buenos Aires',
+        province: 'Buenos Aires',
+        postal_code: 'C1043',
+        country: 'Argentina'
+    }
+}
+```
+
+**Close Modal:**
+```javascript
+closeAddressValidationModal();
+```
+
+### Checkout Integration
+
+**Flow:**
+1. User fills shipping address fields
+2. Clicks "🌍 Validar Dirección" button
+3. Modal opens with:
+   - Search input with Google Places Autocomplete
+   - Interactive map (centered on Argentina by default)
+   - User searches and selects their address
+4. Map shows selected location with marker
+5. Displays normalized address components
+6. User confirms → Form fields auto-update
+7. "📦 Calcular Costo de Envío" button becomes enabled
+8. Shipping quote uses normalized address
+
+**Mandatory vs Optional:**
+- **Mandatory** (`require_confirmation: true`):
+  - Quote button disabled until address validated
+  - User MUST validate before quoting
+  - Best for production to ensure accuracy
+
+- **Optional** (`require_confirmation: false`):
+  - Quote button always enabled
+  - Validation is suggested but not enforced
+  - User can skip validation
+
+### Files Structure
+
+```
+app/includes/google-places.php          # Backend service
+public_html/assets/js/address-validator.js    # Frontend modal & map
+public_html/assets/css/address-validator.css  # Modal styles
+```
+
+**Checkout Integration:**
+```php
+// In checkout-new.php
+require_once APP_PATH . '/includes/google-places.php';
+$google_places_config = google_places_get_frontend_config();
+
+// Conditional loading of scripts/styles
+<?php if ($google_places_config['enabled']): ?>
+    <link rel="stylesheet" href="<?php echo url('/assets/css/address-validator.css'); ?>">
+    <script src="<?php echo url('/assets/js/address-validator.js'); ?>"></script>
+<?php endif; ?>
+```
+
+### Data Storage
+
+**Normalized address saved in order:**
+```json
+{
+    "shipping": {
+        "address": {
+            "name": "Juan Pérez",
+            "street": "Av. Corrientes 1234",
+            "city": "Buenos Aires",
+            "province": "Buenos Aires",
+            "postal_code": "C1043",
+            "country": "AR",
+            "phone": "+54 11 1234-5678"
+        },
+        "normalized_address": {
+            "formatted_address": "Av. Corrientes 1234, Balvanera, CABA, Argentina",
+            "place_id": "ChIJ...",
+            "latitude": -34.6037,
+            "longitude": -58.3816,
+            "components": {
+                "address": "Av. Corrientes 1234",
+                "neighborhood": "Balvanera",
+                "city": "Buenos Aires",
+                "province": "Buenos Aires",
+                "postal_code": "C1043"
+            }
+        }
+    }
+}
+```
+
+### Benefits
+
+**For Logistics:**
+- ✅ Reduces delivery errors from incorrect addresses
+- ✅ Standardized address format for all carriers
+- ✅ Geocoordinates for precise location
+- ✅ Correct neighborhood/locality identification
+
+**For Users:**
+- ✅ Easy address selection with autocomplete
+- ✅ Visual confirmation on map
+- ✅ Auto-fill of city, province, postal code
+- ✅ Confidence in delivery accuracy
+
+### Troubleshooting
+
+**API Key Issues:**
+```
+Error: "Google Maps API not loading"
+→ Check API key is correct
+→ Verify Places API (New) is enabled
+→ Verify Maps JavaScript API is enabled
+→ Check API key restrictions (HTTP referrers)
+```
+
+**Country Restriction:**
+```
+No results for address
+→ Check country_code matches actual country
+→ Try removing country restriction (empty string)
+→ Verify address format is valid for country
+```
+
+**Modal Not Opening:**
+```
+→ Check browser console for JavaScript errors
+→ Verify address-validator.js is loaded
+→ Ensure Google Maps API loaded successfully
+→ Check CSP nonce for inline scripts
+```
+
+### Cost Considerations
+
+**Google Places API Pricing** (as of 2025):
+- **Autocomplete (per session)**: ~$0.017 USD per session
+- **Place Details**: $0.017 USD per request
+- **Maps JavaScript API**: $0.007 USD per map load
+
+**Monthly Free Tier**: $200 USD credit = ~11,700 autocomplete sessions/month
+
+**Optimization Tips:**
+- Use autocomplete sessions (link autocomplete + details = 1 session price)
+- Cache validated addresses in session
+- Only validate when user clicks button (not automatic)
+
 ## Future Carrier Integration
 
 The architecture is ready for:
