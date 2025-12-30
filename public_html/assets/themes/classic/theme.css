@@ -911,11 +911,42 @@ select:focus {
    CARRITO MEJORADO - Classic Theme
    ======================================== */
 
+/* Breadcrumb & Title Row */
+.cart-breadcrumb-row {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.cart-breadcrumb-left {
+    flex: 1;
+}
+
+.cart-page-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.cart-page-title .cart-icon {
+    stroke: var(--color-primary);
+}
+
+.cart-page-title h1 {
+    margin: 0;
+    font-size: var(--font-size-2xl);
+    white-space: nowrap;
+}
+
 /* Page Container */
 .cart-page-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: var(--spacing-2xl) var(--spacing-lg);
+    padding: 0 var(--spacing-lg) var(--spacing-2xl) var(--spacing-lg);
 }
 
 /* Page Header */

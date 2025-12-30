@@ -1429,12 +1429,12 @@ function generate_theme_css_basic($config) {
     $css .= "   CARRITO MEJORADO\n";
     $css .= "   ================================= */\n\n";
 
-    $css .= ".cart-page-container { max-width: 1400px; margin: 0 auto; padding: var(--spacing-2xl) var(--spacing-lg); }\n\n";
-
-    $css .= ".cart-page-header { margin-bottom: var(--spacing-2xl); }\n";
-    $css .= ".cart-page-title { display: flex; align-items: center; gap: var(--spacing-md); }\n";
+    $css .= ".cart-breadcrumb-row { max-width: 1400px; margin: 0 auto; padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-lg); }\n";
+    $css .= ".cart-breadcrumb-left { flex: 1; }\n";
+    $css .= ".cart-page-title { display: flex; align-items: center; gap: var(--spacing-sm); }\n";
     $css .= ".cart-page-title .cart-icon { stroke: var(--color-primary); }\n";
-    $css .= ".cart-page-title h1 { margin: 0; font-size: var(--font-size-3xl); }\n\n";
+    $css .= ".cart-page-title h1 { margin: 0; font-size: var(--font-size-2xl); white-space: nowrap; }\n";
+    $css .= ".cart-page-container { max-width: 1400px; margin: 0 auto; padding: 0 var(--spacing-lg) var(--spacing-2xl) var(--spacing-lg); }\n\n";
 
     $css .= ".cart-layout { display: grid; grid-template-columns: 11fr 9fr; gap: var(--spacing-2xl); align-items: start; max-width: 1400px; }\n";
     $css .= "@media (max-width: 1024px) { .cart-layout { grid-template-columns: 1fr; } }\n\n";
@@ -1519,6 +1519,8 @@ function generate_theme_css_basic($config) {
     $css .= ".cart-loading { opacity: 0.6; pointer-events: none; }\n\n";
 
     $css .= "@media (max-width: 768px) {\n";
+    $css .= "    .cart-breadcrumb-row { flex-direction: column; align-items: flex-start; gap: var(--spacing-sm); }\n";
+    $css .= "    .cart-page-title h1 { font-size: var(--font-size-xl); }\n";
     $css .= "    .cart-item-card { grid-template-columns: 80px 1fr; }\n";
     $css .= "    .cart-item-image { width: 80px; height: 80px; }\n";
     $css .= "    .cart-item-footer { flex-direction: column; align-items: flex-start; }\n";

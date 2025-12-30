@@ -70,28 +70,29 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
     </div>
     <?php endif; ?>
 
-    <!-- Breadcrumb -->
-    <?php
-    require_once APP_PATH . '/includes/frontend/breadcrumb.php';
-    render_breadcrumb([
-        ['label' => 'Inicio', 'url' => url('/')],
-        ['label' => 'Carrito', 'url' => null]
-    ]);
-    ?>
+    <!-- Breadcrumb & Title Row -->
+    <div class="cart-breadcrumb-row">
+        <div class="cart-breadcrumb-left">
+            <?php
+            require_once APP_PATH . '/includes/frontend/breadcrumb.php';
+            render_breadcrumb([
+                ['label' => 'Inicio', 'url' => url('/')],
+                ['label' => 'Carrito', 'url' => null]
+            ]);
+            ?>
+        </div>
+        <div class="cart-page-title">
+            <svg class="cart-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <h1>Mi Carrito</h1>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <div class="container cart-page-container">
-        <!-- Page Header -->
-        <div class="cart-page-header">
-            <div class="cart-page-title">
-                <svg class="cart-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                </svg>
-                <h1>Mi Carrito</h1>
-            </div>
-        </div>
 
         <div class="cart-layout">
             <!-- Cart Items Section -->
