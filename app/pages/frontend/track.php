@@ -4,9 +4,6 @@
  * Permite buscar pedidos por email y número de orden
  */
 
-// Define security constant to prevent direct file access
-
-
 // Set security headers
 
 // Start session
@@ -23,6 +20,8 @@ $all_products = get_all_products(true); // Only active products
 
 $error = null;
 $success = null;
+$found_order = null;
+$show_link = false;
 
 // Check if token is provided in URL
 $token_param = $_GET['token'] ?? '';
@@ -49,21 +48,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Search for order
         $orders = get_all_orders();
-        $found_order = null;
 
         foreach ($orders as $order) {
             if (strtolower($order['customer_email']) === strtolower($email) &&
                 $order['order_number'] === $order_number) {
                 $found_order = $order;
+                $show_link = true;
                 break;
             }
         }
 
-        if ($found_order) {
-            // Redirect to tracking page with token
-            header("Location: " . url("/pedido?order={$found_order['id']}&token={$found_order['tracking_token']}"));
-            exit;
-        } else {
+        if (!$found_order) {
             $error = 'No se encontró ningún pedido con esos datos';
         }
     }
@@ -87,29 +82,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Header -->
     <?php include APP_PATH . '/includes/header-frontend.php'; ?>
 
-    <div class="container">
-        <div class="card">
-            <div class="header">
-                <div class="icon">📦</div>
-                <h1>Rastrear mi Pedido</h1>
-                <p>Ingresa tus datos para ver el estado de tu compra</p>
+    <?php if ($show_link && $found_order): ?>
+        <!-- Card de link permanente -->
+        <div class="tracking-link-card">
+            <h2>✅ Pedido Encontrado</h2>
+            <p>Guarda este link para consultar tu pedido en cualquier momento sin necesidad de volver a ingresar tus datos:</p>
+            <div class="link-display">
+                <input type="text" value="<?= url("/pedido?order={$found_order['id']}&token={$found_order['tracking_token']}") ?>" readonly id="tracking-link-input">
+                <button data-action="copyLink">Copiar</button>
             </div>
+            <p class="redirect-message">Redirigiendo a tu pedido en <span id="countdown">3</span> segundos...</p>
+        </div>
+
+        <script nonce="<?= csp_nonce() ?>">
+            // Countdown y redirección
+            let seconds = 3;
+            const countdownEl = document.getElementById('countdown');
+            const trackingUrl = <?= json_encode(url("/pedido?order={$found_order['id']}&token={$found_order['tracking_token']}")) ?>;
+
+            const interval = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    window.location.href = trackingUrl;
+                }
+            }, 1000);
+        </script>
+    <?php else: ?>
+        <!-- Formulario de búsqueda -->
+        <div class="track-form-container">
+            <h1>📦 Rastrear mi Pedido</h1>
+            <p>Ingresa tus datos para ver el estado de tu compra</p>
 
             <?php if ($error): ?>
-                <div class="alert alert-error">
+                <div class="alert alert-error" style="margin-top: var(--spacing-lg, 28px); padding: var(--spacing-md, 20px); background: var(--color-error-bg, #fee); border: 1px solid var(--color-error, #ef4444); border-radius: var(--border-radius-md, 6px); color: var(--color-error-dark, #dc2626);">
                     <?php echo htmlspecialchars($error); ?>
                 </div>
             <?php endif; ?>
 
-            <?php if ($success): ?>
-                <div class="alert alert-success">
-                    <?php echo htmlspecialchars($success); ?>
-                </div>
-            <?php endif; ?>
-
-            <form method="POST">
-                <div class="form-group">
-                    <label for="email">Email</label>
+            <form method="POST" style="margin-top: var(--spacing-lg, 28px);">
+                <div class="track-form-group">
+                    <label for="email">📧 Email</label>
                     <input
                         type="email"
                         id="email"
@@ -118,11 +132,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         required
                         value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
                     >
-                    <div class="help-text">El email que usaste al realizar la compra</div>
+                    <div style="margin-top: var(--spacing-xs, 6px); color: var(--color-text-light, #666); font-size: var(--font-size-sm, 14px);">El email que usaste al realizar la compra</div>
                 </div>
 
-                <div class="form-group">
-                    <label for="order_number">Número de Pedido</label>
+                <div class="track-form-group">
+                    <label for="order_number">🔢 Número de Pedido</label>
                     <input
                         type="text"
                         id="order_number"
@@ -131,23 +145,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         required
                         value="<?php echo htmlspecialchars($_POST['order_number'] ?? ''); ?>"
                     >
-                    <div class="help-text">Lo encontrarás en el email de confirmación</div>
+                    <div style="margin-top: var(--spacing-xs, 6px); color: var(--color-text-light, #666); font-size: var(--font-size-sm, 14px);">Lo encontrarás en el email de confirmación</div>
                 </div>
 
-                <button type="submit" class="btn">
+                <button type="submit" class="track-form-submit">
                     🔍 Buscar Pedido
                 </button>
             </form>
 
-            <div class="divider">o</div>
+            <div style="margin: var(--spacing-xl, 36px) 0; text-align: center; color: var(--color-text-light, #666); position: relative;">
+                <span style="background: var(--color-bg, white); padding: 0 var(--spacing-sm, 12px); position: relative; z-index: 1;">o</span>
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--color-border, #e0e0e0); z-index: 0;"></div>
+            </div>
 
-            <div class="link-section">
-                <a href="<?php echo url('/'); ?>" class="link-btn">
+            <div style="text-align: center;">
+                <a href="<?php echo url('/'); ?>" style="display: inline-block; padding: var(--spacing-sm, 12px) var(--spacing-lg, 28px); color: var(--color-primary, #667eea); text-decoration: none; border: 1px solid var(--color-border, #e0e0e0); border-radius: var(--border-radius-md, 6px); transition: var(--transition-base, 0.3s ease);">
                     🏠 Volver al inicio
                 </a>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
 
     <!-- Cart Panel Component -->
     <?php
@@ -166,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shared/favorites.js'); ?>"></script>
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shared/cart.js'); ?>"></script>
 
-<script nonce="<?= csp_nonce() ?>">
+    <script nonce="<?= csp_nonce() ?>">
         // Products data for cart panel (global for shared modules)
         window.productUrlBase = '<?php echo url('/producto/'); ?>';
         window.products = <?php
@@ -194,8 +211,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ?>;
 
         // Update cart count from localStorage
-
-        // Update on page load
         ShopCart.updateCartBadge();
         ShopFavorites.updateFavoritesCount();
 
@@ -216,6 +231,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.goToFavoritesPage = function(event, element, params) {
             return goToFavoritesPage();
         };
+
+        // Función para copiar link
+        function copyLink(event, element) {
+            const input = document.getElementById('tracking-link-input');
+            if (input) {
+                input.select();
+                input.setSelectionRange(0, 99999); // Para móviles
+
+                // Método moderno
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(input.value).then(() => {
+                        showCopyFeedback(element);
+                    }).catch(() => {
+                        // Fallback
+                        document.execCommand('copy');
+                        showCopyFeedback(element);
+                    });
+                } else {
+                    // Fallback para navegadores antiguos
+                    document.execCommand('copy');
+                    showCopyFeedback(element);
+                }
+            }
+        }
+
+        function showCopyFeedback(button) {
+            const originalText = button.textContent;
+            const originalBg = button.style.background;
+
+            button.textContent = '✅ Copiado!';
+            button.style.background = 'var(--color-success, #22c55e)';
+
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = originalBg;
+            }, 2000);
+        }
+
+        window.copyLink = copyLink;
     </script>
 
     <!-- Event Delegation System for CSP -->
