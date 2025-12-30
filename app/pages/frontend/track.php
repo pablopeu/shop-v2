@@ -23,6 +23,10 @@ $success = null;
 $found_order = null;
 $show_link = false;
 
+// Pre-llenar formulario desde parámetros GET (útil para links desde emails)
+$prefill_email = $_GET['email'] ?? '';
+$prefill_order = $_GET['order'] ?? '';
+
 // Check if token is provided in URL
 $token_param = $_GET['token'] ?? '';
 if (!empty($token_param)) {
@@ -102,7 +106,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect(url("/pedido?order={$found_order['id']}&token={$found_order['tracking_token']}"));
             exit;
         } else {
-            $error = 'No se encontró ningún pedido con esos datos';
+            $error = 'No se encontró ningún pedido con esos datos. Por favor verifica:<br>
+                     • Que el email sea exactamente el que usaste al comprar<br>
+                     • Que el número de pedido esté correcto (lo encontrarás en el email de confirmación)<br>
+                     • Si el problema persiste, contacta con soporte adjuntando tu email de confirmación';
         }
     }
 }
@@ -132,11 +139,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if ($error): ?>
                 <div class="track-form-error">
-                    <?php echo htmlspecialchars($error); ?>
+                    <?php echo $error; // El error ya está sanitizado y puede contener HTML ?>
                 </div>
             <?php endif; ?>
 
-            <form method="POST" class="track-form">
+            <form method="POST" class="track-form" id="trackForm">
                 <div class="track-form-group">
                     <label for="email">📧 Email</label>
                     <input
@@ -145,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         name="email"
                         placeholder="tu@email.com"
                         required
-                        value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
+                        value="<?php echo htmlspecialchars($_POST['email'] ?? $prefill_email); ?>"
                     >
                     <div class="track-form-help">El email que usaste al realizar la compra</div>
                 </div>
@@ -158,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         name="order_number"
                         placeholder="ORD-2025-72 o 2025-72"
                         required
-                        value="<?php echo htmlspecialchars($_POST['order_number'] ?? ''); ?>"
+                        value="<?php echo htmlspecialchars($_POST['order_number'] ?? $prefill_order); ?>"
                     >
                     <div class="track-form-help">Puedes usar mayúsculas, minúsculas, con o sin ceros (ej: ord-2025-72)</div>
                 </div>
@@ -244,6 +251,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.goToFavoritesPage = function(event, element, params) {
             return goToFavoritesPage();
         };
+    </script>
+
+    <!-- Track Form Enhancement: Remember email -->
+    <script nonce="<?= csp_nonce() ?>">
+        (function() {
+            const form = document.getElementById('trackForm');
+            const emailInput = document.getElementById('email');
+
+            // Cargar email guardado al cargar la página (solo si está vacío)
+            if (emailInput && !emailInput.value) {
+                const savedEmail = localStorage.getItem('track_last_email');
+                if (savedEmail) {
+                    emailInput.value = savedEmail;
+                }
+            }
+
+            // Guardar email cuando se envía el formulario
+            if (form) {
+                form.addEventListener('submit', function() {
+                    if (emailInput && emailInput.value) {
+                        localStorage.setItem('track_last_email', emailInput.value);
+                    }
+                });
+            }
+        })();
     </script>
 
     <!-- Event Delegation System for CSP -->
