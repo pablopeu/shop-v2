@@ -370,13 +370,22 @@ function send_order_confirmation_email($order) {
     }
 
     $to = $order['customer_email'];
-    $subject = "Confirmación de Pedido #{$order['order_number']}";
 
-    $html = get_email_template('order_confirmation', [
-        'order' => $order
+    // Get template from JSON
+    $template = get_email_template_config('order_created', $order);
+
+    if (!$template) {
+        error_log("Failed to load email template: order_created");
+        return false;
+    }
+
+    $html = get_default_email_template([
+        'order' => $order,
+        'title' => $template['title'],
+        'content' => $template['content']
     ]);
 
-    return send_email($to, $subject, $html);
+    return send_email($to, $template['subject'], $html);
 }
 
 /**
@@ -569,13 +578,22 @@ function send_admin_new_order_email($order) {
     }
 
     $to = $config['admin_email'] ?? 'admin@tienda.com';
-    $subject = "🛒 Nueva Orden #{$order['order_number']}";
 
-    $html = get_email_template('admin_new_order', [
-        'order' => $order
+    // Get template from JSON
+    $template = get_email_template_config('admin_new_order', $order);
+
+    if (!$template) {
+        error_log("Failed to load email template: admin_new_order");
+        return false;
+    }
+
+    $html = get_default_email_template([
+        'order' => $order,
+        'title' => $template['title'],
+        'content' => $template['content']
     ]);
 
-    return send_email($to, $subject, $html);
+    return send_email($to, $template['subject'], $html);
 }
 
 /**

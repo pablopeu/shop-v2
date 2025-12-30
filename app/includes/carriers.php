@@ -868,8 +868,8 @@ function zipnova_get_label($shipment_id, $format = 'pdf', $order_id = null) {
                 // Actualizar estado del envío en la orden
                 update_order_shipping_status($ord['id'], 'en_preparacion');
 
-                // Enviar email de notificación al cliente
-                send_shipping_preparation_email($ord);
+                // Queue email de notificación al cliente (async)
+                queue_email('shipping_preparation', ['order' => $ord], 'normal');
 
                 zipnova_log('Order Status Updated to en_preparacion', [
                     'order_id' => $ord['id'],
