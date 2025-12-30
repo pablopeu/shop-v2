@@ -62,17 +62,24 @@ console.log('📦 shipping.js: Archivo cargado');
         if (deliveryMethod === 'home_delivery' || deliveryMethod === 'pickup_point') {
             // Mostrar campos de dirección
             shippingFields.classList.remove('hidden');
-            // Reset shipping selection
-            resetShipping();
 
-            // Si ya hay cotizaciones cargadas, volver a filtrarlas
+            // Si ya hay cotizaciones cargadas, volver a filtrarlas y mostrarlas
             if (shippingQuotes.length > 0) {
+                // Reset solo la selección actual, no las cotizaciones
+                selectedShippingService = null;
+                shippingCost = 0;
+                updateShippingCost(0);
+
+                // Mostrar cotizaciones filtradas por el nuevo tipo
                 displayQuotes(shippingQuotes);
+            } else {
+                // Si no hay cotizaciones, resetear todo
+                resetShipping();
             }
         } else {
-            // Ocultar campos de dirección (retiro en persona)
+            // Retiro en persona - ocultar campos de dirección y cotizaciones
             shippingFields.classList.add('hidden');
-            // Clear shipping cost if pickup selected
+            hideQuotes();
             updateShippingCost(0);
         }
     }
