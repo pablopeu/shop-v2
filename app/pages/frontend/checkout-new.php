@@ -2110,6 +2110,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         function markStepIncomplete(stepNumber) {
             const step = document.getElementById(`step-${stepNumber}`);
             step.classList.remove('completed');
+            step.classList.add('active'); // Mantener paso abierto para que usuario pueda editar
             completedSteps.delete(stepNumber);
 
             // Lock subsequent steps
