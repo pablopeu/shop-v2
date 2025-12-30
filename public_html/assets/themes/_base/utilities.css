@@ -217,8 +217,8 @@
 
 /* Badge "MÁS BARATA" */
 .shipping-badge-cheapest {
-    background: var(--color-success, #27ae60);
-    color: var(--color-white, white);
+    background: #27ae60;
+    color: white;
     padding: 0.15rem 0.5rem;
     border-radius: 3px;
     font-size: 0.75rem;
@@ -227,8 +227,8 @@
 
 /* Badge "MÁS RÁPIDA" */
 .shipping-badge-fastest {
-    background: var(--color-info, #3498db);
-    color: var(--color-white, white);
+    background: #3498db;
+    color: white;
     padding: 0.15rem 0.5rem;
     border-radius: 3px;
     font-size: 0.75rem;
