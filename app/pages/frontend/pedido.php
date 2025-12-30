@@ -220,7 +220,9 @@ function get_status_color_class($status) {
 
                 <?php if (isset($order['shipping']['cost']) && $order['shipping']['cost'] > 0): ?>
                 <div class="order-total-row">
-                    <span class="order-total-label">Gastos de envío:</span>
+                    <span class="order-total-label">
+                        Gastos de envío<?php if (!empty($order['shipping']['carrier_name'])): ?> (<?= htmlspecialchars($order['shipping']['carrier_name']) ?>)<?php endif; ?>:
+                    </span>
                     <span class="order-total-value"><?= format_price($order['shipping']['cost'], $order['currency']) ?></span>
                 </div>
                 <?php endif; ?>
