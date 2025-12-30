@@ -101,19 +101,6 @@ function get_status_color_class($status) {
         </div>
 
     <?php else: ?>
-        <!-- Link Permanente -->
-        <div class="tracking-link-card">
-            <h2>🔗 Link Permanente de Seguimiento</h2>
-            <p>Guarda este link para consultar tu pedido en cualquier momento:</p>
-            <div class="link-display">
-                <input type="text" value="<?= url("/pedido?order={$order['id']}&token={$order['tracking_token']}") ?>" readonly id="tracking-link-input">
-                <button data-action="copyLink">Copiar</button>
-            </div>
-            <p class="tracking-link-explanation">
-                No necesitas volver a ingresar tu email y número de pedido. Con este link puedes acceder directamente.
-            </p>
-        </div>
-
         <!-- Información del Pedido -->
         <div class="pedido-order-header">
             <h1>Pedido #<?php echo htmlspecialchars($order['order_number']); ?></h1>
@@ -222,6 +209,19 @@ function get_status_color_class($status) {
                     <span class="order-total-amount"><?= format_price($order['total'], $order['currency']) ?></span>
                 </div>
             </div>
+        </div>
+
+        <!-- Link Permanente -->
+        <div class="tracking-link-card">
+            <h2>🔗 Link Permanente de Seguimiento</h2>
+            <p>Guarda este link para consultar tu pedido en cualquier momento:</p>
+            <div class="link-display">
+                <input type="text" value="<?= htmlspecialchars(url("/pedido?order={$order['id']}&token={$order['tracking_token']}")) ?>" readonly id="tracking-link-input">
+                <button data-action="copyLink">Copiar</button>
+            </div>
+            <p class="tracking-link-explanation">
+                No necesitas volver a ingresar tu email y número de pedido. Con este link puedes acceder directamente.
+            </p>
         </div>
 
         <!-- Botón volver al inicio -->

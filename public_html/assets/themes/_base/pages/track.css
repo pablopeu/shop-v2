@@ -134,8 +134,8 @@
 
 /* Card de link permanente */
 .tracking-link-card {
-    max-width: 600px;
-    margin: var(--spacing-3xl, 64px) auto;
+    max-width: 800px;
+    margin: var(--spacing-2xl, 48px) auto;
     padding: var(--spacing-xl, 36px);
     background: var(--color-success-bg, #f0fdf4);
     border: 2px solid var(--color-success, #22c55e);
