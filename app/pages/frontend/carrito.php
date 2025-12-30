@@ -70,26 +70,14 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
     </div>
     <?php endif; ?>
 
-    <!-- Breadcrumb & Title Row -->
-    <div class="cart-breadcrumb-row">
-        <div class="cart-breadcrumb-left">
-            <?php
-            require_once APP_PATH . '/includes/frontend/breadcrumb.php';
-            render_breadcrumb([
-                ['label' => 'Inicio', 'url' => url('/')],
-                ['label' => 'Carrito', 'url' => null]
-            ]);
-            ?>
-        </div>
-        <div class="cart-page-title">
-            <svg class="cart-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-            </svg>
-            <h1>Mi Carrito</h1>
-        </div>
-    </div>
+    <!-- Breadcrumb -->
+    <?php
+    require_once APP_PATH . '/includes/frontend/breadcrumb.php';
+    render_breadcrumb([
+        ['label' => 'Inicio', 'url' => url('/')],
+        ['label' => 'Carrito', 'url' => null]
+    ]);
+    ?>
 
     <!-- Main Content -->
     <div class="container cart-page-container">
@@ -98,7 +86,14 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             <!-- Cart Items Section -->
             <div class="cart-items-section">
                 <div class="cart-items-header">
-                    <h2 class="items-title">Productos</h2>
+                    <div class="items-title-with-icon">
+                        <svg class="cart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        <h2 class="items-title">Productos</h2>
+                    </div>
                     <span class="items-count" id="itemsCount">0 productos</span>
                 </div>
 
@@ -1222,11 +1217,35 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
                 return _goToCheckout();
             };
 
-            // updateQuantity uses ShopCart module
+            // updateQuantity - handle locally for cart page
             window.updateQuantity = function(eventOrId, element, params) {
                 const id = params?.productId || (typeof eventOrId === 'string' ? eventOrId : null);
                 const delta = params?.delta ? parseInt(params.delta) : (typeof arguments[1] === 'number' ? arguments[1] : 0);
-                if (id) return ShopCart.updateQuantity(id, delta);
+
+                if (!id) return;
+
+                // Update quantity in localStorage
+                const cartItems = ShopUtils.getCart();
+                const itemIndex = cartItems.findIndex(item => item.id === id);
+
+                if (itemIndex !== -1) {
+                    cartItems[itemIndex].quantity += delta;
+
+                    // Remove if quantity is 0 or less
+                    if (cartItems[itemIndex].quantity <= 0) {
+                        cartItems.splice(itemIndex, 1);
+                    }
+
+                    // Save cart
+                    ShopUtils.saveCart(cartItems);
+                    ShopUtils.updateCartCount();
+
+                    // Reload the cart page
+                    loadCart();
+                    if (cartItems.length > 0) {
+                        fetchCartProducts();
+                    }
+                }
             };
 
             const _removeItem = removeItem;
