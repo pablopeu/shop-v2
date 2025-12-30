@@ -1,6 +1,9 @@
 build/
 zipnova/
 
+# Scripts de build (solo locales)
+scripts/build-release.sh
+
 # Archivos de configuración con datos sensibles (NO commitear)
 app/config/config.php
 app/config/shipping.json
