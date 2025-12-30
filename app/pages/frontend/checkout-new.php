@@ -1702,7 +1702,9 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     <div class="form-group">
                                         <label for="shipping_city">Ciudad *</label>
                                         <input type="text" id="shipping_city" name="shipping_city"
+                                               placeholder="Ej: Rosario, Palermo, etc."
                                                value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? $saved_city); ?>">
+                                        <small>En CABA poner el Barrio</small>
                                     </div>
                                 </div>
 
