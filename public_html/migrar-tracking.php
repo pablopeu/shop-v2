@@ -6,10 +6,30 @@
  * ELIMINAR ESTE ARCHIVO DESPUÉS DE EJECUTARLO
  */
 
+// Mostrar errores para debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 define('APP_ENTRY_POINT', true);
 
-// Cargar bootstrap
-require_once __DIR__ . '/../app/config/bootstrap.php';
+// Cargar bootstrap - intentar diferentes rutas según entorno
+$bootstrap_paths = [
+    __DIR__ . '/../app/config/bootstrap.php',  // Desarrollo
+    '/home2/uv0023/shop-v2-app/config/bootstrap.php',  // Producción
+];
+
+$bootstrap_loaded = false;
+foreach ($bootstrap_paths as $path) {
+    if (file_exists($path)) {
+        require_once $path;
+        $bootstrap_loaded = true;
+        break;
+    }
+}
+
+if (!$bootstrap_loaded) {
+    die("ERROR: No se pudo cargar bootstrap.php");
+}
 
 // Solo admin puede ejecutar
 require_admin();
