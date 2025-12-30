@@ -8,6 +8,7 @@ Sistema de e-commerce profesional con **arquitectura de seguridad primero** y **
 - [📁 Estructura del Proyecto](#-estructura-del-proyecto)
 - [🚀 Instalación](#-instalación)
 - [🎨 Sistema de Themes](#-sistema-de-themes)
+- [📦 Sistema de Tracking y Logística](#-sistema-de-tracking-y-logística)
 - [🧩 Componentes Reutilizables](#-componentes-reutilizables)
 - [📦 Módulos JavaScript](#-módulos-javascript)
 - [⚙️ Configuración](#️-configuración)
@@ -90,7 +91,8 @@ shop-v2/
 │   │   │   ├── carrito.php                 # Carrito de compras
 │   │   │   ├── checkout.php                # Proceso de pago
 │   │   │   ├── favoritos.php               # Lista de favoritos
-│   │   │   ├── track.php                   # Seguimiento de pedido
+│   │   │   ├── track.php                   # Búsqueda de pedido (email + número)
+│   │   │   ├── pedido.php                  # Detalle de pedido con tracking
 │   │   │   ├── buscar.php                  # Búsqueda de productos
 │   │   │   └── preview.php                 # Preview de themes
 │   │   │
@@ -135,6 +137,8 @@ shop-v2/
     │   │   │       ├── home.css
     │   │   │       ├── producto.css
     │   │   │       ├── carrito.css
+    │   │   │       ├── track.css           # Búsqueda y tracking
+    │   │   │       ├── pedido.css          # Detalle de pedido
     │   │   │       └── ...
     │   │   │
     │   │   ├── minimal/                    # Theme Minimal (default)
@@ -357,6 +361,96 @@ El sistema de themes separa:
    ```
 
 Ver [docs/THEME_SYSTEM.md](docs/THEME_SYSTEM.md) para documentación completa.
+
+---
+
+## 📦 Sistema de Tracking y Logística
+
+### 🚚 Integración Multi-Carrier
+
+Sistema completo de logística con arquitectura extensible para múltiples carriers de envío.
+
+#### Características Principales
+
+✅ **Tracking de Pedidos Avanzado**
+- Búsqueda tolerante (case insensitive, flexible con ceros de padding)
+- Link permanente para seguimiento sin autenticación
+- Timeline visual con historial completo del carrier
+- Pre-llenado automático desde parámetros GET
+- LocalStorage para recordar email del usuario
+
+✅ **Integración con Carriers**
+- Zipnova (implementado) - Agregador multi-carrier
+- Arquitectura preparada para Andreani, OCA, Correo Argentino
+- Tracking en tiempo real desde API del carrier
+- Generación automática de etiquetas de envío
+- Webhooks para actualizaciones de estado
+
+✅ **Experiencia de Usuario**
+- Formulario de búsqueda inteligente:
+  - `ORD-2025-00072` = `ord-2025-72` = `2025-72` (todas válidas)
+  - Link permanente en resultados: `https://peu.net/shopv2/pedido?order=xxx&token=xxx`
+- Timeline visual con iconos y estados traducidos
+- Información del carrier en gastos de envío
+- Link directo al tracking externo del carrier
+
+### Páginas de Tracking
+
+#### `/track` - Búsqueda de Pedidos
+```
+Funcionalidades:
+- Búsqueda por email + número de pedido
+- Validación tolerante y flexible
+- Recordar último email usado
+- Pre-llenado desde URL (?email=&order=)
+- Redirección automática a página de detalle
+```
+
+#### `/pedido` - Detalle del Pedido
+```
+Muestra:
+- Timeline de estados del carrier (con historial completo)
+- Número de tracking y link externo
+- Productos comprados con imágenes
+- Información de envío (carrier, costo, dirección)
+- Link permanente para compartir
+```
+
+### Arquitectura Multi-Carrier
+
+El sistema está diseñado para soportar múltiples carriers sin modificar código:
+
+```php
+// Configuración en app/config/shipping.json
+{
+    "carriers": {
+        "ZNVA": {
+            "name": "Zipnova",
+            "enabled": true,
+            "api_key": "..."
+        },
+        "ANDR": {
+            "name": "Andreani",
+            "enabled": false,
+            "api_key": "..."
+        }
+    }
+}
+```
+
+**Flujo de integración**:
+1. Usuario selecciona método de envío en checkout
+2. Sistema consulta cotizaciones a carriers habilitados
+3. Usuario elige opción (carrier + servicio)
+4. Sistema genera envío y obtiene número de tracking
+5. Webhooks actualizan estado en tiempo real
+6. Timeline muestra historial completo
+
+Ver documentación completa:
+- [docs/MULTI_CARRIER_ARCHITECTURE.md](docs/MULTI_CARRIER_ARCHITECTURE.md)
+- [docs/SHIPPING_WORKFLOW.md](docs/SHIPPING_WORKFLOW.md)
+- [docs/SHIPPING_USER_GUIDE.md](docs/SHIPPING_USER_GUIDE.md)
+- [docs/SHIPPING_LABELS.md](docs/SHIPPING_LABELS.md)
 
 ---
 
@@ -745,21 +839,43 @@ Configurados en GitHub Settings → Secrets:
 
 ## 📚 Documentación Adicional
 
-### Documentación del Sistema
+### Documentación Activa (`docs/`)
 
+Documentación necesaria para el desarrollo cotidiano:
+
+#### Arquitectura y Desarrollo
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Arquitectura general del sistema
+- **[COMPONENTS.md](docs/COMPONENTS.md)** - Componentes reutilizables
+- **[DEVELOPMENT_GUIDE.md](docs/DEVELOPMENT_GUIDE.md)** - Guía de desarrollo
+- **[JAVASCRIPT_MODULES.md](docs/JAVASCRIPT_MODULES.md)** - Módulos JavaScript
+
+#### Sistema de Themes
 - **[THEME_SYSTEM.md](docs/THEME_SYSTEM.md)** - Sistema de themes y cache CSS
-- **[PLAN_THEMING_100.md](docs/PLAN_THEMING_100.md)** - ✨ Proyecto Frontend 100% Themeable (COMPLETADO)
-- **[PLAN_MIGRACION_THEMES.md](docs/PLAN_MIGRACION_THEMES.md)** - Plan de migración frontend
-- **[SECURITY-V2.md](SECURITY-V2.md)** - Arquitectura de seguridad
+
+#### Logística y Envíos
+- **[MULTI_CARRIER_ARCHITECTURE.md](docs/MULTI_CARRIER_ARCHITECTURE.md)** - Arquitectura multi-carrier
+- **[SHIPPING_WORKFLOW.md](docs/SHIPPING_WORKFLOW.md)** - Flujo de trabajo de envíos
+- **[SHIPPING_USER_GUIDE.md](docs/SHIPPING_USER_GUIDE.md)** - Guía de usuario
+- **[SHIPPING_LABELS.md](docs/SHIPPING_LABELS.md)** - Etiquetas de envío
+- **[ZIPNOVA_API_REFERENCE.md](docs/ZIPNOVA_API_REFERENCE.md)** - Referencia API Zipnova
+
+#### Seguridad
+- **[SECURITY.md](docs/SECURITY.md)** - Documentación de seguridad
+- **[SECURITY_IMPLEMENTATION.md](docs/SECURITY_IMPLEMENTATION.md)** - Implementación de medidas
+
+#### Instalación
+- **[README_INSTALACION.md](docs/README_INSTALACION.md)** - Guía de instalación
+
+### Documentación Histórica (`docs/archive/`)
+
+Planes completados, auditorías pasadas y análisis históricos. Ver [docs/archive/README.md](docs/archive/README.md).
+
+### Otros Documentos
+
+- **[SECURITY-V2.md](SECURITY-V2.md)** - Arquitectura de seguridad V2
 - **[CLAUDE.md](CLAUDE.md)** - Guía para Claude Code (AI assistant)
-
-### Guías de Desarrollo
-
 - **[install/README.md](install/README.md)** - Instalador del sistema
 - **[.github/DEPLOY.md](.github/DEPLOY.md)** - Configuración de deployment
-
-### Componentes Admin
-
 - **[app/includes/admin/MODAL_GUIDELINES.md](app/includes/admin/MODAL_GUIDELINES.md)** - Uso del modal reutilizable
 
 ---
@@ -832,4 +948,11 @@ Este proyecto es de código abierto. Licencia GNU GPL v2
 
 ---
 
-*Última actualización: 2025-12-09* - ✨ Frontend 100% Themeable Completado
+*Última actualización: 2025-12-30*
+
+**Cambios recientes:**
+- ✨ Sistema de Tracking y Logística Multi-Carrier implementado
+- 📦 Búsqueda tolerante de pedidos con link permanente
+- 🎨 Timeline visual de estados del carrier
+- 📚 Documentación reorganizada (activa vs histórica)
+- 🔧 Branches consolidados en main
