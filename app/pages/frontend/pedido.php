@@ -27,11 +27,22 @@ if (empty($order_id) || empty($token)) {
 $site_config = read_json(APP_PATH . '/config/site.json');
 $footer_config = read_json(APP_PATH . '/config/footer.json');
 $theme_config = read_json(APP_PATH . '/config/theme.json');
+$app_config = require APP_PATH . '/config/config.php';
 
 $active_theme = $theme_config['active_theme'] ?? 'minimal';
 
 // Get all products for cart/favorites panels
 $all_products = get_all_products(true); // Only active products
+
+// Helper: Generar URL absoluta completa (con dominio)
+function get_absolute_url($path) {
+    global $app_config;
+    $base_url = rtrim($app_config['app_url'] ?? 'https://peu.net', '/');
+    $base_path = rtrim($app_config['base_path'] ?? '/shopv2', '/');
+    $path = ltrim($path, '/');
+
+    return $base_url . $base_path . '/' . $path;
+}
 
 // Funciones helper para tracking timeline
 function get_status_icon($status) {
@@ -226,7 +237,7 @@ function get_status_color_class($status) {
             <h2>🔗 Link Permanente de Seguimiento</h2>
             <p>Guarda este link para consultar tu pedido en cualquier momento:</p>
             <div class="link-display">
-                <input type="text" value="<?= htmlspecialchars(url("/pedido?order={$order['id']}&token={$order['tracking_token']}")) ?>" readonly id="tracking-link-input">
+                <input type="text" value="<?= htmlspecialchars(get_absolute_url("/pedido?order={$order['id']}&token={$order['tracking_token']}")) ?>" readonly id="tracking-link-input">
                 <button data-action="copyLink">Copiar</button>
             </div>
             <p class="tracking-link-explanation">
