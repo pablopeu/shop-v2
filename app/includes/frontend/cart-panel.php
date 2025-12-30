@@ -38,7 +38,7 @@ function render_cart_panel($options = []) {
             <div class="cart-empty">Tu carrito está vacío</div>
         </div>
 
-        <div class="cart-panel-footer" id="cart-panel-footer" style="display: none;">
+        <div class="cart-panel-footer hidden" id="cart-panel-footer">
             <div class="cart-total">
                 <span>Total:</span>
                 <span id="cart-total">$0.00</span>
