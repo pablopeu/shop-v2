@@ -147,10 +147,26 @@ console.log('📦 shipping.js: Archivo cargado');
                 console.log('✅ Cotizaciones recibidas:', shippingQuotes.length);
                 displayQuotes(shippingQuotes);
 
-                // Cambiar texto del botón con el costo
+                // Cambiar texto del botón con el costo separado por tipo
                 if (shippingQuotes.length > 0) {
-                    const minCost = Math.min(...shippingQuotes.map(q => q.cost || 0));
-                    button.textContent = `💰 Desde ${formatCurrency(minCost)}`;
+                    // Separar cotizaciones por tipo
+                    const homeDeliveryQuotes = shippingQuotes.filter(q => q.service_type_code !== 'pickup_point');
+                    const pickupPointQuotes = shippingQuotes.filter(q => q.service_type_code === 'pickup_point');
+
+                    let buttonText = '💰 ';
+                    const parts = [];
+
+                    if (homeDeliveryQuotes.length > 0) {
+                        const minHomeDelivery = Math.min(...homeDeliveryQuotes.map(q => q.cost || 0));
+                        parts.push(`Domicilio: ${formatCurrency(minHomeDelivery)}`);
+                    }
+
+                    if (pickupPointQuotes.length > 0) {
+                        const minPickupPoint = Math.min(...pickupPointQuotes.map(q => q.cost || 0));
+                        parts.push(`Punto: ${formatCurrency(minPickupPoint)}`);
+                    }
+
+                    button.textContent = buttonText + parts.join(' | ');
                 } else {
                     button.textContent = originalText;
                 }
