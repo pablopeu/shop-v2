@@ -1557,20 +1557,20 @@ html {
     -webkit-backdrop-filter: blur(var(--blur-md));
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-2xl);
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-lg);
     box-shadow: var(--shadow-xl);
 }
 
 .summary-title {
-    margin: 0 0 var(--spacing-xl) 0;
-    font-size: var(--font-size-2xl);
+    margin: 0 0 var(--spacing-md) 0;
+    font-size: var(--font-size-xl);
     text-align: center;
 }
 
 /* Currency Selector */
 .currency-selector {
-    margin-bottom: var(--spacing-xl);
-    padding-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
     border-bottom: 1px solid var(--glass-border);
 }
 
@@ -1619,14 +1619,14 @@ html {
 
 /* Coupon Section */
 .summary-coupon-section {
-    margin-bottom: var(--spacing-xl);
-    padding-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
     border-bottom: 1px solid var(--glass-border);
 }
 
 /* Totals Section */
 .summary-totals-section {
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
 }
 
 .summary-row {
@@ -1663,7 +1663,7 @@ html {
 .summary-actions {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
 }
 
 .btn-checkout {
@@ -1715,8 +1715,8 @@ html {
 
 /* Security Badge */
 .summary-security {
-    margin-top: var(--spacing-lg);
-    padding-top: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
     border-top: 1px solid var(--glass-border);
     display: flex;
     align-items: center;

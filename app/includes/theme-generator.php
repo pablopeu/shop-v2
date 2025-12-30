@@ -1493,10 +1493,10 @@ function generate_theme_css_basic($config) {
     $css .= ".btn-shop-now:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); background: var(--color-primary-dark); }\n\n";
 
     $css .= ".cart-summary-sidebar { position: sticky; top: var(--spacing-xl); }\n";
-    $css .= ".summary-card { background: var(--color-bg); border: 1px solid var(--color-border-light); border-radius: var(--border-radius-lg); padding: var(--spacing-2xl); box-shadow: var(--shadow-md); }\n";
-    $css .= ".summary-title { margin: 0 0 var(--spacing-xl) 0; font-size: var(--font-size-2xl); text-align: center; }\n\n";
+    $css .= ".summary-card { background: var(--color-bg); border: 1px solid var(--color-border-light); border-radius: var(--border-radius-lg); padding: var(--spacing-lg); box-shadow: var(--shadow-md); }\n";
+    $css .= ".summary-title { margin: 0 0 var(--spacing-md) 0; font-size: var(--font-size-xl); text-align: center; }\n\n";
 
-    $css .= ".currency-selector { margin-bottom: var(--spacing-xl); padding-bottom: var(--spacing-xl); border-bottom: 1px solid var(--color-border); }\n";
+    $css .= ".currency-selector { margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); }\n";
     $css .= ".currency-label { display: block; font-size: var(--font-size-sm); color: var(--color-text-light); margin-bottom: var(--spacing-sm); font-weight: var(--font-weight-semibold); }\n";
     $css .= ".currency-toggle-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); }\n";
     $css .= ".currency-btn { padding: var(--spacing-sm) var(--spacing-md); border: 2px solid var(--color-border); background: var(--color-bg); border-radius: var(--border-radius-md); cursor: pointer; transition: var(--transition-base); display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); font-weight: var(--font-weight-semibold); }\n";
@@ -1504,20 +1504,20 @@ function generate_theme_css_basic($config) {
     $css .= ".currency-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: white; }\n";
     $css .= ".currency-symbol { font-weight: var(--font-weight-bold); }\n\n";
 
-    $css .= ".summary-coupon-section { margin-bottom: var(--spacing-xl); padding-bottom: var(--spacing-xl); border-bottom: 1px solid var(--color-border); }\n";
-    $css .= ".summary-totals-section { margin-bottom: var(--spacing-xl); }\n";
+    $css .= ".summary-coupon-section { margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); }\n";
+    $css .= ".summary-totals-section { margin-bottom: var(--spacing-md); }\n";
     $css .= ".summary-row { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-sm) 0; font-size: var(--font-size-base); }\n";
     $css .= ".summary-row.total { font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); padding-top: var(--spacing-md); border-top: 2px solid var(--color-border); margin-top: var(--spacing-md); }\n";
     $css .= ".summary-row.total span:last-child { color: var(--color-primary); }\n";
     $css .= ".summary-row.promotion, .summary-row.discount { color: var(--color-success); font-weight: var(--font-weight-semibold); }\n\n";
 
-    $css .= ".summary-actions { display: flex; flex-direction: column; gap: var(--spacing-md); }\n";
+    $css .= ".summary-actions { display: flex; flex-direction: column; gap: var(--spacing-sm); }\n";
     $css .= ".btn-checkout { width: 100%; padding: var(--spacing-lg) var(--spacing-xl); background: var(--color-primary); color: white; border: none; border-radius: var(--border-radius-lg); font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); transition: var(--transition-base); box-shadow: var(--shadow-md); }\n";
     $css .= ".btn-checkout:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); background: var(--color-primary-dark); }\n";
     $css .= ".btn-continue-shopping { width: 100%; padding: var(--spacing-md) var(--spacing-lg); background: transparent; color: var(--color-text); border: 2px solid var(--color-border); border-radius: var(--border-radius-md); font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); transition: var(--transition-base); text-decoration: none; }\n";
     $css .= ".btn-continue-shopping:hover { border-color: var(--color-primary); color: var(--color-primary); }\n\n";
 
-    $css .= ".summary-security { margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); font-size: var(--font-size-sm); color: var(--color-text-light); }\n";
+    $css .= ".summary-security { margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); font-size: var(--font-size-sm); color: var(--color-text-light); }\n";
     $css .= ".summary-security svg { stroke: var(--color-success); }\n\n";
 
     $css .= ".cart-loading { opacity: 0.6; pointer-events: none; }\n\n";
