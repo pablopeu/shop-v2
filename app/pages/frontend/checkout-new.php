@@ -2150,6 +2150,9 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 document.getElementById('step-1-summary').textContent = `${name} • ${email}`;
                 markStepCompleted(1);
                 unlockNextStep(1);
+            } else {
+                // Marcar como incompleto si faltan datos
+                markStepIncomplete(1);
             }
         }
 
@@ -2244,7 +2247,15 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         });
 
         function validateStep3() {
-            const method = document.querySelector('input[name="payment_method"]:checked').value;
+            const methodElement = document.querySelector('input[name="payment_method"]:checked');
+
+            // Verificar que haya un método seleccionado
+            if (!methodElement) {
+                markStepIncomplete(3);
+                return;
+            }
+
+            const method = methodElement.value;
             let methodText = '';
             if (method === 'arrangement') methodText = '🤝 Arreglo';
             else if (method === 'pickup_payment') methodText = '💵 Pago al retirar';
