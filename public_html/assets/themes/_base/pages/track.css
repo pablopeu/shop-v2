@@ -135,8 +135,8 @@
 /* Card de link permanente */
 .tracking-link-card {
     max-width: 800px;
-    margin: var(--spacing-2xl, 48px) auto;
-    padding: var(--spacing-xl, 36px);
+    margin: var(--spacing-xl, 36px) auto;
+    padding: var(--spacing-lg, 28px) var(--spacing-xl, 36px);
     background: var(--color-success-bg, #f0fdf4);
     border: 2px solid var(--color-success, #22c55e);
     border-radius: var(--border-radius-lg, 12px);
@@ -144,9 +144,9 @@
 }
 
 .tracking-link-card h2 {
-    margin-bottom: var(--spacing-md, 20px);
+    margin-bottom: var(--spacing-sm, 12px);
     color: var(--color-success-dark, #16a34a);
-    font-size: var(--font-size-2xl, 28px);
+    font-size: var(--font-size-xl, 22px);
 }
 
 .link-display {
@@ -191,7 +191,7 @@
 
 .tracking-timeline-section {
     max-width: 800px;
-    margin: var(--spacing-2xl, 48px) auto;
+    margin: var(--spacing-lg, 28px) auto;
     padding: var(--spacing-xl, 36px);
     background: var(--color-bg, white);
     border-radius: var(--border-radius-lg, 12px);
