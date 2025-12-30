@@ -38,6 +38,46 @@ if (!empty($token_param)) {
     }
 }
 
+/**
+ * Normaliza un número de orden para comparación flexible
+ * Acepta: ORD-2025-00072, ord-2025-72, ORD-2025-072, etc.
+ * Retorna: array con partes normalizadas o null si formato inválido
+ */
+function normalize_order_number($order_number) {
+    // Limpiar espacios y convertir a mayúsculas
+    $order_number = strtoupper(trim($order_number));
+
+    // Agregar prefijo ORD- si no lo tiene
+    if (!preg_match('/^ORD-/', $order_number)) {
+        $order_number = 'ORD-' . $order_number;
+    }
+
+    // Extraer partes: ORD-YYYY-NNNNN
+    if (preg_match('/^ORD-(\d{4})-(\d+)$/', $order_number, $matches)) {
+        return [
+            'year' => $matches[1],
+            'number' => (int)$matches[2] // Convertir a int elimina ceros de padding
+        ];
+    }
+
+    return null;
+}
+
+/**
+ * Compara dos números de orden de forma flexible
+ */
+function orders_match($order_number_1, $order_number_2) {
+    $norm1 = normalize_order_number($order_number_1);
+    $norm2 = normalize_order_number($order_number_2);
+
+    if (!$norm1 || !$norm2) {
+        return false;
+    }
+
+    return $norm1['year'] === $norm2['year'] &&
+           $norm1['number'] === $norm2['number'];
+}
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -51,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($orders as $order) {
             if (strtolower($order['customer_email']) === strtolower($email) &&
-                $order['order_number'] === $order_number) {
+                orders_match($order['order_number'], $order_number)) {
                 $found_order = $order;
                 break;
             }
@@ -116,11 +156,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="text"
                         id="order_number"
                         name="order_number"
-                        placeholder="ORD-2025-00001"
+                        placeholder="ORD-2025-72 o 2025-72"
                         required
                         value="<?php echo htmlspecialchars($_POST['order_number'] ?? ''); ?>"
                     >
-                    <div class="track-form-help">Lo encontrarás en el email de confirmación</div>
+                    <div class="track-form-help">Puedes usar mayúsculas, minúsculas, con o sin ceros (ej: ord-2025-72)</div>
                 </div>
 
                 <button type="submit" class="track-form-submit">
