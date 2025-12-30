@@ -188,3 +188,111 @@
 .z-100 {
     z-index: 100;
 }
+
+/* === Shipping-Specific Utilities === */
+/* Contenedor del botón "Ver más opciones" */
+.shipping-btn-container {
+    text-align: center;
+    margin-top: 0.75rem;
+}
+
+/* Botón "Ver más opciones" */
+.shipping-btn-toggle {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+}
+
+/* Contenedor de contenido completo */
+.shipping-content-full {
+    width: 100%;
+}
+
+/* Contenedor del título con badges */
+.shipping-title-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Badge "MÁS BARATA" */
+.shipping-badge-cheapest {
+    background: var(--color-success, #27ae60);
+    color: var(--color-white, white);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Badge "MÁS RÁPIDA" */
+.shipping-badge-fastest {
+    background: var(--color-info, #3498db);
+    color: var(--color-white, white);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Costo del envío */
+.shipping-cost {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+/* Contenedor de puntos de retiro */
+.pickup-points-container {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--checkout-bg-secondary, #f8f9fa);
+    border-radius: 8px;
+}
+
+/* Título de puntos de retiro */
+.pickup-points-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Select de puntos de retiro */
+.pickup-point-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--checkout-border, #dee2e6);
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+/* === Button States === */
+/* Estado "copiado" para botones */
+.btn-copied {
+    background: var(--color-success, #22c55e) !important;
+    transition: background 0.2s ease;
+}
+
+/* === Tooltip Utilities === */
+/* Tooltip para opciones bloqueadas */
+.locked-tooltip {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+/* Estado visible del tooltip */
+.locked-tooltip.active {
+    opacity: 1;
+}

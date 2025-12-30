@@ -158,7 +158,7 @@ ShopCart.renderCartPanel = async function(products, options = {}) {
 
     if (cart.length === 0) {
         body.innerHTML = '<div class="cart-empty">Tu carrito está vacío</div>';
-        if (footer) footer.style.display = 'none';
+        if (footer) footer.classList.add('hidden');
         return;
     }
 
@@ -297,7 +297,7 @@ ShopCart.renderCartPanel = async function(products, options = {}) {
     // Check if we have valid items to display
     if (html === '' || validCart.length === 0) {
         body.innerHTML = '<div class="cart-empty">Tu carrito está vacío</div>';
-        if (footer) footer.style.display = 'none';
+        if (footer) footer.classList.add('hidden');
         return;
     }
 
@@ -312,7 +312,7 @@ ShopCart.renderCartPanel = async function(products, options = {}) {
         }
     }
 
-    if (footer) footer.style.display = 'block';
+    if (footer) footer.classList.remove('hidden');
 };
 
 /**

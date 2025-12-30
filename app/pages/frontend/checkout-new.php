@@ -2056,22 +2056,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             if (!tooltip) {
                 tooltip = document.createElement('div');
                 tooltip.className = 'locked-tooltip';
-                tooltip.style.cssText = `
-                    position: absolute;
-                    top: -35px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background: #333;
-                    color: white;
-                    padding: 0.5rem 1rem;
-                    border-radius: 4px;
-                    font-size: 0.75rem;
-                    white-space: nowrap;
-                    z-index: 1000;
-                    pointer-events: none;
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                `;
 
                 let message = '';
                 if (stepNumber === 2) message = 'Completá tus datos personales primero';
@@ -2079,14 +2063,14 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 else if (stepNumber === 4) message = 'Seleccioná el método de pago primero';
 
                 tooltip.textContent = message;
-                header.style.position = 'relative';
+                header.classList.add('relative');
                 header.appendChild(tooltip);
             }
 
             // Show tooltip
-            tooltip.style.opacity = '1';
+            tooltip.classList.add('active');
             setTimeout(() => {
-                tooltip.style.opacity = '0';
+                tooltip.classList.remove('active');
             }, 2000);
         }
 

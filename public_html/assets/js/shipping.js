@@ -233,14 +233,11 @@ console.log('📦 shipping.js: Archivo cargado');
             // Add "Ver más" button if there are more than INITIAL_DISPLAY quotes
             if (quotes.length > INITIAL_DISPLAY) {
                 const btnContainer = document.createElement('div');
-                btnContainer.style.textAlign = 'center';
-                btnContainer.style.marginTop = '0.75rem';
+                btnContainer.className = 'shipping-btn-container';
 
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'btn-secondary';
-                btn.style.padding = '0.5rem 1.5rem';
-                btn.style.fontSize = '0.875rem';
+                btn.className = 'btn-secondary shipping-btn-toggle';
                 btn.textContent = showAll ? `▲ Ver menos (mostrando ${quotes.length})` : `▼ Ver más opciones (${quotes.length - INITIAL_DISPLAY} más)`;
 
                 btn.onclick = () => {
@@ -361,14 +358,11 @@ console.log('📦 shipping.js: Archivo cargado');
         radio.addEventListener('change', () => handleQuoteSelection(quote));
 
         const contentDiv = document.createElement('div');
-        contentDiv.style.width = '100%';
+        contentDiv.className = 'shipping-content-full';
 
         // Service name and delivery time
         const titleContainer = document.createElement('div');
-        titleContainer.style.display = 'flex';
-        titleContainer.style.alignItems = 'center';
-        titleContainer.style.gap = '0.5rem';
-        titleContainer.style.flexWrap = 'wrap';
+        titleContainer.className = 'shipping-title-container';
 
         const title = document.createElement('strong');
         title.textContent = quote.service_name || quote.service_id || 'Envío';
@@ -377,7 +371,7 @@ console.log('📦 shipping.js: Archivo cargado');
         // Add "MÁS BARATA" badge if this is the cheapest option
         if (quote.tags && quote.tags.includes('cheapest')) {
             const badge = document.createElement('span');
-            badge.style.cssText = 'background: #27ae60; color: white; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.75rem; font-weight: 600;';
+            badge.className = 'shipping-badge-cheapest';
             badge.textContent = '💰 MÁS BARATA';
             titleContainer.appendChild(badge);
         }
@@ -385,7 +379,7 @@ console.log('📦 shipping.js: Archivo cargado');
         // Add "MÁS RÁPIDA" badge if this is the fastest option
         if (quote.tags && quote.tags.includes('fastest')) {
             const badge = document.createElement('span');
-            badge.style.cssText = 'background: #3498db; color: white; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.75rem; font-weight: 600;';
+            badge.className = 'shipping-badge-fastest';
             badge.textContent = '⚡ MÁS RÁPIDA';
             titleContainer.appendChild(badge);
         }
@@ -404,9 +398,7 @@ console.log('📦 shipping.js: Archivo cargado');
 
         // Cost
         const cost = document.createElement('div');
-        cost.style.marginTop = '0.5rem';
-        cost.style.fontWeight = '600';
-        cost.style.fontSize = '1.1em';
+        cost.className = 'shipping-cost';
         cost.textContent = formatCurrency(quote.cost || 0);
 
         contentDiv.appendChild(titleContainer);
@@ -423,17 +415,15 @@ console.log('📦 shipping.js: Archivo cargado');
             console.log('✅ Creando contenedor de pickup points con', quote.pickup_points.length, 'puntos');
             const pickupPointsContainer = document.createElement('div');
             pickupPointsContainer.className = 'pickup-points-container hidden';
-            pickupPointsContainer.style.cssText = 'margin-top: 1rem; padding: 0.75rem; background: var(--checkout-bg-secondary); border-radius: 8px;';
             pickupPointsContainer.dataset.serviceId = quote.service_id;
 
             const pickupPointsTitle = document.createElement('p');
-            pickupPointsTitle.style.cssText = 'font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem;';
+            pickupPointsTitle.className = 'pickup-points-title';
             pickupPointsTitle.textContent = '📍 Seleccioná un punto de retiro:';
             pickupPointsContainer.appendChild(pickupPointsTitle);
 
             const pickupPointsSelect = document.createElement('select');
             pickupPointsSelect.className = 'pickup-point-select';
-            pickupPointsSelect.style.cssText = 'width: 100%; padding: 0.5rem; border: 1px solid var(--checkout-border); border-radius: 4px; font-size: 0.875rem;';
             pickupPointsSelect.required = true;
 
             // Opción por defecto
@@ -590,9 +580,11 @@ console.log('📦 shipping.js: Archivo cargado');
         // Show/hide shipping row based on cost
         if (shippingCostRow) {
             if (cost > 0) {
-                shippingCostRow.style.display = 'flex';
+                shippingCostRow.classList.remove('hidden');
+                shippingCostRow.classList.add('flex');
             } else {
-                shippingCostRow.style.display = 'none';
+                shippingCostRow.classList.add('hidden');
+                shippingCostRow.classList.remove('flex');
             }
         }
 
