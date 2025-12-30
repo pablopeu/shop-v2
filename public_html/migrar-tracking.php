@@ -12,23 +12,15 @@ ini_set('display_errors', 1);
 
 define('APP_ENTRY_POINT', true);
 
-// Cargar bootstrap - intentar diferentes rutas según entorno
-$bootstrap_paths = [
-    __DIR__ . '/../app/config/bootstrap.php',  // Desarrollo
-    '/home2/uv0023/shop-v2-app/config/bootstrap.php',  // Producción
-];
-
-$bootstrap_loaded = false;
-foreach ($bootstrap_paths as $path) {
-    if (file_exists($path)) {
-        require_once $path;
-        $bootstrap_loaded = true;
-        break;
-    }
-}
-
-if (!$bootstrap_loaded) {
-    die("ERROR: No se pudo cargar bootstrap.php");
+// Detectar entorno y cargar bootstrap
+if (file_exists('/home2/uv0023/shop-v2-app/config/bootstrap.php')) {
+    // Producción
+    require_once '/home2/uv0023/shop-v2-app/config/bootstrap.php';
+} elseif (file_exists(__DIR__ . '/../app/config/bootstrap.php')) {
+    // Desarrollo
+    require_once __DIR__ . '/../app/config/bootstrap.php';
+} else {
+    die("ERROR: No se pudo encontrar bootstrap.php");
 }
 
 // Solo admin puede ejecutar
