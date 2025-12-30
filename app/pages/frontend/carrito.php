@@ -1225,8 +1225,8 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
                 if (!id) return;
 
                 // Update quantity in localStorage
-                const cartItems = ShopUtils.getCart();
-                const itemIndex = cartItems.findIndex(item => item.id === id);
+                const cartItems = ShopCart.getCart();
+                const itemIndex = cartItems.findIndex(item => item.product_id === id);
 
                 if (itemIndex !== -1) {
                     cartItems[itemIndex].quantity += delta;
@@ -1238,7 +1238,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
 
                     // Save cart
                     ShopUtils.saveCart(cartItems);
-                    ShopUtils.updateCartCount();
+                    ShopCart.updateCartBadge();
 
                     // Reload the cart page
                     loadCart();
