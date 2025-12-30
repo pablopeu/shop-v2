@@ -282,6 +282,18 @@ try {
         $shipment_id = $result['data']['id'] ?? null;
 
         if ($shipment_id) {
+            // Leer tracking_number de forma tolerante (Zipnova no es consistente entre carriers)
+            $tracking_number = $result['data']['tracking_number']
+                ?? $result['data']['tracking_code']
+                ?? $result['data']['carrier_tracking_number']
+                ?? null;
+
+            if ($tracking_number) {
+                error_log("API CreateShipment: Tracking number encontrado: $tracking_number");
+            } else {
+                error_log("API CreateShipment: ADVERTENCIA - No se encontró tracking number en respuesta de Zipnova");
+            }
+
             // Guardar envío localmente para poder obtener la etiqueta después
             $shipment_local_data = [
                 'id' => $shipment_id,
@@ -289,7 +301,7 @@ try {
                 'order_number' => $order['order_number'] ?? null,
                 'status' => 'pendiente',
                 'carrier' => $quote_data['carrier_name'] ?? 'ZNVA',
-                'tracking_number' => $result['data']['tracking_number'] ?? null,
+                'tracking_number' => $tracking_number,
                 'created_at' => date('Y-m-d H:i:s'),
                 'data' => $result['data'] // Guardar toda la respuesta de Zipnova
             ];
@@ -297,13 +309,18 @@ try {
             zipnova_save_shipment($shipment_id, $shipment_local_data);
             error_log("API CreateShipment: Envío guardado localmente: $shipment_id");
 
-            // Preparar datos de envío para actualizar orden
+            // Preparar datos de envío para actualizar orden (incluir tracking_number)
             $shipping_info = [
                 'carrier_shipment_id' => $shipment_id,
                 'carrier' => $quote_data['carrier_name'] ?? 'ZNVA',
                 'status' => 'pendiente',
                 'created_at' => date('Y-m-d H:i:s')
             ];
+
+            // Agregar tracking_number si existe
+            if ($tracking_number) {
+                $shipping_info['tracking_number'] = $tracking_number;
+            }
 
             // Actualizar orden con info de envío
             if (update_order_shipping_info($order_id, $shipping_info)) {

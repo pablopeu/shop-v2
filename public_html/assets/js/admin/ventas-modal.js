@@ -420,13 +420,13 @@ export function viewOrder(orderId) {
                 <div class="form-group">
                     <label for="tracking_number"><strong>Número de Seguimiento:</strong></label>
                     <input type="text" name="tracking_number" id="tracking_number"
-                           value="${order.tracking_number || ''}" placeholder="Ej: CA123456789AR">
+                           value="${order.shipping?.tracking_number || order.tracking_number || ''}" placeholder="Ej: CA123456789AR">
                 </div>
 
                 <div class="form-group">
                     <label for="tracking_url"><strong>URL de Seguimiento:</strong></label>
                     <input type="text" name="tracking_url" id="tracking_url"
-                           value="${order.tracking_url || ''}" placeholder="https://...">
+                           value="${order.shipping?.tracking_url || order.tracking_url || ''}" placeholder="https://...">
                 </div>
             </form>
         </div>

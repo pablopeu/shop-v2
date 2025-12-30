@@ -319,10 +319,17 @@ if ($action === 'webhook' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $tracking_id = $data['tracking_id'] ?? $shipment_id;
     $new_status = $data['status'] ?? '';
 
+    // Leer tracking_number de forma tolerante (Zipnova no es consistente entre carriers)
+    $tracking_number = $data['tracking_number']
+        ?? $data['tracking_code']
+        ?? $data['carrier_tracking_number']
+        ?? null;
+
     zipnova_log('Webhook Received', [
         'event' => $event_type,
         'shipment_id' => $shipment_id,
         'tracking_id' => $tracking_id,
+        'tracking_number' => $tracking_number,
         'status' => $new_status
     ]);
 
@@ -364,6 +371,21 @@ if ($action === 'webhook' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Update order shipping status
     if ($tracking_id && $new_status) {
         $updated = update_shipping_status_by_tracking($tracking_id, $new_status, $data);
+
+        // Si hay tracking_number en el webhook, intentar actualizarlo en la orden
+        if ($tracking_number) {
+            $orders = get_all_orders();
+            foreach ($orders as $order) {
+                if (isset($order['shipping']['tracking_id']) && $order['shipping']['tracking_id'] === $tracking_id) {
+                    // Solo actualizar si la orden no tiene tracking_number o es diferente
+                    if (empty($order['tracking_number']) || $order['tracking_number'] !== $tracking_number) {
+                        update_order_shipping_info($order['id'], ['tracking_number' => $tracking_number]);
+                        error_log("Webhook: Tracking number actualizado para orden {$order['order_number']}: $tracking_number");
+                    }
+                    break;
+                }
+            }
+        }
 
         if ($updated) {
             // Find the order to send notification
