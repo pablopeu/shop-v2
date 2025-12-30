@@ -71,49 +71,111 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
     <?php endif; ?>
 
     <!-- Main Content -->
-    <div class="container">
-        <h1>🛒 Carrito de Compras</h1>
+    <div class="container cart-page-container">
+        <!-- Page Header -->
+        <div class="cart-page-header">
+            <div class="cart-page-title">
+                <svg class="cart-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <h1>Mi Carrito</h1>
+            </div>
+            <div class="cart-page-breadcrumb">
+                <a href="<?php echo url('/'); ?>">Inicio</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Carrito</span>
+            </div>
+        </div>
 
         <div class="cart-layout">
-            <!-- Cart Items -->
-            <div class="cart-items">
-                <div id="cartItemsContainer" class="cart-loading">
-                    <div class="empty-cart">
-                        <h2>Tu carrito está vacío</h2>
-                        <p>Agrega productos para comenzar tu compra</p>
-                        <a href="<?php echo url('/'); ?>" class="btn">Ir a la Tienda</a>
+            <!-- Cart Items Section -->
+            <div class="cart-items-section">
+                <div class="cart-items-header">
+                    <h2 class="items-title">Productos</h2>
+                    <span class="items-count" id="itemsCount">0 productos</span>
+                </div>
+
+                <div id="cartItemsContainer" class="cart-items-list cart-loading">
+                    <div class="empty-cart-state">
+                        <div class="empty-cart-icon">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                        </div>
+                        <h2 class="empty-cart-title">Tu carrito está vacío</h2>
+                        <p class="empty-cart-message">¡Descubre nuestros productos y comienza a comprar!</p>
+                        <a href="<?php echo url('/'); ?>" class="btn-shop-now">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            </svg>
+                            Explorar Tienda
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Summary -->
-            <div class="cart-summary hidden" id="cartSummary">
-                <h2 class="summary-title">Resumen de Compra</h2>
+            <!-- Summary Sidebar -->
+            <div class="cart-summary-sidebar hidden" id="cartSummary">
+                <div class="summary-card">
+                    <h2 class="summary-title">Resumen del Pedido</h2>
 
-                <!-- Currency Toggle Buttons -->
-                <div class="currency-toggle" id="currency-toggle">
-                    <button class="currency-btn" data-currency="ARS" data-action="switchDisplayCurrency" data-curr="ARS">
-                        💵 Pesos (ARS)
-                    </button>
-                    <button class="currency-btn" data-currency="USD" data-action="switchDisplayCurrency" data-curr="USD">
-                        💵 Dólares (USD)
-                    </button>
+                    <!-- Currency Toggle -->
+                    <div class="currency-selector" id="currency-toggle">
+                        <label class="currency-label">Moneda:</label>
+                        <div class="currency-toggle-buttons">
+                            <button class="currency-btn" data-currency="ARS" data-action="switchDisplayCurrency" data-curr="ARS">
+                                <span class="currency-symbol">$</span>
+                                <span class="currency-code">ARS</span>
+                            </button>
+                            <button class="currency-btn" data-currency="USD" data-action="switchDisplayCurrency" data-curr="USD">
+                                <span class="currency-symbol">U$D</span>
+                                <span class="currency-code">USD</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Coupon Section -->
+                    <div class="summary-coupon-section">
+                        <?php
+                        require_once APP_PATH . '/includes/frontend/coupon-form.php';
+                        render_coupon_form();
+                        ?>
+                    </div>
+
+                    <!-- Totals -->
+                    <div class="summary-totals-section">
+                        <div id="summaryTotals"></div>
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <div class="summary-actions">
+                        <button class="btn-checkout" id="checkoutBtn" data-action="goToCheckout">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 11l3 3L22 4"></path>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
+                            Continuar con el Pago
+                        </button>
+                        <a href="<?php echo url('/'); ?>" class="btn-continue-shopping">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                            </svg>
+                            Seguir Comprando
+                        </a>
+                    </div>
+
+                    <!-- Security Badge -->
+                    <div class="summary-security">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span>Compra 100% segura</span>
+                    </div>
                 </div>
-
-                <!-- Coupon Form Component -->
-                <?php
-                require_once APP_PATH . '/includes/frontend/coupon-form.php';
-                render_coupon_form();
-                ?>
-
-                <!-- Totals -->
-                <div id="summaryTotals"></div>
-
-                <!-- Actions -->
-                <button class="checkout-btn" id="checkoutBtn" data-action="goToCheckout">
-                    Continuar Compra
-                </button>
-                <a href="<?php echo url('/'); ?>" class="continue-shopping">Continuar Comprando</a>
             </div>
         </div>
     </div>
@@ -225,14 +287,27 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             if (cart.length === 0) {
                 const container = document.getElementById('cartItemsContainer');
                 container.innerHTML = `
-                    <div class="empty-cart">
-                        <h2>Tu carrito está vacío</h2>
-                        <p>Agrega productos para comenzar tu compra</p>
-                        <a href="${BASE_URL}" class="btn">Ir a la Tienda</a>
+                    <div class="empty-cart-state">
+                        <div class="empty-cart-icon">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                        </div>
+                        <h2 class="empty-cart-title">Tu carrito está vacío</h2>
+                        <p class="empty-cart-message">¡Descubre nuestros productos y comienza a comprar!</p>
+                        <a href="${BASE_URL}" class="btn-shop-now">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            </svg>
+                            Explorar Tienda
+                        </a>
                     </div>
                 `;
                 container.classList.remove('cart-loading');
                 document.getElementById('cartSummary').classList.add('hidden');
+                document.getElementById('itemsCount').textContent = '0 productos';
             } else {
                 fetchCartProducts();
             }
@@ -440,50 +515,88 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
                 }
 
                 html += `
-                    <div class="cart-item">
-                        <div class="item-image">
+                    <div class="cart-item-card">
+                        <div class="cart-item-image">
                             ${imageHtml}
                         </div>
-                        <div class="item-details">
-                            <div class="item-name">${product.name}</div>
+                        <div class="cart-item-info">
+                            <div class="cart-item-header">
+                                <h3 class="cart-item-name">${product.name}</h3>
+                                <button class="cart-item-remove" data-action="removeItem" data-product-id="${productId}" title="Eliminar producto">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 6L6 18M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
                             ${promotion ? `
-                                <div class="item-promotion">
-                                    🎉 Promoción: -${promotion.value}${promotion.type === 'percentage' ? '%' : ' ' + displayCurrency}
+                                <div class="cart-item-badge badge-promotion">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                    </svg>
+                                    Promoción: -${promotion.value}${promotion.type === 'percentage' ? '%' : ' ' + displayCurrency}
                                 </div>
                             ` : ''}
                             ${hasCoupon ? `
-                                <div class="item-coupon">
-                                    🎫 Cupón aplicado: -${cartData.coupon.value}${cartData.coupon.type === 'percentage' ? '%' : ' ' + displayCurrency}
+                                <div class="cart-item-badge badge-coupon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 10v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
+                                        <path d="M6 14v7"></path>
+                                        <path d="M10 14v7"></path>
+                                        <path d="M14 14v7"></path>
+                                        <path d="M18 14v7"></path>
+                                    </svg>
+                                    Cupón: -${cartData.coupon.value}${cartData.coupon.type === 'percentage' ? '%' : ' ' + displayCurrency}
                                 </div>
                             ` : ''}
-                            <div class="item-price">
+
+                            <div class="cart-item-pricing">
                                 ${hasPromotion || hasCoupon ? `
-                                    <span class="price-strikethrough">
-                                        ${formatCurrency(price, displayCurrency)}
-                                    </span>
-                                    <span class="${hasPromotion ? 'price-discounted-promo' : 'price-discounted-coupon'}">
-                                        ${formatCurrency(displayPrice, displayCurrency)}
-                                    </span>
-                                ` : ShopUtils.formatProductPrice(product, displayCurrency)}
-                                × ${item.quantity}
+                                    <div class="cart-item-price-group">
+                                        <span class="cart-item-price-original">${formatCurrency(price, displayCurrency)}</span>
+                                        <span class="cart-item-price-discounted ${hasPromotion ? 'price-promotion' : 'price-coupon'}">
+                                            ${formatCurrency(displayPrice, displayCurrency)}
+                                        </span>
+                                    </div>
+                                ` : `
+                                    <div class="cart-item-price-single">
+                                        ${ShopUtils.formatProductPrice(product, displayCurrency)}
+                                    </div>
+                                `}
+                                <span class="cart-item-quantity-label">× ${item.quantity}</span>
                             </div>
-                            <div class="item-stock ${stockWarning ? 'stock-warning' : ''}">
-                                ${stockWarning ?
-                                    '⚠️ Stock insuficiente (' + product.stock + ' disponibles)' :
-                                    'Stock disponible: ' + product.stock
-                                }
+
+                            <div class="cart-item-footer">
+                                <div class="cart-item-stock ${stockWarning ? 'stock-warning' : 'stock-ok'}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        ${stockWarning ?
+                                            '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>' :
+                                            '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'
+                                        }
+                                    </svg>
+                                    ${stockWarning ?
+                                        'Stock insuficiente (' + product.stock + ' disponibles)' :
+                                        product.stock + ' en stock'
+                                    }
+                                </div>
+
+                                <div class="cart-item-quantity-control">
+                                    <button class="quantity-btn-minus" data-action="updateQuantity" data-product-id="${productId}" data-delta="-1" aria-label="Disminuir cantidad">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                    </button>
+                                    <input type="number" class="quantity-input" value="${item.quantity}" readonly aria-label="Cantidad">
+                                    <button class="quantity-btn-plus" data-action="updateQuantity" data-product-id="${productId}" data-delta="1"
+                                        ${item.quantity >= product.stock ? 'disabled' : ''} aria-label="Aumentar cantidad">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="item-actions">
-                            <div class="quantity-control">
-                                <button class="quantity-btn" data-action="updateQuantity" data-product-id="${productId}" data-delta="-1">−</button>
-                                <span class="quantity-value">${item.quantity}</span>
-                                <button class="quantity-btn" data-action="updateQuantity" data-product-id="${productId}" data-delta="1"
-                                    ${item.quantity >= product.stock ? 'disabled' : ''}>+</button>
-                            </div>
-                            <button class="remove-btn" data-action="removeItem" data-product-id="${productId}">
-                                🗑️ Eliminar
-                            </button>
                         </div>
                     </div>
                 `;
@@ -499,9 +612,28 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             // Check if we have any valid items to display
             if (html === '' || validItems.length === 0) {
                 const container = document.getElementById('cartItemsContainer');
-                container.innerHTML = '<p>Tu carrito está vacío</p>';
+                container.innerHTML = `
+                    <div class="empty-cart-state">
+                        <div class="empty-cart-icon">
+                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                        </div>
+                        <h2 class="empty-cart-title">Tu carrito está vacío</h2>
+                        <p class="empty-cart-message">¡Descubre nuestros productos y comienza a comprar!</p>
+                        <a href="${BASE_URL}" class="btn-shop-now">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            </svg>
+                            Explorar Tienda
+                        </a>
+                    </div>
+                `;
                 container.classList.remove('cart-loading');
                 document.getElementById('cartSummary').classList.add('hidden');
+                document.getElementById('itemsCount').textContent = '0 productos';
                 updateCartCount();
                 return;
             }
@@ -510,6 +642,10 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
             container.innerHTML = html;
             container.classList.remove('cart-loading');
             document.getElementById('cartSummary').classList.remove('hidden');
+
+            // Update items count
+            const totalItems = validItems.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('itemsCount').textContent = `${totalItems} ${totalItems === 1 ? 'producto' : 'productos'}`;
 
             await calculateTotals(products);
 
