@@ -13,14 +13,35 @@ ini_set('display_errors', 1);
 define('APP_ENTRY_POINT', true);
 
 // Detectar entorno y cargar bootstrap
-if (file_exists('/home2/uv0023/shop-v2-app/config/bootstrap.php')) {
-    // Producción
-    require_once '/home2/uv0023/shop-v2-app/config/bootstrap.php';
-} elseif (file_exists(__DIR__ . '/../app/config/bootstrap.php')) {
-    // Desarrollo
-    require_once __DIR__ . '/../app/config/bootstrap.php';
-} else {
-    die("ERROR: No se pudo encontrar bootstrap.php");
+$possible_paths = [
+    '/home2/uv0023/shop-v2-app/config/bootstrap.php',
+    __DIR__ . '/../app/config/bootstrap.php',
+    dirname(__DIR__) . '/app/config/bootstrap.php',
+];
+
+echo "<pre>DEBUG - Buscando bootstrap.php:\n";
+echo "__DIR__ = " . __DIR__ . "\n";
+echo "dirname(__DIR__) = " . dirname(__DIR__) . "\n\n";
+
+$bootstrap_found = false;
+foreach ($possible_paths as $path) {
+    $exists = file_exists($path) ? 'SÍ' : 'NO';
+    echo "[$exists] $path\n";
+    if (file_exists($path)) {
+        require_once $path;
+        $bootstrap_found = true;
+        echo "\n✅ Bootstrap cargado desde: $path\n</pre>\n\n";
+        break;
+    }
+}
+
+if (!$bootstrap_found) {
+    echo "\n❌ No se encontró bootstrap.php en ninguna ruta\n";
+    echo "\nListado de archivos en __DIR__:\n";
+    print_r(scandir(__DIR__));
+    echo "\nListado de archivos en dirname(__DIR__):\n";
+    print_r(scandir(dirname(__DIR__)));
+    die("</pre>");
 }
 
 // Solo admin puede ejecutar
