@@ -2114,6 +2114,51 @@ function recursive_rmdir($dir) {
                             <li>Personaliza el diseño y colores</li>
                         </ol>
                     </div>
+
+                    <!-- IMPORTANTE: Configuración del Cron Job -->
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left;">
+                        <h3 style="color: #856404; margin-top: 0; margin-bottom: 15px;">⚙️ Configuración Adicional Requerida: Cron Job para Emails</h3>
+
+                        <p style="color: #856404; margin-bottom: 15px; line-height: 1.6;">
+                            <strong>¿Por qué es necesario?</strong><br>
+                            El sistema usa una cola de emails para enviar notificaciones de forma confiable.
+                            Para que los emails se procesen automáticamente, necesitás configurar un cron job en tu hosting.
+                        </p>
+
+                        <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffc107;">
+                            <h4 style="margin-top: 0; color: #856404;">📝 Pasos para configurar el Cron Job:</h4>
+                            <ol style="color: #856404; line-height: 1.8;">
+                                <li>Accedé al panel de control de tu hosting (cPanel, Plesk, etc.)</li>
+                                <li>Buscá la sección "Cron Jobs" o "Tareas programadas"</li>
+                                <li>Agregá un nuevo cron job con esta configuración:</li>
+                            </ol>
+                        </div>
+
+                        <div style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 6px; margin: 15px 0; font-family: monospace; font-size: 13px; overflow-x: auto;">
+                            <strong style="color: #4ec9b0;">Frecuencia:</strong> <span style="color: #ce9178;">*/5 * * * *</span> <span style="color: #6a9955;">// Cada 5 minutos (recomendado)</span><br>
+                            <strong style="color: #4ec9b0;">Comando:</strong> <span style="color: #ce9178;">/usr/bin/php <?php echo htmlspecialchars($_SESSION['config']['public_path'] ?? '/ruta/a/public_html'); ?>/cron/email-queue-processor.php</span>
+                        </div>
+
+                        <div style="background: #e7f3ff; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #2196F3;">
+                            <h4 style="margin-top: 0; color: #0066cc;">💡 Detalles Importantes:</h4>
+                            <ul style="color: #0066cc; line-height: 1.8; margin-bottom: 0;">
+                                <li><strong>Frecuencia recomendada:</strong> Cada 5-15 minutos</li>
+                                <li><strong>Script URL:</strong><br>
+                                    <code style="background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0; color: #0066cc;"><?php echo htmlspecialchars(($_SESSION['config']['app_url'] ?? '') . ($_SESSION['config']['base_path'] ?? '') . '/cron/email-queue-processor.php'); ?></code>
+                                </li>
+                                <li><strong>Ruta física del script:</strong><br>
+                                    <code style="background: white; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0; color: #0066cc;"><?php echo htmlspecialchars($_SESSION['config']['public_path'] ?? '/ruta/a/public_html'); ?>/cron/email-queue-processor.php</code>
+                                </li>
+                                <li>El script procesa hasta 10 emails por ejecución</li>
+                                <li>Registra actividad en <code style="background: white; padding: 2px 6px; border-radius: 3px;">app/data/email-queue.json</code></li>
+                            </ul>
+                        </div>
+
+                        <p style="color: #856404; margin-bottom: 0; font-size: 14px;">
+                            <strong>⚠️ Sin el cron configurado:</strong> Los emails quedarán en cola y no se enviarán automáticamente.
+                            Podrás enviarlos manualmente desde el panel admin, pero no es la forma recomendada.
+                        </p>
+                    </div>
                 </div>
 
             <!-- STEP 6: Cleanup Complete -->
