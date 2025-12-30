@@ -70,6 +70,15 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
     </div>
     <?php endif; ?>
 
+    <!-- Breadcrumb -->
+    <?php
+    require_once APP_PATH . '/includes/frontend/breadcrumb.php';
+    render_breadcrumb([
+        ['label' => 'Inicio', 'url' => url('/')],
+        ['label' => 'Carrito', 'url' => null]
+    ]);
+    ?>
+
     <!-- Main Content -->
     <div class="container cart-page-container">
         <!-- Page Header -->
@@ -81,11 +90,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
                 <h1>Mi Carrito</h1>
-            </div>
-            <div class="cart-page-breadcrumb">
-                <a href="<?php echo url('/'); ?>">Inicio</a>
-                <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-current">Carrito</span>
             </div>
         </div>
 

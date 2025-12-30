@@ -1431,14 +1431,10 @@ function generate_theme_css_basic($config) {
 
     $css .= ".cart-page-container { max-width: 1400px; margin: 0 auto; padding: var(--spacing-2xl) var(--spacing-lg); }\n\n";
 
-    $css .= ".cart-page-header { margin-bottom: var(--spacing-3xl); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-lg); }\n";
+    $css .= ".cart-page-header { margin-bottom: var(--spacing-2xl); }\n";
     $css .= ".cart-page-title { display: flex; align-items: center; gap: var(--spacing-md); }\n";
     $css .= ".cart-page-title .cart-icon { stroke: var(--color-primary); }\n";
-    $css .= ".cart-page-title h1 { margin: 0; font-size: var(--font-size-3xl); }\n";
-    $css .= ".cart-page-breadcrumb { display: flex; align-items: center; gap: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-text-light); }\n";
-    $css .= ".cart-page-breadcrumb a { color: var(--color-primary); transition: var(--transition-base); }\n";
-    $css .= ".cart-page-breadcrumb a:hover { color: var(--color-secondary); }\n";
-    $css .= ".breadcrumb-current { color: var(--color-text); font-weight: var(--font-weight-semibold); }\n\n";
+    $css .= ".cart-page-title h1 { margin: 0; font-size: var(--font-size-3xl); }\n\n";
 
     $css .= ".cart-layout { display: grid; grid-template-columns: 11fr 9fr; gap: var(--spacing-2xl); align-items: start; max-width: 1400px; }\n";
     $css .= "@media (max-width: 1024px) { .cart-layout { grid-template-columns: 1fr; } }\n\n";
@@ -1523,7 +1519,6 @@ function generate_theme_css_basic($config) {
     $css .= ".cart-loading { opacity: 0.6; pointer-events: none; }\n\n";
 
     $css .= "@media (max-width: 768px) {\n";
-    $css .= "    .cart-page-header { flex-direction: column; align-items: flex-start; }\n";
     $css .= "    .cart-item-card { grid-template-columns: 80px 1fr; }\n";
     $css .= "    .cart-item-image { width: 80px; height: 80px; }\n";
     $css .= "    .cart-item-footer { flex-direction: column; align-items: flex-start; }\n";
