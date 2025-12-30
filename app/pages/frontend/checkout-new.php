@@ -2056,22 +2056,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             if (!tooltip) {
                 tooltip = document.createElement('div');
                 tooltip.className = 'locked-tooltip';
-                tooltip.style.cssText = `
-                    position: absolute;
-                    top: -35px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background: #333;
-                    color: white;
-                    padding: 0.5rem 1rem;
-                    border-radius: 4px;
-                    font-size: 0.75rem;
-                    white-space: nowrap;
-                    z-index: 1000;
-                    pointer-events: none;
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                `;
 
                 let message = '';
                 if (stepNumber === 2) message = 'Completá tus datos personales primero';
@@ -2079,14 +2063,14 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 else if (stepNumber === 4) message = 'Seleccioná el método de pago primero';
 
                 tooltip.textContent = message;
-                header.style.position = 'relative';
+                header.classList.add('relative');
                 header.appendChild(tooltip);
             }
 
             // Show tooltip
-            tooltip.style.opacity = '1';
+            tooltip.classList.add('active');
             setTimeout(() => {
-                tooltip.style.opacity = '0';
+                tooltip.classList.remove('active');
             }, 2000);
         }
 
@@ -2126,6 +2110,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         function markStepIncomplete(stepNumber) {
             const step = document.getElementById(`step-${stepNumber}`);
             step.classList.remove('completed');
+            step.classList.add('active'); // Mantener paso abierto para que usuario pueda editar
             completedSteps.delete(stepNumber);
 
             // Lock subsequent steps
@@ -2166,6 +2151,9 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 document.getElementById('step-1-summary').textContent = `${name} • ${email}`;
                 markStepCompleted(1);
                 unlockNextStep(1);
+            } else {
+                // Marcar como incompleto si faltan datos
+                markStepIncomplete(1);
             }
         }
 
@@ -2260,7 +2248,15 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         });
 
         function validateStep3() {
-            const method = document.querySelector('input[name="payment_method"]:checked').value;
+            const methodElement = document.querySelector('input[name="payment_method"]:checked');
+
+            // Verificar que haya un método seleccionado
+            if (!methodElement) {
+                markStepIncomplete(3);
+                return;
+            }
+
+            const method = methodElement.value;
             let methodText = '';
             if (method === 'arrangement') methodText = '🤝 Arreglo';
             else if (method === 'pickup_payment') methodText = '💵 Pago al retirar';

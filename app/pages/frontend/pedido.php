@@ -349,14 +349,13 @@ function get_status_color_class($status) {
 
         function showCopyFeedback(button) {
             const originalText = button.textContent;
-            const originalBg = button.style.background;
 
             button.textContent = '✅ Copiado!';
-            button.style.background = 'var(--color-success, #22c55e)';
+            button.classList.add('btn-copied');
 
             setTimeout(() => {
                 button.textContent = originalText;
-                button.style.background = originalBg;
+                button.classList.remove('btn-copied');
             }, 2000);
         }
 
