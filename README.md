@@ -41,6 +41,8 @@ Sistema de e-commerce profesional con **arquitectura de seguridad primero** y **
 
 ```
 shop-v2/
+├── instalador.php                          # Instalador del sistema (eliminar post-install)
+│
 ├── app/                                    # PRIVADO (inaccesible vía HTTP)
 │   ├── config/                             # Configuración sensible
 │   │   ├── config.php                      # Config principal (auto-generado)
@@ -167,11 +169,8 @@ shop-v2/
     │       ├── .gitignore                  # Ignorar archivos de cache
     │       └── theme-*.min.css             # CSS minificado
     │
-    ├── uploads/                            # Archivos subidos
-    │   └── products/                       # Imágenes de productos
-    │
-    └── install/                            # Instalador (eliminar post-install)
-        └── installer.php
+    └── uploads/                            # Archivos subidos
+        └── products/                       # Imágenes de productos
 ```
 
 ---
@@ -197,8 +196,9 @@ shop-v2/
 
 3. **Ejecutar instalador**: Abrir en navegador:
    ```
-   http://tu-dominio.com/shopv2/install/installer.php
+   http://tu-dominio.com/instalador.php
    ```
+   (El instalador está en la raíz del proyecto)
 
 4. **Seguir el wizard**:
    - Verificación de requisitos
@@ -207,7 +207,7 @@ shop-v2/
    - Creación de admin
    - Configuración de pagos
 
-5. **Eliminar instalador**: Usar el botón de auto-eliminación al finalizar
+5. **Eliminar instalador**: Borrar manualmente `instalador.php` de la raíz después de completar la instalación
 
 ### Verificación Post-Instalación
 
@@ -244,10 +244,11 @@ curl http://tu-dominio.com/shopv2/admin/login.php
 - 0 colores hardcoded en archivos CSS
 - Sistema completamente variable-based
 
-✅ **FASE 3 - Refactorizar JS**: 90% Completo
+✅ **FASE 3 - Refactorizar JS**: Completo
 - 30+ utility classes en `utilities.css`
 - Event delegation system implementado
 - Manipulaciones críticas refactorizadas
+- Sistema de eventos CSP-compliant funcionando
 
 **Resultado**: El frontend puede cambiar completamente de apariencia editando solo `variables.css`.
 
@@ -380,11 +381,14 @@ Sistema completo de logística con arquitectura extensible para múltiples carri
 - LocalStorage para recordar email del usuario
 
 ✅ **Integración con Carriers**
-- Zipnova (implementado) - Agregador multi-carrier
-- Arquitectura preparada para Andreani, OCA, Correo Argentino
+- Zipnova (implementado y activo) - Agregador multi-carrier
+- Arquitectura extensible diseñada para soportar múltiples carriers
 - Tracking en tiempo real desde API del carrier
 - Generación automática de etiquetas de envío
 - Webhooks para actualizaciones de estado
+
+**Carriers disponibles vía Zipnova:**
+- Andreani, OCA, Correo Argentino, y otros (integrados a través de Zipnova)
 
 ✅ **Experiencia de Usuario**
 - Formulario de búsqueda inteligente:
@@ -872,10 +876,8 @@ Planes completados, auditorías pasadas y análisis históricos. Ver [docs/archi
 
 ### Otros Documentos
 
-- **[SECURITY-V2.md](SECURITY-V2.md)** - Arquitectura de seguridad V2
 - **[CLAUDE.md](CLAUDE.md)** - Guía para Claude Code (AI assistant)
-- **[install/README.md](install/README.md)** - Instalador del sistema
-- **[.github/DEPLOY.md](.github/DEPLOY.md)** - Configuración de deployment
+- **[instalador.php](instalador.php)** - Instalador del sistema (en raíz del proyecto)
 - **[app/includes/admin/MODAL_GUIDELINES.md](app/includes/admin/MODAL_GUIDELINES.md)** - Uso del modal reutilizable
 
 ---
