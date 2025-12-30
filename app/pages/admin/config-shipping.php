@@ -158,6 +158,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping'])) {
             'same_day' => isset($_POST['service_same_day'])
         ];
 
+        // Google Places API configuration
+        $config['google_places'] = [
+            'enabled' => isset($_POST['google_places_enabled']),
+            'api_key' => sanitize_input($_POST['google_places_api_key'] ?? ''),
+            'country_code' => sanitize_input($_POST['google_places_country_code'] ?? 'ar'),
+            'require_confirmation' => isset($_POST['google_places_require_confirmation'])
+        ];
+
         // Dispatch method configuration (pickup vs dropoff)
         $preferred_dispatch = sanitize_input($_POST['dispatch_preferred'] ?? 'pickup');
         $config['dispatch_method'] = [
@@ -829,6 +837,58 @@ $provincias = [
                                value="<?php echo htmlspecialchars($shipping_config['options']['webhook_secret'] ?? ''); ?>"
                                placeholder="secret_para_validar_webhooks">
                         <div class="help-text">Secreto para validar la autenticidad de los webhooks</div>
+                    </div>
+                </div>
+
+                <!-- Google Places API -->
+                <div class="card card-full">
+                    <div class="card-title">
+                        🌍 Google Places API - Normalización de Direcciones
+                    </div>
+                    <div class="card-description">
+                        Validación y normalización de direcciones de envío usando Google Places API. Esto garantiza que las direcciones estén correctamente formateadas antes de cotizar envíos, reduciendo errores en la logística.
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="google_places_enabled"
+                                   <?php echo ($shipping_config['google_places']['enabled'] ?? false) ? 'checked' : ''; ?>>
+                            <span>Habilitar validación de direcciones con Google Places API</span>
+                        </label>
+                        <div class="help-text">El cliente deberá confirmar su dirección normalizada antes de poder cotizar el envío. Esto mejora la precisión de las entregas.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Google Places API Key</label>
+                        <input type="text" name="google_places_api_key"
+                               value="<?php echo htmlspecialchars($shipping_config['google_places']['api_key'] ?? ''); ?>"
+                               placeholder="AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+                        <div class="help-text">
+                            API Key de Google Places. Creala en <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #667eea; text-decoration: underline;">Google Cloud Console</a>.
+                            <br>Servicios necesarios: <strong>Places API (New)</strong> y <strong>Maps JavaScript API</strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Restricción de País</label>
+                        <select name="google_places_country_code">
+                            <option value="ar" <?php echo ($shipping_config['google_places']['country_code'] ?? 'ar') === 'ar' ? 'selected' : ''; ?>>
+                                Argentina (AR)
+                            </option>
+                            <option value="" <?php echo ($shipping_config['google_places']['country_code'] ?? '') === '' ? 'selected' : ''; ?>>
+                                Sin restricción
+                            </option>
+                        </select>
+                        <div class="help-text">Limita las sugerencias de direcciones a un país específico para mejorar la precisión</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="google_places_require_confirmation"
+                                   <?php echo ($shipping_config['google_places']['require_confirmation'] ?? true) ? 'checked' : ''; ?>>
+                            <span>Requerir confirmación obligatoria de dirección normalizada</span>
+                        </label>
+                        <div class="help-text">Si está habilitado, el cliente DEBE confirmar la dirección normalizada antes de cotizar. Si está deshabilitado, la validación es opcional.</div>
                     </div>
                 </div>
 
