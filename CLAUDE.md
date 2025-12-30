@@ -209,6 +209,64 @@ cat app/data/productos.json                 # ❌ PROHIBIDO
 
 ---
 
+## ❌ RULE 8: NO HARDCODED STYLES - USE CSS CLASSES AND THEME SYSTEM
+
+### NEVER use:
+```javascript
+// ❌ PROHIBIDO - Hardcodear estilos en JavaScript
+element.style.color = '#ff0000';
+element.style.background = '#27ae60';
+element.style.padding = '10px';
+element.style.display = 'none';
+element.style.fontSize = '16px';
+```
+
+```html
+<!-- ❌ PROHIBIDO - Inline styles en HTML -->
+<div style="color: red; padding: 10px;"></div>
+<button style="background: #4CAF50;"></button>
+```
+
+### ALWAYS use instead:
+```javascript
+// ✅ CORRECTO - Usar clases CSS
+element.classList.add('error');
+element.classList.add('hidden');
+element.classList.add('btn-success');
+element.classList.toggle('active');
+```
+
+```css
+/* ✅ CORRECTO - Definir estilos en CSS con variables del theme */
+.error {
+    color: var(--color-error, #dc3545);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.btn-success {
+    background: var(--color-success, #4CAF50);
+    padding: var(--spacing-md, 12px);
+}
+```
+
+**Why**:
+- Estilos hardcoded NO pueden ser cambiados por el sistema de themes
+- Variables CSS permiten personalización completa del aspecto visual
+- `.style` inline tiene mayor especificidad y bypasea el theming
+- Mantiene separación de responsabilidades (HTML/JS para estructura, CSS para estilos)
+
+**Exceptions** (casos legítimos para usar `.style`):
+- Valores calculados dinámicamente: `element.style.transform = 'translateX(' + offset + 'px)'`
+- Animaciones con valores variables: `element.style.width = percentage + '%'`
+- Solo cuando NO es posible usar clases CSS
+
+**Location**: CSS classes in `public_html/assets/themes/_base/utilities.css`
+
+---
+
 # END CRITICAL RULES
 **Review these BEFORE writing any code**
 
