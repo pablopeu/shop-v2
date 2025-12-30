@@ -331,7 +331,7 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-lg);
-    background: white;
+    background: var(--color-bg);
 }
 
 .cart-empty {
@@ -402,6 +402,7 @@
 .cart-panel-footer {
     padding: var(--spacing-lg);
     border-top: 2px solid var(--color-border);
+    background: var(--color-bg);
 }
 
 .cart-total {

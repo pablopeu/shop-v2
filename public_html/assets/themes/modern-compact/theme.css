@@ -1168,7 +1168,7 @@ html {
 
 /* Items Section */
 .cart-items-section {
-    background: white;
+    background: var(--color-bg);
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-2xl);
     padding: var(--spacing-2xl);
@@ -1219,7 +1219,7 @@ html {
 
 /* Individual Cart Item Card */
 .cart-item-card {
-    background: white;
+    background: var(--color-bg);
     border: 1px solid var(--color-border-light);
     border-radius: var(--border-radius-xl);
     padding: var(--spacing-lg);
@@ -1514,7 +1514,7 @@ html {
 }
 
 .summary-card {
-    background: white;
+    background: var(--color-bg);
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-2xl);
     padding: var(--spacing-lg);

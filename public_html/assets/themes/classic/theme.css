@@ -990,7 +990,7 @@ select:focus {
 
 /* Items Section */
 .cart-items-section {
-    background: white;
+    background: var(--color-bg);
     border: 1px solid var(--color-border-light);
     border-radius: var(--border-radius-md);
     padding: var(--spacing-lg);
@@ -1029,7 +1029,7 @@ select:focus {
 
 /* Individual Cart Item Card */
 .cart-item-card {
-    background: white;
+    background: var(--color-bg);
     border: 1px solid var(--color-border-light);
     border-radius: var(--border-radius-sm);
     padding: var(--spacing-lg);
@@ -1295,7 +1295,7 @@ select:focus {
 }
 
 .summary-card {
-    background: white;
+    background: var(--color-bg);
     border: 1px solid var(--color-border-light);
     border-radius: var(--border-radius-md);
     padding: var(--spacing-lg);
