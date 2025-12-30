@@ -93,13 +93,11 @@ function get_status_color_class($status) {
 
     <?php if ($error): ?>
         <!-- Error State -->
-        <div style="max-width: 600px; margin: var(--spacing-3xl, 64px) auto; padding: var(--spacing-xl, 36px); text-align: center; background: var(--color-bg, white); border-radius: var(--border-radius-lg, 12px); box-shadow: var(--shadow-md, 0 4px 8px rgba(0,0,0,0.1));">
-            <div style="font-size: 48px; margin-bottom: var(--spacing-md, 20px);">🔍</div>
-            <h2 style="margin-bottom: var(--spacing-md, 20px); color: var(--color-text, #1a1a1a);"><?php echo htmlspecialchars($error); ?></h2>
-            <p style="margin-bottom: var(--spacing-lg, 28px); color: var(--color-text-light, #666);">
-                Por favor verifica el link de seguimiento que recibiste por email.
-            </p>
-            <a href="<?php echo url('/'); ?>" style="display: inline-block; padding: var(--spacing-md, 20px) var(--spacing-lg, 28px); background: var(--color-primary, #667eea); color: var(--color-white, white); text-decoration: none; border-radius: var(--border-radius-md, 6px); font-weight: var(--font-weight-semibold, 600);">Volver al inicio</a>
+        <div class="pedido-error-container">
+            <div class="pedido-error-icon">🔍</div>
+            <h2><?php echo htmlspecialchars($error); ?></h2>
+            <p>Por favor verifica el link de seguimiento que recibiste por email.</p>
+            <a href="<?php echo url('/'); ?>" class="pedido-error-link">Volver al inicio</a>
         </div>
 
     <?php else: ?>
@@ -111,15 +109,15 @@ function get_status_color_class($status) {
                 <input type="text" value="<?= url("/pedido?order={$order['id']}&token={$order['tracking_token']}") ?>" readonly id="tracking-link-input">
                 <button data-action="copyLink">Copiar</button>
             </div>
-            <p style="margin-top: var(--spacing-md, 20px); color: var(--color-text-light, #666); font-size: var(--font-size-sm, 14px);">
+            <p class="tracking-link-explanation">
                 No necesitas volver a ingresar tu email y número de pedido. Con este link puedes acceder directamente.
             </p>
         </div>
 
         <!-- Información del Pedido -->
-        <div style="max-width: 800px; margin: var(--spacing-md, 20px) auto; padding: var(--spacing-md, 20px); background: var(--color-bg-light, #f8f9fa); border-radius: var(--border-radius-md, 6px); text-align: center;">
-            <h1 style="margin: 0; color: var(--color-text, #1a1a1a); font-size: var(--font-size-xl, 22px);">Pedido #<?php echo htmlspecialchars($order['order_number']); ?></h1>
-            <div style="margin-top: var(--spacing-xs, 6px); color: var(--color-text-light, #666); font-size: var(--font-size-sm, 14px);">
+        <div class="pedido-order-header">
+            <h1>Pedido #<?php echo htmlspecialchars($order['order_number']); ?></h1>
+            <div class="pedido-order-date">
                 Realizado el <?php echo date('d/m/Y', strtotime($order['date'])); ?> a las <?php echo date('H:i', strtotime($order['date'])); ?>
             </div>
         </div>
@@ -167,8 +165,8 @@ function get_status_color_class($status) {
             </div>
 
             <?php if (!empty($order['tracking_url'])): ?>
-            <div style="margin-top: var(--spacing-lg, 28px); text-align: center;">
-                <a href="<?= htmlspecialchars($order['tracking_url']) ?>" target="_blank" rel="noopener" style="display: inline-block; padding: var(--spacing-sm, 12px) var(--spacing-lg, 28px); background: var(--color-primary, #667eea); color: var(--color-white, white); text-decoration: none; border-radius: var(--border-radius-md, 6px); font-weight: var(--font-weight-medium, 500);">
+            <div class="tracking-external-link-container">
+                <a href="<?= htmlspecialchars($order['tracking_url']) ?>" target="_blank" rel="noopener" class="tracking-external-link">
                     Ver seguimiento completo en el carrier →
                 </a>
             </div>
@@ -207,19 +205,19 @@ function get_status_color_class($status) {
             <?php endforeach; ?>
 
             <div class="order-total">
-                <div style="margin-bottom: var(--spacing-sm, 12px);">
+                <div class="order-total-row">
                     <span class="order-total-label">Subtotal:</span>
-                    <span style="font-size: var(--font-size-base, 16px); font-weight: var(--font-weight-medium, 500);"><?= format_price($order['subtotal'], $order['currency']) ?></span>
+                    <span class="order-total-value"><?= format_price($order['subtotal'], $order['currency']) ?></span>
                 </div>
 
                 <?php if ($order['discount_coupon'] > 0): ?>
-                <div style="margin-bottom: var(--spacing-sm, 12px); color: var(--color-success, #22c55e);">
+                <div class="order-total-row-discount">
                     <span class="order-total-label">Descuento (<?= htmlspecialchars($order['coupon_code']) ?>):</span>
-                    <span style="font-size: var(--font-size-base, 16px); font-weight: var(--font-weight-medium, 500);">-<?= format_price($order['discount_coupon'], $order['currency']) ?></span>
+                    <span class="order-total-value">-<?= format_price($order['discount_coupon'], $order['currency']) ?></span>
                 </div>
                 <?php endif; ?>
 
-                <div style="padding-top: var(--spacing-md, 20px); border-top: 2px solid var(--color-border, #e0e0e0);">
+                <div class="order-total-row-final">
                     <span class="order-total-label">Total:</span>
                     <span class="order-total-amount"><?= format_price($order['total'], $order['currency']) ?></span>
                 </div>
@@ -227,8 +225,8 @@ function get_status_color_class($status) {
         </div>
 
         <!-- Botón volver al inicio -->
-        <div style="max-width: 800px; margin: var(--spacing-2xl, 48px) auto; text-align: center;">
-            <a href="<?php echo url('/'); ?>" style="display: inline-block; padding: var(--spacing-md, 20px) var(--spacing-xl, 36px); background: var(--color-primary, #667eea); color: var(--color-white, white); text-decoration: none; border-radius: var(--border-radius-md, 6px); font-weight: var(--font-weight-semibold, 600); font-size: var(--font-size-base, 16px);">
+        <div class="pedido-back-button-container">
+            <a href="<?php echo url('/'); ?>" class="pedido-back-button">
                 🏠 Volver al Inicio
             </a>
         </div>
