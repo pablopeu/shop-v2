@@ -30,6 +30,9 @@ $theme_config = read_json(APP_PATH . '/config/theme.json');
 
 $active_theme = $theme_config['active_theme'] ?? 'minimal';
 
+// Get all products for cart/favorites panels
+$all_products = get_all_products(true); // Only active products
+
 // Funciones helper para tracking timeline
 function get_status_icon($status) {
     $icons = [
@@ -238,6 +241,73 @@ function get_status_color_class($status) {
             </a>
         </div>
     <?php endif; ?>
+
+    <!-- Cart Panel Component -->
+    <?php
+    require_once APP_PATH . '/includes/frontend/cart-panel.php';
+    render_cart_panel();
+    ?>
+
+    <!-- Favorites Panel Component -->
+    <?php
+    require_once APP_PATH . '/includes/frontend/favorites-panel.php';
+    render_favorites_panel();
+    ?>
+
+    <!-- Shared JavaScript Modules -->
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shared/utils.js'); ?>"></script>
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shared/favorites.js'); ?>"></script>
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shared/cart.js'); ?>"></script>
+
+    <script nonce="<?= csp_nonce() ?>">
+        // Products data for cart panel (global for shared modules)
+        window.productUrlBase = '<?php echo url('/producto/'); ?>';
+        window.products = <?php
+            // Deep clone products to avoid reference issues
+            $products_for_js = json_decode(json_encode($all_products), true);
+
+            // Apply url() to cloned products for JavaScript usage
+            foreach ($products_for_js as &$p) {
+                if (isset($p['thumbnail'])) {
+                    $p['thumbnail'] = url($p['thumbnail']);
+                }
+                if (isset($p['images']) && is_array($p['images'])) {
+                    foreach ($p['images'] as &$img) {
+                        if (is_array($img) && isset($img['url'])) {
+                            $img['url'] = url($img['url']);
+                        } elseif (is_string($img)) {
+                            $img = url($img);
+                        }
+                    }
+                    unset($img); // Break reference
+                }
+            }
+            unset($p); // Break reference
+            echo json_encode($products_for_js);
+        ?>;
+
+        // Update cart count from localStorage
+        ShopCart.updateCartBadge();
+        ShopFavorites.updateFavoritesCount();
+
+        // Navigation functions
+        function goToCheckout() {
+            window.location.href = '<?php echo url('/carrito'); ?>';
+        }
+
+        function goToFavoritesPage() {
+            window.location.href = '<?php echo url('/favoritos'); ?>';
+        }
+
+        // Export for event delegation compatibility
+        window.goToCheckout = function(event, element, params) {
+            return goToCheckout();
+        };
+
+        window.goToFavoritesPage = function(event, element, params) {
+            return goToFavoritesPage();
+        };
+    </script>
 
     <script nonce="<?= csp_nonce() ?>">
         // Función para copiar link
