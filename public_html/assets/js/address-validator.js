@@ -224,7 +224,51 @@
             ].filter(x => x).join(', ');
 
             input.value = fullAddress;
+
+            // Hacer geocoding automático de la dirección inicial
+            geocodeAddress(fullAddress);
         }
+    }
+
+    /**
+     * Hacer geocoding de una dirección y centrar el mapa
+     */
+    function geocodeAddress(address) {
+        if (!address || !google.maps.Geocoder) {
+            return;
+        }
+
+        const geocoder = new google.maps.Geocoder();
+        const request = {
+            address: address
+        };
+
+        // Agregar restricción de país si está configurada
+        if (AddressValidator.config.country_code) {
+            request.componentRestrictions = {
+                country: AddressValidator.config.country_code
+            };
+        }
+
+        geocoder.geocode(request, function(results, status) {
+            if (status === 'OK' && results && results.length > 0) {
+                const place = results[0];
+
+                // Centrar mapa en la ubicación
+                AddressValidator.map.setCenter(place.geometry.location);
+                AddressValidator.map.setZoom(15);
+
+                // Mostrar marker temporal (semi-transparente para indicar que es aproximado)
+                AddressValidator.marker.setPosition(place.geometry.location);
+                AddressValidator.marker.setVisible(true);
+                AddressValidator.marker.setOpacity(0.6);
+                AddressValidator.marker.setTitle('Ubicación aproximada - Buscá tu dirección exacta');
+
+                console.log('📍 Dirección geocodificada:', place.formatted_address);
+            } else {
+                console.warn('No se pudo geocodificar la dirección inicial:', status);
+            }
+        });
     }
 
     /**
@@ -235,9 +279,11 @@
         AddressValidator.map.setCenter(place.geometry.location);
         AddressValidator.map.setZoom(17);
 
-        // Actualizar marker
+        // Actualizar marker (opaco = ubicación confirmada)
         AddressValidator.marker.setPosition(place.geometry.location);
         AddressValidator.marker.setVisible(true);
+        AddressValidator.marker.setOpacity(1.0);
+        AddressValidator.marker.setTitle('Ubicación confirmada');
 
         // Extraer componentes de dirección
         const components = extractAddressComponents(place.address_components);
