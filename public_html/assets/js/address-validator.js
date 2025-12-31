@@ -95,21 +95,21 @@
 
                     <div class="address-validation-body">
                         <div class="validation-instructions">
-                            <p><strong>📍 Validá tu dirección de envío:</strong></p>
-                            <p style="margin-bottom: 8px;">El mapa muestra tu zona aproximada. <strong style="color: #dc3545;">IMPORTANTE:</strong> Buscá tu dirección exacta en el campo de abajo y seleccioná de las sugerencias para obtener el <strong>barrio/localidad correcta</strong>.</p>
+                            <p><strong>📍 Verificando tu dirección de envío...</strong></p>
+                            <p style="margin-bottom: 8px;">Estamos obteniendo los detalles completos de tu dirección. Verificá que la información sea correcta en el panel de abajo.</p>
                         </div>
 
                         <div class="address-search-container">
-                            <label for="addressSearchInput" style="font-weight: 600; color: #333;">🔍 Buscar dirección exacta:</label>
+                            <label for="addressSearchInput" style="font-weight: 600; color: #333;">🔍 Buscar otra dirección (opcional):</label>
                             <input
                                 type="text"
                                 id="addressSearchInput"
                                 class="address-search-input"
-                                placeholder="Ej: Av. Corrientes 1234..."
+                                placeholder="Si la dirección no es correcta, buscá otra aquí..."
                                 autocomplete="off"
                             >
-                            <div class="help-text-small" style="color: #dc3545; font-weight: 500;">
-                                ⚠️ Debés escribir y SELECCIONAR una sugerencia de la lista para confirmar
+                            <div class="help-text-small">
+                                Solo si necesitás cambiar la dirección detectada
                             </div>
                         </div>
 
@@ -252,21 +252,54 @@
 
         geocoder.geocode(request, function(results, status) {
             if (status === 'OK' && results && results.length > 0) {
-                const place = results[0];
+                const result = results[0];
 
                 // Centrar mapa en la ubicación
-                AddressValidator.map.setCenter(place.geometry.location);
+                AddressValidator.map.setCenter(result.geometry.location);
                 AddressValidator.map.setZoom(15);
 
-                // Mostrar marker temporal (semi-transparente para indicar que es aproximado)
-                AddressValidator.marker.setPosition(place.geometry.location);
+                // Mostrar marker
+                AddressValidator.marker.setPosition(result.geometry.location);
                 AddressValidator.marker.setVisible(true);
-                AddressValidator.marker.setOpacity(0.6);
-                AddressValidator.marker.setTitle('Ubicación aproximada - Buscá tu dirección exacta');
+                AddressValidator.marker.setOpacity(0.8);
+                AddressValidator.marker.setTitle('Verificando dirección...');
 
-                console.log('📍 Dirección geocodificada:', place.formatted_address);
+                console.log('📍 Dirección geocodificada:', result.formatted_address);
+
+                // Si tiene place_id, obtener detalles completos (incluyendo barrio)
+                if (result.place_id) {
+                    getPlaceDetails(result.place_id);
+                }
             } else {
                 console.warn('No se pudo geocodificar la dirección inicial:', status);
+            }
+        });
+    }
+
+    /**
+     * Obtener detalles completos del lugar usando place_id
+     * Esto nos da TODOS los componentes incluyendo barrio
+     */
+    function getPlaceDetails(placeId) {
+        if (!google.maps.places || !google.maps.places.PlacesService) {
+            console.warn('PlacesService no disponible');
+            return;
+        }
+
+        const service = new google.maps.places.PlacesService(AddressValidator.map);
+
+        service.getDetails({
+            placeId: placeId,
+            fields: ['address_components', 'formatted_address', 'geometry', 'place_id', 'name']
+        }, function(place, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+                console.log('✅ Detalles del lugar obtenidos:', place);
+
+                // Procesar automáticamente como si el usuario hubiera seleccionado del autocomplete
+                processPlace(place);
+            } else {
+                console.warn('No se pudieron obtener detalles del lugar:', status);
+                // Fallback: mostrar lo que tenemos del geocoding
             }
         });
     }
