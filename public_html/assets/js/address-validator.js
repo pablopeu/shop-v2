@@ -95,21 +95,21 @@
 
                     <div class="address-validation-body">
                         <div class="validation-instructions">
-                            <p><strong>Por favor, confirmá tu dirección de envío:</strong></p>
-                            <p>Buscá tu dirección en el mapa para asegurar que el envío llegue correctamente.</p>
+                            <p><strong>📍 Validá tu dirección de envío:</strong></p>
+                            <p style="margin-bottom: 8px;">El mapa muestra tu zona aproximada. <strong style="color: #dc3545;">IMPORTANTE:</strong> Buscá tu dirección exacta en el campo de abajo y seleccioná de las sugerencias para obtener el <strong>barrio/localidad correcta</strong>.</p>
                         </div>
 
                         <div class="address-search-container">
-                            <label for="addressSearchInput">Buscar dirección:</label>
+                            <label for="addressSearchInput" style="font-weight: 600; color: #333;">🔍 Buscar dirección exacta:</label>
                             <input
                                 type="text"
                                 id="addressSearchInput"
                                 class="address-search-input"
-                                placeholder="Ingresá tu dirección completa..."
+                                placeholder="Ej: Av. Corrientes 1234..."
                                 autocomplete="off"
                             >
-                            <div class="help-text-small">
-                                Escribí tu dirección y seleccioná de las sugerencias
+                            <div class="help-text-small" style="color: #dc3545; font-weight: 500;">
+                                ⚠️ Debés escribir y SELECCIONAR una sugerencia de la lista para confirmar
                             </div>
                         </div>
 
