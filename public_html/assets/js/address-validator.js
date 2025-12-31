@@ -278,30 +278,78 @@
 
     /**
      * Obtener detalles completos del lugar usando place_id
-     * Esto nos da TODOS los componentes incluyendo barrio
+     * Usa la nueva Places API (New) via REST
      */
     function getPlaceDetails(placeId) {
-        if (!google.maps.places || !google.maps.places.PlacesService) {
-            console.warn('PlacesService no disponible');
+        if (!AddressValidator.config || !AddressValidator.config.api_key) {
+            console.warn('API key no disponible');
             return;
         }
 
-        const service = new google.maps.places.PlacesService(AddressValidator.map);
+        // Usar la nueva Places API (New) - REST API
+        const url = `https://places.googleapis.com/v1/places/${placeId}`;
 
-        service.getDetails({
-            placeId: placeId,
-            fields: ['address_components', 'formatted_address', 'geometry', 'place_id', 'name']
-        }, function(place, status) {
-            if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-                console.log('✅ Detalles del lugar obtenidos:', place);
-
-                // Procesar automáticamente como si el usuario hubiera seleccionado del autocomplete
-                processPlace(place);
-            } else {
-                console.warn('No se pudieron obtener detalles del lugar:', status);
-                // Fallback: mostrar lo que tenemos del geocoding
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Goog-Api-Key': AddressValidator.config.api_key,
+                'X-Goog-FieldMask': 'id,formattedAddress,addressComponents,location,displayName'
             }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Detalles del lugar obtenidos (New API):', data);
+
+            // Convertir formato de la nueva API al formato antiguo para compatibilidad
+            const place = convertNewAPIToLegacyFormat(data);
+
+            // Procesar automáticamente
+            processPlace(place);
+        })
+        .catch(error => {
+            console.error('Error al obtener detalles del lugar:', error);
+            // Fallback: el usuario puede buscar manualmente
         });
+    }
+
+    /**
+     * Convertir formato de Places API (New) al formato legacy
+     */
+    function convertNewAPIToLegacyFormat(newAPIData) {
+        // Convertir addressComponents al formato legacy
+        const addressComponents = [];
+
+        if (newAPIData.addressComponents) {
+            newAPIData.addressComponents.forEach(component => {
+                addressComponents.push({
+                    long_name: component.longText || '',
+                    short_name: component.shortText || '',
+                    types: component.types || []
+                });
+            });
+        }
+
+        // Convertir location
+        const location = newAPIData.location ? {
+            lat: () => newAPIData.location.latitude,
+            lng: () => newAPIData.location.longitude
+        } : null;
+
+        return {
+            place_id: newAPIData.id,
+            formatted_address: newAPIData.formattedAddress || '',
+            address_components: addressComponents,
+            geometry: {
+                location: location
+            },
+            name: newAPIData.displayName?.text || ''
+        };
     }
 
     /**
