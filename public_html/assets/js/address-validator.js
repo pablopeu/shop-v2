@@ -174,44 +174,58 @@
             zoom: 13,
             mapTypeControl: false,
             streetViewControl: false,
-            fullscreenControl: false
+            fullscreenControl: false,
+            mapId: 'DEMO_MAP_ID' // Required for AdvancedMarkerElement
         });
 
-        // Crear marker
-        AddressValidator.marker = new google.maps.Marker({
+        // Crear marker usando AdvancedMarkerElement (nueva API)
+        AddressValidator.marker = new google.maps.marker.AdvancedMarkerElement({
             map: AddressValidator.map,
-            draggable: false,
-            animation: google.maps.Animation.DROP
+            position: null,
+            gmpDraggable: false
         });
 
-        // Configurar autocomplete
+        // Configurar autocomplete usando PlaceAutocompleteElement (nueva API)
+        const inputContainer = document.getElementById('addressSearchInput').parentElement;
         const input = document.getElementById('addressSearchInput');
-        const options = {
-            fields: ['address_components', 'formatted_address', 'geometry', 'place_id'],
-            strictBounds: false
-        };
+
+        // Ocultar el input HTML tradicional
+        input.style.display = 'none';
+
+        // Crear PlaceAutocompleteElement
+        const autocomplete = document.createElement('gmp-place-autocomplete');
+        autocomplete.id = 'place-autocomplete';
+        autocomplete.setAttribute('type', 'address');
 
         // Restricción de país si está configurada
         if (AddressValidator.config.country_code) {
-            options.componentRestrictions = {
-                country: AddressValidator.config.country_code
-            };
+            autocomplete.setAttribute('country', AddressValidator.config.country_code.toUpperCase());
         }
 
-        AddressValidator.autocomplete = new google.maps.places.Autocomplete(input, options);
-        AddressValidator.autocomplete.bindTo('bounds', AddressValidator.map);
+        // Estilos para que coincida con el input original
+        autocomplete.style.width = '100%';
+
+        // Insertar después del label, antes del input oculto
+        inputContainer.insertBefore(autocomplete, input);
 
         // Listener para cuando se selecciona un lugar
-        AddressValidator.autocomplete.addListener('place_changed', function() {
-            const place = AddressValidator.autocomplete.getPlace();
+        autocomplete.addEventListener('gmp-placeselect', async (event) => {
+            const place = event.detail.place;
 
-            if (!place.geometry || !place.geometry.location) {
-                alert('No se pudo obtener información de esta dirección. Por favor, seleccioná una opción de la lista de sugerencias.');
+            if (!place) {
                 return;
             }
 
+            // Obtener detalles completos del lugar
+            await place.fetchFields({
+                fields: ['addressComponents', 'formattedAddress', 'location', 'id', 'displayName']
+            });
+
+            // Convertir al formato que esperamos
+            const legacyPlace = convertPlaceToLegacyFormat(place);
+
             // Procesar y mostrar lugar
-            processPlace(place);
+            processPlace(legacyPlace);
         });
 
         // Pre-llenar con dirección actual si existe
@@ -258,11 +272,10 @@
                 AddressValidator.map.setCenter(result.geometry.location);
                 AddressValidator.map.setZoom(15);
 
-                // Mostrar marker
-                AddressValidator.marker.setPosition(result.geometry.location);
-                AddressValidator.marker.setVisible(true);
-                AddressValidator.marker.setOpacity(0.8);
-                AddressValidator.marker.setTitle('Verificando dirección...');
+                // Mostrar marker (AdvancedMarkerElement API)
+                AddressValidator.marker.position = result.geometry.location;
+                AddressValidator.marker.map = AddressValidator.map;
+                AddressValidator.marker.title = 'Verificando dirección...';
 
                 console.log('📍 Dirección geocodificada:', result.formatted_address);
 
@@ -319,7 +332,34 @@
     }
 
     /**
-     * Convertir formato de Places API (New) al formato legacy
+     * Convertir Place del PlaceAutocompleteElement al formato legacy
+     */
+    function convertPlaceToLegacyFormat(place) {
+        const addressComponents = [];
+
+        if (place.addressComponents) {
+            place.addressComponents.forEach(component => {
+                addressComponents.push({
+                    long_name: component.longText || '',
+                    short_name: component.shortText || '',
+                    types: component.types || []
+                });
+            });
+        }
+
+        return {
+            place_id: place.id || '',
+            formatted_address: place.formattedAddress || '',
+            address_components: addressComponents,
+            geometry: {
+                location: place.location // Ya es un LatLng del web component
+            },
+            name: place.displayName || ''
+        };
+    }
+
+    /**
+     * Convertir formato de Places API (New) REST al formato legacy
      */
     function convertNewAPIToLegacyFormat(newAPIData) {
         // Convertir addressComponents al formato legacy
@@ -364,11 +404,10 @@
         AddressValidator.map.setCenter(place.geometry.location);
         AddressValidator.map.setZoom(17);
 
-        // Actualizar marker (opaco = ubicación confirmada)
-        AddressValidator.marker.setPosition(place.geometry.location);
-        AddressValidator.marker.setVisible(true);
-        AddressValidator.marker.setOpacity(1.0);
-        AddressValidator.marker.setTitle('Ubicación confirmada');
+        // Actualizar marker (AdvancedMarkerElement API)
+        AddressValidator.marker.position = place.geometry.location;
+        AddressValidator.marker.map = AddressValidator.map;
+        AddressValidator.marker.title = 'Ubicación confirmada';
 
         // Extraer componentes de dirección
         const components = extractAddressComponents(place.address_components);

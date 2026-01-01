@@ -220,6 +220,6 @@ function google_places_get_frontend_config() {
         'require_confirmation' => google_places_requires_confirmation(),
         'maps_js_url' => 'https://maps.googleapis.com/maps/api/js?key=' .
                         urlencode(google_places_get_api_key()) .
-                        '&libraries=places&callback=initGooglePlaces'
+                        '&libraries=places,marker&loading=async&callback=initGooglePlaces'
     ];
 }
