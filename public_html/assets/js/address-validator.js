@@ -438,29 +438,13 @@
         const textDiv = document.getElementById('normalizedAddressText');
         const componentsDiv = document.getElementById('normalizedAddressComponents');
 
+        // Mostrar solo la dirección formateada
         textDiv.textContent = normalized.formatted_address;
 
-        // Mostrar componentes relevantes
-        const componentsHTML = [];
-        const comp = normalized.components;
+        // Ocultar el desglose de componentes (los datos se guardan completos igualmente)
+        componentsDiv.innerHTML = '';
+        componentsDiv.style.display = 'none';
 
-        if (comp.address) {
-            componentsHTML.push(`<div class="addr-component"><strong>Calle:</strong> ${comp.address}</div>`);
-        }
-        if (comp.neighborhood) {
-            componentsHTML.push(`<div class="addr-component"><strong>Barrio:</strong> ${comp.neighborhood}</div>`);
-        }
-        if (comp.city) {
-            componentsHTML.push(`<div class="addr-component"><strong>Ciudad:</strong> ${comp.city}</div>`);
-        }
-        if (comp.province) {
-            componentsHTML.push(`<div class="addr-component"><strong>Provincia:</strong> ${comp.province}</div>`);
-        }
-        if (comp.postal_code) {
-            componentsHTML.push(`<div class="addr-component"><strong>Código Postal:</strong> ${comp.postal_code}</div>`);
-        }
-
-        componentsDiv.innerHTML = componentsHTML.join('');
         displayDiv.style.display = 'block';
     }
 
