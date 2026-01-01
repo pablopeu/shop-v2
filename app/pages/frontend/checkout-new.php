@@ -3049,7 +3049,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                             normalizedInput.type = 'hidden';
                             normalizedInput.id = 'normalized_address_data';
                             normalizedInput.name = 'normalized_address_data';
-                            document.querySelector('form[name="checkout_form"]').appendChild(normalizedInput);
+                            document.getElementById('checkout-form').appendChild(normalizedInput);
                         }
                         normalizedInput.value = JSON.stringify(normalizedAddress);
 
