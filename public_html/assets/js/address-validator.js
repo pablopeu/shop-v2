@@ -321,6 +321,7 @@
 
             // Convertir formato de la nueva API al formato antiguo para compatibilidad
             const place = convertNewAPIToLegacyFormat(data);
+            console.log('🔄 Lugar convertido a formato legacy:', place);
 
             // Procesar automáticamente
             processPlace(place);
@@ -400,37 +401,64 @@
      * Procesar lugar seleccionado
      */
     function processPlace(place) {
-        // Actualizar mapa
-        AddressValidator.map.setCenter(place.geometry.location);
-        AddressValidator.map.setZoom(17);
+        console.log('🎯 processPlace() llamado con:', place);
 
-        // Actualizar marker (AdvancedMarkerElement API)
-        AddressValidator.marker.position = place.geometry.location;
-        AddressValidator.marker.map = AddressValidator.map;
-        AddressValidator.marker.title = 'Ubicación confirmada';
+        try {
+            // Actualizar mapa
+            console.log('📍 Centrando mapa en:', place.geometry.location);
+            AddressValidator.map.setCenter(place.geometry.location);
+            AddressValidator.map.setZoom(17);
 
-        // Extraer componentes de dirección
-        const components = extractAddressComponents(place.address_components);
-
-        // Guardar dirección normalizada
-        AddressValidator.normalizedAddress = {
-            formatted_address: place.formatted_address,
-            place_id: place.place_id,
-            latitude: place.geometry.location.lat(),
-            longitude: place.geometry.location.lng(),
-            components: components
-        };
-
-        // Mostrar dirección normalizada
-        displayNormalizedAddress(AddressValidator.normalizedAddress);
-
-        // Habilitar botón de confirmar
-        const confirmBtn = document.getElementById('confirmAddressBtn');
-        if (confirmBtn) {
-            confirmBtn.disabled = false;
+            // Actualizar marker (AdvancedMarkerElement API)
+            console.log('📌 Actualizando marker...');
+            AddressValidator.marker.position = place.geometry.location;
+            AddressValidator.marker.map = AddressValidator.map;
+            AddressValidator.marker.title = 'Ubicación confirmada';
+            console.log('✅ Marker actualizado');
+        } catch (error) {
+            console.error('❌ Error al actualizar mapa/marker:', error);
         }
 
-        AddressValidator.isAddressValidated = true;
+        try {
+            // Extraer componentes de dirección
+            console.log('📋 Extrayendo componentes de dirección...');
+            const components = extractAddressComponents(place.address_components);
+            console.log('✅ Componentes extraídos:', components);
+
+            // Guardar dirección normalizada
+            console.log('💾 Guardando dirección normalizada...');
+            console.log('📍 Location object:', place.geometry.location);
+            console.log('📍 Location type:', typeof place.geometry.location);
+            console.log('📍 Location constructor:', place.geometry.location?.constructor?.name);
+
+            AddressValidator.normalizedAddress = {
+                formatted_address: place.formatted_address,
+                place_id: place.place_id,
+                latitude: place.geometry.location.lat(),
+                longitude: place.geometry.location.lng(),
+                components: components
+            };
+            console.log('✅ Dirección guardada:', AddressValidator.normalizedAddress);
+
+            // Mostrar dirección normalizada
+            console.log('🎨 Mostrando dirección normalizada...');
+            displayNormalizedAddress(AddressValidator.normalizedAddress);
+
+            // Habilitar botón de confirmar
+            console.log('🔘 Habilitando botón de confirmar...');
+            const confirmBtn = document.getElementById('confirmAddressBtn');
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                console.log('✅ Botón habilitado');
+            } else {
+                console.warn('⚠️ Botón de confirmar no encontrado');
+            }
+
+            AddressValidator.isAddressValidated = true;
+            console.log('✅ processPlace() completado exitosamente');
+        } catch (error) {
+            console.error('❌ Error en processPlace():', error);
+        }
     }
 
     /**
