@@ -335,11 +335,21 @@
             });
         }
 
-        // Convertir location
-        const location = newAPIData.location ? {
-            lat: () => newAPIData.location.latitude,
-            lng: () => newAPIData.location.longitude
-        } : null;
+        // Convertir location - crear objeto LatLng compatible
+        let location = null;
+        if (newAPIData.location) {
+            const lat = newAPIData.location.latitude;
+            const lng = newAPIData.location.longitude;
+
+            // Crear objeto compatible con google.maps.LatLng
+            location = {
+                lat: function() { return lat; },
+                lng: function() { return lng; },
+                // También como propiedades directas para compatibilidad
+                latitude: lat,
+                longitude: lng
+            };
+        }
 
         return {
             place_id: newAPIData.id,
