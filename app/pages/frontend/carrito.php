@@ -1142,14 +1142,20 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
 
         // Go to checkout
         async function goToCheckout() {
+            console.log('[goToCheckout] Function called');
+
             // Sync cart to PHP session first
             try {
                 const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                console.log('[goToCheckout] Cart from localStorage:', cart);
 
                 if (cart.length === 0) {
+                    console.warn('[goToCheckout] Cart is empty, showing toast');
                     ShopUtils.showToast('El carrito está vacío', 'error');
                     return;
                 }
+
+                console.log('[goToCheckout] Cart has', cart.length, 'items, proceeding to sync');
 
                 // Prepare cart data for API
                 const syncData = {
@@ -1220,6 +1226,10 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
 
             const _goToCheckout = goToCheckout;
             window.goToCheckout = function(event, element, params) {
+                console.log('[Wrapper] goToCheckout wrapper called');
+                console.log('[Wrapper] Event:', event);
+                console.log('[Wrapper] Element:', element);
+                console.log('[Wrapper] Params:', params);
                 return _goToCheckout();
             };
 
