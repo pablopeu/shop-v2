@@ -333,4 +333,32 @@ El análisis también reveló que el código **SÍ sigue las buenas prácticas**
 
 ---
 
+## ⚙️ Actualización del Instalador
+
+### CRÍTICO: instalador.php también fue actualizado
+
+El archivo `instalador.php` genera dinámicamente el archivo `public_html/.htaccess` durante la instalación. Se actualizó la función `create_htaccess_files()` para que sea consistente con los cambios aplicados.
+
+**Cambios realizados:**
+
+1. **RewriteBase condicional**:
+   - Solo se incluye `RewriteBase` cuando `base_path` no está vacío
+   - Si `base_path` es `/` o vacío, se omite y Apache lo auto-detecta
+   ```php
+   if ($base_path !== '' && $base_path !== '/') {
+       $public_htaccess .= "RewriteBase " . $rewrite_base . "\n";
+   } else {
+       $public_htaccess .= "# RewriteBase auto-detectado por Apache\n";
+   }
+   ```
+
+2. **Paths relativos en RewriteCond**:
+   - Antes: `RewriteCond %{REQUEST_URI} ^" . $base_path . "/api/`
+   - Ahora: `RewriteCond %{REQUEST_URI} /api/`
+   - Esto permite que las reglas funcionen independientemente del `base_path`
+
+**Impacto**: El instalador ahora genera archivos .htaccess portables que funcionan en cualquier entorno sin hardcodear paths.
+
+---
+
 **Fin del informe**
