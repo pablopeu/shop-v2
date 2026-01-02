@@ -45,8 +45,9 @@ function set_security_headers() {
     // 'unsafe-eval' required for MercadoPago SDK
     // Multiple 'sha256-...' hashes allow MercadoPago SDK inline scripts (different scripts in different contexts)
     // 'unsafe-inline' in style-src permitido (conversion de estilos inline pendiente)
+    // Google Maps API domains added for address validation
     if (!isset($_SESSION['debug_mode']) || !$_SESSION['debug_mode']) {
-        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}' 'sha256-RpuWbcoKHtKl7uWamhq6Qvgzi2L1h6KiTLYhudr/mRk=' 'sha256-nc7dWKPKMf6dz8/Sq4nwFHmhcw9wPW/8UFRGat11sR8=' 'unsafe-eval' https://cdnjs.cloudflare.com https://sdk.mercadopago.com https://*.mercadopago.com https://http2.mlstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.mercadopago.com; font-src 'self' https://cdnjs.cloudflare.com https://http2.mlstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; frame-src https://*.mercadopago.com;");
+        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}' 'sha256-RpuWbcoKHtKl7uWamhq6Qvgzi2L1h6KiTLYhudr/mRk=' 'sha256-nc7dWKPKMf6dz8/Sq4nwFHmhcw9wPW/8UFRGat11sR8=' 'unsafe-eval' https://cdnjs.cloudflare.com https://sdk.mercadopago.com https://*.mercadopago.com https://http2.mlstatic.com https://maps.googleapis.com https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.mercadopago.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://http2.mlstatic.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://maps.googleapis.com https://*.googleapis.com; frame-src https://*.mercadopago.com;");
     }
 }
 

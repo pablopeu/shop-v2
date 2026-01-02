@@ -19,6 +19,7 @@ require_once APP_PATH . '/includes/email.php';
 require_once APP_PATH . '/includes/telegram.php';
 require_once APP_PATH . '/includes/coupons.php';
 require_once APP_PATH . '/includes/promotions.php';
+require_once APP_PATH . '/includes/google-places.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -61,6 +62,9 @@ $currency_config = read_json(APP_PATH . '/config/currency.json');
 $telegram_config = read_json(APP_PATH . '/config/telegram.json');
 $payment_config = read_json(APP_PATH . '/config/payment.json');
 $theme_config = read_json(APP_PATH . '/config/theme.json');
+
+// Google Places configuration for address validation
+$google_places_config = google_places_get_frontend_config();
 
 // Load active theme colors
 $active_theme = $theme_config['active_theme'] ?? 'minimal';
@@ -645,6 +649,11 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
     <!-- Mobile Menu Styles -->
     <link rel="stylesheet" href="<?php echo url('/assets/css/mobile-menu.css'); ?>">
+
+    <!-- Address Validator Styles -->
+    <?php if ($google_places_config['enabled']): ?>
+    <link rel="stylesheet" href="<?php echo url('/assets/css/address-validator.css'); ?>">
+    <?php endif; ?>
 
     <style nonce="<?= csp_nonce() ?>">
         :root {
@@ -1745,9 +1754,36 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
                                 </div>
 
+                                <!-- Validación de dirección con Google Places -->
+                                <?php if ($google_places_config['enabled']): ?>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary btn-block" id="validate-address-btn" data-action="validateAddress">
+                                        🌍 Validar Dirección
+                                    </button>
+                                    <small style="color: #666; display: block; margin-top: 8px;">
+                                        <?php if ($google_places_config['require_confirmation']): ?>
+                                        Validá tu dirección antes de cotizar el envío
+                                        <?php else: ?>
+                                        Opcional: Validá tu dirección para mayor precisión
+                                        <?php endif; ?>
+                                    </small>
+                                </div>
+
+                                <!-- Mensaje de dirección validada -->
+                                <div id="address-validated-message" class="hidden" style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px 16px; border-radius: 6px; margin-bottom: 15px;">
+                                    <p style="margin: 0; color: #155724; font-weight: 600;">
+                                        ✓ Dirección validada correctamente
+                                    </p>
+                                    <p id="validated-address-display" style="margin: 8px 0 0 0; color: #155724; font-size: 14px;"></p>
+                                </div>
+                                <?php endif; ?>
+
                                 <!-- Botón para cotizar -->
                                 <div class="form-group">
-                                    <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote">
+                                    <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote"
+                                        <?php if ($google_places_config['enabled'] && $google_places_config['require_confirmation']): ?>
+                                        disabled title="Primero debés validar tu dirección"
+                                        <?php endif; ?>>
                                         📦 Calcular Costo de Envío
                                     </button>
                                 </div>
@@ -2935,6 +2971,121 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
     <script nonce="<?= csp_nonce() ?>">
         window.BASE_PATH = '<?php echo htmlspecialchars(rtrim(url('/'), '/')); ?>';
     </script>
+
+    <!-- Address Validator (Google Places Integration) -->
+    <?php if ($google_places_config['enabled']): ?>
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/address-validator.js'); ?>"></script>
+    <script nonce="<?= csp_nonce() ?>">
+        // Inicializar Address Validator
+        window.googlePlacesConfig = <?php echo json_encode($google_places_config); ?>;
+        if (typeof initAddressValidator === 'function') {
+            initAddressValidator(window.googlePlacesConfig);
+        }
+
+        /**
+         * Función para validar dirección con Google Places
+         * Llamada por el event delegation system
+         */
+        function validateAddress(event, element, params) {
+            // Obtener datos actuales del formulario
+            const addressData = {
+                address: document.getElementById('shipping_address')?.value || '',
+                city: document.getElementById('shipping_city')?.value || '',
+                province: document.getElementById('shipping_province')?.value || '',
+                postal_code: document.getElementById('shipping_postal_code')?.value || '',
+                country: document.getElementById('shipping_country')?.value || 'AR'
+            };
+
+            // Validar que al menos tenga dirección
+            if (!addressData.address.trim()) {
+                showModal({
+                    title: 'Campo requerido',
+                    message: 'Por favor ingresá tu dirección antes de validarla',
+                    icon: '⚠️',
+                    confirmText: 'Entendido'
+                });
+                return;
+            }
+
+            // Cargar Google Maps API si no está cargada
+            loadGoogleMapsAPI(function(success) {
+                if (!success) {
+                    showModal({
+                        title: 'Error',
+                        message: 'No se pudo cargar Google Maps. Por favor, intentá nuevamente.',
+                        icon: '❌',
+                        confirmText: 'Entendido'
+                    });
+                    return;
+                }
+
+                // Mostrar modal de validación
+                showAddressValidationModal(
+                    addressData,
+                    function(normalizedAddress) {
+                        // Callback cuando se confirma la dirección normalizada
+                        console.log('Dirección normalizada:', normalizedAddress);
+
+                        // Actualizar campos del formulario con dirección normalizada
+                        const components = normalizedAddress.components;
+
+                        if (components.address) {
+                            document.getElementById('shipping_address').value = components.address;
+                        }
+                        if (components.city) {
+                            document.getElementById('shipping_city').value = components.city;
+                        }
+                        if (components.province) {
+                            document.getElementById('shipping_province').value = components.province;
+                        }
+                        if (components.postal_code) {
+                            document.getElementById('shipping_postal_code').value = components.postal_code;
+                        }
+
+                        // Guardar dirección normalizada completa en un campo oculto (opcional)
+                        let normalizedInput = document.getElementById('normalized_address_data');
+                        if (!normalizedInput) {
+                            normalizedInput = document.createElement('input');
+                            normalizedInput.type = 'hidden';
+                            normalizedInput.id = 'normalized_address_data';
+                            normalizedInput.name = 'normalized_address_data';
+                            document.getElementById('checkout-form').appendChild(normalizedInput);
+                        }
+                        normalizedInput.value = JSON.stringify(normalizedAddress);
+
+                        // Mostrar mensaje de confirmación
+                        const validatedMsg = document.getElementById('address-validated-message');
+                        const validatedDisplay = document.getElementById('validated-address-display');
+
+                        if (validatedMsg && validatedDisplay) {
+                            validatedDisplay.textContent = normalizedAddress.formatted_address;
+                            validatedMsg.classList.remove('hidden');
+                        }
+
+                        // Habilitar botón de cotizar
+                        const quoteBtn = document.getElementById('get-shipping-quote');
+                        if (quoteBtn) {
+                            quoteBtn.disabled = false;
+                            quoteBtn.title = '';
+                        }
+
+                        // Scroll suave al botón de cotizar
+                        setTimeout(() => {
+                            quoteBtn?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                    },
+                    function() {
+                        // Callback cuando se cancela
+                        console.log('Validación de dirección cancelada');
+                    }
+                );
+            });
+        }
+
+        // Exportar para event delegation
+        window.validateAddress = validateAddress;
+    </script>
+    <?php endif; ?>
 
     <!-- Shipping Module (Zipnova Integration) -->
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shipping.js'); ?>"></script>
