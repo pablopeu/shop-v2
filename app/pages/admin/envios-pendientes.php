@@ -159,6 +159,22 @@ $en_transito = count(array_filter($shipping_orders, fn($o) => $o['status'] === '
 $enviadas = count(array_filter($shipping_orders, fn($o) => !empty($o['shipping']['carrier_shipment_id'])));
 $entregadas = count(array_filter($shipping_orders, fn($o) => $o['status'] === 'entregada'));
 
+// Envíos Cotizados: tienen costo de envío pero NO fueron despachadas al carrier
+$envios_cotizados = array_filter($shipping_orders, function($o) {
+    $tiene_costo_envio = !empty($o['shipping']['cost']) && $o['shipping']['cost'] > 0;
+    $no_despachada = empty($o['shipping']['carrier_shipment_id']);
+    return $tiene_costo_envio && $no_despachada;
+});
+$total_cotizados = count($envios_cotizados);
+$monto_cotizados = array_sum(array_map(fn($o) => floatval($o['shipping']['cost'] ?? 0), $envios_cotizados));
+
+// Envíos Realizados: recibieron webhook de Zipnova (en tránsito o en reparto)
+$envios_realizados = array_filter($shipping_orders, function($o) {
+    return in_array($o['status'], ['en_transito', 'en_reparto']);
+});
+$total_realizados = count($envios_realizados);
+$monto_realizados = array_sum(array_map(fn($o) => floatval($o['shipping']['cost'] ?? 0), $envios_realizados));
+
 // Get logged user
 $user = get_logged_user();
 
@@ -841,6 +857,20 @@ $user = get_logged_user();
             <div class="stat-card">
                 <div class="stat-value"><?php echo $total_orders; ?></div>
                 <div class="stat-label">Total Envíos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $total_cotizados; ?></div>
+                <div class="stat-label">Envíos Cotizados</div>
+                <div class="stat-sublabel" style="font-size: 11px; color: #666; margin-top: 4px;">
+                    $<?php echo number_format($monto_cotizados, 2); ?>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $total_realizados; ?></div>
+                <div class="stat-label">Envíos Realizados</div>
+                <div class="stat-sublabel" style="font-size: 11px; color: #666; margin-top: 4px;">
+                    $<?php echo number_format($monto_realizados, 2); ?>
+                </div>
             </div>
             <div class="stat-card">
                 <div class="stat-value"><?php echo $enviadas; ?></div>
