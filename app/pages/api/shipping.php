@@ -51,11 +51,14 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         send_json_response(['success' => false, 'error' => 'Código postal requerido'], 400);
     }
 
+    // Extraer solo la parte numérica del código postal (ej: C1419BVO -> 1419)
+    $numeric_zipcode = preg_replace('/[^0-9]/', '', $postal_code);
+
     // Formatear destino según API v2 de Zipnova
     $destination = [
         'city' => $city ?: 'Ciudad',
         'state' => $province ?: 'Provincia',
-        'zipcode' => $postal_code
+        'zipcode' => $numeric_zipcode
     ];
 
     // Formatear items según API v2 de Zipnova
@@ -132,10 +135,15 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $items_raw = $data['items'] ?? [];
 
     // Formatear destino según API v2
+    $raw_zipcode = $destination_raw['zipcode'] ?? $destination_raw['postal_code'] ?? '';
+
+    // Extraer solo la parte numérica del código postal (ej: C1419BVO -> 1419)
+    $numeric_zipcode = preg_replace('/[^0-9]/', '', $raw_zipcode);
+
     $destination = [
         'city' => $destination_raw['city'] ?? 'Ciudad',
         'state' => $destination_raw['state'] ?? $destination_raw['province'] ?? 'Provincia',
-        'zipcode' => $destination_raw['zipcode'] ?? $destination_raw['postal_code'] ?? ''
+        'zipcode' => $numeric_zipcode
     ];
 
     // Formatear items
