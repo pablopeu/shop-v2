@@ -3028,9 +3028,15 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     return;
                 }
 
-                console.log('📍 Configurando listener de gmp-place-autocomplete...');
+                console.log('📍 Configurando listeners del web component...');
+                console.log('Tipo de autocompleteElement:', autocompleteElement.constructor.name);
+                console.log('Tag name:', autocompleteElement.tagName);
 
-                // Escuchar el evento gmp-placeselect del web component
+                // Verificar si el input interno está accesible
+                const inputInside = autocompleteElement.querySelector('input');
+                console.log('Input dentro del web component:', inputInside);
+
+                // Agregar múltiples listeners para debug
                 autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
                     console.log('🎯 Evento gmp-placeselect disparado');
                     console.log('Event completo:', event);
@@ -3040,7 +3046,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     console.log('Place recibido (antes de fetchFields):', place);
 
                     // Usar fetchFields para obtener los datos del lugar
-                    // Esto es necesario con Places API (New)
                     try {
                         await place.fetchFields({
                             fields: ['displayName', 'formattedAddress', 'location', 'addressComponents']
@@ -3049,7 +3054,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                         console.log('✅ fetchFields completado exitosamente');
                         console.log('Place completo (después de fetchFields):', place);
 
-                        // Procesar el lugar seleccionado
                         processSelectedPlace(place);
 
                     } catch (error) {
@@ -3057,7 +3061,23 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                     }
                 });
 
-                console.log('✅ Event listener agregado a gmp-placeselect');
+                // Agregar listeners adicionales para debugging
+                autocompleteElement.addEventListener('change', (e) => {
+                    console.log('📝 Evento change en web component:', e);
+                });
+
+                autocompleteElement.addEventListener('input', (e) => {
+                    console.log('⌨️ Evento input en web component:', e);
+                });
+
+                // Escuchar directamente en el input si existe
+                if (inputInside) {
+                    inputInside.addEventListener('change', (e) => {
+                        console.log('📝 Evento change en input interno:', e);
+                    });
+                }
+
+                console.log('✅ Event listeners agregados');
             });
         }
 
