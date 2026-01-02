@@ -2987,330 +2987,40 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         }
 
         /**
-         * Inicialización del sistema de validación de dirección inline
+        /**
+         * Inicialización simplificada - usa places-autocomplete-new.js
          */
-        let inlineMap = null;
-        let inlineMarker = null;
-        let placeAutocompleteElement = null;
-
-        let autocompleteService = null;
-        let placesService = null;
-        let sessionToken = null;
-
         function initInlineAddressValidation() {
-            // Cargar Google Maps API
             loadGoogleMapsAPI(function(success) {
                 if (!success) {
                     console.error('No se pudo cargar Google Maps API');
                     return;
                 }
 
-                // Inicializar mapa
                 const mapElement = document.getElementById('inline-address-map');
-                if (!mapElement) {
-                    console.error('❌ No se encontró el elemento del mapa');
-                    return;
-                }
+                if (!mapElement) return;
 
                 console.log('🗺️ Inicializando mapa...');
 
-                // Crear mapa centrado en Buenos Aires por defecto
-                inlineMap = new google.maps.Map(mapElement, {
+                // Crear mapa
+                const map = new google.maps.Map(mapElement, {
                     center: { lat: -34.6037, lng: -58.3816 },
                     zoom: 13,
                     mapTypeControl: false,
                     streetViewControl: false,
                     fullscreenControl: false,
-                    mapId: 'inline-address-map' // Necesario para AdvancedMarkerElement
+                    mapId: 'inline-address-map'
                 });
 
-                console.log('✅ Mapa inicializado correctamente');
+                console.log('✅ Mapa inicializado');
 
-                // Inicializar servicios de Places API (New)
-                autocompleteService = new google.maps.places.AutocompleteService();
-                placesService = new google.maps.places.PlacesService(inlineMap);
-                sessionToken = new google.maps.places.AutocompleteSessionToken();
-
-                console.log('✅ AutocompleteService y PlacesService inicializados');
-
-                // Obtener elementos
-                const inputElement = document.getElementById('address-autocomplete-input');
-                const predictionsElement = document.getElementById('address-predictions');
-
-                if (!inputElement || !predictionsElement) {
-                    console.error('❌ No se encontraron elementos necesarios');
-                    return;
-                }
-
-                console.log('📍 Configurando autocomplete manual...');
-
-                // Escuchar input del usuario
-                let debounceTimer;
-                inputElement.addEventListener('input', function() {
-                    clearTimeout(debounceTimer);
-                    const query = this.value.trim();
-
-                    if (query.length < 3) {
-                        predictionsElement.style.display = 'none';
-                        return;
-                    }
-
-                    debounceTimer = setTimeout(() => {
-                        getPlacePredictions(query, predictionsElement);
-                    }, 300);
-                });
-
-                // Ocultar dropdown al hacer click fuera
-                document.addEventListener('click', function(e) {
-                    if (!inputElement.contains(e.target) && !predictionsElement.contains(e.target)) {
-                        predictionsElement.style.display = 'none';
-                    }
-                });
-
-                console.log('✅ Autocomplete manual configurado');
-            });
-        }
-
-        function getPlacePredictions(query, predictionsElement) {
-            console.log('🔍 Buscando predicciones para:', query);
-
-            const request = {
-                input: query,
-                componentRestrictions: { country: window.googlePlacesConfig?.country_code || 'ar' },
-                sessionToken: sessionToken
-            };
-
-            autocompleteService.getPlacePredictions(request, function(predictions, status) {
-                if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
-                    console.log('⚠️ No se encontraron predicciones:', status);
-                    predictionsElement.style.display = 'none';
-                    return;
-                }
-
-                console.log('✅ Predicciones recibidas:', predictions.length);
-
-                // Mostrar predicciones
-                displayPredictions(predictions, predictionsElement);
-            });
-        }
-
-        function displayPredictions(predictions, predictionsElement) {
-            predictionsElement.innerHTML = '';
-
-            predictions.forEach(function(prediction) {
-                const item = document.createElement('div');
-                item.style.cssText = 'padding: 12px; cursor: pointer; border-bottom: 1px solid #eee;';
-                item.textContent = prediction.description;
-
-                item.addEventListener('mouseenter', function() {
-                    this.style.background = '#f5f5f5';
-                });
-
-                item.addEventListener('mouseleave', function() {
-                    this.style.background = 'white';
-                });
-
-                item.addEventListener('click', function() {
-                    console.log('🎯 Predicción seleccionada:', prediction.description);
-                    selectPrediction(prediction, predictionsElement);
-                });
-
-                predictionsElement.appendChild(item);
-            });
-
-            predictionsElement.style.display = 'block';
-        }
-
-        function selectPrediction(prediction, predictionsElement) {
-            // Actualizar input
-            document.getElementById('address-autocomplete-input').value = prediction.description;
-
-            // Ocultar dropdown
-            predictionsElement.style.display = 'none';
-
-            // Obtener detalles del lugar
-            console.log('📍 Obteniendo detalles del lugar con place_id:', prediction.place_id);
-
-            const request = {
-                placeId: prediction.place_id,
-                fields: ['geometry', 'formatted_address', 'address_components', 'name'],
-                sessionToken: sessionToken
-            };
-
-            placesService.getDetails(request, function(place, status) {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    console.log('✅ Detalles del lugar obtenidos:', place);
-
-                    // Crear nuevo session token para la próxima búsqueda
-                    sessionToken = new google.maps.places.AutocompleteSessionToken();
-
-                    // Procesar el lugar seleccionado
-                    processSelectedPlace(place);
+                // Inicializar autocomplete con REST API (desde archivo externo)
+                if (typeof initPlacesAutocompleteNew === 'function') {
+                    initPlacesAutocompleteNew(map);
                 } else {
-                    console.error('❌ Error al obtener detalles del lugar:', status);
+                    console.error('❌ initPlacesAutocompleteNew no está disponible');
                 }
             });
-        }
-
-        /**
-         * Procesar el lugar seleccionado del autocomplete
-         */
-        function processSelectedPlace(place) {
-            console.log('🔍 processSelectedPlace llamado');
-            console.log('Place object:', place);
-
-            // PlacesService.getDetails() retorna place.geometry.location
-            if (!place.geometry || !place.geometry.location) {
-                console.error('❌ El lugar no tiene información de ubicación');
-                console.log('Propiedades disponibles:', Object.keys(place));
-                return;
-            }
-
-            // place.geometry.location es un LatLng
-            const lat = place.geometry.location.lat();
-            const lng = place.geometry.location.lng();
-
-            console.log('📍 Coordenadas obtenidas:', { lat, lng });
-            console.log('🗺️ Centrando mapa en:', { lat, lng });
-
-            // Centrar mapa en la ubicación seleccionada
-            inlineMap.setCenter({ lat, lng });
-            inlineMap.setZoom(17);
-
-            // Remover marker anterior si existe
-            if (inlineMarker) {
-                inlineMarker.map = null;
-            }
-
-            // Crear nuevo marker en la ubicación
-            const markerTitle = place.formatted_address || place.name || 'Dirección seleccionada';
-            console.log('📍 Creando marker con título:', markerTitle);
-
-            inlineMarker = new google.maps.marker.AdvancedMarkerElement({
-                map: inlineMap,
-                position: { lat, lng },
-                title: markerTitle
-            });
-
-            console.log('✅ Marker creado exitosamente');
-
-            // Actualizar formulario con los datos del lugar
-            updateFormWithPlace(place);
-        }
-
-        /**
-         * Actualizar formulario con los datos del lugar seleccionado
-         */
-        function updateFormWithPlace(place) {
-            console.log('📝 Actualizando formulario con lugar seleccionado');
-            console.log('Place completo:', place);
-
-            // Places API (New) usa formattedAddress (no formatted_address)
-            const formattedAddress = place.formattedAddress || place.formatted_address || '';
-            console.log('Formatted address:', formattedAddress);
-
-            // Actualizar dirección
-            if (formattedAddress) {
-                document.getElementById('address-autocomplete-input').value = formattedAddress;
-                console.log('✅ Dirección actualizada:', formattedAddress);
-            }
-
-            // Extraer componentes de dirección
-            // Places API (New) usa addressComponents (no address_components)
-            const addressComponents = place.addressComponents || place.address_components || [];
-            console.log('Address components recibidos:', addressComponents);
-
-            if (addressComponents && addressComponents.length > 0) {
-                console.log('📋 Extrayendo componentes de dirección...');
-                const components = extractAddressComponents(addressComponents);
-
-                console.log('Componentes extraídos:', components);
-
-                if (components.locality) {
-                    document.getElementById('shipping_city').value = components.locality;
-                    console.log('✅ Ciudad actualizada:', components.locality);
-                }
-
-                if (components.administrative_area_level_1) {
-                    document.getElementById('shipping_province').value = components.administrative_area_level_1;
-                    console.log('✅ Provincia actualizada:', components.administrative_area_level_1);
-                }
-
-                if (components.postal_code) {
-                    document.getElementById('shipping_postal_code').value = components.postal_code;
-                    console.log('✅ Código postal actualizado:', components.postal_code);
-                }
-
-                // Guardar datos normalizados en campo oculto
-                saveNormalizedAddressData({
-                    formatted_address: place.formatted_address,
-                    components: components,
-                    place_id: place.place_id
-                });
-
-                console.log('✅ Datos normalizados guardados');
-            }
-        }
-
-        /**
-         * Extraer componentes de dirección estructurados
-         */
-        function extractAddressComponents(addressComponents) {
-            const components = {
-                street_address: '',
-                locality: '',
-                administrative_area_level_1: '',
-                postal_code: '',
-                country: ''
-            };
-
-            addressComponents.forEach(component => {
-                const types = component.types || [];
-
-                if (types.includes('street_number')) {
-                    components.street_number = component.longText || component.long_name;
-                }
-                if (types.includes('route')) {
-                    components.route = component.longText || component.long_name;
-                }
-                if (types.includes('locality') || types.includes('sublocality')) {
-                    components.locality = component.longText || component.long_name;
-                }
-                if (types.includes('administrative_area_level_1')) {
-                    components.administrative_area_level_1 = component.longText || component.long_name;
-                }
-                if (types.includes('postal_code')) {
-                    components.postal_code = component.longText || component.long_name;
-                }
-                if (types.includes('country')) {
-                    components.country = component.shortText || component.short_name;
-                }
-            });
-
-            // Construir dirección completa
-            if (components.route) {
-                components.street_address = components.route;
-                if (components.street_number) {
-                    components.street_address = components.route + ' ' + components.street_number;
-                }
-            }
-
-            return components;
-        }
-
-        /**
-         * Guardar datos normalizados en campo oculto
-         */
-        function saveNormalizedAddressData(data) {
-            let normalizedInput = document.getElementById('normalized_address_data');
-            if (!normalizedInput) {
-                normalizedInput = document.createElement('input');
-                normalizedInput.type = 'hidden';
-                normalizedInput.id = 'normalized_address_data';
-                normalizedInput.name = 'normalized_address_data';
-                document.getElementById('checkout-form').appendChild(normalizedInput);
-            }
-            normalizedInput.value = JSON.stringify(data);
         }
 
         // Inicializar cuando se muestra el formulario de envío
@@ -3318,9 +3028,8 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         deliveryMethodRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.value === 'home_delivery' || this.value === 'pickup_point') {
-                    // Pequeño delay para asegurar que el DOM esté visible
                     setTimeout(() => {
-                        if (window.googlePlacesConfig?.enabled && !inlineMap) {
+                        if (window.googlePlacesConfig?.enabled) {
                             initInlineAddressValidation();
                         }
                     }, 100);
@@ -3328,17 +3037,15 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             });
         });
 
-        // Si home_delivery es el default y está seleccionado, inicializar inmediatamente
+        // Si home_delivery es el default, inicializar inmediatamente
         document.addEventListener('DOMContentLoaded', function() {
             const selectedMethod = document.querySelector('input[name="delivery_method"]:checked');
             if (selectedMethod && (selectedMethod.value === 'home_delivery' || selectedMethod.value === 'pickup_point')) {
-                // Asegurar que shipping-fields esté visible antes de inicializar
                 const shippingFields = document.getElementById('shipping-fields');
                 if (shippingFields) {
                     shippingFields.classList.remove('hidden');
                 }
 
-                // Inicializar mapa con delay para asegurar que el DOM esté listo
                 setTimeout(() => {
                     if (window.googlePlacesConfig?.enabled) {
                         initInlineAddressValidation();
