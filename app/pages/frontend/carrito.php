@@ -985,7 +985,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
         async function showReapplyButton(coupon) {
             // First validate if coupon is still valid (not expired)
             try {
-                const response = await fetch('/api/?endpoint=validate-coupon', {
+                const response = await fetch('<?php echo url('/api/?endpoint=validate-coupon'); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
