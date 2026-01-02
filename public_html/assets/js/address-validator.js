@@ -505,6 +505,15 @@
         const textDiv = document.getElementById('normalizedAddressText');
         const componentsDiv = document.getElementById('normalizedAddressComponents');
 
+        // Reemplazar mensaje de "Verificando..." por confirmación
+        const instructionsDiv = document.querySelector('.validation-instructions');
+        if (instructionsDiv) {
+            instructionsDiv.innerHTML = `
+                <p><strong>✓ Dirección verificada correctamente</strong></p>
+                <p style="margin-bottom: 8px;">Confirmá que la información sea correcta o buscá otra dirección si es necesario.</p>
+            `;
+        }
+
         // Mostrar dirección formateada
         textDiv.textContent = normalized.formatted_address;
 
