@@ -43,6 +43,14 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
     $cart_message = 'Tu carrito ha expirado por inactividad (4 horas). Por favor, agrega los productos nuevamente.';
 }
 
+// If coming from expired checkout, clean up checkout session
+if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
+    // Clean checkout session to avoid double-click issue
+    unset($_SESSION['checkout_start_time']);
+    unset($_SESSION['checkout_id']);
+    $cart_message = 'Tu sesión de checkout ha expirado. Por favor, continúa con el pago nuevamente.';
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
