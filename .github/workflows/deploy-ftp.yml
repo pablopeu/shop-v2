@@ -44,7 +44,6 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
-            **/.htaccess
             **/assets/uploads/**/*.jpg
             **/assets/uploads/**/*.webp
             **/assets/uploads/**/*.png
