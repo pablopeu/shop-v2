@@ -2976,6 +2976,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
     <!-- Address Validator (Google Places Integration) -->
     <?php if ($google_places_config['enabled']): ?>
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/address-validator.js'); ?>"></script>
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/places-autocomplete-new.js'); ?>"></script>
     <script nonce="<?= csp_nonce() ?>">
         // Inicializar Address Validator
         window.googlePlacesConfig = <?php echo json_encode($google_places_config); ?>;
