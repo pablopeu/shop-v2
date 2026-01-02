@@ -2949,45 +2949,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         }
 
         /**
-         * Verificar si hay dirección precargada desde cookies y habilitar botón
-         */
-        function checkPreloadedAddress() {
-            const address = document.getElementById('shipping_address')?.value?.trim();
-            const postalCode = document.getElementById('shipping_postal_code')?.value?.trim();
-            const city = document.getElementById('shipping_city')?.value?.trim();
-            const province = document.getElementById('shipping_province')?.value?.trim();
-            const quoteBtn = document.getElementById('get-shipping-quote');
-
-            console.log('🔍 Verificando dirección precargada:', { address, postalCode, city, province });
-
-            // Si hay dirección completa precargada, habilitar el botón
-            if (address && postalCode && city && province) {
-                console.log('✅ Dirección precargada detectada - habilitando botón de cotización');
-
-                // Crear window.addressData básico para que shipping.js pueda usarlo
-                window.addressData = {
-                    formatted_address: address,
-                    domicilio: address,
-                    codigo_postal: postalCode,
-                    localidad: city,
-                    ciudad: city,
-                    provincia: province,
-                    pais: document.getElementById('shipping_country')?.value || 'AR',
-                    from_cookies: true // Flag para saber que viene de cookies
-                };
-
-                // Habilitar botón
-                if (quoteBtn && quoteBtn.disabled) {
-                    quoteBtn.disabled = false;
-                    quoteBtn.title = '';
-                    console.log('✅ Botón de cotización habilitado - dirección desde cookies');
-                }
-            } else {
-                console.log('⚠️ No hay dirección completa precargada');
-            }
-        }
-
-        /**
          * Inicialización simplificada - usa places-autocomplete-new.js
          */
         function initInlineAddressValidation() {
@@ -3020,11 +2981,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 } else {
                     console.error('❌ initPlacesAutocompleteNew no está disponible');
                 }
-
-                // Verificar si hay dirección precargada después de inicializar
-                setTimeout(() => {
-                    checkPreloadedAddress();
-                }, 500);
             });
         }
 

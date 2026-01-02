@@ -56,6 +56,15 @@
         });
 
         console.log('✅ Autocomplete configurado con REST API');
+
+        // Si el input ya tiene un valor (precargado desde cookies), buscar automáticamente
+        setTimeout(() => {
+            const preloadedValue = inputElement.value.trim();
+            if (preloadedValue && preloadedValue.length >= 3) {
+                console.log('🔍 Dirección precargada detectada, buscando en Google Places:', preloadedValue);
+                getPlacePredictions(preloadedValue, predictionsElement);
+            }
+        }, 500);
     };
 
     // Obtener predicciones usando REST API
