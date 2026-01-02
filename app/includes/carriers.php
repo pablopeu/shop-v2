@@ -1034,8 +1034,8 @@ function zipnova_log($event, $data = [], $order_id = null) {
  * @param string|null $order_id Identificador de orden (para rastrear conversación completa)
  */
 function zipnova_save_response_json($endpoint, $method, $data, $order_id = null) {
-    // Usar ruta absoluta desde la raíz del proyecto
-    $logs_dir = dirname(dirname(__DIR__)) . '/logs/zipnova-responses';
+    // Usar DATA_PATH para que funcione tanto en dev como en producción
+    $logs_dir = DATA_PATH . '/logs/zipnova-responses';
     if (!is_dir($logs_dir)) {
         mkdir($logs_dir, 0755, true);
     }
