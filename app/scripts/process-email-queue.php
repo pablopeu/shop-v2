@@ -28,12 +28,12 @@ define('APP_ENTRY_POINT', true);
 // Auto-detect app path
 $app_path = __DIR__ . '/../';
 if (!file_exists($app_path . 'config/config.php')) {
-    $app_path = '/home2/uv0023/shop-v2-app/';
-}
-
-if (!file_exists($app_path . 'config/config.php')) {
-    echo "[ERROR] App path not found\n";
-    exit(1);
+    // Si el script se ejecuta desde otra ubicación, intentar detectar desde cwd
+    $app_path = getcwd() . '/app/';
+    if (!file_exists($app_path . 'config/config.php')) {
+        echo "[ERROR] App path not found. Please run this script from the project root or app/scripts directory.\n";
+        exit(1);
+    }
 }
 
 // Load config manually
@@ -43,7 +43,10 @@ define('APP_PATH', $config['app_path']);
 
 // Set $_SERVER['HTTP_HOST'] for CLI mode (needed by email.php)
 if (!isset($_SERVER['HTTP_HOST'])) {
-    $_SERVER['HTTP_HOST'] = 'peu.net';
+    // Extract host from app_url in config
+    $app_url = $config['app_url'] ?? 'http://localhost';
+    $parsed_url = parse_url($app_url);
+    $_SERVER['HTTP_HOST'] = $parsed_url['host'] ?? 'localhost';
 }
 
 // ==== STANDALONE JSON FUNCTIONS (no dependencies) ====

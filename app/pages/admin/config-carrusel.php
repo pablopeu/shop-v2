@@ -48,6 +48,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
         // Rebuild slides array from form data (existing slides)
         if (isset($_POST['slide_images']) && is_array($_POST['slide_images'])) {
             foreach ($_POST['slide_images'] as $index => $image) {
+                // Check if there's a new image for this slide
+                if (isset($_FILES['slide_new_images']['tmp_name'][$index]) &&
+                    !empty($_FILES['slide_new_images']['tmp_name'][$index]) &&
+                    is_uploaded_file($_FILES['slide_new_images']['tmp_name'][$index])) {
+
+                    // Upload new image
+                    $file_array = [
+                        'name' => $_FILES['slide_new_images']['name'][$index],
+                        'type' => $_FILES['slide_new_images']['type'][$index],
+                        'tmp_name' => $_FILES['slide_new_images']['tmp_name'][$index],
+                        'error' => $_FILES['slide_new_images']['error'][$index],
+                        'size' => $_FILES['slide_new_images']['size'][$index]
+                    ];
+
+                    $upload_result = upload_image($file_array, 'carousel');
+
+                    if (isset($upload_result['file'])) {
+                        // Delete old image if it was uploaded (not a product image)
+                        if (strpos($image, '/images/') === 0) {
+                            delete_uploaded_image($image);
+                        }
+                        // Use new image path
+                        $image = $upload_result['file'];
+                    } elseif (isset($upload_result['error'])) {
+                        $error = 'Error al subir nueva imagen para slide ' . ($index + 1) . ': ' . $upload_result['error'];
+                    }
+                }
+
                 $link = sanitize_input($_POST['slide_links'][$index] ?? '');
                 $link_type = 'none';
 
@@ -212,7 +240,7 @@ $visible_products = array_filter($all_products, function($product) {
     <style nonce="<?= csp_nonce() ?>">
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
-        .main-content { margin-left: 260px; padding: 20px; max-width: 900px; }
+        .main-content { margin-left: 260px; padding: 20px; max-width: 1400px; }
         .message { padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
         .message.success { background: #d4edda; border-left: 4px solid #28a745; color: #155724; }
         .message.error { background: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; }
@@ -226,16 +254,19 @@ $visible_products = array_filter($all_products, function($product) {
         .checkbox-group input[type="checkbox"] { width: auto; }
 
         /* Slides Gallery */
-        .slides-gallery { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-        .slide-item { position: relative; background: #f8f9fa; border-radius: 8px; padding: 15px; border: 2px solid transparent; transition: all 0.3s; cursor: move; }
+        .slides-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .slide-item { position: relative; background: #f8f9fa; border-radius: 8px; padding: 12px; border: 2px solid transparent; transition: all 0.3s; cursor: move; }
         .slide-item:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2); }
         .slide-item.sortable-ghost { opacity: 0.4; }
-        .slide-content { display: grid; grid-template-columns: 200px 1fr; gap: 15px; align-items: start; }
+        .slide-content { display: flex; flex-direction: column; gap: 12px; }
         .slide-image { position: relative; }
-        .slide-image img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; }
+        .slide-image img { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; }
+        .slide-image:hover .btn-change-image { opacity: 1; }
         .drag-handle { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: grab; }
-        .btn-delete-slide { position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .btn-delete-slide { position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; z-index: 2; }
         .btn-delete-slide:hover { background: #c82333; transform: scale(1.1); }
+        .btn-change-image { position: absolute; bottom: 5px; left: 5px; right: 5px; background: rgba(102, 126, 234, 0.95); color: white; border: none; padding: 6px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s; opacity: 0; z-index: 2; }
+        .btn-change-image:hover { background: rgba(102, 126, 234, 1); transform: translateY(-1px); }
         .slide-fields { display: flex; flex-direction: column; gap: 10px; }
         .slide-fields input, .slide-fields textarea, .slide-fields select { padding: 8px 10px; font-size: 13px; border: 2px solid #e0e0e0; border-radius: 6px; transition: border-color 0.3s; }
         .slide-fields input:focus, .slide-fields textarea:focus, .slide-fields select:focus { outline: none; border-color: #667eea; }
@@ -514,7 +545,9 @@ $visible_products = array_filter($all_products, function($product) {
                                     <div class="slide-content">
                                         <div class="slide-image">
                                             <span class="drag-handle">⋮⋮</span>
-                                            <img src="<?php echo htmlspecialchars(url($slide['image'])); ?>" alt="Slide <?php echo $index + 1; ?>">
+                                            <img src="<?php echo htmlspecialchars(url($slide['image'])); ?>" alt="Slide <?php echo $index + 1; ?>" data-slide-index="<?php echo $index; ?>">
+                                            <button type="button" class="btn-change-image" data-action="openChangeImage" data-index="<?php echo $index; ?>">📷 Cambiar imagen</button>
+                                            <input type="file" class="slide-image-input" name="slide_new_images[<?php echo $index; ?>]" data-slide-index="<?php echo $index; ?>" accept="image/*" style="display: none;">
                                             <a href="javascript:void(0)"
                                                class="btn-delete-slide"
                                                data-action="confirmDeleteSlide"
@@ -1182,6 +1215,70 @@ $visible_products = array_filter($all_products, function($product) {
                 console.log('[CAROUSEL] Added', selectedProducts.length, 'products to carousel');
             });
         }
+
+        // ===== Change Slide Image =====
+
+        /**
+         * Abre el selector de archivo para cambiar la imagen de un slide
+         */
+        window.openChangeImage = function(event, element, params) {
+            const index = params?.index;
+            if (index === undefined) return;
+
+            const fileInput = document.querySelector(`.slide-image-input[data-slide-index="${index}"]`);
+            if (fileInput) {
+                fileInput.click();
+            }
+        };
+
+        // Manejar cambio de imagen en slides existentes
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('slide-image-input')) {
+                const slideIndex = e.target.dataset.slideIndex;
+                const file = e.target.files[0];
+
+                if (!file) return;
+
+                // Validar que sea una imagen
+                if (!file.type.startsWith('image/')) {
+                    showModal({
+                        title: 'Error',
+                        message: 'El archivo seleccionado no es una imagen válida.',
+                        icon: '❌',
+                        iconClass: 'danger',
+                        confirmText: 'Entendido',
+                        onConfirm: function() {}
+                    });
+                    e.target.value = '';
+                    return;
+                }
+
+                // Validar tamaño (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showModal({
+                        title: 'Error',
+                        message: 'La imagen es demasiado grande. El tamaño máximo es 5MB.',
+                        icon: '❌',
+                        iconClass: 'danger',
+                        confirmText: 'Entendido',
+                        onConfirm: function() {}
+                    });
+                    e.target.value = '';
+                    return;
+                }
+
+                // Mostrar preview de la nueva imagen
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.querySelector(`img[data-slide-index="${slideIndex}"]`);
+                    if (img) {
+                        img.src = event.target.result;
+                        markChanged();
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         // ============================================================================
         // WRAPPERS FOR EVENT DELEGATION COMPATIBILITY

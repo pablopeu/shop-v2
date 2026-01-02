@@ -1385,7 +1385,14 @@ function create_htaccess_files($app_path, $public_path, $config) {
 
     $public_htaccess .= "# Enable rewrite engine\n";
     $public_htaccess .= "RewriteEngine On\n";
-    $public_htaccess .= "RewriteBase " . $rewrite_base . "\n\n";
+
+    // Solo incluir RewriteBase si base_path no está vacío
+    if ($base_path !== '' && $base_path !== '/') {
+        $public_htaccess .= "RewriteBase " . $rewrite_base . "\n";
+    } else {
+        $public_htaccess .= "# RewriteBase auto-detectado por Apache\n";
+    }
+    $public_htaccess .= "\n";
 
     $public_htaccess .= "# Don't redirect existing files (CSS, JS, images, etc.)\n";
     $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -f\n";
@@ -1395,17 +1402,18 @@ function create_htaccess_files($app_path, $public_path, $config) {
     $public_htaccess .= "RewriteCond %{REQUEST_FILENAME} -d\n";
     $public_htaccess .= "RewriteRule ^ - [L]\n\n";
 
+    // Usar paths relativos en lugar de absolutos
     $public_htaccess .= "# Don't redirect API endpoints\n";
-    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/api/ [OR]\n";
-    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/api/\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} /api/ [OR]\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} /admin/api/\n";
     $public_htaccess .= "RewriteRule ^ - [L]\n\n";
 
     $public_htaccess .= "# Don't redirect webhook\n";
-    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/webhook\\.php$\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} /webhook\\.php$\n";
     $public_htaccess .= "RewriteRule ^ - [L]\n\n";
 
     $public_htaccess .= "# Don't redirect admin PHP files\n";
-    $public_htaccess .= "RewriteCond %{REQUEST_URI} ^" . $base_path . "/admin/.*\\.php$\n";
+    $public_htaccess .= "RewriteCond %{REQUEST_URI} /admin/.*\\.php$\n";
     $public_htaccess .= "RewriteRule ^ - [L]\n\n";
 
     $public_htaccess .= "# Redirect all other requests to index.php\n";

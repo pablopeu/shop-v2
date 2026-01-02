@@ -56,6 +56,15 @@
         });
 
         console.log('✅ Autocomplete configurado con REST API');
+
+        // Si el input ya tiene un valor (precargado desde cookies), buscar automáticamente
+        setTimeout(() => {
+            const preloadedValue = inputElement.value.trim();
+            if (preloadedValue && preloadedValue.length >= 3) {
+                console.log('🔍 Dirección precargada detectada, buscando en Google Places:', preloadedValue);
+                getPlacePredictions(preloadedValue, predictionsElement);
+            }
+        }, 500);
     };
 
     // Obtener predicciones usando REST API
@@ -350,6 +359,14 @@
                 provincia: components.provincia,
                 codigo_postal: components.codigo_postal
             });
+
+            // Habilitar botón de cotización ahora que la dirección está validada
+            const quoteBtn = document.getElementById('get-shipping-quote');
+            if (quoteBtn && quoteBtn.disabled) {
+                quoteBtn.disabled = false;
+                quoteBtn.title = '';
+                console.log('✅ Botón de cotización habilitado - dirección validada');
+            }
         }
     }
 

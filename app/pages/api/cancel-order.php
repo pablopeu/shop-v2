@@ -25,11 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Validar Origin header para prevenir CSRF
+$config = require APP_PATH . '/config/config.php';
+$app_url = $config['app_url'] ?? '';
 $allowed_origins = [
-    'https://peu.net',
     'http://localhost:8000',
     'http://127.0.0.1:8000'
 ];
+// Add production URL if configured
+if (!empty($app_url)) {
+    $allowed_origins[] = rtrim($app_url, '/');
+}
 $origin = $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? '';
 
 // Extraer dominio del referer si no hay origin

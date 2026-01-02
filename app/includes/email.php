@@ -16,7 +16,8 @@ function get_secure_credentials() {
     // Get path to credentials file
     if (!file_exists($credentials_path_file)) {
         error_log("Credentials path file not found. Using default path.");
-        $credentials_path = '/home/notification_credentials.json';
+        // Try parent directory of APP_PATH first (production setup)
+        $credentials_path = dirname(APP_PATH) . '/notification_credentials.json';
     } else {
         $credentials_path = trim(file_get_contents($credentials_path_file));
     }

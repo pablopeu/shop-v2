@@ -27,9 +27,9 @@
     "meta_tags": {
         "og_title": "El Mercadito de PEU",
         "og_type": "website",
-        "og_url": "/shopv2/",
-        "og_url_secure": "/shopv2/",
-        "og_image": "/shopv2/assets/uploads/og-images/og_image_1764553168.jpg",
+        "og_url": "/",
+        "og_url_secure": "/",
+        "og_image": "/assets/uploads/og-images/og_image_1764553168.jpg",
         "og_site_name": "El Mercadito de PEU",
         "og_description": "Un sitio que armé para vender cosas",
         "content_type": "text/html; charset=utf-8",

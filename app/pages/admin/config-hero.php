@@ -96,7 +96,7 @@ $user = get_logged_user();
     <style nonce="<?= csp_nonce() ?>">
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
-        .main-content { margin-left: 260px; padding: 20px; max-width: 900px; }
+        .main-content { margin-left: 260px; padding: 20px; max-width: 1400px; }
         .section-divider { margin: 30px 0; padding: 15px 0; border-top: 2px solid #e0e0e0; font-size: 18px; font-weight: 600; color: #2c3e50; }
         .message { padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
         .message.success { background: #d4edda; border-left: 4px solid #28a745; color: #155724; }

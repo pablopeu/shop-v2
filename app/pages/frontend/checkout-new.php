@@ -2949,7 +2949,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         }
 
         /**
-        /**
          * Inicialización simplificada - usa places-autocomplete-new.js
          */
         function initInlineAddressValidation() {
