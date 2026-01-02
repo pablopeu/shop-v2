@@ -1728,53 +1728,12 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     <small>Requerido por la empresa de envío</small>
                                 </div>
 
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="shipping_postal_code">Código Postal *</label>
-                                        <input type="text" id="shipping_postal_code" name="shipping_postal_code"
-                                               value="<?php echo htmlspecialchars($_POST['shipping_postal_code'] ?? $saved_postal_code); ?>">
-                                        <small>Ingresá tu código postal para calcular el envío</small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="shipping_city">Ciudad *</label>
-                                        <input type="text" id="shipping_city" name="shipping_city"
-                                               placeholder="Ej: Rosario, Palermo, etc."
-                                               value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? $saved_city); ?>">
-                                        <small>En CABA poner el Barrio</small>
-                                    </div>
-                                </div>
-
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="shipping_province">Provincia / Estado *</label>
-                                        <select id="shipping_province" name="shipping_province">
-                                            <?php
-                                            $provincias = [
-                                                'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
-                                                'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
-                                                'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
-                                                'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
-                                                'Tierra del Fuego', 'Tucumán'
-                                            ];
-                                            $selected_province = $_POST['shipping_province'] ?? $saved_state ?? '';
-                                            ?>
-                                            <option value="">Seleccionar provincia...</option>
-                                            <?php foreach ($provincias as $provincia): ?>
-                                                <option value="<?php echo $provincia; ?>" <?php echo ($selected_province === $provincia) ? 'selected' : ''; ?>>
-                                                    <?php echo $provincia; ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="shipping_country">País *</label>
-                                        <select id="shipping_country" name="shipping_country">
-                                            <?php $selected_saved_country = $_POST['shipping_country'] ?? $saved_country ?? 'AR'; ?>
-                                            <option value="AR" <?php echo ($selected_saved_country === 'AR' || $selected_saved_country === 'Argentina' || empty($selected_saved_country)) ? 'selected' : ''; ?>>Argentina</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                <!-- Campos ocultos que se autocompletan con Google Places -->
+                                <input type="hidden" id="shipping_address" name="shipping_address" value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
+                                <input type="hidden" id="shipping_postal_code" name="shipping_postal_code" value="<?php echo htmlspecialchars($_POST['shipping_postal_code'] ?? $saved_postal_code); ?>">
+                                <input type="hidden" id="shipping_city" name="shipping_city" value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? $saved_city); ?>">
+                                <input type="hidden" id="shipping_province" name="shipping_province" value="<?php echo htmlspecialchars($_POST['shipping_province'] ?? $saved_state ?? ''); ?>">
+                                <input type="hidden" id="shipping_country" name="shipping_country" value="AR">
 
                                 <!-- Botón para cotizar (movido antes de referencias) -->
                                 <div class="form-group">

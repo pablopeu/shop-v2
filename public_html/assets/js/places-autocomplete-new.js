@@ -247,43 +247,71 @@
             place.addressComponents.forEach(component => {
                 const types = component.types || [];
 
+                // Dirección
                 if (types.includes('street_number')) {
                     components.street_number = component.longText;
                 }
                 if (types.includes('route')) {
                     components.route = component.longText;
                 }
-                if (types.includes('locality') || types.includes('sublocality')) {
-                    components.locality = component.longText;
+
+                // Barrio (puede ser sublocality_level_1 o neighborhood)
+                if (types.includes('sublocality_level_1') || types.includes('sublocality')) {
+                    components.barrio = component.longText;
                 }
+                if (types.includes('neighborhood')) {
+                    components.barrio = components.barrio || component.longText;
+                }
+
+                // Localidad/Ciudad
+                if (types.includes('locality')) {
+                    components.localidad = component.longText;
+                }
+                if (types.includes('administrative_area_level_2')) {
+                    components.ciudad = component.longText;
+                }
+
+                // Provincia
                 if (types.includes('administrative_area_level_1')) {
-                    components.administrative_area_level_1 = component.longText;
+                    components.provincia = component.longText;
                 }
+
+                // Código Postal
                 if (types.includes('postal_code')) {
-                    components.postal_code = component.longText;
+                    components.codigo_postal = component.longText;
                 }
+
+                // País
                 if (types.includes('country')) {
-                    components.country = component.shortText;
+                    components.pais = component.shortText;
                 }
             });
 
-            console.log('Componentes extraídos:', components);
+            console.log('📋 Componentes extraídos:', components);
 
-            // Actualizar campos
-            if (components.locality) {
-                document.getElementById('shipping_city').value = components.locality;
-                console.log('✅ Ciudad:', components.locality);
+            // Construir dirección completa
+            let direccionCompleta = '';
+            if (components.route) {
+                direccionCompleta = components.route;
+                if (components.street_number) {
+                    direccionCompleta += ' ' + components.street_number;
+                }
             }
 
-            if (components.administrative_area_level_1) {
-                document.getElementById('shipping_province').value = components.administrative_area_level_1;
-                console.log('✅ Provincia:', components.administrative_area_level_1);
-            }
+            // Actualizar campos del formulario (hidden inputs)
+            const updateHiddenField = (id, value, label) => {
+                const field = document.getElementById(id);
+                if (field && value) {
+                    field.value = value;
+                    console.log(`✅ ${label}:`, value);
+                }
+            };
 
-            if (components.postal_code) {
-                document.getElementById('shipping_postal_code').value = components.postal_code;
-                console.log('✅ Código postal:', components.postal_code);
-            }
+            updateHiddenField('shipping_address', direccionCompleta || place.formattedAddress, 'Dirección');
+            updateHiddenField('shipping_postal_code', components.codigo_postal, 'Código Postal');
+            updateHiddenField('shipping_city', components.localidad || components.ciudad, 'Ciudad/Localidad');
+            updateHiddenField('shipping_province', components.provincia, 'Provincia');
+            updateHiddenField('shipping_country', components.pais || 'AR', 'País');
 
             // Guardar datos normalizados
             let normalizedInput = document.getElementById('normalized_address_data');
@@ -297,12 +325,26 @@
 
             normalizedInput.value = JSON.stringify({
                 formatted_address: place.formattedAddress,
-                components: components,
+                domicilio: direccionCompleta || place.formattedAddress,
+                barrio: components.barrio,
+                localidad: components.localidad,
+                ciudad: components.ciudad,
+                provincia: components.provincia,
+                codigo_postal: components.codigo_postal,
+                pais: components.pais || 'AR',
                 place_id: place.id,
-                location: place.location
+                location: place.location,
+                components: components
             });
 
-            console.log('✅ Datos normalizados guardados');
+            console.log('✅ Datos normalizados guardados para logística:', {
+                domicilio: direccionCompleta,
+                barrio: components.barrio,
+                localidad: components.localidad,
+                ciudad: components.ciudad,
+                provincia: components.provincia,
+                codigo_postal: components.codigo_postal
+            });
         }
     }
 
