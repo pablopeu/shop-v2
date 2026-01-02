@@ -240,7 +240,7 @@ $visible_products = array_filter($all_products, function($product) {
     <style nonce="<?= csp_nonce() ?>">
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
-        .main-content { margin-left: 260px; padding: 20px; max-width: 900px; }
+        .main-content { margin-left: 260px; padding: 20px; max-width: 1400px; }
         .message { padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
         .message.success { background: #d4edda; border-left: 4px solid #28a745; color: #155724; }
         .message.error { background: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; }

@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             padding: 25px;
-            max-width: 900px;
+            max-width: 1400px;
             margin-bottom: 20px;
         }
 
