@@ -367,6 +367,38 @@
                 quoteBtn.title = '';
                 console.log('✅ Botón de cotización habilitado - dirección validada');
             }
+
+            // Guardar dirección validada en cookies para futuro uso
+            saveAddressToCookies(normalizedData);
+        }
+    }
+
+    /**
+     * Guardar dirección validada en cookies
+     */
+    async function saveAddressToCookies(addressData) {
+        try {
+            const response = await fetch(window.BASE_PATH + '/api/?endpoint=save-address-cookies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    address: addressData.domicilio || addressData.formatted_address,
+                    postal_code: addressData.codigo_postal,
+                    city: addressData.localidad || addressData.ciudad,
+                    province: addressData.provincia,
+                    country: addressData.pais || 'AR'
+                })
+            });
+
+            if (response.ok) {
+                console.log('✅ Dirección guardada en cookies para futuro uso');
+            } else {
+                console.warn('⚠️ No se pudieron guardar cookies de dirección');
+            }
+        } catch (error) {
+            console.warn('⚠️ Error al guardar cookies de dirección:', error);
         }
     }
 
