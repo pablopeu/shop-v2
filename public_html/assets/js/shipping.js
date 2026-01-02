@@ -136,8 +136,12 @@ console.log('📦 shipping.js: Archivo cargado');
         const items = buildPackagesFromCart();
         const declaredValue = calculateCartValue();
 
+        // Obtener dirección completa para caché más granular
+        const address = document.getElementById('shipping_address')?.value.trim() || '';
+
         // Build request
         const destination = {
+            address: address, // Incluir dirección completa para evitar cache colisions
             postal_code: postalCode,
             city: city,
             province: province,

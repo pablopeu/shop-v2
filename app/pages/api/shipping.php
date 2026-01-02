@@ -169,8 +169,9 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Check cache
-    $cache_key = 'quote_' . md5(json_encode($destination) . json_encode($items) . $total_declared_value);
+    // Check cache - incluir dirección completa para evitar colisiones en mismo barrio/CP
+    $address_for_cache = $destination_raw['address'] ?? '';
+    $cache_key = 'quote_' . md5($address_for_cache . json_encode($destination) . json_encode($items) . $total_declared_value);
     $cache_file = __DIR__ . '/../../data/cache/' . $cache_key . '.json';
     $config = zipnova_get_config();
     $cache_minutes = $config['options']['cache_quotes_minutes'] ?? 5;
