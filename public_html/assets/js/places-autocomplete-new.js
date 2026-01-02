@@ -323,7 +323,7 @@
                 document.getElementById('checkout-form').appendChild(normalizedInput);
             }
 
-            normalizedInput.value = JSON.stringify({
+            const normalizedData = {
                 formatted_address: place.formattedAddress,
                 domicilio: direccionCompleta || place.formattedAddress,
                 barrio: components.barrio,
@@ -335,7 +335,12 @@
                 place_id: place.id,
                 location: place.location,
                 components: components
-            });
+            };
+
+            normalizedInput.value = JSON.stringify(normalizedData);
+
+            // Guardar en window.addressData para que shipping.js pueda acceder
+            window.addressData = normalizedData;
 
             console.log('✅ Datos normalizados guardados para logística:', {
                 domicilio: direccionCompleta,
