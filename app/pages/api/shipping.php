@@ -51,11 +51,14 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         send_json_response(['success' => false, 'error' => 'Código postal requerido'], 400);
     }
 
+    // Extraer solo la parte numérica del código postal (ej: C1419BVO -> 1419)
+    $numeric_zipcode = preg_replace('/[^0-9]/', '', $postal_code);
+
     // Formatear destino según API v2 de Zipnova
     $destination = [
         'city' => $city ?: 'Ciudad',
         'state' => $province ?: 'Provincia',
-        'zipcode' => $postal_code
+        'zipcode' => $numeric_zipcode
     ];
 
     // Formatear items según API v2 de Zipnova
@@ -132,10 +135,15 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $items_raw = $data['items'] ?? [];
 
     // Formatear destino según API v2
+    $raw_zipcode = $destination_raw['zipcode'] ?? $destination_raw['postal_code'] ?? '';
+
+    // Extraer solo la parte numérica del código postal (ej: C1419BVO -> 1419)
+    $numeric_zipcode = preg_replace('/[^0-9]/', '', $raw_zipcode);
+
     $destination = [
         'city' => $destination_raw['city'] ?? 'Ciudad',
         'state' => $destination_raw['state'] ?? $destination_raw['province'] ?? 'Provincia',
-        'zipcode' => $destination_raw['zipcode'] ?? $destination_raw['postal_code'] ?? ''
+        'zipcode' => $numeric_zipcode
     ];
 
     // Formatear items
@@ -169,8 +177,9 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Check cache
-    $cache_key = 'quote_' . md5(json_encode($destination) . json_encode($items) . $total_declared_value);
+    // Check cache - incluir dirección completa para evitar colisiones en mismo barrio/CP
+    $address_for_cache = $destination_raw['address'] ?? '';
+    $cache_key = 'quote_' . md5($address_for_cache . json_encode($destination) . json_encode($items) . $total_declared_value);
     $cache_file = __DIR__ . '/../../data/cache/' . $cache_key . '.json';
     $config = zipnova_get_config();
     $cache_minutes = $config['options']['cache_quotes_minutes'] ?? 5;

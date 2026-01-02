@@ -189,6 +189,12 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/shared/cart.js'); ?>"></script>
 
     <script nonce="<?= csp_nonce() ?>">
+        <?php
+        // Obtener base_path de configuración
+        $app_config = require APP_PATH . '/config/config.php';
+        $base_path = rtrim($app_config['base_path'] ?? '', '/');
+        ?>
+        window.BASE_PATH = '<?php echo htmlspecialchars($base_path); ?>';
         const CURRENCY = '<?php echo $selected_currency; ?>';
         const EXCHANGE_RATE = <?php echo $currency_config['exchange_rate']; ?>;
         const BASE_URL = '<?php echo url('/'); ?>';
@@ -985,7 +991,7 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'expired') {
         async function showReapplyButton(coupon) {
             // First validate if coupon is still valid (not expired)
             try {
-                const response = await fetch('/api/?endpoint=validate-coupon', {
+                const response = await fetch(window.BASE_PATH + '/api/?endpoint=validate-coupon', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

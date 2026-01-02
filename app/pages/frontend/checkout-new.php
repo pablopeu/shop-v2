@@ -1656,7 +1656,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <div class="radio-group">
                                     <label class="radio-option">
                                         <input type="radio" name="delivery_method" value="pickup"
-                                               <?php echo ($saved_delivery_method === 'pickup' || empty($saved_delivery_method)) ? 'checked' : ''; ?> required>
+                                               <?php echo $saved_delivery_method === 'pickup' ? 'checked' : ''; ?> required>
                                         <div>
                                             <strong>🏪 Retiro en persona</strong>
                                             <p class="option-description">Coordinaremos lugar y horario</p>
@@ -1664,7 +1664,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     </label>
                                     <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
                                         <input type="radio" name="delivery_method" value="home_delivery"
-                                               <?php echo $saved_delivery_method === 'home_delivery' ? 'checked' : ''; ?>
+                                               <?php echo ($saved_delivery_method === 'home_delivery' || (empty($saved_delivery_method) && !$has_pickup_only)) ? 'checked' : ''; ?>
                                                <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
                                         <div>
                                             <strong>🏠 Envío a domicilio</strong>
@@ -1688,11 +1688,38 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                             </div>
 
                             <div id="shipping-fields" class="hidden">
+                                <!-- Google Places Autocomplete con Mapa -->
+                                <?php if ($google_places_config['enabled']): ?>
+                                <div class="form-group">
+                                    <label for="address-autocomplete-input">Dirección *</label>
+                                    <div style="position: relative;">
+                                        <input
+                                            type="text"
+                                            id="address-autocomplete-input"
+                                            name="shipping_address"
+                                            placeholder="Comenzá a escribir tu dirección..."
+                                            value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>"
+                                            autocomplete="off"
+                                            style="width: 100%; padding: 12px; border: 1px solid var(--checkout-border-color, #ddd); border-radius: 8px; font-size: 16px;">
+                                        <!-- Dropdown de sugerencias -->
+                                        <div id="address-predictions" style="display: none; position: absolute; z-index: 1000; width: 100%; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+                                    </div>
+                                    <small style="color: #666; display: block; margin-top: 8px;">
+                                        Escribí tu dirección y seleccioná una de las opciones sugeridas
+                                    </small>
+                                </div>
+
+                                <!-- Mapa Interactivo -->
+                                <div class="form-group">
+                                    <div id="inline-address-map" style="width: 100%; height: 300px; border-radius: 8px; border: 1px solid var(--checkout-border-color, #ddd); margin-bottom: 20px;"></div>
+                                </div>
+                                <?php else: ?>
                                 <div class="form-group">
                                     <label for="shipping_address">Dirección *</label>
                                     <input type="text" id="shipping_address" name="shipping_address" placeholder="Calle y número"
                                            value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
                                 </div>
+                                <?php endif; ?>
 
                                 <div class="form-group">
                                     <label for="shipping_document">DNI / CUIT *</label>
@@ -1701,84 +1728,14 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     <small>Requerido por la empresa de envío</small>
                                 </div>
 
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="shipping_postal_code">Código Postal *</label>
-                                        <input type="text" id="shipping_postal_code" name="shipping_postal_code"
-                                               value="<?php echo htmlspecialchars($_POST['shipping_postal_code'] ?? $saved_postal_code); ?>">
-                                        <small>Ingresá tu código postal para calcular el envío</small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="shipping_city">Ciudad *</label>
-                                        <input type="text" id="shipping_city" name="shipping_city"
-                                               placeholder="Ej: Rosario, Palermo, etc."
-                                               value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? $saved_city); ?>">
-                                        <small>En CABA poner el Barrio</small>
-                                    </div>
-                                </div>
+                                <!-- Campos ocultos que se autocompletan con Google Places -->
+                                <input type="hidden" id="shipping_address" name="shipping_address" value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
+                                <input type="hidden" id="shipping_postal_code" name="shipping_postal_code" value="<?php echo htmlspecialchars($_POST['shipping_postal_code'] ?? $saved_postal_code); ?>">
+                                <input type="hidden" id="shipping_city" name="shipping_city" value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? $saved_city); ?>">
+                                <input type="hidden" id="shipping_province" name="shipping_province" value="<?php echo htmlspecialchars($_POST['shipping_province'] ?? $saved_state ?? ''); ?>">
+                                <input type="hidden" id="shipping_country" name="shipping_country" value="AR">
 
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="shipping_province">Provincia / Estado *</label>
-                                        <select id="shipping_province" name="shipping_province">
-                                            <?php
-                                            $provincias = [
-                                                'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
-                                                'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
-                                                'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
-                                                'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
-                                                'Tierra del Fuego', 'Tucumán'
-                                            ];
-                                            $selected_province = $_POST['shipping_province'] ?? $saved_state ?? '';
-                                            ?>
-                                            <option value="">Seleccionar provincia...</option>
-                                            <?php foreach ($provincias as $provincia): ?>
-                                                <option value="<?php echo $provincia; ?>" <?php echo ($selected_province === $provincia) ? 'selected' : ''; ?>>
-                                                    <?php echo $provincia; ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="shipping_country">País *</label>
-                                        <select id="shipping_country" name="shipping_country">
-                                            <?php $selected_saved_country = $_POST['shipping_country'] ?? $saved_country ?? 'AR'; ?>
-                                            <option value="AR" <?php echo ($selected_saved_country === 'AR' || $selected_saved_country === 'Argentina' || empty($selected_saved_country)) ? 'selected' : ''; ?>>Argentina</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="shipping_notes">Referencias de entrega (opcional)</label>
-                                    <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
-                                </div>
-
-                                <!-- Validación de dirección con Google Places -->
-                                <?php if ($google_places_config['enabled']): ?>
-                                <div class="form-group">
-                                    <button type="button" class="btn btn-primary btn-block" id="validate-address-btn" data-action="validateAddress">
-                                        🌍 Validar Dirección
-                                    </button>
-                                    <small style="color: #666; display: block; margin-top: 8px;">
-                                        <?php if ($google_places_config['require_confirmation']): ?>
-                                        Validá tu dirección antes de cotizar el envío
-                                        <?php else: ?>
-                                        Opcional: Validá tu dirección para mayor precisión
-                                        <?php endif; ?>
-                                    </small>
-                                </div>
-
-                                <!-- Mensaje de dirección validada -->
-                                <div id="address-validated-message" class="hidden" style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px 16px; border-radius: 6px; margin-bottom: 15px;">
-                                    <p style="margin: 0; color: #155724; font-weight: 600;">
-                                        ✓ Dirección validada correctamente
-                                    </p>
-                                    <p id="validated-address-display" style="margin: 8px 0 0 0; color: #155724; font-size: 14px;"></p>
-                                </div>
-                                <?php endif; ?>
-
-                                <!-- Botón para cotizar -->
+                                <!-- Botón para cotizar (movido antes de referencias) -->
                                 <div class="form-group">
                                     <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote"
                                         <?php if ($google_places_config['enabled'] && $google_places_config['require_confirmation']): ?>
@@ -1786,6 +1743,12 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                         <?php endif; ?>>
                                         📦 Calcular Costo de Envío
                                     </button>
+                                </div>
+
+                                <!-- Referencias de entrega (movido después del botón) -->
+                                <div class="form-group">
+                                    <label for="shipping_notes">Referencias de entrega (opcional)</label>
+                                    <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
                                 </div>
 
                                 <!-- Cotizaciones de envío -->
@@ -2975,115 +2938,83 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
     <!-- Address Validator (Google Places Integration) -->
     <?php if ($google_places_config['enabled']): ?>
     <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/address-validator.js'); ?>"></script>
+    <script nonce="<?= csp_nonce() ?>" src="<?php echo url('/assets/js/places-autocomplete-new.js'); ?>"></script>
     <script nonce="<?= csp_nonce() ?>">
         // Inicializar Address Validator
         window.googlePlacesConfig = <?php echo json_encode($google_places_config); ?>;
+
+        // Inicializar AddressValidator para que loadGoogleMapsAPI funcione
         if (typeof initAddressValidator === 'function') {
             initAddressValidator(window.googlePlacesConfig);
         }
 
         /**
-         * Función para validar dirección con Google Places
-         * Llamada por el event delegation system
+        /**
+         * Inicialización simplificada - usa places-autocomplete-new.js
          */
-        function validateAddress(event, element, params) {
-            // Obtener datos actuales del formulario
-            const addressData = {
-                address: document.getElementById('shipping_address')?.value || '',
-                city: document.getElementById('shipping_city')?.value || '',
-                province: document.getElementById('shipping_province')?.value || '',
-                postal_code: document.getElementById('shipping_postal_code')?.value || '',
-                country: document.getElementById('shipping_country')?.value || 'AR'
-            };
-
-            // Validar que al menos tenga dirección
-            if (!addressData.address.trim()) {
-                showModal({
-                    title: 'Campo requerido',
-                    message: 'Por favor ingresá tu dirección antes de validarla',
-                    icon: '⚠️',
-                    confirmText: 'Entendido'
-                });
-                return;
-            }
-
-            // Cargar Google Maps API si no está cargada
+        function initInlineAddressValidation() {
             loadGoogleMapsAPI(function(success) {
                 if (!success) {
-                    showModal({
-                        title: 'Error',
-                        message: 'No se pudo cargar Google Maps. Por favor, intentá nuevamente.',
-                        icon: '❌',
-                        confirmText: 'Entendido'
-                    });
+                    console.error('No se pudo cargar Google Maps API');
                     return;
                 }
 
-                // Mostrar modal de validación
-                showAddressValidationModal(
-                    addressData,
-                    function(normalizedAddress) {
-                        // Callback cuando se confirma la dirección normalizada
-                        console.log('Dirección normalizada:', normalizedAddress);
+                const mapElement = document.getElementById('inline-address-map');
+                if (!mapElement) return;
 
-                        // Actualizar campos del formulario con dirección normalizada
-                        const components = normalizedAddress.components;
+                console.log('🗺️ Inicializando mapa...');
 
-                        if (components.address) {
-                            document.getElementById('shipping_address').value = components.address;
-                        }
-                        if (components.city) {
-                            document.getElementById('shipping_city').value = components.city;
-                        }
-                        if (components.province) {
-                            document.getElementById('shipping_province').value = components.province;
-                        }
-                        if (components.postal_code) {
-                            document.getElementById('shipping_postal_code').value = components.postal_code;
-                        }
+                // Crear mapa
+                const map = new google.maps.Map(mapElement, {
+                    center: { lat: -34.6037, lng: -58.3816 },
+                    zoom: 13,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false,
+                    mapId: 'inline-address-map'
+                });
 
-                        // Guardar dirección normalizada completa en un campo oculto (opcional)
-                        let normalizedInput = document.getElementById('normalized_address_data');
-                        if (!normalizedInput) {
-                            normalizedInput = document.createElement('input');
-                            normalizedInput.type = 'hidden';
-                            normalizedInput.id = 'normalized_address_data';
-                            normalizedInput.name = 'normalized_address_data';
-                            document.getElementById('checkout-form').appendChild(normalizedInput);
-                        }
-                        normalizedInput.value = JSON.stringify(normalizedAddress);
+                console.log('✅ Mapa inicializado');
 
-                        // Mostrar mensaje de confirmación
-                        const validatedMsg = document.getElementById('address-validated-message');
-                        const validatedDisplay = document.getElementById('validated-address-display');
-
-                        if (validatedMsg && validatedDisplay) {
-                            validatedDisplay.textContent = normalizedAddress.formatted_address;
-                            validatedMsg.classList.remove('hidden');
-                        }
-
-                        // Habilitar botón de cotizar
-                        const quoteBtn = document.getElementById('get-shipping-quote');
-                        if (quoteBtn) {
-                            quoteBtn.disabled = false;
-                            quoteBtn.title = '';
-                        }
-
-                        // Scroll suave al botón de cotizar
-                        setTimeout(() => {
-                            quoteBtn?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 300);
-                    },
-                    function() {
-                        // Callback cuando se cancela
-                        console.log('Validación de dirección cancelada');
-                    }
-                );
+                // Inicializar autocomplete con REST API (desde archivo externo)
+                if (typeof initPlacesAutocompleteNew === 'function') {
+                    initPlacesAutocompleteNew(map);
+                } else {
+                    console.error('❌ initPlacesAutocompleteNew no está disponible');
+                }
             });
         }
 
-        // Exportar para event delegation
-        window.validateAddress = validateAddress;
+        // Inicializar cuando se muestra el formulario de envío
+        const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
+        deliveryMethodRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'home_delivery' || this.value === 'pickup_point') {
+                    setTimeout(() => {
+                        if (window.googlePlacesConfig?.enabled) {
+                            initInlineAddressValidation();
+                        }
+                    }, 100);
+                }
+            });
+        });
+
+        // Si home_delivery es el default, inicializar inmediatamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectedMethod = document.querySelector('input[name="delivery_method"]:checked');
+            if (selectedMethod && (selectedMethod.value === 'home_delivery' || selectedMethod.value === 'pickup_point')) {
+                const shippingFields = document.getElementById('shipping-fields');
+                if (shippingFields) {
+                    shippingFields.classList.remove('hidden');
+                }
+
+                setTimeout(() => {
+                    if (window.googlePlacesConfig?.enabled) {
+                        initInlineAddressValidation();
+                    }
+                }, 500);
+            }
+        });
     </script>
     <?php endif; ?>
 
