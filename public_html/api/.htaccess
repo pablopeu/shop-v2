@@ -3,7 +3,7 @@
 
 # Enable rewrite engine
 RewriteEngine On
-RewriteBase /shopv2/api/
+# RewriteBase configurado dinámicamente por el instalador
 
 # Don't redirect if it's index.php itself
 RewriteCond %{REQUEST_URI} index\.php$
