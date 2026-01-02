@@ -1834,10 +1834,6 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                                 <textarea id="shipping_notes" name="shipping_notes" rows="3" placeholder="Piso, departamento, timbre, entre calles, horario preferido de entrega..."><?php echo htmlspecialchars($_POST['shipping_notes'] ?? $saved_notes); ?></textarea>
                                 <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">Información útil para facilitar la entrega (por ej: piso 3, depto B, portero eléctrico código 123)</small>
                             </div>
-
-                            <button type="button" class="btn btn-primary btn-block" data-action="nextStep" data-step="3">
-                                Continuar al Pago →
-                            </button>
                         </div>
                     </div>
 
@@ -2056,6 +2052,19 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
     @keyframes flash {
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.7; transform: scale(1.05); }
+    }
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+    }
+    .pulse-animation {
+        animation: pulse 1.5s ease-in-out infinite;
     }
     </style>
 
@@ -2286,10 +2295,10 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                 return;
             }
 
-            const document = document.getElementById('shipping_document')?.value.trim() || '';
+            const docValue = document.getElementById('shipping_document')?.value.trim() || '';
 
             // Validar que el documento esté completo (mínimo 7 dígitos)
-            if (document.length >= 7) {
+            if (docValue.length >= 7) {
                 document.getElementById('step-3-summary').textContent = '✅ Datos completados';
                 markStepCompleted(3);
                 unlockNextStep(3);
@@ -2298,6 +2307,15 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                 markStepIncomplete(3);
             }
         }
+
+        // Initial validation for document (auto-complete if already filled from cookies)
+        // This runs after step 2 is unlocked and step 3 becomes available
+        setTimeout(() => {
+            const step3 = document.getElementById('step-3');
+            if (step3 && !step3.classList.contains('locked')) {
+                validateStep3();
+            }
+        }, 500);
 
         // Step 4: Payment validation
         document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
