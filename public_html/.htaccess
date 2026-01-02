@@ -9,7 +9,7 @@
 
 # Enable rewrite engine
 RewriteEngine On
-# RewriteBase configurado dinámicamente por el instalador
+RewriteBase /shopv2/
 
 # Don't redirect existing files (CSS, JS, images, etc.)
 RewriteCond %{REQUEST_FILENAME} -f
@@ -20,16 +20,16 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
 # Don't redirect API endpoints
-RewriteCond %{REQUEST_URI} /api/ [OR]
-RewriteCond %{REQUEST_URI} /admin/api/
+RewriteCond %{REQUEST_URI} ^/shopv2/api/ [OR]
+RewriteCond %{REQUEST_URI} ^/shopv2/admin/api/
 RewriteRule ^ - [L]
 
 # Don't redirect webhook
-RewriteCond %{REQUEST_URI} /webhook\.php$
+RewriteCond %{REQUEST_URI} ^/shopv2/webhook\.php$
 RewriteRule ^ - [L]
 
 # Don't redirect admin PHP files
-RewriteCond %{REQUEST_URI} /admin/.*\.php$
+RewriteCond %{REQUEST_URI} ^/shopv2/admin/.*\.php$
 RewriteRule ^ - [L]
 
 # Redirect all other requests to index.php
