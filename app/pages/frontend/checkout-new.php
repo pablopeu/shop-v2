@@ -1656,7 +1656,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <div class="radio-group">
                                     <label class="radio-option">
                                         <input type="radio" name="delivery_method" value="pickup"
-                                               <?php echo ($saved_delivery_method === 'pickup' || empty($saved_delivery_method)) ? 'checked' : ''; ?> required>
+                                               <?php echo $saved_delivery_method === 'pickup' ? 'checked' : ''; ?> required>
                                         <div>
                                             <strong>🏪 Retiro en persona</strong>
                                             <p class="option-description">Coordinaremos lugar y horario</p>
@@ -1664,7 +1664,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     </label>
                                     <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
                                         <input type="radio" name="delivery_method" value="home_delivery"
-                                               <?php echo $saved_delivery_method === 'home_delivery' ? 'checked' : ''; ?>
+                                               <?php echo ($saved_delivery_method === 'home_delivery' || (empty($saved_delivery_method) && !$has_pickup_only)) ? 'checked' : ''; ?>
                                                <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
                                         <div>
                                             <strong>🏠 Envío a domicilio</strong>
@@ -1688,11 +1688,37 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                             </div>
 
                             <div id="shipping-fields" class="hidden">
+                                <!-- Google Places Autocomplete con Mapa -->
+                                <?php if ($google_places_config['enabled']): ?>
+                                <div class="form-group">
+                                    <label for="address-autocomplete-input">Dirección *</label>
+                                    <gmp-place-autocomplete
+                                        id="address-autocomplete"
+                                        country="<?php echo strtolower($google_places_config['country_code'] ?? 'ar'); ?>">
+                                        <input
+                                            type="text"
+                                            id="address-autocomplete-input"
+                                            name="shipping_address"
+                                            placeholder="Comenzá a escribir tu dirección..."
+                                            value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>"
+                                            style="width: 100%; padding: 12px; border: 1px solid var(--checkout-border-color, #ddd); border-radius: 8px; font-size: 16px;">
+                                    </gmp-place-autocomplete>
+                                    <small style="color: #666; display: block; margin-top: 8px;">
+                                        Escribí tu dirección y seleccioná una de las opciones sugeridas
+                                    </small>
+                                </div>
+
+                                <!-- Mapa Interactivo -->
+                                <div class="form-group">
+                                    <div id="inline-address-map" style="width: 100%; height: 300px; border-radius: 8px; border: 1px solid var(--checkout-border-color, #ddd); margin-bottom: 20px;"></div>
+                                </div>
+                                <?php else: ?>
                                 <div class="form-group">
                                     <label for="shipping_address">Dirección *</label>
                                     <input type="text" id="shipping_address" name="shipping_address" placeholder="Calle y número"
                                            value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
                                 </div>
+                                <?php endif; ?>
 
                                 <div class="form-group">
                                     <label for="shipping_document">DNI / CUIT *</label>
@@ -1749,43 +1775,17 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                     </div>
                                 </div>
 
+                                <!-- Botón para cotizar (movido antes de referencias) -->
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote">
+                                        📦 Calcular Costo de Envío
+                                    </button>
+                                </div>
+
+                                <!-- Referencias de entrega (movido después del botón) -->
                                 <div class="form-group">
                                     <label for="shipping_notes">Referencias de entrega (opcional)</label>
                                     <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
-                                </div>
-
-                                <!-- Validación de dirección con Google Places -->
-                                <?php if ($google_places_config['enabled']): ?>
-                                <div class="form-group">
-                                    <button type="button" class="btn btn-primary btn-block" id="validate-address-btn" data-action="validateAddress">
-                                        🌍 Validar Dirección
-                                    </button>
-                                    <small style="color: #666; display: block; margin-top: 8px;">
-                                        <?php if ($google_places_config['require_confirmation']): ?>
-                                        Validá tu dirección antes de cotizar el envío
-                                        <?php else: ?>
-                                        Opcional: Validá tu dirección para mayor precisión
-                                        <?php endif; ?>
-                                    </small>
-                                </div>
-
-                                <!-- Mensaje de dirección validada -->
-                                <div id="address-validated-message" class="hidden" style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px 16px; border-radius: 6px; margin-bottom: 15px;">
-                                    <p style="margin: 0; color: #155724; font-weight: 600;">
-                                        ✓ Dirección validada correctamente
-                                    </p>
-                                    <p id="validated-address-display" style="margin: 8px 0 0 0; color: #155724; font-size: 14px;"></p>
-                                </div>
-                                <?php endif; ?>
-
-                                <!-- Botón para cotizar -->
-                                <div class="form-group">
-                                    <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote"
-                                        <?php if ($google_places_config['enabled'] && $google_places_config['require_confirmation']): ?>
-                                        disabled title="Primero debés validar tu dirección"
-                                        <?php endif; ?>>
-                                        📦 Calcular Costo de Envío
-                                    </button>
                                 </div>
 
                                 <!-- Cotizaciones de envío -->
@@ -2978,112 +2978,279 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
     <script nonce="<?= csp_nonce() ?>">
         // Inicializar Address Validator
         window.googlePlacesConfig = <?php echo json_encode($google_places_config); ?>;
-        if (typeof initAddressValidator === 'function') {
-            initAddressValidator(window.googlePlacesConfig);
-        }
 
         /**
-         * Función para validar dirección con Google Places
-         * Llamada por el event delegation system
+         * Inicialización del sistema de validación de dirección inline
          */
-        function validateAddress(event, element, params) {
-            // Obtener datos actuales del formulario
-            const addressData = {
-                address: document.getElementById('shipping_address')?.value || '',
-                city: document.getElementById('shipping_city')?.value || '',
-                province: document.getElementById('shipping_province')?.value || '',
-                postal_code: document.getElementById('shipping_postal_code')?.value || '',
-                country: document.getElementById('shipping_country')?.value || 'AR'
-            };
+        let inlineMap = null;
+        let inlineMarker = null;
+        let placeAutocompleteElement = null;
 
-            // Validar que al menos tenga dirección
-            if (!addressData.address.trim()) {
-                showModal({
-                    title: 'Campo requerido',
-                    message: 'Por favor ingresá tu dirección antes de validarla',
-                    icon: '⚠️',
-                    confirmText: 'Entendido'
-                });
-                return;
-            }
-
-            // Cargar Google Maps API si no está cargada
+        function initInlineAddressValidation() {
+            // Cargar Google Maps API
             loadGoogleMapsAPI(function(success) {
                 if (!success) {
-                    showModal({
-                        title: 'Error',
-                        message: 'No se pudo cargar Google Maps. Por favor, intentá nuevamente.',
-                        icon: '❌',
-                        confirmText: 'Entendido'
-                    });
+                    console.error('No se pudo cargar Google Maps API');
                     return;
                 }
 
-                // Mostrar modal de validación
-                showAddressValidationModal(
-                    addressData,
-                    function(normalizedAddress) {
-                        // Callback cuando se confirma la dirección normalizada
-                        console.log('Dirección normalizada:', normalizedAddress);
+                // Inicializar mapa
+                const mapElement = document.getElementById('inline-address-map');
+                if (!mapElement) return;
 
-                        // Actualizar campos del formulario con dirección normalizada
-                        const components = normalizedAddress.components;
+                // Crear mapa centrado en Buenos Aires por defecto
+                inlineMap = new google.maps.Map(mapElement, {
+                    center: { lat: -34.6037, lng: -58.3816 },
+                    zoom: 13,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
+                });
 
-                        if (components.address) {
-                            document.getElementById('shipping_address').value = components.address;
-                        }
-                        if (components.city) {
-                            document.getElementById('shipping_city').value = components.city;
-                        }
-                        if (components.province) {
-                            document.getElementById('shipping_province').value = components.province;
-                        }
-                        if (components.postal_code) {
-                            document.getElementById('shipping_postal_code').value = components.postal_code;
-                        }
+                // Obtener el elemento de autocomplete
+                placeAutocompleteElement = document.getElementById('address-autocomplete');
+                if (!placeAutocompleteElement) return;
 
-                        // Guardar dirección normalizada completa en un campo oculto (opcional)
-                        let normalizedInput = document.getElementById('normalized_address_data');
-                        if (!normalizedInput) {
-                            normalizedInput = document.createElement('input');
-                            normalizedInput.type = 'hidden';
-                            normalizedInput.id = 'normalized_address_data';
-                            normalizedInput.name = 'normalized_address_data';
-                            document.getElementById('checkout-form').appendChild(normalizedInput);
-                        }
-                        normalizedInput.value = JSON.stringify(normalizedAddress);
+                // Escuchar cuando el usuario selecciona un lugar
+                placeAutocompleteElement.addEventListener('gmp-placeselect', async (event) => {
+                    const place = event.detail.place;
+                    console.log('Lugar seleccionado:', place);
 
-                        // Mostrar mensaje de confirmación
-                        const validatedMsg = document.getElementById('address-validated-message');
-                        const validatedDisplay = document.getElementById('validated-address-display');
-
-                        if (validatedMsg && validatedDisplay) {
-                            validatedDisplay.textContent = normalizedAddress.formatted_address;
-                            validatedMsg.classList.remove('hidden');
-                        }
-
-                        // Habilitar botón de cotizar
-                        const quoteBtn = document.getElementById('get-shipping-quote');
-                        if (quoteBtn) {
-                            quoteBtn.disabled = false;
-                            quoteBtn.title = '';
-                        }
-
-                        // Scroll suave al botón de cotizar
-                        setTimeout(() => {
-                            quoteBtn?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 300);
-                    },
-                    function() {
-                        // Callback cuando se cancela
-                        console.log('Validación de dirección cancelada');
-                    }
-                );
+                    // Procesar el lugar seleccionado
+                    await processSelectedPlace(place);
+                });
             });
         }
 
-        // Exportar para event delegation
-        window.validateAddress = validateAddress;
+        /**
+         * Procesar el lugar seleccionado del autocomplete
+         */
+        async function processSelectedPlace(place) {
+            if (!place.geometry || !place.geometry.location) {
+                console.error('El lugar no tiene información de geometría');
+                return;
+            }
+
+            // Obtener coordenadas
+            const location = place.geometry.location;
+            const lat = location.lat();
+            const lng = location.lng();
+
+            // Centrar mapa en la ubicación seleccionada
+            inlineMap.setCenter({ lat, lng });
+            inlineMap.setZoom(17);
+
+            // Remover marker anterior si existe
+            if (inlineMarker) {
+                inlineMarker.map = null;
+            }
+
+            // Crear nuevo marker en la ubicación
+            inlineMarker = new google.maps.marker.AdvancedMarkerElement({
+                map: inlineMap,
+                position: { lat, lng },
+                title: place.formattedAddress || 'Dirección seleccionada'
+            });
+
+            // Obtener detalles completos del lugar usando la nueva Places API
+            if (place.id) {
+                try {
+                    const placeDetails = await getPlaceDetails(place.id);
+                    updateFormWithPlaceDetails(placeDetails);
+                } catch (error) {
+                    console.error('Error al obtener detalles del lugar:', error);
+                    // Usar datos básicos del place
+                    updateFormWithBasicPlace(place);
+                }
+            } else {
+                updateFormWithBasicPlace(place);
+            }
+        }
+
+        /**
+         * Obtener detalles completos del lugar usando Places API (New)
+         */
+        async function getPlaceDetails(placeId) {
+            const apiKey = window.googlePlacesConfig?.api_key;
+            if (!apiKey) {
+                throw new Error('API key no disponible');
+            }
+
+            const url = `https://places.googleapis.com/v1/places/${placeId}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Goog-Api-Key': apiKey,
+                    'X-Goog-FieldMask': 'id,displayName,formattedAddress,addressComponents'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error en la API: ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        /**
+         * Actualizar formulario con detalles completos del lugar
+         */
+        function updateFormWithPlaceDetails(placeDetails) {
+            console.log('Detalles del lugar:', placeDetails);
+
+            const components = extractAddressComponents(placeDetails.addressComponents || []);
+
+            // Actualizar campos del formulario
+            if (components.street_address) {
+                document.getElementById('address-autocomplete-input').value = components.street_address;
+            } else if (placeDetails.formattedAddress) {
+                document.getElementById('address-autocomplete-input').value = placeDetails.formattedAddress;
+            }
+
+            if (components.locality) {
+                document.getElementById('shipping_city').value = components.locality;
+            }
+
+            if (components.administrative_area_level_1) {
+                document.getElementById('shipping_province').value = components.administrative_area_level_1;
+            }
+
+            if (components.postal_code) {
+                document.getElementById('shipping_postal_code').value = components.postal_code;
+            }
+
+            // Guardar datos normalizados en campo oculto
+            saveNormalizedAddressData({
+                formatted_address: placeDetails.formattedAddress,
+                components: components,
+                place_id: placeDetails.id
+            });
+        }
+
+        /**
+         * Actualizar formulario con datos básicos del place
+         */
+        function updateFormWithBasicPlace(place) {
+            console.log('Usando datos básicos del lugar');
+
+            // Actualizar dirección
+            if (place.formattedAddress) {
+                document.getElementById('address-autocomplete-input').value = place.formattedAddress;
+            }
+
+            // Intentar extraer componentes básicos
+            if (place.addressComponents) {
+                const components = extractAddressComponents(place.addressComponents);
+
+                if (components.locality) {
+                    document.getElementById('shipping_city').value = components.locality;
+                }
+
+                if (components.administrative_area_level_1) {
+                    document.getElementById('shipping_province').value = components.administrative_area_level_1;
+                }
+
+                if (components.postal_code) {
+                    document.getElementById('shipping_postal_code').value = components.postal_code;
+                }
+            }
+        }
+
+        /**
+         * Extraer componentes de dirección estructurados
+         */
+        function extractAddressComponents(addressComponents) {
+            const components = {
+                street_address: '',
+                locality: '',
+                administrative_area_level_1: '',
+                postal_code: '',
+                country: ''
+            };
+
+            addressComponents.forEach(component => {
+                const types = component.types || [];
+
+                if (types.includes('street_number')) {
+                    components.street_number = component.longText || component.long_name;
+                }
+                if (types.includes('route')) {
+                    components.route = component.longText || component.long_name;
+                }
+                if (types.includes('locality') || types.includes('sublocality')) {
+                    components.locality = component.longText || component.long_name;
+                }
+                if (types.includes('administrative_area_level_1')) {
+                    components.administrative_area_level_1 = component.longText || component.long_name;
+                }
+                if (types.includes('postal_code')) {
+                    components.postal_code = component.longText || component.long_name;
+                }
+                if (types.includes('country')) {
+                    components.country = component.shortText || component.short_name;
+                }
+            });
+
+            // Construir dirección completa
+            if (components.route) {
+                components.street_address = components.route;
+                if (components.street_number) {
+                    components.street_address = components.route + ' ' + components.street_number;
+                }
+            }
+
+            return components;
+        }
+
+        /**
+         * Guardar datos normalizados en campo oculto
+         */
+        function saveNormalizedAddressData(data) {
+            let normalizedInput = document.getElementById('normalized_address_data');
+            if (!normalizedInput) {
+                normalizedInput = document.createElement('input');
+                normalizedInput.type = 'hidden';
+                normalizedInput.id = 'normalized_address_data';
+                normalizedInput.name = 'normalized_address_data';
+                document.getElementById('checkout-form').appendChild(normalizedInput);
+            }
+            normalizedInput.value = JSON.stringify(data);
+        }
+
+        // Inicializar cuando se muestra el formulario de envío
+        const deliveryMethodRadios = document.querySelectorAll('input[name="delivery_method"]');
+        deliveryMethodRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'home_delivery' || this.value === 'pickup_point') {
+                    // Pequeño delay para asegurar que el DOM esté visible
+                    setTimeout(() => {
+                        if (window.googlePlacesConfig?.enabled && !inlineMap) {
+                            initInlineAddressValidation();
+                        }
+                    }, 100);
+                }
+            });
+        });
+
+        // Si home_delivery es el default y está seleccionado, inicializar inmediatamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectedMethod = document.querySelector('input[name="delivery_method"]:checked');
+            if (selectedMethod && (selectedMethod.value === 'home_delivery' || selectedMethod.value === 'pickup_point')) {
+                // Asegurar que shipping-fields esté visible antes de inicializar
+                const shippingFields = document.getElementById('shipping-fields');
+                if (shippingFields) {
+                    shippingFields.classList.remove('hidden');
+                }
+
+                // Inicializar mapa con delay para asegurar que el DOM esté listo
+                setTimeout(() => {
+                    if (window.googlePlacesConfig?.enabled) {
+                        initInlineAddressValidation();
+                    }
+                }, 500);
+            }
+        });
     </script>
     <?php endif; ?>
 
