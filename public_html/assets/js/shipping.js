@@ -93,9 +93,26 @@ console.log('📦 shipping.js: Archivo cargado');
 
         // Validate required fields
         const postalCode = document.getElementById('shipping_postal_code').value.trim();
-        const city = document.getElementById('shipping_city').value.trim();
         const province = document.getElementById('shipping_province').value;
         const country = document.getElementById('shipping_country').value;
+
+        // Determinar qué usar en 'city' según el código postal
+        let city = document.getElementById('shipping_city').value.trim();
+
+        // Si el código postal está en rango CABA (1000-1499), usar el barrio
+        const postalCodeNum = parseInt(postalCode.replace(/[^0-9]/g, ''));
+        if (postalCodeNum >= 1000 && postalCodeNum <= 1499) {
+            // Para CABA, usar el barrio si está disponible
+            if (window.addressData && window.addressData.barrio) {
+                city = window.addressData.barrio;
+                console.log('📍 CABA detectada - usando barrio:', city);
+            } else {
+                console.warn('⚠️ CABA detectada pero no hay barrio en addressData');
+            }
+        } else {
+            // Para el resto del país, usar la localidad
+            console.log('📍 Fuera de CABA - usando localidad:', city);
+        }
 
         console.log('📍 Datos de envío:', { postalCode, city, province, country });
 
