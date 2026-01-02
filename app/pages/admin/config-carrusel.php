@@ -226,13 +226,13 @@ $visible_products = array_filter($all_products, function($product) {
         .checkbox-group input[type="checkbox"] { width: auto; }
 
         /* Slides Gallery */
-        .slides-gallery { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-        .slide-item { position: relative; background: #f8f9fa; border-radius: 8px; padding: 15px; border: 2px solid transparent; transition: all 0.3s; cursor: move; }
+        .slides-gallery { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .slide-item { position: relative; background: #f8f9fa; border-radius: 8px; padding: 12px; border: 2px solid transparent; transition: all 0.3s; cursor: move; }
         .slide-item:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2); }
         .slide-item.sortable-ghost { opacity: 0.4; }
-        .slide-content { display: grid; grid-template-columns: 200px 1fr; gap: 15px; align-items: start; }
+        .slide-content { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: start; }
         .slide-image { position: relative; }
-        .slide-image img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; }
+        .slide-image img { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; }
         .drag-handle { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: grab; }
         .btn-delete-slide { position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
         .btn-delete-slide:hover { background: #c82333; transform: scale(1.1); }
