@@ -1692,18 +1692,18 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <?php if ($google_places_config['enabled']): ?>
                                 <div class="form-group">
                                     <label for="address-autocomplete-input">Dirección *</label>
-                                    <gmp-place-autocomplete
-                                        id="address-autocomplete"
-                                        for-map="inline-address-map"
-                                        country="<?php echo strtolower($google_places_config['country_code'] ?? 'ar'); ?>">
+                                    <div style="position: relative;">
                                         <input
                                             type="text"
                                             id="address-autocomplete-input"
                                             name="shipping_address"
                                             placeholder="Comenzá a escribir tu dirección..."
                                             value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>"
+                                            autocomplete="off"
                                             style="width: 100%; padding: 12px; border: 1px solid var(--checkout-border-color, #ddd); border-radius: 8px; font-size: 16px;">
-                                    </gmp-place-autocomplete>
+                                        <!-- Dropdown de sugerencias -->
+                                        <div id="address-predictions" style="display: none; position: absolute; z-index: 1000; width: 100%; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+                                    </div>
                                     <small style="color: #666; display: block; margin-top: 8px;">
                                         Escribí tu dirección y seleccioná una de las opciones sugeridas
                                     </small>
@@ -2992,6 +2992,10 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         let inlineMarker = null;
         let placeAutocompleteElement = null;
 
+        let autocompleteService = null;
+        let placesService = null;
+        let sessionToken = null;
+
         function initInlineAddressValidation() {
             // Cargar Google Maps API
             loadGoogleMapsAPI(function(success) {
@@ -3021,63 +3025,129 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
                 console.log('✅ Mapa inicializado correctamente');
 
-                // Obtener el web component de autocomplete
-                const autocompleteElement = document.getElementById('address-autocomplete');
-                if (!autocompleteElement) {
-                    console.error('❌ No se encontró el elemento gmp-place-autocomplete');
+                // Inicializar servicios de Places API (New)
+                autocompleteService = new google.maps.places.AutocompleteService();
+                placesService = new google.maps.places.PlacesService(inlineMap);
+                sessionToken = new google.maps.places.AutocompleteSessionToken();
+
+                console.log('✅ AutocompleteService y PlacesService inicializados');
+
+                // Obtener elementos
+                const inputElement = document.getElementById('address-autocomplete-input');
+                const predictionsElement = document.getElementById('address-predictions');
+
+                if (!inputElement || !predictionsElement) {
+                    console.error('❌ No se encontraron elementos necesarios');
                     return;
                 }
 
-                console.log('📍 Configurando listeners del web component...');
-                console.log('Tipo de autocompleteElement:', autocompleteElement.constructor.name);
-                console.log('Tag name:', autocompleteElement.tagName);
+                console.log('📍 Configurando autocomplete manual...');
 
-                // Verificar si el input interno está accesible
-                const inputInside = autocompleteElement.querySelector('input');
-                console.log('Input dentro del web component:', inputInside);
+                // Escuchar input del usuario
+                let debounceTimer;
+                inputElement.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    const query = this.value.trim();
 
-                // Agregar múltiples listeners para debug
-                autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
-                    console.log('🎯 Evento gmp-placeselect disparado');
-                    console.log('Event completo:', event);
-                    console.log('Event.detail:', event.detail);
+                    if (query.length < 3) {
+                        predictionsElement.style.display = 'none';
+                        return;
+                    }
 
-                    const place = event.detail.place;
-                    console.log('Place recibido (antes de fetchFields):', place);
+                    debounceTimer = setTimeout(() => {
+                        getPlacePredictions(query, predictionsElement);
+                    }, 300);
+                });
 
-                    // Usar fetchFields para obtener los datos del lugar
-                    try {
-                        await place.fetchFields({
-                            fields: ['displayName', 'formattedAddress', 'location', 'addressComponents']
-                        });
-
-                        console.log('✅ fetchFields completado exitosamente');
-                        console.log('Place completo (después de fetchFields):', place);
-
-                        processSelectedPlace(place);
-
-                    } catch (error) {
-                        console.error('❌ Error al hacer fetchFields:', error);
+                // Ocultar dropdown al hacer click fuera
+                document.addEventListener('click', function(e) {
+                    if (!inputElement.contains(e.target) && !predictionsElement.contains(e.target)) {
+                        predictionsElement.style.display = 'none';
                     }
                 });
 
-                // Agregar listeners adicionales para debugging
-                autocompleteElement.addEventListener('change', (e) => {
-                    console.log('📝 Evento change en web component:', e);
-                });
+                console.log('✅ Autocomplete manual configurado');
+            });
+        }
 
-                autocompleteElement.addEventListener('input', (e) => {
-                    console.log('⌨️ Evento input en web component:', e);
-                });
+        function getPlacePredictions(query, predictionsElement) {
+            console.log('🔍 Buscando predicciones para:', query);
 
-                // Escuchar directamente en el input si existe
-                if (inputInside) {
-                    inputInside.addEventListener('change', (e) => {
-                        console.log('📝 Evento change en input interno:', e);
-                    });
+            const request = {
+                input: query,
+                componentRestrictions: { country: window.googlePlacesConfig?.country_code || 'ar' },
+                sessionToken: sessionToken
+            };
+
+            autocompleteService.getPlacePredictions(request, function(predictions, status) {
+                if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+                    console.log('⚠️ No se encontraron predicciones:', status);
+                    predictionsElement.style.display = 'none';
+                    return;
                 }
 
-                console.log('✅ Event listeners agregados');
+                console.log('✅ Predicciones recibidas:', predictions.length);
+
+                // Mostrar predicciones
+                displayPredictions(predictions, predictionsElement);
+            });
+        }
+
+        function displayPredictions(predictions, predictionsElement) {
+            predictionsElement.innerHTML = '';
+
+            predictions.forEach(function(prediction) {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 12px; cursor: pointer; border-bottom: 1px solid #eee;';
+                item.textContent = prediction.description;
+
+                item.addEventListener('mouseenter', function() {
+                    this.style.background = '#f5f5f5';
+                });
+
+                item.addEventListener('mouseleave', function() {
+                    this.style.background = 'white';
+                });
+
+                item.addEventListener('click', function() {
+                    console.log('🎯 Predicción seleccionada:', prediction.description);
+                    selectPrediction(prediction, predictionsElement);
+                });
+
+                predictionsElement.appendChild(item);
+            });
+
+            predictionsElement.style.display = 'block';
+        }
+
+        function selectPrediction(prediction, predictionsElement) {
+            // Actualizar input
+            document.getElementById('address-autocomplete-input').value = prediction.description;
+
+            // Ocultar dropdown
+            predictionsElement.style.display = 'none';
+
+            // Obtener detalles del lugar
+            console.log('📍 Obteniendo detalles del lugar con place_id:', prediction.place_id);
+
+            const request = {
+                placeId: prediction.place_id,
+                fields: ['geometry', 'formatted_address', 'address_components', 'name'],
+                sessionToken: sessionToken
+            };
+
+            placesService.getDetails(request, function(place, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    console.log('✅ Detalles del lugar obtenidos:', place);
+
+                    // Crear nuevo session token para la próxima búsqueda
+                    sessionToken = new google.maps.places.AutocompleteSessionToken();
+
+                    // Procesar el lugar seleccionado
+                    processSelectedPlace(place);
+                } else {
+                    console.error('❌ Error al obtener detalles del lugar:', status);
+                }
             });
         }
 
@@ -3088,16 +3158,16 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             console.log('🔍 processSelectedPlace llamado');
             console.log('Place object:', place);
 
-            // Places API (New) usa place.location, no place.geometry.location
-            if (!place.location) {
+            // PlacesService.getDetails() retorna place.geometry.location
+            if (!place.geometry || !place.geometry.location) {
                 console.error('❌ El lugar no tiene información de ubicación');
                 console.log('Propiedades disponibles:', Object.keys(place));
                 return;
             }
 
-            // place.location es un LatLng de la nueva API
-            const lat = place.location.lat();
-            const lng = place.location.lng();
+            // place.geometry.location es un LatLng
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
 
             console.log('📍 Coordenadas obtenidas:', { lat, lng });
             console.log('🗺️ Centrando mapa en:', { lat, lng });
