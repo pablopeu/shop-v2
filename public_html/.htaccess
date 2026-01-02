@@ -9,7 +9,7 @@
 
 # Enable rewrite engine
 RewriteEngine On
-# RewriteBase auto-detectado por Apache (configurado dinámicamente por instalador si es necesario)
+RewriteBase /shopv2/
 
 # Don't redirect existing files (CSS, JS, images, etc.)
 RewriteCond %{REQUEST_FILENAME} -f
