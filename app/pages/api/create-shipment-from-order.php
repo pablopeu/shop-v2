@@ -238,6 +238,7 @@ try {
             'name' => $shipping_address['name'] ?? $order['customer_name'],
             'street' => $street,
             'street_number' => $street_number,
+            'street_extras' => $shipping_address['notes'] ?? '', // Referencias: piso, depto, entre calles
             'city' => $shipping_address['city'] ?? '',
             'state' => $shipping_address['province'] ?? $shipping_address['state'] ?? '',
             'zipcode' => $shipping_address['postal_code'] ?? '',

@@ -35,13 +35,13 @@ if (!isset($_SESSION['checkout_start_time'])) {
     // Already in checkout - check for expiration
     $elapsed = time() - $_SESSION['checkout_start_time'];
     if ($elapsed > 3600) { // 1 hour = 3600 seconds
-        // Checkout expired - clean up and redirect
+        // Checkout expired - clean up checkout session but KEEP cart
         unset($_SESSION['checkout_start_time']);
         unset($_SESSION['checkout_id']);
-        unset($_SESSION['cart']);
-        unset($_SESSION['applied_coupon']);
-        
-        $_SESSION['error'] = 'Tu sesión de checkout ha expirado (1 hora). Por favor, inicia el proceso nuevamente.';
+        // NO borrar $_SESSION['cart'] - el usuario debe poder continuar con su compra
+        // NO borrar $_SESSION['applied_coupon'] - mantener cupón aplicado
+
+        $_SESSION['error'] = 'Tu sesión de checkout ha expirado (1 hora). Por favor, continúa con el pago nuevamente.';
         redirect(url('/carrito?msg=checkout_expired'));
         exit;
     }
@@ -352,6 +352,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $postal_code = sanitize_input($_POST['shipping_postal_code'] ?? '');
         $state = sanitize_input($_POST['shipping_province'] ?? '');
         $country = sanitize_input($_POST['shipping_country'] ?? '');
+        $notes = sanitize_input($_POST['shipping_notes'] ?? ''); // Referencias de entrega
 
         if (empty($address)) {
             $errors[] = 'La dirección es requerida para envío';
@@ -386,7 +387,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 'postal_code' => $postal_code,
                 'state' => $state,
                 'country' => $country,
-                'phone' => $full_phone
+                'phone' => $full_phone,
+                'notes' => $notes // Referencias de entrega (piso, depto, etc.)
             ];
         }
     }
@@ -555,6 +557,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 setcookie('checkout_postal_code', $shipping_address['postal_code'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_state', $shipping_address['state'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_country', $shipping_address['country'], $cookie_expiry, $cookie_path);
+                setcookie('checkout_notes', $shipping_address['notes'] ?? '', $cookie_expiry, $cookie_path);
             }
 
             // Clear cart and coupon immediately after creating order (for all payment methods)
@@ -632,6 +635,7 @@ $saved_city = $_COOKIE['checkout_city'] ?? '';
 $saved_postal_code = $_COOKIE['checkout_postal_code'] ?? '';
 $saved_state = $_COOKIE['checkout_state'] ?? '';
 $saved_country = $_COOKIE['checkout_country'] ?? '';
+$saved_notes = $_COOKIE['checkout_notes'] ?? '';
 
 ?>
 <!DOCTYPE html>
@@ -1748,7 +1752,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <!-- Referencias de entrega (movido después del botón) -->
                                 <div class="form-group">
                                     <label for="shipping_notes">Referencias de entrega (opcional)</label>
-                                    <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
+                                    <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."><?php echo htmlspecialchars($_POST['shipping_notes'] ?? $saved_notes); ?></textarea>
                                 </div>
 
                                 <!-- Cotizaciones de envío -->
