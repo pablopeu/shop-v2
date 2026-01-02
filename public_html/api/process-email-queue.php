@@ -4,7 +4,7 @@
  * Este endpoint puede ser llamado por cron mediante URL
  *
  * Uso en cron:
- * wget -q -O /dev/null "https://peu.net/shopv2/api/process-email-queue.php?secret=YOUR_SECRET"
+ * wget -q -O /dev/null "https://[YOUR-DOMAIN]/[BASE-PATH]/api/process-email-queue.php?secret=YOUR_SECRET"
  */
 
 define('APP_ENTRY_POINT', true);

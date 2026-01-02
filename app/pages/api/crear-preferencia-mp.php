@@ -166,7 +166,7 @@ try {
 
     // URLs de retorno - usar URL absoluta con dominio
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'peu.net';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $base_url = $protocol . '://' . $host . url('');
     $return_url = $base_url . '/gracias?order=' . $order_id . '&token=' . $tracking_token;
 

@@ -31,7 +31,7 @@ $current_users_path = file_exists($users_path_file)
 
 $current_credentials_path = file_exists($credentials_path_file)
     ? trim(file_get_contents($credentials_path_file))
-    : '/home/notification_credentials.json';
+    : dirname(APP_PATH) . '/notification_credentials.json';
 
 if (file_exists($payment_credentials_path_file)) {
     $current_payment_path = trim(file_get_contents($payment_credentials_path_file));

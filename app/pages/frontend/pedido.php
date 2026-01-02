@@ -37,8 +37,10 @@ $all_products = get_all_products(true); // Only active products
 // Helper: Generar URL absoluta completa (con dominio)
 function get_absolute_url($path) {
     global $app_config;
-    $base_url = rtrim($app_config['app_url'] ?? 'https://peu.net', '/');
-    $base_path = rtrim($app_config['base_path'] ?? '/shopv2', '/');
+    // Use current server host if app_url is not configured
+    $default_url = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    $base_url = rtrim($app_config['app_url'] ?? $default_url, '/');
+    $base_path = rtrim($app_config['base_path'] ?? '', '/');
     $path = ltrim($path, '/');
 
     return $base_url . $base_path . '/' . $path;

@@ -46,7 +46,7 @@ if (isset($_POST['process_now'])) {
 $system_info = get_email_queue_system_info();
 
 // Detect paths for cron command
-$site_url = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'peu.net') . url('/api/process-email-queue.php?secret=email_queue_cron_2024');
+$site_url = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . url('/api/process-email-queue.php?secret=email_queue_cron_2024');
 $log_path = dirname(APP_PATH) . '/logs/email-queue.log';
 
 // Generate cron command (usando wget - más compatible con cPanel)
