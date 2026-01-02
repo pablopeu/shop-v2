@@ -505,12 +505,29 @@
         const textDiv = document.getElementById('normalizedAddressText');
         const componentsDiv = document.getElementById('normalizedAddressComponents');
 
-        // Mostrar solo la dirección formateada
+        // Mostrar dirección formateada
         textDiv.textContent = normalized.formatted_address;
 
-        // Ocultar el desglose de componentes (los datos se guardan completos igualmente)
-        componentsDiv.innerHTML = '';
-        componentsDiv.style.display = 'none';
+        // Mostrar barrio y localidad si están disponibles
+        const componentsHTML = [];
+        const comp = normalized.components;
+
+        if (comp.neighborhood) {
+            componentsHTML.push(`<strong>Barrio:</strong> ${comp.neighborhood}`);
+        }
+        if (comp.city) {
+            componentsHTML.push(`<strong>Localidad:</strong> ${comp.city}`);
+        }
+
+        if (componentsHTML.length > 0) {
+            componentsDiv.innerHTML = '<div style="margin-top: 8px; font-size: 13px; color: #555;">' +
+                                      componentsHTML.join(' • ') +
+                                      '</div>';
+            componentsDiv.style.display = 'block';
+        } else {
+            componentsDiv.innerHTML = '';
+            componentsDiv.style.display = 'none';
+        }
 
         displayDiv.style.display = 'block';
     }

@@ -92,13 +92,13 @@
 
 /* Body */
 .address-validation-body {
-    padding: 24px;
+    padding: 20px 24px;
     overflow-y: auto;
     flex: 1;
 }
 
 .validation-instructions {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .validation-instructions p {
@@ -171,11 +171,11 @@ gmp-place-autocomplete input:focus {
 /* Map */
 .address-map {
     width: 100%;
-    height: 300px;
+    height: 220px;
     border-radius: 8px;
     overflow: hidden;
     border: 2px solid #e0e0e0;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 /* Normalized Address Display */
@@ -183,22 +183,22 @@ gmp-place-autocomplete input:focus {
     background: #f0f9ff;
     border: 2px solid #3b82f6;
     border-radius: 8px;
-    padding: 16px;
-    margin-top: 20px;
+    padding: 14px;
+    margin-top: 0;
 }
 
 .normalized-address h4 {
-    margin: 0 0 12px 0;
+    margin: 0 0 10px 0;
     font-size: 15px;
     color: #1e40af;
     font-weight: 600;
 }
 
 .normalized-address-text {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     color: #1e3a8a;
-    margin-bottom: 12px;
+    margin-bottom: 0;
     padding: 10px;
     background: white;
     border-radius: 6px;
