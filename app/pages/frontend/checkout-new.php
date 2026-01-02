@@ -2979,6 +2979,11 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         // Inicializar Address Validator
         window.googlePlacesConfig = <?php echo json_encode($google_places_config); ?>;
 
+        // Inicializar AddressValidator para que loadGoogleMapsAPI funcione
+        if (typeof initAddressValidator === 'function') {
+            initAddressValidator(window.googlePlacesConfig);
+        }
+
         /**
          * Inicialización del sistema de validación de dirección inline
          */
