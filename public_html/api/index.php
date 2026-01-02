@@ -72,6 +72,7 @@ $endpoints_map = [
     // Validación y Carrito
     'validate-coupon' => APP_PATH . '/pages/api/validate-coupon.php',
     'sync-cart' => APP_PATH . '/pages/api/sync-cart.php',
+    'save-address-cookies' => APP_PATH . '/pages/api/save-address-cookies.php',
 
     // Órdenes
     'get-order' => APP_PATH . '/pages/api/get-order.php',
