@@ -3018,12 +3018,17 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
 
                 // Escuchar cuando el usuario selecciona un lugar
                 placeAutocompleteElement.addEventListener('gmp-placeselect', async (event) => {
+                    console.log('🎯 Evento gmp-placeselect disparado');
+                    console.log('Event detail:', event.detail);
+
                     const place = event.detail.place;
                     console.log('Lugar seleccionado:', place);
 
                     // Procesar el lugar seleccionado
                     await processSelectedPlace(place);
                 });
+
+                console.log('✅ Event listener agregado a gmp-place-autocomplete');
             });
         }
 
@@ -3031,15 +3036,32 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
          * Procesar el lugar seleccionado del autocomplete
          */
         async function processSelectedPlace(place) {
-            if (!place.geometry || !place.geometry.location) {
-                console.error('El lugar no tiene información de geometría');
+            console.log('🔍 processSelectedPlace llamado con:', place);
+
+            // El web component de la nueva API retorna place.location directamente
+            // No place.geometry.location como la API antigua
+            let location = null;
+            let lat, lng;
+
+            if (place.location) {
+                // Nueva API: place.location es un objeto LatLng
+                location = place.location;
+                lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+                lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+            } else if (place.geometry && place.geometry.location) {
+                // API antigua (fallback)
+                location = place.geometry.location;
+                lat = location.lat();
+                lng = location.lng();
+            } else {
+                console.error('❌ El lugar no tiene información de ubicación');
+                console.error('Estructura del place:', JSON.stringify(place, null, 2));
                 return;
             }
 
-            // Obtener coordenadas
-            const location = place.geometry.location;
-            const lat = location.lat();
-            const lng = location.lng();
+            console.log('📍 Coordenadas obtenidas:', { lat, lng });
+
+            console.log('🗺️ Centrando mapa en:', { lat, lng });
 
             // Centrar mapa en la ubicación seleccionada
             inlineMap.setCenter({ lat, lng });
@@ -3051,23 +3073,35 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             }
 
             // Crear nuevo marker en la ubicación
+            const markerTitle = place.displayName?.text || place.formattedAddress || place.name || 'Dirección seleccionada';
+            console.log('📍 Creando marker con título:', markerTitle);
+
             inlineMarker = new google.maps.marker.AdvancedMarkerElement({
                 map: inlineMap,
                 position: { lat, lng },
-                title: place.formattedAddress || 'Dirección seleccionada'
+                title: markerTitle
             });
 
-            // Obtener detalles completos del lugar usando la nueva Places API
-            if (place.id) {
+            console.log('✅ Marker creado exitosamente');
+
+            // Intentar obtener addressComponents del place directamente
+            // El web component puede ya tener esta información
+            if (place.addressComponents && place.addressComponents.length > 0) {
+                console.log('📋 Usando addressComponents del place directamente');
+                updateFormWithBasicPlace(place);
+            } else if (place.id) {
+                // Si no tiene addressComponents, obtener detalles completos usando REST API
+                console.log('🔍 Obteniendo detalles completos del lugar via REST API');
                 try {
                     const placeDetails = await getPlaceDetails(place.id);
                     updateFormWithPlaceDetails(placeDetails);
                 } catch (error) {
-                    console.error('Error al obtener detalles del lugar:', error);
+                    console.error('❌ Error al obtener detalles del lugar:', error);
                     // Usar datos básicos del place
                     updateFormWithBasicPlace(place);
                 }
             } else {
+                console.log('⚠️ Place sin ID ni addressComponents, usando datos básicos');
                 updateFormWithBasicPlace(place);
             }
         }
@@ -3137,15 +3171,22 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
          * Actualizar formulario con datos básicos del place
          */
         function updateFormWithBasicPlace(place) {
-            console.log('Usando datos básicos del lugar');
+            console.log('📝 Actualizando formulario con datos básicos del lugar');
 
-            // Actualizar dirección
-            if (place.formattedAddress) {
-                document.getElementById('address-autocomplete-input').value = place.formattedAddress;
+            // Actualizar dirección - la nueva API usa displayName y formattedAddress
+            const addressText = place.formattedAddress ||
+                              (place.displayName?.text || place.displayName) ||
+                              place.name || '';
+
+            console.log('📍 Dirección a usar:', addressText);
+
+            if (addressText) {
+                document.getElementById('address-autocomplete-input').value = addressText;
             }
 
             // Intentar extraer componentes básicos
-            if (place.addressComponents) {
+            if (place.addressComponents && place.addressComponents.length > 0) {
+                console.log('📋 Extrayendo componentes de dirección...');
                 const components = extractAddressComponents(place.addressComponents);
 
                 if (components.locality) {
