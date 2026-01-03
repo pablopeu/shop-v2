@@ -1746,8 +1746,31 @@ function generate_theme($data, $original_config = null) {
             isset($original_config['spacing']['values']) ? ['values' => $original_config['spacing']['values']] : []
         ),
 
-        // Preservar borders del original si existe
-        'borders' => $original_config['borders'] ?? [],
+        // Generar borders basado en configuración actual de componentes
+        'borders' => [
+            'radius' => ($data['card_rounded'] || $data['button_rounded']) ? [
+                'none' => '0',
+                'sm' => '8px',
+                'md' => '12px',
+                'lg' => '16px',
+                'xl' => '24px',
+                '2xl' => '32px',
+                'full' => '9999px'
+            ] : [
+                'none' => '0',
+                'sm' => '0',
+                'md' => '0',
+                'lg' => '0',
+                'xl' => '0',
+                '2xl' => '0',
+                'full' => '0'
+            ],
+            'width' => $original_config['borders']['width'] ?? [
+                'default' => '1px',
+                'thick' => '2px',
+                'bold' => '3px'
+            ]
+        ],
 
         // Preservar effects del original si existe
         'effects' => $original_config['effects'] ?? [],
