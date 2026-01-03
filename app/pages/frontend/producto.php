@@ -313,7 +313,8 @@ write_json($visits_file, $visits_data);
                         ]);
                         ?>
 
-                        <button class="btn-primary-action"
+                        <button id="add-to-cart-btn"
+                                class="btn-primary-action"
                                 data-action="addToCartWithQuantity"
                                 data-product-id="<?php echo $product['id']; ?>"
                                 <?php echo $product['stock'] === 0 ? 'disabled' : ''; ?>>
@@ -1074,6 +1075,37 @@ write_json($visits_file, $visits_data);
                 if (url) window.location.href = url;
             };
             window.goToProduct = _goToProduct;
+
+            // iOS Safari fix: Direct event listener for add to cart button
+            // Safari iOS has issues with event delegation + async functions
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            if (addToCartBtn) {
+                // Click event (desktop and fallback)
+                addToCartBtn.addEventListener('click', async function(e) {
+                    if (this.disabled) return;
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const productId = this.getAttribute('data-product-id');
+                    if (productId) {
+                        await addToCartWithQuantity(productId);
+                    }
+                }, { passive: false });
+
+                // Touchend event for better iOS responsiveness
+                addToCartBtn.addEventListener('touchend', async function(e) {
+                    if (this.disabled) return;
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const productId = this.getAttribute('data-product-id');
+                    if (productId) {
+                        await addToCartWithQuantity(productId);
+                    }
+                }, { passive: false });
+            }
         })();
     </script>
 
