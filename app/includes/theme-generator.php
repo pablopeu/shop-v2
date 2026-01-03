@@ -758,9 +758,14 @@ function generate_theme_css_basic($config) {
     if ($config['components']['cards']['border']) {
         $css .= "    border: var(--border-width) solid var(--color-border);\n";
     }
+
+    // Border radius: siempre especificar (0 o lg)
     if ($config['components']['cards']['rounded']) {
         $css .= "    border-radius: var(--border-radius-lg);\n";
+    } else {
+        $css .= "    border-radius: 0;\n";
     }
+
     if ($config['components']['cards']['shadow'] && $config['components']['cards']['shadow'] !== 'none') {
         $css .= "    box-shadow: var(--shadow-md);\n";
     }
