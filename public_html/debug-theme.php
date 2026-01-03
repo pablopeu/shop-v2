@@ -436,10 +436,15 @@ $config_differences = array_filter($config_differences, function($diff) {
         // Contador de seleccionados
         function updateSelectedCount() {
             const checked = document.querySelectorAll('.diff-checkbox:checked').length;
-            document.getElementById('selected-count').textContent = checked;
+            const selectedCountEl = document.getElementById('selected-count');
+            if (selectedCountEl) {
+                selectedCountEl.textContent = checked;
+            }
 
             const btn = document.getElementById('btn-generate-comments');
-            btn.disabled = checked === 0;
+            if (btn) {
+                btn.disabled = checked === 0;
+            }
         }
 
         // Event listeners para checkboxes
@@ -448,7 +453,9 @@ $config_differences = array_filter($config_differences, function($diff) {
         });
 
         // Generar formulario de comentarios
-        document.getElementById('btn-generate-comments').addEventListener('click', function() {
+        const btnGenerateComments = document.getElementById('btn-generate-comments');
+        if (btnGenerateComments) {
+            btnGenerateComments.addEventListener('click', function() {
             const checkedBoxes = document.querySelectorAll('.diff-checkbox:checked');
             const commentList = document.getElementById('comment-list');
 
@@ -485,10 +492,13 @@ $config_differences = array_filter($config_differences, function($diff) {
 
             // Scroll hacia la sección de comentarios
             document.getElementById('comment-section').scrollIntoView({ behavior: 'smooth' });
-        });
+            });
+        }
 
         // Guardar comentarios al LOG
-        document.getElementById('btn-save-log').addEventListener('click', function() {
+        const btnSaveLog = document.getElementById('btn-save-log');
+        if (btnSaveLog) {
+            btnSaveLog.addEventListener('click', function() {
             const textareas = document.querySelectorAll('.comment-input');
             const comments = [];
 
@@ -514,7 +524,8 @@ $config_differences = array_filter($config_differences, function($diff) {
 
             document.body.appendChild(form);
             form.submit();
-        });
+            });
+        }
 
         // Inicializar contador
         updateSelectedCount();
