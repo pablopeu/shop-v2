@@ -384,8 +384,19 @@ function generate_variables_css($config) {
     // === TIPOGRAFÍA ===
     $css .= "    /* Tipografía */\n";
     $font_family = $config['typography']['font_family'] ?? 'sans-serif';
-    $css .= "    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, {$font_family};\n";
-    $css .= "    --font-family-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, {$font_family};\n";
+
+    // Generar font stack según la familia seleccionada
+    if ($font_family === 'serif') {
+        $font_stack = 'Georgia, "Times New Roman", Times, serif';
+    } elseif ($font_family === 'monospace') {
+        $font_stack = "'Courier New', Courier, Monaco, monospace";
+    } else {
+        // sans-serif (default): usar system fonts
+        $font_stack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+    }
+
+    $css .= "    --font-family: {$font_stack};\n";
+    $css .= "    --font-family-heading: {$font_stack};\n";
     $css .= "    --font-family-mono: 'SF Mono', Monaco, Consolas, monospace;\n\n";
 
     // Font sizes - leer del theme.json o usar defaults
