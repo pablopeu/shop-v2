@@ -320,6 +320,110 @@ function render_orders_table($orders, $filters, $status_labels) {
             </tbody>
             </table>
         </div>
+
+        <!-- Mobile Cards View -->
+        <div class="mobile-cards">
+            <?php if (empty($orders)): ?>
+                <div style="text-align: center; padding: 40px; color: #999;">
+                    No hay órdenes<?php echo $filters['status'] !== 'all' ? ' con este estado' : ''; ?>.
+                </div>
+            <?php else: ?>
+                <?php foreach ($orders as $order): ?>
+                    <?php
+                    // Calculate amounts in ARS and USD
+                    $exchange_rate = $order['exchange_rate'] ?? 1000;
+                    $total = $order['total'];
+                    $currency = $order['currency'];
+
+                    if ($currency === 'USD') {
+                        $total_usd = $total;
+                        $total_ars = $total * $exchange_rate;
+                    } else {
+                        $total_ars = $total;
+                        $total_usd = $total / $exchange_rate;
+                    }
+
+                    $status = $order['status'];
+                    $label = $status_labels[$status]['label'] ?? ucfirst($status);
+                    $color = $status_labels[$status]['color'] ?? '#999';
+                    ?>
+                    <div class="mobile-card">
+                        <div class="mobile-card-header">
+                            <div style="flex: 1;">
+                                <div class="mobile-card-title">
+                                    <input type="checkbox" name="selected_orders[]"
+                                           value="<?php echo htmlspecialchars($order['id']); ?>"
+                                           class="order-checkbox mobile-card-checkbox"
+                                           form="bulkForm"
+                                           data-onchange="updateSelectedCount">
+                                    Orden #<?php echo htmlspecialchars($order['order_number']); ?>
+                                </div>
+                                <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                    <?php echo format_date_with_timezone($order['date']); ?>
+                                </div>
+                            </div>
+                            <span class="status-badge" style="background: <?php echo $color; ?>; margin-left: 10px;">
+                                <?php echo $label; ?>
+                            </span>
+                        </div>
+
+                        <div class="mobile-card-body">
+                            <div class="mobile-card-row">
+                                <span class="mobile-card-label">Cliente:</span>
+                                <span class="mobile-card-value"><?php echo htmlspecialchars($order['customer_name'] ?? 'N/A'); ?></span>
+                            </div>
+                            <div class="mobile-card-row">
+                                <span class="mobile-card-label">Total ARS:</span>
+                                <span class="mobile-card-value"><strong>$<?php echo number_format($total_ars, 2, ',', '.'); ?></strong></span>
+                            </div>
+                            <div class="mobile-card-row">
+                                <span class="mobile-card-label">Total USD:</span>
+                                <span class="mobile-card-value"><strong>U$D <?php echo number_format($total_usd, 2, ',', '.'); ?></strong></span>
+                            </div>
+                            <div class="mobile-card-row">
+                                <span class="mobile-card-label">Pago:</span>
+                                <span class="mobile-card-value">
+                                    <?php
+                                    $payment_icons = [
+                                        'mercadopago' => '💳',
+                                        'arrangement' => '🤝',
+                                        'pickup_payment' => '💵',
+                                        'presencial' => '💵'
+                                    ];
+                                    $icon = $payment_icons[$order['payment_method']] ?? '💵';
+                                    echo $icon . ' ';
+
+                                    if ($order['payment_method'] === 'mercadopago') {
+                                        echo 'Mercadopago';
+                                    } elseif ($order['payment_method'] === 'arrangement') {
+                                        echo 'Arreglo';
+                                    } elseif ($order['payment_method'] === 'pickup_payment') {
+                                        echo 'Al retirar';
+                                    } else {
+                                        echo 'Presencial';
+                                    }
+                                    ?>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mobile-card-actions">
+                            <button type="button" class="btn btn-primary btn-sm"
+                                    data-action="viewOrder"
+                                    data-order-id="<?php echo htmlspecialchars($order['id']); ?>">
+                                👁️ Ver Detalles
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm"
+                                    data-action="showArchiveModal"
+                                    data-order-id="<?php echo htmlspecialchars($order['id']); ?>"
+                                    data-order-number="<?php echo htmlspecialchars($order['order_number']); ?>">
+                                📦 Archivar
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
     </div>
     <?php
 }
