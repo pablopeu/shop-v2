@@ -1831,22 +1831,35 @@ function generate_theme($data, $original_config = null) {
             isset($original_config['typography']['line_heights']) ? ['line_heights' => $original_config['typography']['line_heights']] : []
         ),
 
-        'spacing' => (function() use ($data) {
-            $base_unit = (int)str_replace('px', '', $data['base_unit'] ?? '12px');
+        'spacing' => (function() use ($data, $original_config) {
+            $new_base_unit = $data['base_unit'] ?? '12px';
+            $old_base_unit = $original_config['spacing']['base_unit'] ?? null;
+            $base_unit_changed = ($old_base_unit && $old_base_unit !== $new_base_unit);
+
+            // Si cambió base_unit, regenerar spacing.values
+            if ($base_unit_changed || !isset($original_config['spacing']['values'])) {
+                $base_unit = (int)str_replace('px', '', $new_base_unit);
+                return [
+                    'base_unit' => $new_base_unit,
+                    'scale' => $data['spacing_scale'] ?? 'proportional',
+                    'values' => [
+                        'xs' => (int)($base_unit * 0.5) . 'px',
+                        'sm' => $base_unit . 'px',
+                        'md' => (int)($base_unit * 1.67) . 'px',
+                        'lg' => (int)($base_unit * 2.33) . 'px',
+                        'xl' => (int)($base_unit * 3) . 'px',
+                        '2xl' => (int)($base_unit * 4) . 'px',
+                        '3xl' => (int)($base_unit * 5.33) . 'px',
+                        '4xl' => (int)($base_unit * 6.67) . 'px'
+                    ]
+                ];
+            }
+
+            // Si NO cambió base_unit, preservar spacing.values del original
             return [
-                'base_unit' => $data['base_unit'] ?? '12px',
+                'base_unit' => $new_base_unit,
                 'scale' => $data['spacing_scale'] ?? 'proportional',
-                // Regenerar values desde base_unit (no preservar del original)
-                'values' => [
-                    'xs' => (int)($base_unit * 0.5) . 'px',
-                    'sm' => $base_unit . 'px',
-                    'md' => (int)($base_unit * 1.67) . 'px',
-                    'lg' => (int)($base_unit * 2.33) . 'px',
-                    'xl' => (int)($base_unit * 3) . 'px',
-                    '2xl' => (int)($base_unit * 4) . 'px',
-                    '3xl' => (int)($base_unit * 5.33) . 'px',
-                    '4xl' => (int)($base_unit * 6.67) . 'px'
-                ]
+                'values' => $original_config['spacing']['values']
             ];
         })(),
 
