@@ -115,7 +115,7 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             // Cards
             'card_border' => $edit_config['components']['cards']['border'] ?? false,
             'card_shadow' => $edit_config['features']['shadow_style'] ?? 'subtle',
-            'card_rounded' => ($edit_config['features']['border_style'] ?? 'sharp') === 'rounded',
+            'card_rounded' => $edit_config['components']['cards']['rounded'] ?? false,
             'card_hover' => $edit_config['components']['cards']['hover_effect'] ?? 'glow',
             'card_buttons' => $edit_config['components']['cards']['buttons'] ?? 'show',
             'card_buttons_position' => $edit_config['components']['cards']['buttons_position'] ?? 'center',
@@ -1226,6 +1226,10 @@ $user = get_logged_user();
                                 <label>
                                     <input type="radio" name="spacing_scale" value="geometric" <?php echo ($form_values['spacing_scale'] ?? 'proportional') === 'geometric' ? 'checked' : ''; ?>>
                                     Geométrica
+                                </label>
+                                <label>
+                                    <input type="radio" name="spacing_scale" value="custom" <?php echo ($form_values['spacing_scale'] ?? 'proportional') === 'custom' ? 'checked' : ''; ?>>
+                                    Personalizada
                                 </label>
                             </div>
                             <small class="helper-text">Cómo escalan los espacios (xs, sm, md, lg, xl)</small>
