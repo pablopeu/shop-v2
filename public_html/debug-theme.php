@@ -184,20 +184,20 @@ $config_differences = array_filter($config_differences, function($diff) {
             padding-bottom: 10px;
         }
         .diff-item {
-            margin-bottom: 15px;
-            padding: 15px;
+            margin-bottom: 8px;
+            padding: 10px;
             background: white;
-            border-left: 4px solid #00B7B5;
-            border-radius: 4px;
+            border-left: 3px solid #00B7B5;
+            border-radius: 3px;
             display: grid;
-            grid-template-columns: 40px 1fr;
-            gap: 15px;
+            grid-template-columns: 30px 1fr;
+            gap: 10px;
             align-items: start;
         }
         .diff-checkbox {
-            margin-top: 5px;
-            width: 20px;
-            height: 20px;
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
         }
         .diff-content {
@@ -206,24 +206,24 @@ $config_differences = array_filter($config_differences, function($diff) {
         .setting-path {
             font-weight: bold;
             color: #005461;
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: 5px;
+            font-size: 13px;
         }
         .values-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            font-size: 13px;
+            gap: 8px;
+            font-size: 12px;
         }
         .value-box {
-            padding: 8px;
+            padding: 6px;
             background: #f9f9f9;
-            border-radius: 4px;
+            border-radius: 3px;
         }
         .value-label {
             color: #666;
-            font-size: 11px;
-            margin-bottom: 4px;
+            font-size: 10px;
+            margin-bottom: 3px;
         }
         .value-content {
             font-family: 'Courier New', monospace;
@@ -303,7 +303,7 @@ $config_differences = array_filter($config_differences, function($diff) {
             font-weight: bold;
         }
         .scroll-container {
-            max-height: 600px;
+            max-height: 70vh;
             overflow-y: auto;
             padding-right: 10px;
         }
@@ -398,7 +398,7 @@ $config_differences = array_filter($config_differences, function($diff) {
         </div>
     </div>
 
-    <script>
+    <script nonce="<?= csp_nonce() ?>">
         // Contador de seleccionados
         function updateSelectedCount() {
             const checked = document.querySelectorAll('.diff-checkbox:checked').length;
@@ -492,14 +492,5 @@ $config_differences = array_filter($config_differences, function($diff) {
         // Inicializar contador
         updateSelectedCount();
     </script>
-
-    <div style="margin-top: 40px; padding: 20px; background: #fffbf0; border-radius: 8px; border-left: 4px solid #ffaa00;">
-        <strong>📝 Instrucciones de Uso:</strong><br><br>
-        1. Marca los checkboxes de los settings que quieres comentar<br>
-        2. Click en "Generar Comentarios"<br>
-        3. Escribe tus observaciones sobre cada setting (si funciona, si no se aplica, bugs, etc.)<br>
-        4. Click en "Agregar Comentarios al LOG"<br>
-        5. Los comentarios se guardarán en <code>/app/logs/theme-testing.log</code>
-    </div>
 </body>
 </html>
