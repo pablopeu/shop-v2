@@ -49,22 +49,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_comments'])) {
 
         // Agregar header solo si el archivo es nuevo
         if ($add_header) {
-            $log_entry .= "setting,value,comment\n";
+            $log_entry .= "setting,original value,modified value,comment\n";
+        }
+
+        // Función helper para formatear valores CSV
+        function csv_value($value) {
+            // Convertir a string
+            $str = is_string($value) ? $value : json_encode($value);
+
+            // Escapar comillas dobles
+            $str = str_replace('"', '""', $str);
+
+            // Encerrar en comillas
+            return '"' . $str . '"';
         }
 
         // Agregar cada entrada como línea CSV
         foreach ($comments_data as $item) {
             $setting = $item['setting'] ?? 'Unknown';
-            $value = $item['current'] ?? '';
+            $original = $item['reference'] ?? '';
+            $modified = $item['current'] ?? '';
             $comment = $item['comment'] ?? '';
 
-            // Escapar comillas y encerrar en comillas si hay comas
+            // Formatear valores
+            $setting_csv = csv_value($setting);
+            $original_csv = csv_value($original);
+            $modified_csv = csv_value($modified);
+
+            // Comentario: escapar y encerrar si necesario
             $comment_escaped = str_replace('"', '""', $comment);
             if (strpos($comment, ',') !== false || strpos($comment, '"') !== false || strpos($comment, "\n") !== false) {
                 $comment_escaped = '"' . $comment_escaped . '"';
             }
 
-            $log_entry .= "{$setting},{$value},{$comment_escaped}\n";
+            $log_entry .= "{$setting_csv},{$original_csv},{$modified_csv},{$comment_escaped}\n";
         }
 
         // Guardar log
