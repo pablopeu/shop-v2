@@ -529,7 +529,7 @@ write_json($visits_file, $visits_data);
         }
 
         // Add to cart with selected quantity
-        function addToCartWithQuantity(productId) {
+        async function addToCartWithQuantity(productId) {
             const input = document.getElementById('quantity-input');
             const quantity = parseInt(input.value);
 
@@ -550,7 +550,10 @@ write_json($visits_file, $visits_data);
 
             ShopUtils.saveCart(cart);
             updateCartCount();
-            ShopCart.renderCartPanel();
+
+            // openCartPanel already calls renderCartPanel internally, so just open
+            // Wait for render to complete before opening
+            await ShopCart.renderCartPanel();
             ShopCart.openCartPanel();
 
             // Reset quantity to 1 after adding to cart
