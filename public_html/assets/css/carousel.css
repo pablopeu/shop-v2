@@ -14,7 +14,7 @@
 
 /* Alignment options */
 .carousel-v2-wrapper[data-alignment="center"] {
-    max-width: 1200px;
+    max-width: var(--container-width, 1200px);
     margin-left: auto;
     margin-right: auto;
 }

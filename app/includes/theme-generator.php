@@ -1831,14 +1831,24 @@ function generate_theme($data, $original_config = null) {
             isset($original_config['typography']['line_heights']) ? ['line_heights' => $original_config['typography']['line_heights']] : []
         ),
 
-        'spacing' => array_merge(
-            [
+        'spacing' => (function() use ($data) {
+            $base_unit = (int)str_replace('px', '', $data['base_unit'] ?? '12px');
+            return [
                 'base_unit' => $data['base_unit'] ?? '12px',
-                'scale' => $data['spacing_scale'] ?? 'proportional'
-            ],
-            // Preservar valores custom del original si existen
-            isset($original_config['spacing']['values']) ? ['values' => $original_config['spacing']['values']] : []
-        ),
+                'scale' => $data['spacing_scale'] ?? 'proportional',
+                // Regenerar values desde base_unit (no preservar del original)
+                'values' => [
+                    'xs' => (int)($base_unit * 0.5) . 'px',
+                    'sm' => $base_unit . 'px',
+                    'md' => (int)($base_unit * 1.67) . 'px',
+                    'lg' => (int)($base_unit * 2.33) . 'px',
+                    'xl' => (int)($base_unit * 3) . 'px',
+                    '2xl' => (int)($base_unit * 4) . 'px',
+                    '3xl' => (int)($base_unit * 5.33) . 'px',
+                    '4xl' => (int)($base_unit * 6.67) . 'px'
+                ]
+            ];
+        })(),
 
         // Generar borders basado en configuración actual de componentes
         'borders' => [
