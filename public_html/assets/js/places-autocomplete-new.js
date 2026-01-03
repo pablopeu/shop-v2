@@ -365,6 +365,19 @@
             if (quoteBtn && quoteBtn.disabled) {
                 quoteBtn.disabled = false;
                 quoteBtn.title = '';
+
+                // Agregar animación para llamar la atención del usuario
+                quoteBtn.classList.add('pulse-animation');
+
+                // Remover animación después de 5 segundos o cuando el usuario haga click
+                const removeAnimation = () => {
+                    quoteBtn.classList.remove('pulse-animation');
+                    quoteBtn.removeEventListener('click', removeAnimation);
+                };
+
+                setTimeout(removeAnimation, 5000);
+                quoteBtn.addEventListener('click', removeAnimation, { once: true });
+
                 console.log('✅ Botón de cotización habilitado - dirección validada');
             }
 

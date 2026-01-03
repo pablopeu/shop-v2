@@ -35,13 +35,13 @@ if (!isset($_SESSION['checkout_start_time'])) {
     // Already in checkout - check for expiration
     $elapsed = time() - $_SESSION['checkout_start_time'];
     if ($elapsed > 3600) { // 1 hour = 3600 seconds
-        // Checkout expired - clean up and redirect
+        // Checkout expired - clean up checkout session but KEEP cart
         unset($_SESSION['checkout_start_time']);
         unset($_SESSION['checkout_id']);
-        unset($_SESSION['cart']);
-        unset($_SESSION['applied_coupon']);
-        
-        $_SESSION['error'] = 'Tu sesión de checkout ha expirado (1 hora). Por favor, inicia el proceso nuevamente.';
+        // NO borrar $_SESSION['cart'] - el usuario debe poder continuar con su compra
+        // NO borrar $_SESSION['applied_coupon'] - mantener cupón aplicado
+
+        $_SESSION['error'] = 'Tu sesión de checkout ha expirado (1 hora). Por favor, continúa con el pago nuevamente.';
         redirect(url('/carrito?msg=checkout_expired'));
         exit;
     }
@@ -352,6 +352,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $postal_code = sanitize_input($_POST['shipping_postal_code'] ?? '');
         $state = sanitize_input($_POST['shipping_province'] ?? '');
         $country = sanitize_input($_POST['shipping_country'] ?? '');
+        $notes = sanitize_input($_POST['shipping_notes'] ?? ''); // Referencias de entrega
 
         if (empty($address)) {
             $errors[] = 'La dirección es requerida para envío';
@@ -386,7 +387,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 'postal_code' => $postal_code,
                 'state' => $state,
                 'country' => $country,
-                'phone' => $full_phone
+                'phone' => $full_phone,
+                'notes' => $notes // Referencias de entrega (piso, depto, etc.)
             ];
         }
     }
@@ -555,6 +557,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 setcookie('checkout_postal_code', $shipping_address['postal_code'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_state', $shipping_address['state'], $cookie_expiry, $cookie_path);
                 setcookie('checkout_country', $shipping_address['country'], $cookie_expiry, $cookie_path);
+                setcookie('checkout_notes', $shipping_address['notes'] ?? '', $cookie_expiry, $cookie_path);
             }
 
             // Clear cart and coupon immediately after creating order (for all payment methods)
@@ -632,6 +635,7 @@ $saved_city = $_COOKIE['checkout_city'] ?? '';
 $saved_postal_code = $_COOKIE['checkout_postal_code'] ?? '';
 $saved_state = $_COOKIE['checkout_state'] ?? '';
 $saved_country = $_COOKIE['checkout_country'] ?? '';
+$saved_notes = $_COOKIE['checkout_notes'] ?? '';
 
 ?>
 <!DOCTYPE html>
@@ -1721,13 +1725,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 </div>
                                 <?php endif; ?>
 
-                                <div class="form-group">
-                                    <label for="shipping_document">DNI / CUIT *</label>
-                                    <input type="text" id="shipping_document" name="shipping_document" placeholder="Ej: 12345678 o 20-12345678-9"
-                                           value="<?php echo htmlspecialchars($_POST['shipping_document'] ?? $_COOKIE['checkout_document'] ?? ''); ?>">
-                                    <small>Requerido por la empresa de envío</small>
-                                </div>
-
                                 <!-- Campos ocultos que se autocompletan con Google Places -->
                                 <input type="hidden" id="shipping_address" name="shipping_address" value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
                                 <input type="hidden" id="shipping_postal_code" name="shipping_postal_code" value="<?php echo htmlspecialchars($_POST['shipping_postal_code'] ?? $saved_postal_code); ?>">
@@ -1735,7 +1732,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <input type="hidden" id="shipping_province" name="shipping_province" value="<?php echo htmlspecialchars($_POST['shipping_province'] ?? $saved_state ?? ''); ?>">
                                 <input type="hidden" id="shipping_country" name="shipping_country" value="AR">
 
-                                <!-- Botón para cotizar (movido antes de referencias) -->
+                                <!-- Botón para cotizar -->
                                 <div class="form-group">
                                     <button type="button" class="btn btn-secondary btn-block" id="get-shipping-quote"
                                         <?php if ($google_places_config['enabled'] && $google_places_config['require_confirmation']): ?>
@@ -1743,12 +1740,6 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                         <?php endif; ?>>
                                         📦 Calcular Costo de Envío
                                     </button>
-                                </div>
-
-                                <!-- Referencias de entrega (movido después del botón) -->
-                                <div class="form-group">
-                                    <label for="shipping_notes">Referencias de entrega (opcional)</label>
-                                    <textarea id="shipping_notes" name="shipping_notes" rows="2" placeholder="Piso, departamento, entre calles..."></textarea>
                                 </div>
 
                                 <!-- Cotizaciones de envío -->
@@ -1820,13 +1811,39 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                         </div>
                     </div>
 
-                    <!-- PASO 3: Pago -->
-                    <div class="step-section locked" id="step-3">
+                    <!-- PASO 3: Documento y Datos Adicionales (solo para envíos) -->
+                    <div class="step-section locked shipping-only" id="step-3">
                         <div class="step-header" data-action="toggleStep" data-step="3">
                             <div class="step-number-circle">3</div>
                             <div class="step-header-content">
-                                <h3 class="step-title">💳 Método de Pago</h3>
+                                <h3 class="step-title">📝 Datos de Entrega</h3>
                                 <p class="step-subtitle" id="step-3-summary"></p>
+                            </div>
+                            <span class="step-indicator-icon">▼</span>
+                        </div>
+                        <div class="step-content">
+                            <div class="form-group">
+                                <label for="shipping_document">DNI / CUIT *</label>
+                                <input type="text" id="shipping_document" name="shipping_document" placeholder="Ej: 12345678 o 20-12345678-9"
+                                       value="<?php echo htmlspecialchars($_POST['shipping_document'] ?? $_COOKIE['checkout_document'] ?? ''); ?>">
+                                <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">Este dato es requerido por la empresa de logística para realizar el envío</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shipping_notes">Datos adicionales</label>
+                                <textarea id="shipping_notes" name="shipping_notes" rows="3" placeholder="Piso, departamento, timbre, entre calles, horario preferido de entrega..."><?php echo htmlspecialchars($_POST['shipping_notes'] ?? $saved_notes); ?></textarea>
+                                <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">Información útil para facilitar la entrega (por ej: piso 3, depto B, portero eléctrico código 123)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASO 4: Pago -->
+                    <div class="step-section locked" id="step-4">
+                        <div class="step-header" data-action="toggleStep" data-step="4">
+                            <div class="step-number-circle">4</div>
+                            <div class="step-header-content">
+                                <h3 class="step-title">💳 Método de Pago</h3>
+                                <p class="step-subtitle" id="step-4-summary"></p>
                             </div>
                             <span class="step-indicator-icon">▼</span>
                         </div>
@@ -1866,10 +1883,10 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                         </div>
                     </div>
 
-                    <!-- PASO 4: Confirmar -->
-                    <div class="step-section locked" id="step-4">
-                        <div class="step-header" data-action="toggleStep" data-step="4">
-                            <div class="step-number-circle">4</div>
+                    <!-- PASO 5: Confirmar -->
+                    <div class="step-section locked" id="step-5">
+                        <div class="step-header" data-action="toggleStep" data-step="5">
+                            <div class="step-number-circle">5</div>
                             <div class="step-header-content">
                                 <h3 class="step-title">✅ Confirmar Pedido</h3>
                                 <p class="step-subtitle">Revisa tu información antes de confirmar</p>
@@ -1883,7 +1900,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                                 <p><strong>Pago:</strong> <span id="confirm-payment"></span></p>
                             </div>
 
-                            <!-- Botón para mobile al final del paso 4 -->
+                            <!-- Botón para mobile al final del paso 5 -->
                             <button type="button" id="final-buy-button-mobile" class="btn btn-primary btn-block hidden mt-lg" data-action="submitOrder" disabled>
                                 🛒 Confirmar Pedido
                             </button>
@@ -2036,6 +2053,19 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.7; transform: scale(1.05); }
     }
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+    }
+    .pulse-animation {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
     </style>
 
     <script nonce="<?= csp_nonce() ?>">
@@ -2061,7 +2091,8 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 let message = '';
                 if (stepNumber === 2) message = 'Completá tus datos personales primero';
                 else if (stepNumber === 3) message = 'Seleccioná el método de entrega primero';
-                else if (stepNumber === 4) message = 'Seleccioná el método de pago primero';
+                else if (stepNumber === 4) message = 'Completá los datos de entrega primero';
+                else if (stepNumber === 5) message = 'Seleccioná el método de pago primero';
 
                 tooltip.textContent = message;
                 header.classList.add('relative');
@@ -2115,7 +2146,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             completedSteps.delete(stepNumber);
 
             // Lock subsequent steps
-            for (let i = stepNumber + 1; i <= 4; i++) {
+            for (let i = stepNumber + 1; i <= 5; i++) {
                 const nextStep = document.getElementById(`step-${i}`);
                 if (nextStep) {
                     nextStep.classList.add('locked');
@@ -2130,7 +2161,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         function updateBuyButton() {
             const button = document.getElementById('final-buy-button');
             const buttonMobile = document.getElementById('final-buy-button-mobile');
-            if (completedSteps.size === 4) {
+            if (completedSteps.size === 5) {
                 button.disabled = false;
                 if (buttonMobile) buttonMobile.disabled = false;
             } else {
@@ -2189,6 +2220,8 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                 document.getElementById('step-2-summary').textContent = '🏪 Retiro en persona';
                 markStepCompleted(2);
                 unlockNextStep(2);
+                // Trigger step 3 validation (will auto-complete for pickup)
+                setTimeout(() => validateStep3(), 100);
             } else if (method === 'home_delivery' || method === 'pickup_point') {
                 // Asegurar que el paso permanezca abierto para mostrar campos de envío
                 if (!step2.classList.contains('active')) {
@@ -2218,6 +2251,8 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
                         document.getElementById('step-2-summary').textContent = `${icon} Envío (${days} días)`;
                         markStepCompleted(2);
                         unlockNextStep(2);
+                        // Trigger step 3 validation (will check document field)
+                        setTimeout(() => validateStep3(), 100);
                     }
                 } else {
                     // Envío seleccionado pero sin cotización
@@ -2243,17 +2278,56 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
         // Initial validation for delivery method (shows shipping fields if saved method is 'shipping')
         validateStep2();
 
-        // Step 3: Payment validation
-        document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
-            radio.addEventListener('change', validateStep3);
-        });
+        // Step 3: Document validation (for shipping orders only)
+        const documentInput = document.getElementById('shipping_document');
+        if (documentInput) {
+            documentInput.addEventListener('blur', validateStep3);
+            documentInput.addEventListener('input', validateStep3);
+        }
 
         function validateStep3() {
+            const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked')?.value;
+
+            // Si es pickup, saltar este paso (no mostrar campos de documento)
+            if (deliveryMethod === 'pickup') {
+                markStepCompleted(3);
+                unlockNextStep(3);
+                return;
+            }
+
+            const docValue = document.getElementById('shipping_document')?.value.trim() || '';
+
+            // Validar que el documento esté completo (mínimo 7 dígitos)
+            if (docValue.length >= 7) {
+                document.getElementById('step-3-summary').textContent = '✅ Datos completados';
+                markStepCompleted(3);
+                unlockNextStep(3);
+            } else {
+                document.getElementById('step-3-summary').textContent = '';
+                markStepIncomplete(3);
+            }
+        }
+
+        // Initial validation for document (auto-complete if already filled from cookies)
+        // This runs after step 2 is unlocked and step 3 becomes available
+        setTimeout(() => {
+            const step3 = document.getElementById('step-3');
+            if (step3 && !step3.classList.contains('locked')) {
+                validateStep3();
+            }
+        }, 500);
+
+        // Step 4: Payment validation
+        document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+            radio.addEventListener('change', validateStep4);
+        });
+
+        function validateStep4() {
             const methodElement = document.querySelector('input[name="payment_method"]:checked');
 
             // Verificar que haya un método seleccionado
             if (!methodElement) {
-                markStepIncomplete(3);
+                markStepIncomplete(4);
                 return;
             }
 
@@ -2263,9 +2337,9 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             else if (method === 'pickup_payment') methodText = '💵 Pago al retirar';
             else if (method === 'mercadopago') methodText = '💳 Mercadopago';
 
-            document.getElementById('step-3-summary').textContent = methodText;
-            markStepCompleted(3);
-            unlockNextStep(3);
+            document.getElementById('step-4-summary').textContent = methodText;
+            markStepCompleted(4);
+            unlockNextStep(4);
             updateConfirmationSummary();
         }
 
@@ -2283,7 +2357,7 @@ $saved_country = $_COOKIE['checkout_country'] ?? '';
             else if (payment === 'mercadopago') paymentText = 'Mercadopago';
             document.getElementById('confirm-payment').textContent = paymentText;
 
-            markStepCompleted(4);
+            markStepCompleted(5);
         }
 
         // Current selected currency

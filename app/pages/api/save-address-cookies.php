@@ -46,6 +46,7 @@ $postal_code = sanitize_input($data['postal_code']);
 $city = sanitize_input($data['city'] ?? '');
 $province = sanitize_input($data['province'] ?? '');
 $country = sanitize_input($data['country'] ?? 'AR');
+$notes = sanitize_input($data['notes'] ?? '');
 
 // Configuración de cookies (1 año)
 $cookie_expiry = time() + (365 * 24 * 60 * 60);
@@ -57,6 +58,7 @@ setcookie('checkout_postal_code', $postal_code, $cookie_expiry, $cookie_path);
 setcookie('checkout_city', $city, $cookie_expiry, $cookie_path);
 setcookie('checkout_state', $province, $cookie_expiry, $cookie_path);
 setcookie('checkout_country', $country, $cookie_expiry, $cookie_path);
+setcookie('checkout_notes', $notes, $cookie_expiry, $cookie_path);
 
 echo json_encode([
     'success' => true,
