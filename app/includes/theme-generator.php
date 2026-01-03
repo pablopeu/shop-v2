@@ -764,16 +764,32 @@ function generate_theme_css_basic($config) {
     if ($config['components']['cards']['shadow'] && $config['components']['cards']['shadow'] !== 'none') {
         $css .= "    box-shadow: var(--shadow-md);\n";
     }
-    $css .= "    background: var(--color-bg);\n";
+
+    // Background: glassmorphism o sólido
+    if ($config['components']['cards']['glassmorphism'] ?? false) {
+        $css .= "    background: var(--glass-bg);\n";
+        $css .= "    backdrop-filter: blur(var(--blur-md));\n";
+        $css .= "    border: 1px solid var(--glass-border);\n";
+    } else {
+        $css .= "    background: var(--color-bg);\n";
+    }
+
     $css .= "    transition: var(--transition-base);\n";
     $css .= "}\n\n";
 
     // Card hover effect
     $hover_effect = $config['components']['cards']['hover_effect'] ?? 'glow';
+    $has_3d = $config['features']['transform_3d'] ?? false;
+    $has_glassmorphism = $config['components']['cards']['glassmorphism'] ?? false;
+
     $css .= ".product-card:hover {\n";
 
     if ($hover_effect === 'lift') {
-        $css .= "    transform: translateY(-8px);\n";
+        if ($has_3d) {
+            $css .= "    transform: var(--transform-3d-lift);\n";
+        } else {
+            $css .= "    transform: translateY(-8px);\n";
+        }
         if ($config['components']['cards']['shadow'] && $config['components']['cards']['shadow'] !== 'none') {
             $css .= "    box-shadow: var(--shadow-lg);\n";
         }
@@ -784,10 +800,19 @@ function generate_theme_css_basic($config) {
             $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);\n";
         }
     } elseif ($hover_effect === 'lift-3d') {
-        $css .= "    transform: translateY(-8px) scale(1.02);\n";
+        if ($has_3d) {
+            $css .= "    transform: var(--transform-3d-lift) scale(1.02);\n";
+        } else {
+            $css .= "    transform: translateY(-8px) scale(1.02);\n";
+        }
         if ($config['components']['cards']['shadow'] && $config['components']['cards']['shadow'] !== 'none') {
             $css .= "    box-shadow: var(--shadow-xl);\n";
         }
+    }
+
+    // Glassmorphism hover: intensificar efecto
+    if ($has_glassmorphism) {
+        $css .= "    background: var(--gradient-glass-hover, rgba(255, 255, 255, 0.85));\n";
     }
 
     $css .= "}\n\n";
@@ -883,10 +908,20 @@ function generate_theme_css_basic($config) {
     }
 
     // Estilos específicos según el tipo (solid/outline)
+    $has_gradient = $config['features']['gradient_effects'] ?? false;
+    $has_3d_transform = $config['components']['buttons']['transform'] ?? false;
+
     if ($btn_style === 'solid') {
         // Estilo sólido
         $css .= ".btn-primary, .btn-add-cart {\n";
-        $css .= "    background: var(--color-primary);\n";
+
+        // Background: gradient o color sólido
+        if ($has_gradient) {
+            $css .= "    background: var(--gradient-primary);\n";
+        } else {
+            $css .= "    background: var(--color-primary);\n";
+        }
+
         $css .= "    color: var(--color-white);\n";
         $css .= "    border: none;\n";
         if ($btn_shadow) {
@@ -897,24 +932,45 @@ function generate_theme_css_basic($config) {
         $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
         // Aplicar efecto hover según configuración
         if ($btn_hover === 'lift') {
-            $css .= "    transform: translateY(-2px);\n";
-            $css .= "    background: var(--color-primary-dark);\n";
+            // Transform: 3D si está activado, normal si no
+            if ($has_3d_transform) {
+                $css .= "    transform: var(--transform-3d-lift);\n";
+            } else {
+                $css .= "    transform: translateY(-2px);\n";
+            }
+
+            // Background: mantener gradient si está activo, sino oscurecer
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-primary-dark);\n";
+            }
+
             if ($btn_shadow) {
                 $css .= "    box-shadow: var(--shadow-lg);\n";
             }
         } elseif ($btn_hover === 'glow') {
-            $css .= "    background: var(--color-primary-dark);\n";
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-primary-dark);\n";
+            }
             $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.3);\n";
         } elseif ($btn_hover === 'darken') {
-            $css .= "    background: var(--color-primary-dark);\n";
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-primary-dark);\n";
+            }
             $css .= "    opacity: 0.9;\n";
         } elseif ($btn_hover === 'none') {
-            $css .= "    background: var(--color-primary);\n";
+            // No hacer nada
         }
         $css .= "}\n\n";
 
         $css .= ".btn-secondary {\n";
-        $css .= "    background: var(--color-secondary);\n";
+
+        // Background: gradient o color sólido
+        if ($has_gradient) {
+            $css .= "    background: var(--gradient-secondary);\n";
+        } else {
+            $css .= "    background: var(--color-secondary);\n";
+        }
+
         $css .= "    color: var(--color-white);\n";
         $css .= "    border: none;\n";
         if ($btn_shadow) {
@@ -925,19 +981,33 @@ function generate_theme_css_basic($config) {
         $css .= ".btn-secondary:hover {\n";
         // Aplicar efecto hover según configuración
         if ($btn_hover === 'lift') {
-            $css .= "    transform: translateY(-2px);\n";
-            $css .= "    background: var(--color-secondary-dark);\n";
+            // Transform: 3D si está activado, normal si no
+            if ($has_3d_transform) {
+                $css .= "    transform: var(--transform-3d-lift);\n";
+            } else {
+                $css .= "    transform: translateY(-2px);\n";
+            }
+
+            // Background: mantener gradient si está activo, sino oscurecer
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-secondary-dark);\n";
+            }
+
             if ($btn_shadow) {
                 $css .= "    box-shadow: var(--shadow-lg);\n";
             }
         } elseif ($btn_hover === 'glow') {
-            $css .= "    background: var(--color-secondary-dark);\n";
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-secondary-dark);\n";
+            }
             $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-secondary-rgb), 0.3);\n";
         } elseif ($btn_hover === 'darken') {
-            $css .= "    background: var(--color-secondary-dark);\n";
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-secondary-dark);\n";
+            }
             $css .= "    opacity: 0.9;\n";
         } elseif ($btn_hover === 'none') {
-            $css .= "    background: var(--color-secondary);\n";
+            // No hacer nada
         }
         $css .= "}\n\n";
     } elseif ($btn_style === 'outline') {
