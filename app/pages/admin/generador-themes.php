@@ -905,15 +905,15 @@ $user = get_logged_user();
                             <label>Familia de Fuente</label>
                             <div class="radio-group">
                                 <label>
-                                    <input type="radio" name="font_family" value="sans-serif" checked>
+                                    <input type="radio" name="font_family" value="sans-serif" <?php echo ($form_values['font_family'] ?? 'sans-serif') === 'sans-serif' ? 'checked' : ''; ?>>
                                     Sans-serif
                                 </label>
                                 <label>
-                                    <input type="radio" name="font_family" value="serif">
+                                    <input type="radio" name="font_family" value="serif" <?php echo ($form_values['font_family'] ?? '') === 'serif' ? 'checked' : ''; ?>>
                                     Serif
                                 </label>
                                 <label>
-                                    <input type="radio" name="font_family" value="monospace">
+                                    <input type="radio" name="font_family" value="monospace" <?php echo ($form_values['font_family'] ?? '') === 'monospace' ? 'checked' : ''; ?>>
                                     Monospace
                                 </label>
                             </div>
@@ -922,19 +922,19 @@ $user = get_logged_user();
                         <div class="form-group">
                             <label for="font_size">Tamaño Base</label>
                             <select name="font_size" id="font_size">
-                                <option value="14px">14px</option>
-                                <option value="16px" selected>16px</option>
-                                <option value="18px">18px</option>
+                                <option value="14px" <?php echo ($form_values['font_size'] ?? '16px') === '14px' ? 'selected' : ''; ?>>14px</option>
+                                <option value="16px" <?php echo ($form_values['font_size'] ?? '16px') === '16px' ? 'selected' : ''; ?>>16px</option>
+                                <option value="18px" <?php echo ($form_values['font_size'] ?? '16px') === '18px' ? 'selected' : ''; ?>>18px</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="line_height">Altura de Línea</label>
                             <select name="line_height" id="line_height">
-                                <option value="1.4">1.4</option>
-                                <option value="1.5" selected>1.5</option>
-                                <option value="1.6">1.6</option>
-                                <option value="1.8">1.8</option>
+                                <option value="1.4" <?php echo ($form_values['line_height'] ?? '1.5') === '1.4' ? 'selected' : ''; ?>>1.4</option>
+                                <option value="1.5" <?php echo ($form_values['line_height'] ?? '1.5') === '1.5' ? 'selected' : ''; ?>>1.5</option>
+                                <option value="1.6" <?php echo ($form_values['line_height'] ?? '1.5') === '1.6' ? 'selected' : ''; ?>>1.6</option>
+                                <option value="1.8" <?php echo ($form_values['line_height'] ?? '1.5') === '1.8' ? 'selected' : ''; ?>>1.8</option>
                             </select>
                         </div>
                     </div>

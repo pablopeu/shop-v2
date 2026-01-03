@@ -30,7 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_comments'])) {
     $comments_data = json_decode($_POST['comments_data'] ?? '[]', true);
 
     if (!empty($comments_data)) {
-        $log_file = APP_PATH . '/logs/theme-testing.log';
+        // Log en /logs (raíz del proyecto, no en /app/logs)
+        $project_root = dirname(APP_PATH);
+        $log_file = $project_root . '/logs/theme-testing.log';
         $log_dir = dirname($log_file);
 
         // Crear directorio de logs si no existe
@@ -330,7 +332,7 @@ $config_differences = array_filter($config_differences, function($diff) {
 
     <?php if (isset($save_success)): ?>
         <div class="success-message">
-            ✅ Comentarios guardados exitosamente en: <code><?php echo APP_PATH . '/logs/theme-testing.log'; ?></code>
+            ✅ Comentarios guardados exitosamente en: <code>/logs/theme-testing.log</code>
         </div>
     <?php endif; ?>
 
