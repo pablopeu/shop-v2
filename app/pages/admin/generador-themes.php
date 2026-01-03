@@ -1316,19 +1316,19 @@ $user = get_logged_user();
                         <label>Sombreado</label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="card_shadow" value="none">
+                                <input type="radio" name="card_shadow" value="none" <?php echo ($form_values['card_shadow'] ?? 'subtle') === 'none' ? 'checked' : ''; ?>>
                                 Sin sombra
                             </label>
                             <label>
-                                <input type="radio" name="card_shadow" value="subtle" checked>
+                                <input type="radio" name="card_shadow" value="subtle" <?php echo ($form_values['card_shadow'] ?? 'subtle') === 'subtle' ? 'checked' : ''; ?>>
                                 Sutil
                             </label>
                             <label>
-                                <input type="radio" name="card_shadow" value="medium">
+                                <input type="radio" name="card_shadow" value="medium" <?php echo ($form_values['card_shadow'] ?? 'subtle') === 'medium' ? 'checked' : ''; ?>>
                                 Medio
                             </label>
                             <label>
-                                <input type="radio" name="card_shadow" value="deep">
+                                <input type="radio" name="card_shadow" value="deep" <?php echo ($form_values['card_shadow'] ?? 'subtle') === 'deep' ? 'checked' : ''; ?>>
                                 Profundo
                             </label>
                         </div>
@@ -1338,19 +1338,19 @@ $user = get_logged_user();
                         <label>Efecto Hover</label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="card_hover" value="none">
+                                <input type="radio" name="card_hover" value="none" <?php echo ($form_values['card_hover'] ?? 'glow') === 'none' ? 'checked' : ''; ?>>
                                 Sin efecto
                             </label>
                             <label>
-                                <input type="radio" name="card_hover" value="lift">
+                                <input type="radio" name="card_hover" value="lift" <?php echo ($form_values['card_hover'] ?? 'glow') === 'lift' ? 'checked' : ''; ?>>
                                 Elevación
                             </label>
                             <label>
-                                <input type="radio" name="card_hover" value="glow" checked>
+                                <input type="radio" name="card_hover" value="glow" <?php echo ($form_values['card_hover'] ?? 'glow') === 'glow' ? 'checked' : ''; ?>>
                                 Brillo
                             </label>
                             <label>
-                                <input type="radio" name="card_hover" value="lift-3d">
+                                <input type="radio" name="card_hover" value="lift-3d" <?php echo ($form_values['card_hover'] ?? 'glow') === 'lift-3d' ? 'checked' : ''; ?>>
                                 Elevación 3D
                             </label>
                         </div>

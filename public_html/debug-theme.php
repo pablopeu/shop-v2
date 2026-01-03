@@ -150,10 +150,10 @@ function array_diff_recursive($array1, $array2, $path = '', $ignore_keys = []) {
     return $differences;
 }
 
-// Comparar configuraciones (ignorando name, slug, preview_image)
+// Comparar configuraciones (ignorando name, slug, preview_image, updated_at)
 $config_differences = [];
 if (!empty($theme_json_content) && !empty($reference_json)) {
-    $ignore_keys = ['name', 'slug', 'preview_image'];
+    $ignore_keys = ['name', 'slug', 'preview_image', 'updated_at'];
     $config_differences = array_diff_recursive($theme_json_content, $reference_json, '', $ignore_keys);
 }
 
@@ -493,21 +493,14 @@ $config_differences = array_filter($config_differences, function($diff) {
             const comments = [];
 
             textareas.forEach(textarea => {
-                const comment = textarea.value.trim();
-                if (comment) {
-                    comments.push({
-                        setting: textarea.dataset.setting,
-                        current: textarea.dataset.current,
-                        reference: textarea.dataset.reference,
-                        comment: comment
-                    });
-                }
+                // Permitir comentarios vacíos
+                comments.push({
+                    setting: textarea.dataset.setting,
+                    current: textarea.dataset.current,
+                    reference: textarea.dataset.reference,
+                    comment: textarea.value.trim()
+                });
             });
-
-            if (comments.length === 0) {
-                alert('Por favor agrega al menos un comentario');
-                return;
-            }
 
             // Crear formulario y enviarlo
             const form = document.createElement('form');
