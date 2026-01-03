@@ -1367,7 +1367,7 @@ $user = get_logged_user();
                                 Mostrar borde
                             </label>
                             <label>
-                                <input type="checkbox" name="card_rounded">
+                                <input type="checkbox" name="card_rounded" <?php echo ($form_values['card_rounded'] ?? false) ? 'checked' : ''; ?>>
                                 Bordes redondeados
                             </label>
                         </div>
@@ -2405,9 +2405,9 @@ $user = get_logged_user();
                     const cardShadow = config.features?.shadow_style || 'subtle';
                     document.querySelector(`[name="card_shadow"][value="${cardShadow}"]`)?.click();
 
-                    // Rounded viene de features.border_style
+                    // Rounded viene de components.cards.rounded
                     const cardRounded = document.querySelector('[name="card_rounded"]');
-                    if (cardRounded) cardRounded.checked = (config.features?.border_style === 'rounded');
+                    if (cardRounded) cardRounded.checked = (config.components?.cards?.rounded || false);
 
                     const cardHover = config.components?.cards?.hover_effect || 'glow';
                     document.querySelector(`[name="card_hover"][value="${cardHover}"]`)?.click();
