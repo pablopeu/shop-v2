@@ -48,51 +48,62 @@ export function viewOrder(orderId) {
 
     let html = `
         <div class="modal-tabs">
-            <button class="modal-tab active" data-action="switchTab" data-tab-id="tab-details">📋 Detalles</button>
-            <button class="modal-tab" data-action="switchTab" data-tab-id="tab-payments">💳 Pagos</button>
-            <button class="modal-tab" data-action="switchTab" data-tab-id="tab-status">📦 Estado & Tracking</button>
-            <button class="modal-tab" data-action="switchTab" data-tab-id="tab-communication">💬 Comunicación</button>
+            <button class="modal-tab active" data-action="switchTab" data-tab-id="tab-resumen">📋 Resumen de Orden</button>
+            <button class="modal-tab" data-action="switchTab" data-tab-id="tab-envio">🚚 Envío y Logística</button>
+            <button class="modal-tab" data-action="switchTab" data-tab-id="tab-comunicacion">💬 Comunicación</button>
         </div>
 
-        <!-- TAB 1: Detalles -->
-        <div id="tab-details" class="modal-tab-content active">
-            <div class="form-group">
-                <label><strong>Cliente:</strong></label>
-                <p>${order.customer_name || 'N/A'}<br>
-                   ${order.customer_email || ''}<br>
-                   ${order.customer_phone || ''}</p>
-            </div>
-
-            <div class="form-group">
-                <label><strong>Preferencia de Contacto:</strong></label>
-                <p>${order.contact_preference === 'telegram' ? '📱 Telegram' : '📧 Email'}</p>
+        <!-- TAB 1: Resumen de Orden (Detalles + Pagos fusionados) -->
+        <div id="tab-resumen" class="modal-tab-content active">
+            <!-- Información del Cliente -->
+            <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>👤 Información del Cliente</strong></label>
+                <div style="display: grid; gap: 8px;">
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Nombre:</span>
+                        <span style="font-weight: 500;">${order.customer_name || 'N/A'}</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Email:</span>
+                        <span>${order.customer_email || 'N/A'}</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Teléfono:</span>
+                        <span>${order.customer_phone || 'N/A'}</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Contacto preferido:</span>
+                        <span>${order.contact_preference === 'telegram' ? '📱 Telegram' : '📧 Email'}</span>
+                    </div>
+                </div>
             </div>
 
             ${order.shipping_address ? `
-            <div class="form-group">
-                <label><strong>Dirección de Envío:</strong></label>
-                <p>${order.shipping_address.address}<br>
+            <div class="form-group" style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>📍 Dirección de Envío</strong></label>
+                <p style="margin: 0; line-height: 1.6;">${order.shipping_address.address}<br>
                    ${order.shipping_address.city}, CP ${order.shipping_address.postal_code}</p>
             </div>
             ` : ''}
 
             ${order.notes && order.notes.trim() ? `
-            <div class="form-group" style="background: #fff9e6; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
-                <label><strong>💬 Mensaje del Cliente:</strong></label>
-                <p style="margin-top: 10px; white-space: pre-wrap;">${order.notes}</p>
+            <div class="form-group" style="background: #fff9e6; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>💬 Mensaje del Cliente</strong></label>
+                <p style="margin: 0; white-space: pre-wrap; line-height: 1.6; color: #555;">${order.notes}</p>
             </div>
             ` : ''}
 
-            <div class="form-group">
-                <label><strong>Productos:</strong></label>
+            <!-- Productos y Totales -->
+            <div class="form-group" style="background: #ffffff; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>🛒 Productos</strong></label>
                 <div class="order-items">
                     ${order.items.map(item => `
                         <div class="order-item">
-                            <span>${item.name} (x${item.quantity})</span>
+                            <span>${item.name} <span style="color: #999;">(x${item.quantity})</span></span>
                             <strong>${formatPrice(item.final_price, order.currency)}</strong>
                         </div>
                     `).join('')}
-                    <div class="order-item" style="margin-top: 10px; padding-top: 10px;">
+                    <div class="order-item" style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #e0e0e0;">
                         <span><strong>Subtotal:</strong></span>
                         <strong>${formatPrice(order.total, order.currency)}</strong>
                     </div>
@@ -106,31 +117,34 @@ export function viewOrder(orderId) {
                         <strong style="color: #4CAF50; font-size: 16px;">${formatPrice(order.mercadopago_data.net_received_amount || order.total, order.currency)}</strong>
                     </div>
                     ` : `
-                    <div class="order-item" style="border-top: 2px solid #ccc; margin-top: 5px; padding-top: 10px;">
+                    <div class="order-item" style="border-top: 2px solid #4CAF50; margin-top: 5px; padding-top: 10px;">
                         <span><strong>Total:</strong></span>
                         <strong>${formatPrice(order.total, order.currency)}</strong>
                     </div>
                     `}
                 </div>
             </div>
-        </div>
 
-        <!-- TAB 2: Pagos -->
-        <div id="tab-payments" class="modal-tab-content">
-            <div class="form-group">
-                <label><strong>Método de Pago:</strong></label>
-                <p>${
-                    order.payment_method === 'mercadopago' ? '💳 Mercadopago' :
-                    order.payment_method === 'arrangement' ? '🤝 Arreglo con vendedor' :
-                    order.payment_method === 'pickup_payment' ? '💵 Pago al retirar' :
-                    '💵 Presencial'
-                }</p>
+            <!-- Detalles de Pago -->
+            <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>💳 Información de Pago</strong></label>
+                <div style="display: grid; gap: 8px;">
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Método:</span>
+                        <span>${
+                            order.payment_method === 'mercadopago' ? '💳 Mercadopago' :
+                            order.payment_method === 'arrangement' ? '🤝 Arreglo con vendedor' :
+                            order.payment_method === 'pickup_payment' ? '💵 Pago al retirar' :
+                            '💵 Presencial'
+                        }</span>
+                    </div>
+                </div>
             </div>
 
             ${order.mercadopago_data ? `
-            <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #667eea;">
-                <label><strong>📊 Detalles de Mercadopago:</strong></label>
-                <div style="margin-top: 10px; font-size: 13px;">
+            <div class="form-group" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>📊 Detalles de Mercadopago</strong></label>
+                <div style="display: grid; gap: 6px; font-size: 13px;">
                     ${order.mercadopago_data.payment_id ? `
                     <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #e0e0e0;">
                         <span style="color: #666; font-weight: 600;">Payment ID:</span>
@@ -174,22 +188,10 @@ export function viewOrder(orderId) {
                         <span>**** **** **** ${order.mercadopago_data.card_last_four_digits}</span>
                     </div>
                     ` : ''}
-                    ${order.mercadopago_data.date_created ? `
-                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #e0e0e0;">
-                        <span style="color: #666; font-weight: 600;">Fecha creación:</span>
-                        <span>${new Date(order.mercadopago_data.date_created).toLocaleString('es-AR')}</span>
-                    </div>
-                    ` : ''}
                     ${order.mercadopago_data.date_approved ? `
-                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #e0e0e0;">
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0;">
                         <span style="color: #666; font-weight: 600;">Fecha aprobación:</span>
                         <span style="color: #4CAF50; font-weight: 600;">${new Date(order.mercadopago_data.date_approved).toLocaleString('es-AR')}</span>
-                    </div>
-                    ` : ''}
-                    ${order.mercadopago_data.payer_email ? `
-                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0;">
-                        <span style="color: #666; font-weight: 600;">Email pagador:</span>
-                        <span>${order.mercadopago_data.payer_email}</span>
                     </div>
                     ` : ''}
                 </div>
@@ -205,31 +207,24 @@ export function viewOrder(orderId) {
             ` : ''}
 
             ${order.payment_error ? `
-            <div class="form-group" style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ff9800;">
-                <label><strong>⚠️ Error de Pago:</strong></label>
-                <div style="margin-top: 10px; font-size: 13px;">
+            <div class="form-group" style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>⚠️ Error de Pago</strong></label>
+                <div style="font-size: 13px;">
                     <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #e0e0e0;">
                         <span style="color: #666; font-weight: 600;">Mensaje:</span>
                         <span style="color: #d32f2f; font-family: monospace; font-size: 12px;">${order.payment_error.message}</span>
                     </div>
-                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #e0e0e0;">
-                        <span style="color: #666; font-weight: 600;">Fecha del error:</span>
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0;">
+                        <span style="color: #666; font-weight: 600;">Fecha:</span>
                         <span>${new Date(order.payment_error.date).toLocaleString('es-AR')}</span>
                     </div>
-                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0;">
-                        <span style="color: #666; font-weight: 600;">Modo:</span>
-                        <span>${order.payment_error.sandbox_mode ? 'Sandbox (prueba)' : 'Producción'}</span>
-                    </div>
                 </div>
-                <small style="display: block; margin-top: 10px; color: #856404;">
-                    💡 Este error indica un problema técnico al procesar el pago (error de API, problemas de conexión, etc.)
-                </small>
             </div>
             ` : ''}
 
             ${order.chargebacks && order.chargebacks.length > 0 ? `
-            <div class="form-group" style="background: #ffebee; padding: 15px; border-radius: 6px; border-left: 4px solid #f44336;">
-                <label><strong>🚨 Contracargos (Chargebacks):</strong></label>
+            <div class="form-group" style="background: #ffebee; padding: 15px; border-radius: 8px; border-left: 4px solid #f44336;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>🚨 Contracargos</strong></label>
                 <div style="margin-top: 10px;">
                     ${order.chargebacks.map((cb, index) => `
                         <div style="background: white; padding: 12px; border-radius: 4px; margin-bottom: ${index < order.chargebacks.length - 1 ? '10px' : '0'}; border: 1px solid #ffcdd2;">
@@ -238,7 +233,7 @@ export function viewOrder(orderId) {
                                     <span style="color: #666; font-weight: 600;">Chargeback ID:</span>
                                     <span style="font-family: monospace; font-size: 12px;">${cb.chargeback_id}</span>
                                 </div>
-                                <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f5f5f5;">
+                                <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0;">
                                     <span style="color: #666; font-weight: 600;">Acción:</span>
                                     <span>
                                         <span style="padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; color: white;
@@ -247,29 +242,17 @@ export function viewOrder(orderId) {
                                         </span>
                                     </span>
                                 </div>
-                                <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f5f5f5;">
-                                    <span style="color: #666; font-weight: 600;">Payment ID:</span>
-                                    <span style="font-family: monospace; font-size: 12px;">${cb.payment_id}</span>
-                                </div>
-                                <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 6px 0;">
-                                    <span style="color: #666; font-weight: 600;">Fecha:</span>
-                                    <span>${new Date(cb.date).toLocaleString('es-AR')}</span>
-                                </div>
                             </div>
                         </div>
                     `).join('')}
                 </div>
-                <small style="display: block; margin-top: 12px; color: #c62828; font-weight: 600;">
-                    ⚠️ Un contracargo indica que el comprador disputó el pago con su banco.
-                    ${order.chargebacks.some(cb => cb.action === 'created' || cb.action === 'lost') ? 'El stock fue restaurado automáticamente.' : ''}
-                </small>
             </div>
             ` : ''}
 
             ${order.payment_link ? `
-            <div class="form-group" style="background: #e3f2fd; padding: 15px; border-radius: 6px; border-left: 4px solid #2196F3;">
-                <label><strong>🔗 Link de Pago de Mercadopago:</strong></label>
-                <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
+            <div class="form-group" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>🔗 Link de Pago</strong></label>
+                <div style="display: flex; gap: 10px; align-items: center;">
                     <input type="text" value="${order.payment_link}" readonly
                            style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; font-family: monospace; background: white;">
                     <button type="button" data-action="copyPaymentLink" data-payment-link="${order.payment_link}"
@@ -277,57 +260,51 @@ export function viewOrder(orderId) {
                         📋 Copiar
                     </button>
                 </div>
-                <small style="color: #666; display: block; margin-top: 8px;">
-                    ${order.payment_status === 'approved' ? '✅ Pago aprobado' :
-                      order.payment_status === 'pending' ? '⏳ Pago pendiente' :
-                      order.payment_status === 'rejected' ? '❌ Pago rechazado' :
-                      '📝 Esperando pago'}
-                </small>
             </div>
             ` : ''}
 
-            <!-- Historial de Cambios de Estado -->
-            <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #667eea;">
-                <label><strong>📋 Historial de Cambios de Estado:</strong></label>
-                <div style="margin-top: 15px;">
+            <!-- Timeline de Estados -->
+            <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                <label style="font-size: 15px; margin-bottom: 15px; display: block; color: #333;"><strong>📋 Historial de Estados</strong></label>
+                <div style="position: relative;">
                     ${order.status_history && order.status_history.length > 0 ?
                         order.status_history.map((change, index) => `
-                            <div style="background: white; padding: 12px; margin-bottom: ${index < order.status_history.length - 1 ? '10px' : '0'}; border-radius: 4px; border-left: 3px solid ${
-                                change.status === 'impago' ? '#FF9800' :
-                                change.status === 'pagado' ? '#4CAF50' :
-                                change.status === 'pendiente' ? '#9E9E9E' :
-                                change.status === 'lista_retiro' ? '#00BCD4' :
-                                change.status === 'en_transito' ? '#2196F3' :
-                                change.status === 'en_reparto' ? '#03A9F4' :
-                                change.status === 'entregada' ? '#4CAF50' :
-                                change.status === 'fallida' ? '#FF5722' :
-                                change.status === 'devuelta' ? '#9C27B0' :
-                                change.status === 'cancelada' || change.status === 'rechazada' ? '#f44336' : '#999'
-                            };">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                    <span style="font-weight: 600; color: #333;">
-                                        ${change.status === 'impago' ? '💵 Impago' :
-                                          change.status === 'pagado' ? '✅ Pagado' :
-                                          change.status === 'pendiente' ? '⏳ Pendiente de Envío' :
-                                          change.status === 'lista_retiro' ? '📋 Lista para Retiro' :
-                                          change.status === 'en_transito' ? '🚚 En Tránsito' :
-                                          change.status === 'en_reparto' ? '🚴 En Reparto' :
-                                          change.status === 'entregada' ? '📦 Entregada' :
-                                          change.status === 'fallida' ? '❌ Fallida' :
-                                          change.status === 'devuelta' ? '↩️ Devuelta' :
-                                          change.status === 'cancelada' ? '🚫 Cancelada' :
-                                          change.status === 'rechazada' ? '⛔ Rechazada' :
-                                          change.status}
-                                    </span>
-                                    <span style="font-size: 12px; color: #666;">
+                            <div style="position: relative; padding-left: 30px; margin-bottom: ${index < order.status_history.length - 1 ? '20px' : '0'};">
+                                <div style="position: absolute; left: 0; top: 5px; width: 14px; height: 14px; border-radius: 50%; background: ${
+                                    change.status === 'impago' ? '#FF9800' :
+                                    change.status === 'pagado' ? '#4CAF50' :
+                                    change.status === 'pendiente' ? '#9E9E9E' :
+                                    change.status === 'lista_retiro' ? '#00BCD4' :
+                                    change.status === 'en_transito' ? '#2196F3' :
+                                    change.status === 'en_reparto' ? '#03A9F4' :
+                                    change.status === 'entregada' ? '#4CAF50' :
+                                    change.status === 'fallida' ? '#FF5722' :
+                                    change.status === 'devuelta' ? '#9C27B0' :
+                                    change.status === 'cancelada' || change.status === 'rechazada' ? '#f44336' : '#999'
+                                }; border: 3px solid white; box-shadow: 0 0 0 1px #e0e0e0;"></div>
+                                ${index < order.status_history.length - 1 ? `<div style="position: absolute; left: 6px; top: 19px; bottom: -20px; width: 2px; background: #e0e0e0;"></div>` : ''}
+                                <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #e0e0e0;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                        <span style="font-weight: 600; color: #333; font-size: 14px;">
+                                            ${change.status === 'impago' ? '💵 Impago' :
+                                              change.status === 'pagado' ? '✅ Pagado' :
+                                              change.status === 'pendiente' ? '⏳ Pendiente de Envío' :
+                                              change.status === 'lista_retiro' ? '📋 Lista para Retiro' :
+                                              change.status === 'en_transito' ? '🚚 En Tránsito' :
+                                              change.status === 'en_reparto' ? '🚴 En Reparto' :
+                                              change.status === 'entregada' ? '📦 Entregada' :
+                                              change.status === 'fallida' ? '❌ Fallida' :
+                                              change.status === 'devuelta' ? '↩️ Devuelta' :
+                                              change.status === 'cancelada' ? '🚫 Cancelada' :
+                                              change.status === 'rechazada' ? '⛔ Rechazada' :
+                                              change.status}
+                                        </span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #999;">
                                         ${new Date(change.date).toLocaleString('es-AR')}
-                                    </span>
+                                        ${change.user ? ` • Por: ${change.user}` : ''}
+                                    </div>
                                 </div>
-                                ${change.user ? `
-                                <div style="font-size: 12px; color: #999;">
-                                    👤 Por: ${change.user}
-                                </div>
-                                ` : ''}
                             </div>
                         `).join('') :
                         '<div style="text-align: center; color: #999; padding: 20px; font-style: italic;">No hay cambios de estado registrados</div>'
@@ -336,10 +313,42 @@ export function viewOrder(orderId) {
             </div>
         </div>
 
-        <!-- TAB 3: Estado & Tracking -->
-        <div id="tab-status" class="modal-tab-content">
-            <!-- Current Status Badge -->
-            <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid ${
+        <!-- TAB 2: Envío y Logística -->
+        <div id="tab-envio" class="modal-tab-content">
+            <!-- Información del Servicio de Envío -->
+            ${order.delivery_method ? `
+            <div class="form-group" style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>📦 Método de Entrega</strong></label>
+                <div style="display: grid; gap: 8px;">
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Tipo:</span>
+                        <span style="font-weight: 500;">${order.delivery_method === 'shipping' ? '🚚 Envío a domicilio' : '🏪 Retiro en local'}</span>
+                    </div>
+                    ${order.shipping_quote_data && order.shipping_quote_data.carrier_name ? `
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Carrier:</span>
+                        <span>${order.shipping_quote_data.carrier_name}</span>
+                    </div>
+                    ` : ''}
+                    ${order.shipping_quote_data && order.shipping_quote_data.service_name ? `
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Servicio:</span>
+                        <span>${order.shipping_quote_data.service_name}</span>
+                    </div>
+                    ` : ''}
+                    ${order.shipping_quote_data && order.shipping_quote_data.price ? `
+                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Costo:</span>
+                        <span><strong>${formatPrice(order.shipping_quote_data.price, 'ARS')}</strong></span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+            ` : ''}
+
+            <!-- Estado Actual del Envío -->
+            <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid ${
                 order.status === 'impago' ? '#FF9800' :
                 order.status === 'pagado' ? '#4CAF50' :
                 order.status === 'pendiente' ? '#9E9E9E' :
@@ -351,9 +360,9 @@ export function viewOrder(orderId) {
                 order.status === 'devuelta' ? '#9C27B0' :
                 order.status === 'cancelada' || order.status === 'rechazada' ? '#f44336' : '#999'
             };">
-                <label style="margin-bottom: 10px; display: block;"><strong>📊 Estado Actual:</strong></label>
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>📊 Estado Actual</strong></label>
                 <div style="display: inline-block;">
-                    <span style="padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; color: white; background: ${
+                    <span style="padding: 10px 20px; border-radius: 8px; font-size: 15px; font-weight: 600; color: white; background: ${
                         order.status === 'impago' ? '#FF9800' :
                         order.status === 'pagado' ? '#4CAF50' :
                         order.status === 'pendiente' ? '#9E9E9E' :
@@ -381,14 +390,64 @@ export function viewOrder(orderId) {
                 </div>
             </div>
 
+            <!-- Tracking del Carrier (Automático) -->
+            ${order.shipping && (order.shipping.tracking_number || order.shipping.tracking_url || order.shipping.carrier_shipment_id) ? `
+            <div class="form-group" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;">
+                <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>🔍 Tracking del Carrier</strong></label>
+                <div style="display: grid; gap: 10px; font-size: 14px;">
+                    ${order.shipping.carrier ? `
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Carrier:</span>
+                        <span style="font-weight: 500;">${order.shipping.carrier}</span>
+                    </div>
+                    ` : ''}
+                    ${order.shipping.carrier_shipment_id ? `
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Shipment ID:</span>
+                        <span style="font-family: monospace; font-size: 13px;">${order.shipping.carrier_shipment_id}</span>
+                    </div>
+                    ` : ''}
+                    ${order.shipping.tracking_number ? `
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 10px;">
+                        <span style="color: #666; font-weight: 600;">Número de Tracking:</span>
+                        <span style="font-family: monospace; font-size: 14px; font-weight: 600; color: #2196F3;">${order.shipping.tracking_number}</span>
+                    </div>
+                    ` : ''}
+                    ${order.shipping.tracking_url ? `
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: center;">
+                        <span style="color: #666; font-weight: 600;">Rastrear:</span>
+                        <a href="${order.shipping.tracking_url}" target="_blank"
+                           style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #2196F3; color: white;
+                                  text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600; width: fit-content;">
+                            🔗 Ver tracking en carrier
+                        </a>
+                    </div>
+                    ` : ''}
+                    ${order.shipping.label_url ? `
+                    <div style="display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: center;">
+                        <span style="color: #666; font-weight: 600;">Etiqueta:</span>
+                        <button type="button" class="btn btn-sm"
+                                style="background: #667eea; color: white; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; width: fit-content;"
+                                data-action="printShippingLabel"
+                                data-order-id="${order.id}"
+                                data-shipment-id="${order.shipping.carrier_shipment_id || ''}">
+                            🖨️ Imprimir Etiqueta
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Cambiar Estado Logístico -->
             <form method="POST" action="" id="formStatus" onsubmit="return false;">
                 <input type="hidden" name="csrf_token" value="${csrfToken}">
                 <input type="hidden" name="order_id" value="${order.id}">
                 <input type="hidden" name="update_status" value="1">
 
-                <div class="form-group">
-                    <label for="status"><strong>Cambiar Estado:</strong></label>
-                    <select name="status" id="status" style="font-weight: 600;">
+                <div class="form-group" style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                    <label for="status" style="font-size: 15px; margin-bottom: 10px; display: block; color: #333;"><strong>🔄 Cambiar Estado</strong></label>
+                    <select name="status" id="status" style="font-weight: 600; padding: 10px; font-size: 14px; width: 100%; border-radius: 6px; border: 2px solid #e0e0e0;">
                         <optgroup label="Estados de Pago">
                             <option value="impago" ${order.status === 'impago' ? 'selected' : ''}>💵 Impago</option>
                             <option value="pagado" ${order.status === 'pagado' ? 'selected' : ''}>✅ Pagado</option>
@@ -407,83 +466,104 @@ export function viewOrder(orderId) {
                             <option value="rechazada" ${order.status === 'rechazada' ? 'selected' : ''}>⛔ Rechazada</option>
                         </optgroup>
                     </select>
+                    <small style="display: block; margin-top: 8px; color: #666; font-size: 12px;">
+                        💡 El cambio se guardará al hacer clic en "Guardar Cambios"
+                    </small>
                 </div>
             </form>
 
-            <hr style="margin: 20px 0;">
-
+            <!-- Tracking Manual (Solo si no hay tracking automático) -->
+            ${!order.shipping || (!order.shipping.tracking_number && !order.shipping.tracking_url) ? `
             <form method="POST" action="" id="formTracking" onsubmit="return false;">
                 <input type="hidden" name="csrf_token" value="${csrfToken}">
                 <input type="hidden" name="order_id" value="${order.id}">
                 <input type="hidden" name="add_tracking" value="1">
 
-                <div class="form-group">
-                    <label for="tracking_number"><strong>Número de Seguimiento:</strong></label>
-                    <input type="text" name="tracking_number" id="tracking_number"
-                           value="${order.shipping?.tracking_number || order.tracking_number || ''}" placeholder="Ej: CA123456789AR">
-                </div>
+                <div class="form-group" style="background: #fff9e6; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    <label style="font-size: 15px; margin-bottom: 12px; display: block; color: #333;"><strong>✏️ Tracking Manual</strong></label>
+                    <small style="display: block; margin-bottom: 12px; color: #856404; font-size: 13px;">
+                        ⚠️ Solo usar si el envío no se creó mediante carrier. Si se generó etiqueta, el tracking es automático.
+                    </small>
 
-                <div class="form-group">
-                    <label for="tracking_url"><strong>URL de Seguimiento:</strong></label>
-                    <input type="text" name="tracking_url" id="tracking_url"
-                           value="${order.shipping?.tracking_url || order.tracking_url || ''}" placeholder="https://...">
+                    <div style="margin-bottom: 12px;">
+                        <label for="tracking_number" style="display: block; margin-bottom: 6px; font-weight: 600; color: #555; font-size: 13px;">Número de Seguimiento:</label>
+                        <input type="text" name="tracking_number" id="tracking_number"
+                               value="${order.tracking_number || ''}"
+                               placeholder="Ej: CA123456789AR"
+                               style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+                    </div>
+
+                    <div>
+                        <label for="tracking_url" style="display: block; margin-bottom: 6px; font-weight: 600; color: #555; font-size: 13px;">URL de Seguimiento:</label>
+                        <input type="text" name="tracking_url" id="tracking_url"
+                               value="${order.tracking_url || ''}"
+                               placeholder="https://..."
+                               style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+                    </div>
                 </div>
             </form>
+            ` : ''}
         </div>
 
-        <!-- TAB 4: Comunicación -->
-        <div id="tab-communication" class="modal-tab-content">
-            <form onsubmit="sendCustomMessage(event, '${order.id}')">
-                <input type="hidden" name="csrf_token" value="${csrfToken}">
-                <input type="hidden" name="order_id" value="${order.id}">
+        <!-- TAB 3: Comunicación -->
+        <div id="tab-comunicacion" class="modal-tab-content">
+            <!-- Enviar Nuevo Mensaje -->
+            <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                <form onsubmit="sendCustomMessage(event, '${order.id}')">
+                    <input type="hidden" name="csrf_token" value="${csrfToken}">
+                    <input type="hidden" name="order_id" value="${order.id}">
 
-                <div class="form-group">
-                    <label><strong>Enviar Mensaje al Cliente:</strong></label>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                        Medio elegido: <strong>${order.contact_preference === 'telegram' ? '📱 Telegram' : '📧 Email'}</strong>
-                        ${order.contact_preference === 'telegram' && !order.telegram_chat_id ? '<br><span style="color: #dc3545;">⚠️ No hay chat_id de Telegram registrado</span>' : ''}
-                    </p>
+                    <label style="font-size: 15px; margin-bottom: 10px; display: block; color: #333;"><strong>📤 Enviar Mensaje al Cliente</strong></label>
+
+                    <div style="background: ${order.contact_preference === 'telegram' ? '#e3f2fd' : '#fff3e0'}; padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 4px solid ${order.contact_preference === 'telegram' ? '#2196F3' : '#FF9800'};">
+                        <div style="font-size: 13px; color: #555;">
+                            <strong>Canal de envío:</strong> ${order.contact_preference === 'telegram' ? '📱 Telegram' : '📧 Email'}
+                            ${order.contact_preference === 'telegram' && !order.telegram_chat_id ? '<br><span style="color: #dc3545; font-weight: 600;">⚠️ No hay chat_id de Telegram registrado</span>' : ''}
+                        </div>
+                    </div>
+
                     <textarea name="custom_message" id="custom_message"
                               rows="4"
                               placeholder="Escribe tu mensaje personalizado aquí..."
                               required
-                              style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; font-family: inherit;"></textarea>
-                </div>
+                              style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical;"></textarea>
 
-                <button type="submit" class="btn btn-primary">
-                    📤 Enviar Mensaje
-                </button>
-            </form>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 10px; padding: 10px 20px; font-size: 14px; font-weight: 600;">
+                        📤 Enviar Mensaje
+                    </button>
+                </form>
+            </div>
 
-            <hr style="margin: 30px 0;">
-
-            <div class="form-group">
-                <label><strong>📋 Historial de Comunicación:</strong></label>
-                <div class="message-history">
+            <!-- Historial de Mensajes Estilo Chat -->
+            <div class="form-group" style="margin-top: 20px;">
+                <label style="font-size: 15px; margin-bottom: 15px; display: block; color: #333;"><strong>💬 Historial de Comunicación</strong></label>
+                <div style="background: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0; padding: 15px; max-height: 500px; overflow-y: auto;">
                     ${order.notes && order.notes.trim() ? `
-                        <div class="message-item" style="background-color: #fff9e6; border-left: 4px solid #ffc107;">
-                            <div class="message-header">
-                                <div class="message-meta">
-                                    <span class="message-channel" style="background-color: #ffc107; color: #000;">💬 Mensaje Inicial</span>
-                                    <span>${new Date(order.date || order.created_at).toLocaleString('es-AR')}</span>
+                        <!-- Mensaje inicial del cliente -->
+                        <div style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: flex-start;">
+                            <div style="background: #fff9e6; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 80%; border-left: 3px solid #ffc107; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                    <span style="display: inline-block; padding: 3px 8px; background: #ffc107; color: #000; border-radius: 4px; font-size: 11px; font-weight: 700;">💬 CLIENTE</span>
+                                    <span style="font-size: 11px; color: #999;">${new Date(order.date || order.created_at).toLocaleString('es-AR', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</span>
                                 </div>
+                                <div style="color: #555; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">${order.notes}</div>
+                                <div style="margin-top: 6px; font-size: 11px; color: #999; font-style: italic;">Mensaje escrito en el checkout</div>
                             </div>
-                            <div class="message-body" style="white-space: pre-wrap;"><strong>Cliente escribió en el checkout:</strong><br>${order.notes}</div>
                         </div>
                     ` : ''}
                     ${order.messages && order.messages.length > 0 ?
                         order.messages.map(msg => `
-                            <div class="message-item">
-                                <div class="message-header">
-                                    <div class="message-meta">
-                                        <span class="message-channel ${msg.channel}">${msg.channel === 'email' ? '📧 Email' : '📱 Telegram'}</span>
-                                        <span>${new Date(msg.date).toLocaleString('es-AR')}</span>
+                            <div style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: flex-end;">
+                                <div style="background: ${msg.channel === 'email' ? '#e3f2fd' : '#e8f5e9'}; padding: 12px 16px; border-radius: 12px; border-bottom-right-radius: 4px; max-width: 80%; border-right: 3px solid ${msg.channel === 'email' ? '#2196F3' : '#4CAF50'}; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                        <span style="display: inline-block; padding: 3px 8px; background: ${msg.channel === 'email' ? '#2196F3' : '#4CAF50'}; color: white; border-radius: 4px; font-size: 11px; font-weight: 700;">${msg.channel === 'email' ? '📧 EMAIL' : '📱 TELEGRAM'}</span>
+                                        <span style="font-size: 11px; color: #999;">${new Date(msg.date).toLocaleString('es-AR', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</span>
                                     </div>
+                                    <div style="color: #333; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">${msg.message}</div>
                                 </div>
-                                <div class="message-body">${msg.message}</div>
                             </div>
                         `).join('') :
-                        (order.notes && order.notes.trim() ? '' : '<div class="no-messages">No hay mensajes enviados aún</div>')
+                        (!order.notes || !order.notes.trim() ? '<div style="text-align: center; color: #999; padding: 40px 20px; font-style: italic; font-size: 14px;">No hay mensajes enviados aún. ¡Envía el primer mensaje al cliente!</div>' : '')
                     }
                 </div>
             </div>
