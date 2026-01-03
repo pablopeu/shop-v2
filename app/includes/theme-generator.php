@@ -384,6 +384,7 @@ function generate_variables_css($config) {
     // === TIPOGRAFÍA ===
     $css .= "    /* Tipografía */\n";
     $font_family = $config['typography']['font_family'] ?? 'sans-serif';
+    $font_family_heading = $config['typography']['font_family_heading'] ?? $font_family;
 
     // Generar font stack según la familia seleccionada
     if ($font_family === 'serif') {
@@ -395,13 +396,24 @@ function generate_variables_css($config) {
         $font_stack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
     }
 
+    // Generar font stack para headings (puede ser diferente)
+    if ($font_family_heading === 'serif') {
+        $font_stack_heading = 'Georgia, "Times New Roman", Times, serif';
+    } elseif ($font_family_heading === 'monospace') {
+        $font_stack_heading = "'Courier New', Courier, Monaco, monospace";
+    } else {
+        // sans-serif (default): usar system fonts
+        $font_stack_heading = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+    }
+
     $css .= "    --font-family: {$font_stack};\n";
-    $css .= "    --font-family-heading: {$font_stack};\n";
+    $css .= "    --font-family-heading: {$font_stack_heading};\n";
     $css .= "    --font-family-mono: 'SF Mono', Monaco, Consolas, monospace;\n\n";
 
     // Font sizes - leer del theme.json o usar defaults
+    $base_size = $config['typography']['base_size'] ?? '16px';
     $font_sizes = $config['typography']['font_sizes'] ?? [
-        'xs' => '12px', 'sm' => '14px', 'base' => '16px', 'lg' => '18px',
+        'xs' => '12px', 'sm' => '14px', 'base' => $base_size, 'lg' => '18px',
         'xl' => '22px', '2xl' => '28px', '3xl' => '36px', '4xl' => '52px'
     ];
     foreach ($font_sizes as $size => $value) {
@@ -420,8 +432,9 @@ function generate_variables_css($config) {
     $css .= "\n";
 
     // Line heights - leer del theme.json o usar defaults
+    $line_height = $config['typography']['line_height'] ?? '1.5';
     $line_heights = $config['typography']['line_heights'] ?? [
-        'tight' => '1.2', 'normal' => '1.5', 'relaxed' => '1.8'
+        'tight' => '1.2', 'normal' => $line_height, 'relaxed' => '1.8'
     ];
     foreach ($line_heights as $height => $value) {
         $css .= "    --line-height-{$height}: {$value};\n";
