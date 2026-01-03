@@ -345,7 +345,6 @@ export function viewOrder(orderId) {
                 </div>
             </div>
             ` : ''}
-            ` : ''}
 
             <!-- Estado Actual del Envío -->
             <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid ${
