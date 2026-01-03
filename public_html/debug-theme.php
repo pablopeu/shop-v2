@@ -49,6 +49,103 @@ if ($theme_json_exists) {
     $theme_json_content = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
 }
 
+// Cargar theme de referencia (modern-compact) para comparación
+$reference_theme = 'modern-compact';
+$reference_dir = PUBLIC_PATH . "/assets/themes/{$reference_theme}";
+$reference_json = [];
+$reference_css = '';
+if (file_exists($reference_dir . '/theme.json')) {
+    $reference_json = json_decode(file_get_contents($reference_dir . '/theme.json'), true);
+}
+if (file_exists($reference_dir . '/variables.css')) {
+    $reference_css = file_get_contents($reference_dir . '/variables.css');
+}
+
+/**
+ * Comparar dos arrays recursivamente
+ */
+function array_diff_recursive($array1, $array2, $path = '') {
+    $differences = [];
+
+    foreach ($array1 as $key => $value) {
+        $current_path = $path ? "$path.$key" : $key;
+
+        if (!isset($array2[$key])) {
+            $differences[$current_path] = [
+                'status' => 'removed',
+                'current' => $value,
+                'reference' => null
+            ];
+        } elseif (is_array($value) && is_array($array2[$key])) {
+            $sub_diff = array_diff_recursive($value, $array2[$key], $current_path);
+            $differences = array_merge($differences, $sub_diff);
+        } elseif ($value !== $array2[$key]) {
+            $differences[$current_path] = [
+                'status' => 'changed',
+                'current' => $value,
+                'reference' => $array2[$key]
+            ];
+        }
+    }
+
+    // Buscar keys que existen en array2 pero no en array1
+    foreach ($array2 as $key => $value) {
+        $current_path = $path ? "$path.$key" : $key;
+        if (!isset($array1[$key])) {
+            $differences[$current_path] = [
+                'status' => 'added',
+                'current' => null,
+                'reference' => $value
+            ];
+        }
+    }
+
+    return $differences;
+}
+
+/**
+ * Extraer variables CSS de un contenido CSS
+ */
+function extract_css_variables($css_content) {
+    $variables = [];
+    preg_match_all('/--([a-z0-9-]+):\s*([^;]+);/i', $css_content, $matches);
+
+    if (!empty($matches[1])) {
+        foreach ($matches[1] as $index => $var_name) {
+            $variables['--' . $var_name] = trim($matches[2][$index]);
+        }
+    }
+
+    return $variables;
+}
+
+// Comparar configuraciones
+$config_differences = [];
+if (!empty($theme_json_content) && !empty($reference_json)) {
+    $config_differences = array_diff_recursive($theme_json_content, $reference_json);
+}
+
+// Comparar variables CSS
+$current_css_vars = extract_css_variables($variables_css_content);
+$reference_css_vars = extract_css_variables($reference_css);
+$css_differences = [];
+
+foreach ($current_css_vars as $var_name => $var_value) {
+    if (!isset($reference_css_vars[$var_name])) {
+        $css_differences[$var_name] = [
+            'status' => 'added',
+            'current' => $var_value,
+            'reference' => null
+        ];
+    } elseif ($var_value !== $reference_css_vars[$var_name]) {
+        $css_differences[$var_name] = [
+            'status' => 'changed',
+            'current' => $var_value,
+            'reference' => $reference_css_vars[$var_name]
+        ];
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -260,6 +357,123 @@ if ($theme_json_exists) {
         </div>
     </div>
 
+    <?php if (!empty($config_differences)): ?>
+    <div class="info-box">
+        <h2>🔄 Diferencias de Configuración vs <?php echo htmlspecialchars($reference_theme); ?></h2>
+        <p>Configuraciones que son <strong>diferentes</strong> entre tu theme y <?php echo htmlspecialchars($reference_theme); ?>:</p>
+
+        <div style="max-height: 400px; overflow-y: auto; background: #f9f9f9; padding: 15px; border-radius: 6px; margin-top: 15px;">
+            <?php
+            $count = 0;
+            foreach ($config_differences as $path => $diff):
+                if ($diff['status'] === 'changed'):
+                    $count++;
+            ?>
+                <div style="margin-bottom: 15px; padding: 10px; background: white; border-left: 4px solid #00B7B5; border-radius: 4px;">
+                    <div style="font-weight: bold; color: #005461; margin-bottom: 5px;">
+                        📝 <?php echo htmlspecialchars($path); ?>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
+                        <div>
+                            <span style="color: #666;">Tu theme:</span>
+                            <code style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; display: inline-block; margin-left: 5px;">
+                                <?php echo htmlspecialchars(is_bool($diff['current']) ? ($diff['current'] ? 'true' : 'false') : json_encode($diff['current'])); ?>
+                            </code>
+                        </div>
+                        <div>
+                            <span style="color: #666;"><?php echo htmlspecialchars($reference_theme); ?>:</span>
+                            <code style="background: #fff3e0; padding: 2px 6px; border-radius: 3px; display: inline-block; margin-left: 5px;">
+                                <?php echo htmlspecialchars(is_bool($diff['reference']) ? ($diff['reference'] ? 'true' : 'false') : json_encode($diff['reference'])); ?>
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            <?php
+                endif;
+            endforeach;
+            ?>
+            <?php if ($count === 0): ?>
+                <p style="color: #999; font-style: italic;">No hay diferencias en la configuración.</p>
+            <?php else: ?>
+                <p style="margin-top: 15px; font-weight: bold; color: #005461;">
+                    Total: <?php echo $count; ?> configuraciones diferentes
+                </p>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($css_differences)): ?>
+    <div class="info-box">
+        <h2>🎨 Diferencias de Variables CSS vs <?php echo htmlspecialchars($reference_theme); ?></h2>
+        <p>Variables CSS que tienen <strong>valores diferentes</strong>:</p>
+
+        <div style="max-height: 400px; overflow-y: auto; background: #f9f9f9; padding: 15px; border-radius: 6px; margin-top: 15px;">
+            <?php
+            $css_count = 0;
+            // Agrupar por categoría (color, spacing, border, etc.)
+            $grouped = [];
+            foreach ($css_differences as $var_name => $diff) {
+                if ($diff['status'] === 'changed') {
+                    $category = 'other';
+                    if (strpos($var_name, 'color') !== false) $category = 'colors';
+                    elseif (strpos($var_name, 'spacing') !== false) $category = 'spacing';
+                    elseif (strpos($var_name, 'border') !== false) $category = 'borders';
+                    elseif (strpos($var_name, 'font') !== false) $category = 'typography';
+                    elseif (strpos($var_name, 'shadow') !== false) $category = 'shadows';
+
+                    if (!isset($grouped[$category])) {
+                        $grouped[$category] = [];
+                    }
+                    $grouped[$category][$var_name] = $diff;
+                    $css_count++;
+                }
+            }
+
+            $category_labels = [
+                'colors' => '🎨 Colores',
+                'spacing' => '📏 Espaciado',
+                'borders' => '🔲 Bordes',
+                'typography' => '✍️ Tipografía',
+                'shadows' => '✨ Sombras',
+                'other' => '🔧 Otros'
+            ];
+
+            foreach ($grouped as $category => $vars):
+            ?>
+                <h3 style="color: #018790; margin: 20px 0 10px 0; font-size: 16px;">
+                    <?php echo $category_labels[$category] ?? 'Otros'; ?> (<?php echo count($vars); ?>)
+                </h3>
+                <?php foreach ($vars as $var_name => $diff): ?>
+                    <div style="margin-bottom: 10px; padding: 8px; background: white; border-left: 3px solid #00B7B5; border-radius: 3px; font-size: 13px;">
+                        <div style="display: grid; grid-template-columns: 200px 1fr 1fr; gap: 10px; align-items: center;">
+                            <code style="font-weight: bold; color: #005461;">
+                                <?php echo htmlspecialchars($var_name); ?>
+                            </code>
+                            <div>
+                                <span style="color: #666; font-size: 11px;">Tu theme:</span><br>
+                                <code style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px;">
+                                    <?php echo htmlspecialchars($diff['current']); ?>
+                                </code>
+                            </div>
+                            <div>
+                                <span style="color: #666; font-size: 11px;"><?php echo htmlspecialchars($reference_theme); ?>:</span><br>
+                                <code style="background: #fff3e0; padding: 2px 6px; border-radius: 3px;">
+                                    <?php echo htmlspecialchars($diff['reference']); ?>
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+
+            <p style="margin-top: 20px; font-weight: bold; color: #005461; padding-top: 15px; border-top: 2px solid #e0e0e0;">
+                Total: <?php echo $css_count; ?> variables CSS diferentes
+            </p>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="info-box">
         <h2>🔗 Enlaces de Prueba</h2>
         <p><a href="<?php echo url('/'); ?>" target="_blank">Ver Frontend →</a></p>
@@ -268,12 +482,49 @@ if ($theme_json_exists) {
     </div>
 
     <div class="info-box">
-        <h2>📝 Instrucciones</h2>
-        <p>1. Verifica que el theme activo sea el correcto</p>
-        <p>2. Verifica que "Tarjetas redondeadas" y "Botones redondeados" tengan el valor esperado</p>
-        <p>3. Verifica que las variables CSS de border-radius tengan los valores correctos</p>
-        <p>4. Si los valores son incorrectos, regenera el theme desde el generador</p>
-        <p>5. Si los valores son correctos pero no se ven en el frontend, limpia el cache del navegador (Ctrl+Shift+R)</p>
+        <h2>📝 Cómo Usar Este Diagnóstico</h2>
+        <ol style="line-height: 2;">
+            <li>
+                <strong>Verifica el theme activo</strong> en la sección "Configuración Actual"
+            </li>
+            <li>
+                <strong>Revisa las diferencias de configuración</strong> vs <?php echo htmlspecialchars($reference_theme); ?>:
+                <ul style="margin-top: 5px;">
+                    <li>Si modificaste una opción y NO aparece en "Diferencias de Configuración", esa opción <span style="color: #c62828; font-weight: bold;">NO se está guardando</span></li>
+                    <li>Si aparece en "Diferencias de Configuración" pero NO en "Diferencias de Variables CSS", esa opción <span style="color: #f57c00; font-weight: bold;">NO está generando CSS</span></li>
+                </ul>
+            </li>
+            <li>
+                <strong>Prueba hacer cambios incrementales</strong>:
+                <ul style="margin-top: 5px;">
+                    <li>Carga <?php echo htmlspecialchars($reference_theme); ?> en el generador</li>
+                    <li>Cambia SOLO UNA configuración a la vez</li>
+                    <li>Guarda y verifica si aparece aquí en las diferencias</li>
+                    <li>Esto te ayudará a identificar qué opciones funcionan y cuáles no</li>
+                </ul>
+            </li>
+            <li>
+                Si los cambios se ven aquí pero no en el frontend, limpia el cache del navegador (Ctrl+Shift+R)
+            </li>
+        </ol>
+    </div>
+
+    <div class="info-box" style="background: #fff9e6; border-left: 4px solid #f57c00;">
+        <h2>💡 Tip para Identificar Configuraciones Rotas</h2>
+        <p style="margin-bottom: 10px;">Para identificar qué configuraciones NO están funcionando:</p>
+        <ol style="line-height: 1.8;">
+            <li>Ve al generador de themes</li>
+            <li>Carga <strong><?php echo htmlspecialchars($reference_theme); ?></strong></li>
+            <li>Cambia UNA sola opción (por ejemplo: color primario)</li>
+            <li>Guarda con un nombre de prueba</li>
+            <li>Activa ese theme de prueba</li>
+            <li>Recarga esta página de diagnóstico</li>
+            <li>Verifica si el cambio aparece en "Diferencias de Variables CSS"</li>
+        </ol>
+        <p style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px;">
+            <strong>Si NO aparece:</strong> Esa configuración es un placeholder y no está implementada.<br>
+            <strong>Si aparece:</strong> Esa configuración funciona correctamente.
+        </p>
     </div>
 
     <div style="margin-top: 40px; padding: 20px; background: #fffbf0; border-radius: 8px; border-left: 4px solid #ffaa00;">
