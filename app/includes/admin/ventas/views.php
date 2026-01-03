@@ -209,7 +209,7 @@ function render_orders_table($orders, $filters, $status_labels) {
                                 </small>
                             </td>
                             <td>
-                                <?php echo date('d/m/Y H:i', strtotime($order['date'])); ?>
+                                <?php echo format_date_with_timezone($order['date']); ?>
                             </td>
                             <td>
                                 <strong>$<?php echo number_format($total_ars, 2, ',', '.'); ?></strong>

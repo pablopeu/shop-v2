@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
         $config['contact_email'] = sanitize_input($_POST['contact_email'] ?? '');
         $config['contact_phone'] = sanitize_input($_POST['contact_phone'] ?? '');
         $config['footer_text'] = sanitize_input($_POST['footer_text'] ?? '');
+        $config['timezone'] = sanitize_input($_POST['timezone'] ?? 'America/Argentina/Buenos_Aires');
 
         // WhatsApp configuration (new structure)
         $config['whatsapp'] = [
@@ -337,6 +338,36 @@ $user = get_logged_user();
                                placeholder="Ej: Juan Pérez">
                         <small style="color: #666; font-size: 11px; display: block; margin-top: 3px;">
                             Usado en comunicaciones con clientes
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="timezone">Zona Horaria</label>
+                        <select id="timezone" name="timezone" style="padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; width: 100%;">
+                            <?php
+                            $current_timezone = $site_config['timezone'] ?? 'America/Argentina/Buenos_Aires';
+                            $timezones = [
+                                'America/Argentina/Buenos_Aires' => 'Argentina (Buenos Aires) - GMT-3',
+                                'America/Argentina/Cordoba' => 'Argentina (Córdoba) - GMT-3',
+                                'America/Argentina/Mendoza' => 'Argentina (Mendoza) - GMT-3',
+                                'America/Montevideo' => 'Uruguay (Montevideo) - GMT-3',
+                                'America/Santiago' => 'Chile (Santiago) - GMT-3/-4',
+                                'America/Sao_Paulo' => 'Brasil (São Paulo) - GMT-3',
+                                'America/Mexico_City' => 'México (Ciudad de México) - GMT-6',
+                                'America/Bogota' => 'Colombia (Bogotá) - GMT-5',
+                                'America/Lima' => 'Perú (Lima) - GMT-5',
+                                'America/New_York' => 'EE.UU. (Nueva York) - GMT-5/-4',
+                                'America/Los_Angeles' => 'EE.UU. (Los Ángeles) - GMT-8/-7',
+                                'Europe/Madrid' => 'España (Madrid) - GMT+1/+2',
+                                'UTC' => 'UTC (Tiempo Universal Coordinado)'
+                            ];
+                            foreach ($timezones as $tz => $label) {
+                                $selected = ($current_timezone === $tz) ? 'selected' : '';
+                                echo "<option value=\"$tz\" $selected>$label</option>";
+                            }
+                            ?>
+                        </select>
+                        <small style="color: #666; font-size: 11px; display: block; margin-top: 3px;">
+                            Las fechas y horas se mostrarán en esta zona horaria
                         </small>
                     </div>
                     <div class="form-group">

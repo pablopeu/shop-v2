@@ -1036,8 +1036,8 @@ $user = get_logged_user();
                                             <small style="color: #999;"><?php echo htmlspecialchars($order['customer_email'] ?? ''); ?></small>
                                         </td>
                                         <td>
-                                            <?php echo date('d/m/Y', strtotime($order['date'])); ?><br>
-                                            <small style="color: #999;"><?php echo date('H:i', strtotime($order['date'])); ?></small>
+                                            <?php echo format_date_with_timezone($order['date'], 'd/m/Y'); ?><br>
+                                            <small style="color: #999;"><?php echo format_date_with_timezone($order['date'], 'H:i'); ?></small>
                                         </td>
                                         <td>
                                             <strong>$<?php echo number_format($total_ars, 2, ',', '.'); ?></strong>
@@ -1168,7 +1168,7 @@ $user = get_logged_user();
                             ?>
                             <div class="mobile-card-row">
                                 <span class="mobile-card-label">Fecha:</span>
-                                <span class="mobile-card-value"><?php echo date('d/m/Y H:i', strtotime($order['date'])); ?></span>
+                                <span class="mobile-card-value"><?php echo format_date_with_timezone($order['date']); ?></span>
                             </div>
                             <div class="mobile-card-row">
                                 <span class="mobile-card-label">Total ARS:</span>

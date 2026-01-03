@@ -1437,3 +1437,36 @@ function get_payment_credentials() {
 
     return $credentials;
 }
+
+/**
+ * Format date with configured timezone
+ * Converts UTC date to configured timezone and formats it
+ *
+ * @param string $utc_date Date string in UTC (from database)
+ * @param string $format PHP date format (default: 'd/m/Y H:i')
+ * @return string Formatted date in configured timezone
+ */
+function format_date_with_timezone($utc_date, $format = 'd/m/Y H:i') {
+    if (empty($utc_date)) {
+        return '';
+    }
+
+    // Get configured timezone from site config
+    $site_config = read_json(APP_PATH . '/config/site.json');
+    $timezone = $site_config['timezone'] ?? 'America/Argentina/Buenos_Aires';
+
+    try {
+        // Create DateTime object from UTC date
+        $date = new DateTime($utc_date, new DateTimeZone('UTC'));
+
+        // Convert to configured timezone
+        $date->setTimezone(new DateTimeZone($timezone));
+
+        // Return formatted date
+        return $date->format($format);
+    } catch (Exception $e) {
+        error_log("Error formatting date: " . $e->getMessage());
+        // Fallback to original behavior
+        return date($format, strtotime($utc_date));
+    }
+}
