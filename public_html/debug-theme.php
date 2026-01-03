@@ -40,32 +40,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_comments'])) {
             mkdir($log_dir, 0755, true);
         }
 
-        // Preparar entrada de log
-        $timestamp = date('Y-m-d H:i:s');
-        $theme_name = sanitize_input($_POST['theme_name'] ?? 'Unknown');
-        $reference_name = sanitize_input($_POST['reference_name'] ?? 'modern-compact');
+        // Preparar entrada de log en formato CSV
 
-        $log_entry = str_repeat('=', 80) . "\n";
-        $log_entry .= "THEME TESTING LOG\n";
-        $log_entry .= "Fecha: {$timestamp}\n";
-        $log_entry .= "Theme Probado: {$theme_name}\n";
-        $log_entry .= "Referencia: {$reference_name}\n";
-        $log_entry .= str_repeat('-', 80) . "\n\n";
+        // Verificar si el archivo existe para agregar header
+        $add_header = !file_exists($log_file);
 
-        foreach ($comments_data as $item) {
-            $setting = $item['setting'] ?? 'Unknown';
-            $comment = $item['comment'] ?? 'Sin comentario';
-            $current = $item['current'] ?? '';
-            $reference = $item['reference'] ?? '';
+        $log_entry = '';
 
-            $log_entry .= "SETTING: {$setting}\n";
-            $log_entry .= "  Current Value: {$current}\n";
-            $log_entry .= "  Reference Value: {$reference}\n";
-            $log_entry .= "  Comment: {$comment}\n";
-            $log_entry .= "\n";
+        // Agregar header solo si el archivo es nuevo
+        if ($add_header) {
+            $log_entry .= "setting,value,comment\n";
         }
 
-        $log_entry .= "\n";
+        // Agregar cada entrada como línea CSV
+        foreach ($comments_data as $item) {
+            $setting = $item['setting'] ?? 'Unknown';
+            $value = $item['current'] ?? '';
+            $comment = $item['comment'] ?? '';
+
+            // Escapar comillas y encerrar en comillas si hay comas
+            $comment_escaped = str_replace('"', '""', $comment);
+            if (strpos($comment, ',') !== false || strpos($comment, '"') !== false || strpos($comment, "\n") !== false) {
+                $comment_escaped = '"' . $comment_escaped . '"';
+            }
+
+            $log_entry .= "{$setting},{$value},{$comment_escaped}\n";
+        }
 
         // Guardar log
         file_put_contents($log_file, $log_entry, FILE_APPEND);
@@ -185,52 +185,56 @@ $config_differences = array_filter($config_differences, function($diff) {
             border-bottom: 2px solid #00B7B5;
             padding-bottom: 10px;
         }
-        .diff-item {
-            margin-bottom: 8px;
-            padding: 10px;
+        .diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .diff-row {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .diff-row:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .diff-row:nth-child(odd) {
             background: white;
-            border-left: 3px solid #00B7B5;
-            border-radius: 3px;
-            display: grid;
-            grid-template-columns: 30px 1fr;
-            gap: 10px;
-            align-items: start;
+        }
+        .diff-row td {
+            padding: 8px 12px;
+            vertical-align: middle;
+        }
+        .col-setting {
+            width: 25%;
+            font-weight: 600;
+            color: #005461;
+        }
+        .col-reference {
+            width: 30%;
+            color: #666;
+        }
+        .col-current {
+            width: 30%;
+            color: #333;
+        }
+        .col-checkbox {
+            width: 50px;
+            text-align: center;
         }
         .diff-checkbox {
-            margin-top: 3px;
             width: 18px;
             height: 18px;
             cursor: pointer;
         }
-        .diff-content {
-            flex: 1;
-        }
-        .setting-path {
-            font-weight: bold;
-            color: #005461;
-            margin-bottom: 5px;
-            font-size: 13px;
-        }
-        .values-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            font-size: 12px;
-        }
-        .value-box {
-            padding: 6px;
-            background: #f9f9f9;
-            border-radius: 3px;
-        }
-        .value-label {
-            color: #666;
-            font-size: 10px;
-            margin-bottom: 3px;
-        }
         .value-content {
             font-family: 'Courier New', monospace;
-            color: #333;
+            font-size: 12px;
             word-break: break-all;
+        }
+        .label-prefix {
+            font-size: 10px;
+            color: #999;
+            text-transform: uppercase;
+            margin-right: 4px;
         }
         .btn {
             padding: 12px 24px;
@@ -349,35 +353,40 @@ $config_differences = array_filter($config_differences, function($diff) {
             <p style="color: #999; font-style: italic;">No hay diferencias con el theme de referencia.</p>
         <?php else: ?>
             <div class="scroll-container">
-                <?php foreach ($config_differences as $path => $diff): ?>
-                    <div class="diff-item">
-                        <input type="checkbox"
-                               class="diff-checkbox"
-                               data-setting="<?php echo htmlspecialchars($path); ?>"
-                               data-current="<?php echo htmlspecialchars(is_bool($diff['current']) ? ($diff['current'] ? 'true' : 'false') : json_encode($diff['current'])); ?>"
-                               data-reference="<?php echo htmlspecialchars(is_bool($diff['reference']) ? ($diff['reference'] ? 'true' : 'false') : json_encode($diff['reference'])); ?>">
-
-                        <div class="diff-content">
-                            <div class="setting-path">
-                                📝 <?php echo htmlspecialchars($path); ?>
-                            </div>
-                            <div class="values-grid">
-                                <div class="value-box">
-                                    <div class="value-label">Tu theme:</div>
-                                    <div class="value-content">
-                                        <?php echo htmlspecialchars(is_bool($diff['current']) ? ($diff['current'] ? 'true' : 'false') : json_encode($diff['current'])); ?>
-                                    </div>
-                                </div>
-                                <div class="value-box">
-                                    <div class="value-label"><?php echo htmlspecialchars($reference_theme); ?>:</div>
-                                    <div class="value-content">
+                <table class="diff-table">
+                    <thead>
+                        <tr style="background: #005461; color: white; font-weight: bold;">
+                            <th style="padding: 10px; text-align: left;">Setting</th>
+                            <th style="padding: 10px; text-align: left;"><?php echo htmlspecialchars($reference_theme); ?></th>
+                            <th style="padding: 10px; text-align: left;"><?php echo htmlspecialchars($active_theme); ?></th>
+                            <th style="padding: 10px; text-align: center;">✓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($config_differences as $path => $diff): ?>
+                            <tr class="diff-row">
+                                <td class="col-setting"><?php echo htmlspecialchars($path); ?></td>
+                                <td class="col-reference">
+                                    <span class="value-content">
                                         <?php echo htmlspecialchars(is_bool($diff['reference']) ? ($diff['reference'] ? 'true' : 'false') : json_encode($diff['reference'])); ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                                    </span>
+                                </td>
+                                <td class="col-current">
+                                    <span class="value-content">
+                                        <?php echo htmlspecialchars(is_bool($diff['current']) ? ($diff['current'] ? 'true' : 'false') : json_encode($diff['current'])); ?>
+                                    </span>
+                                </td>
+                                <td class="col-checkbox">
+                                    <input type="checkbox"
+                                           class="diff-checkbox"
+                                           data-setting="<?php echo htmlspecialchars($path); ?>"
+                                           data-current="<?php echo htmlspecialchars(is_bool($diff['current']) ? ($diff['current'] ? 'true' : 'false') : json_encode($diff['current'])); ?>"
+                                           data-reference="<?php echo htmlspecialchars(is_bool($diff['reference']) ? ($diff['reference'] ? 'true' : 'false') : json_encode($diff['reference'])); ?>">
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
 
             <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
