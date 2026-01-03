@@ -282,8 +282,13 @@
         .modal-header {
             font-size: 16px;
             font-weight: 600;
-            padding: 20px 20px 0 20px;
+            padding: 20px 20px 15px 20px;
             flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 11;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .modal-close {
@@ -387,6 +392,9 @@
             border-bottom: 2px solid #e0e0e0;
             background: #f8f9fa;
             flex-shrink: 0;
+            position: sticky;
+            top: 60px;
+            z-index: 10;
         }
 
         .modal-tab {
