@@ -395,11 +395,16 @@ $config_differences = array_filter($config_differences, function($diff) {
                                     </span>
                                 </td>
                                 <td class="col-checkbox">
+                                    <?php
+                                    // Formatear valores para data attributes
+                                    $current_val = is_bool($diff['current']) ? ($diff['current'] ? 'true' : 'false') : (is_string($diff['current']) ? $diff['current'] : json_encode($diff['current']));
+                                    $reference_val = is_bool($diff['reference']) ? ($diff['reference'] ? 'true' : 'false') : (is_string($diff['reference']) ? $diff['reference'] : json_encode($diff['reference']));
+                                    ?>
                                     <input type="checkbox"
                                            class="diff-checkbox"
                                            data-setting="<?php echo htmlspecialchars($path); ?>"
-                                           data-current="<?php echo htmlspecialchars(is_bool($diff['current']) ? ($diff['current'] ? 'true' : 'false') : json_encode($diff['current'])); ?>"
-                                           data-reference="<?php echo htmlspecialchars(is_bool($diff['reference']) ? ($diff['reference'] ? 'true' : 'false') : json_encode($diff['reference'])); ?>">
+                                           data-current="<?php echo htmlspecialchars($current_val); ?>"
+                                           data-reference="<?php echo htmlspecialchars($reference_val); ?>">
                                 </td>
                             </tr>
                         <?php endforeach; ?>
