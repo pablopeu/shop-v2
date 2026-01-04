@@ -37,6 +37,8 @@ $form_values = [
     'button_width' => 'auto',
     'button_icon' => 'show',
     'button_hover' => 'lift',
+    'badge_cart_shape' => 'round',
+    'badge_favorite_shape' => 'round',
     'product_gallery_layout' => 'thumbnails-bottom',
     'product_image_size' => 'medium',
     'product_thumbnail_size' => 'medium',
@@ -115,7 +117,7 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             // Cards
             'card_border' => $edit_config['components']['cards']['border'] ?? false,
             'card_shadow' => $edit_config['features']['shadow_style'] ?? 'subtle',
-            'card_rounded' => ($edit_config['features']['border_style'] ?? 'sharp') === 'rounded',
+            'card_rounded' => $edit_config['components']['cards']['rounded'] ?? false,
             'card_hover' => $edit_config['components']['cards']['hover_effect'] ?? 'glow',
             'card_buttons' => $edit_config['components']['cards']['buttons'] ?? 'show',
             'card_buttons_position' => $edit_config['components']['cards']['buttons_position'] ?? 'center',
@@ -131,6 +133,10 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'button_width' => $edit_config['components']['buttons']['width'] ?? 'auto',
             'button_icon' => $edit_config['components']['buttons']['icon'] ?? 'show',
             'button_hover' => $edit_config['components']['buttons']['hover'] ?? 'lift',
+
+            // Badges
+            'badge_cart_shape' => $edit_config['components']['badges']['cart_shape'] ?? 'round',
+            'badge_favorite_shape' => $edit_config['components']['badges']['favorite_shape'] ?? 'round',
 
             // Vista de Producto
             'product_gallery_layout' => $edit_config['components']['product_view']['gallery_layout'] ?? 'thumbnails-bottom',
@@ -240,6 +246,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'button_width' => sanitize_input($_POST['button_width'] ?? 'auto'),
             'button_icon' => sanitize_input($_POST['button_icon'] ?? 'show'),
             'button_hover' => sanitize_input($_POST['button_hover'] ?? 'lift'),
+
+            // Componentes: Badges
+            'badge_cart_shape' => sanitize_input($_POST['badge_cart_shape'] ?? 'round'),
+            'badge_favorite_shape' => sanitize_input($_POST['badge_favorite_shape'] ?? 'round'),
 
             // Componentes: Vista Producto
             'product_gallery_layout' => sanitize_input($_POST['product_gallery_layout'] ?? 'thumbnails-bottom'),
@@ -905,15 +915,15 @@ $user = get_logged_user();
                             <label>Familia de Fuente</label>
                             <div class="radio-group">
                                 <label>
-                                    <input type="radio" name="font_family" value="sans-serif" checked>
+                                    <input type="radio" name="font_family" value="sans-serif" <?php echo ($form_values['font_family'] ?? 'sans-serif') === 'sans-serif' ? 'checked' : ''; ?>>
                                     Sans-serif
                                 </label>
                                 <label>
-                                    <input type="radio" name="font_family" value="serif">
+                                    <input type="radio" name="font_family" value="serif" <?php echo ($form_values['font_family'] ?? '') === 'serif' ? 'checked' : ''; ?>>
                                     Serif
                                 </label>
                                 <label>
-                                    <input type="radio" name="font_family" value="monospace">
+                                    <input type="radio" name="font_family" value="monospace" <?php echo ($form_values['font_family'] ?? '') === 'monospace' ? 'checked' : ''; ?>>
                                     Monospace
                                 </label>
                             </div>
@@ -922,19 +932,19 @@ $user = get_logged_user();
                         <div class="form-group">
                             <label for="font_size">Tamaño Base</label>
                             <select name="font_size" id="font_size">
-                                <option value="14px">14px</option>
-                                <option value="16px" selected>16px</option>
-                                <option value="18px">18px</option>
+                                <option value="14px" <?php echo ($form_values['font_size'] ?? '16px') === '14px' ? 'selected' : ''; ?>>14px</option>
+                                <option value="16px" <?php echo ($form_values['font_size'] ?? '16px') === '16px' ? 'selected' : ''; ?>>16px</option>
+                                <option value="18px" <?php echo ($form_values['font_size'] ?? '16px') === '18px' ? 'selected' : ''; ?>>18px</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="line_height">Altura de Línea</label>
                             <select name="line_height" id="line_height">
-                                <option value="1.4">1.4</option>
-                                <option value="1.5" selected>1.5</option>
-                                <option value="1.6">1.6</option>
-                                <option value="1.8">1.8</option>
+                                <option value="1.4" <?php echo ($form_values['line_height'] ?? '1.5') === '1.4' ? 'selected' : ''; ?>>1.4</option>
+                                <option value="1.5" <?php echo ($form_values['line_height'] ?? '1.5') === '1.5' ? 'selected' : ''; ?>>1.5</option>
+                                <option value="1.6" <?php echo ($form_values['line_height'] ?? '1.5') === '1.6' ? 'selected' : ''; ?>>1.6</option>
+                                <option value="1.8" <?php echo ($form_values['line_height'] ?? '1.5') === '1.8' ? 'selected' : ''; ?>>1.8</option>
                             </select>
                         </div>
                     </div>
@@ -1227,6 +1237,10 @@ $user = get_logged_user();
                                     <input type="radio" name="spacing_scale" value="geometric" <?php echo ($form_values['spacing_scale'] ?? 'proportional') === 'geometric' ? 'checked' : ''; ?>>
                                     Geométrica
                                 </label>
+                                <label>
+                                    <input type="radio" name="spacing_scale" value="custom" <?php echo ($form_values['spacing_scale'] ?? 'proportional') === 'custom' ? 'checked' : ''; ?>>
+                                    Personalizada
+                                </label>
                             </div>
                             <small class="helper-text">Cómo escalan los espacios (xs, sm, md, lg, xl)</small>
                         </div>
@@ -1316,19 +1330,19 @@ $user = get_logged_user();
                         <label>Sombreado</label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="card_shadow" value="none">
+                                <input type="radio" name="card_shadow" value="none" <?php echo ($form_values['card_shadow'] ?? 'subtle') === 'none' ? 'checked' : ''; ?>>
                                 Sin sombra
                             </label>
                             <label>
-                                <input type="radio" name="card_shadow" value="subtle" checked>
+                                <input type="radio" name="card_shadow" value="subtle" <?php echo ($form_values['card_shadow'] ?? 'subtle') === 'subtle' ? 'checked' : ''; ?>>
                                 Sutil
                             </label>
                             <label>
-                                <input type="radio" name="card_shadow" value="medium">
+                                <input type="radio" name="card_shadow" value="medium" <?php echo ($form_values['card_shadow'] ?? 'subtle') === 'medium' ? 'checked' : ''; ?>>
                                 Medio
                             </label>
                             <label>
-                                <input type="radio" name="card_shadow" value="deep">
+                                <input type="radio" name="card_shadow" value="deep" <?php echo ($form_values['card_shadow'] ?? 'subtle') === 'deep' ? 'checked' : ''; ?>>
                                 Profundo
                             </label>
                         </div>
@@ -1338,19 +1352,19 @@ $user = get_logged_user();
                         <label>Efecto Hover</label>
                         <div class="radio-group">
                             <label>
-                                <input type="radio" name="card_hover" value="none">
+                                <input type="radio" name="card_hover" value="none" <?php echo ($form_values['card_hover'] ?? 'glow') === 'none' ? 'checked' : ''; ?>>
                                 Sin efecto
                             </label>
                             <label>
-                                <input type="radio" name="card_hover" value="lift">
+                                <input type="radio" name="card_hover" value="lift" <?php echo ($form_values['card_hover'] ?? 'glow') === 'lift' ? 'checked' : ''; ?>>
                                 Elevación
                             </label>
                             <label>
-                                <input type="radio" name="card_hover" value="glow" checked>
+                                <input type="radio" name="card_hover" value="glow" <?php echo ($form_values['card_hover'] ?? 'glow') === 'glow' ? 'checked' : ''; ?>>
                                 Brillo
                             </label>
                             <label>
-                                <input type="radio" name="card_hover" value="lift-3d">
+                                <input type="radio" name="card_hover" value="lift-3d" <?php echo ($form_values['card_hover'] ?? 'glow') === 'lift-3d' ? 'checked' : ''; ?>>
                                 Elevación 3D
                             </label>
                         </div>
@@ -1363,7 +1377,7 @@ $user = get_logged_user();
                                 Mostrar borde
                             </label>
                             <label>
-                                <input type="checkbox" name="card_rounded">
+                                <input type="checkbox" name="card_rounded" <?php echo ($form_values['card_rounded'] ?? false) ? 'checked' : ''; ?>>
                                 Bordes redondeados
                             </label>
                         </div>
@@ -1559,8 +1573,45 @@ $user = get_logged_user();
                         </div>
                     </div>
 
+                    <!-- Componentes: Badges -->
+                    <div class="card card-half">
+                        <div class="card-title">
+                            🏷️ Componentes: Badges e Iconos
+                        </div>
+
+                        <div class="form-group">
+                            <label>Badge del Carrito (contador de items)</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="badge_cart_shape" value="round" <?php echo ($form_values['badge_cart_shape'] ?? 'round') === 'round' ? 'checked' : ''; ?>>
+                                    Redondo
+                                </label>
+                                <label>
+                                    <input type="radio" name="badge_cart_shape" value="square" <?php echo ($form_values['badge_cart_shape'] ?? 'round') === 'square' ? 'checked' : ''; ?>>
+                                    Cuadrado
+                                </label>
+                            </div>
+                            <small class="helper-text">Forma del badge que muestra el número de items en el carrito</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Botón de Favoritos (corazón)</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="badge_favorite_shape" value="round" <?php echo ($form_values['badge_favorite_shape'] ?? 'round') === 'round' ? 'checked' : ''; ?>>
+                                    Redondo
+                                </label>
+                                <label>
+                                    <input type="radio" name="badge_favorite_shape" value="square" <?php echo ($form_values['badge_favorite_shape'] ?? 'round') === 'square' ? 'checked' : ''; ?>>
+                                    Cuadrado
+                                </label>
+                            </div>
+                            <small class="helper-text">Forma del botón de favoritos en las cards de productos</small>
+                        </div>
+                    </div>
+
                     <!-- Componentes: Forms -->
-                    <div class="card card-full" style="margin-top: 20px;">
+                    <div class="card card-half">
                         <div class="card-title">
                             📝 Componentes: Formularios
                         </div>
@@ -2401,9 +2452,9 @@ $user = get_logged_user();
                     const cardShadow = config.features?.shadow_style || 'subtle';
                     document.querySelector(`[name="card_shadow"][value="${cardShadow}"]`)?.click();
 
-                    // Rounded viene de features.border_style
+                    // Rounded viene de components.cards.rounded
                     const cardRounded = document.querySelector('[name="card_rounded"]');
-                    if (cardRounded) cardRounded.checked = (config.features?.border_style === 'rounded');
+                    if (cardRounded) cardRounded.checked = (config.components?.cards?.rounded || false);
 
                     const cardHover = config.components?.cards?.hover_effect || 'glow';
                     document.querySelector(`[name="card_hover"][value="${cardHover}"]`)?.click();
@@ -2536,6 +2587,13 @@ $user = get_logged_user();
 
                     const formGlowEffect = document.querySelector('[name="form_glow_effect"]');
                     if (formGlowEffect) formGlowEffect.checked = config.components?.forms?.glow_effect || false;
+
+                    // Poblar badges
+                    const badgeCartShape = config.components?.badges?.cart_shape || 'round';
+                    document.querySelector(`[name="badge_cart_shape"][value="${badgeCartShape}"]`)?.click();
+
+                    const badgeFavoriteShape = config.components?.badges?.favorite_shape || 'round';
+                    document.querySelector(`[name="badge_favorite_shape"][value="${badgeFavoriteShape}"]`)?.click();
 
                     // Mostrar sección de actualizar paleta
                     const editPaletteSection = document.getElementById('edit-palette-section');

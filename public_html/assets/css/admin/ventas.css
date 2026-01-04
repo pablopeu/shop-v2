@@ -387,6 +387,11 @@
             border-bottom: 2px solid #e0e0e0;
             background: #f8f9fa;
             flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            margin: 0 -20px;
+            padding: 0 20px;
         }
 
         .modal-tab {

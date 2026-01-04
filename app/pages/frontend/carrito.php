@@ -1208,8 +1208,22 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
 
         // Update cart count
         function updateCartCount() {
-            const count = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
-            document.getElementById('cart-count').textContent = count;
+            // Use ShopCart.updateCartBadge to handle count and visibility
+            if (typeof ShopCart !== 'undefined' && typeof ShopCart.updateCartBadge === 'function') {
+                ShopCart.updateCartBadge();
+            } else {
+                // Fallback
+                const count = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
+                const badge = document.getElementById('cart-count');
+                if (badge) {
+                    badge.textContent = count;
+                    if (count > 0) {
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            }
         }
 
         // Show toast

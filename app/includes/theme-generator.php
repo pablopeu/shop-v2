@@ -384,13 +384,36 @@ function generate_variables_css($config) {
     // === TIPOGRAFÍA ===
     $css .= "    /* Tipografía */\n";
     $font_family = $config['typography']['font_family'] ?? 'sans-serif';
-    $css .= "    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, {$font_family};\n";
-    $css .= "    --font-family-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, {$font_family};\n";
+    $font_family_heading = $config['typography']['font_family_heading'] ?? $font_family;
+
+    // Generar font stack según la familia seleccionada
+    if ($font_family === 'serif') {
+        $font_stack = 'Georgia, "Times New Roman", Times, serif';
+    } elseif ($font_family === 'monospace') {
+        $font_stack = "'Courier New', Courier, Monaco, monospace";
+    } else {
+        // sans-serif (default): usar system fonts
+        $font_stack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+    }
+
+    // Generar font stack para headings (puede ser diferente)
+    if ($font_family_heading === 'serif') {
+        $font_stack_heading = 'Georgia, "Times New Roman", Times, serif';
+    } elseif ($font_family_heading === 'monospace') {
+        $font_stack_heading = "'Courier New', Courier, Monaco, monospace";
+    } else {
+        // sans-serif (default): usar system fonts
+        $font_stack_heading = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+    }
+
+    $css .= "    --font-family: {$font_stack};\n";
+    $css .= "    --font-family-heading: {$font_stack_heading};\n";
     $css .= "    --font-family-mono: 'SF Mono', Monaco, Consolas, monospace;\n\n";
 
     // Font sizes - leer del theme.json o usar defaults
+    $base_size = $config['typography']['base_size'] ?? '16px';
     $font_sizes = $config['typography']['font_sizes'] ?? [
-        'xs' => '12px', 'sm' => '14px', 'base' => '16px', 'lg' => '18px',
+        'xs' => '12px', 'sm' => '14px', 'base' => $base_size, 'lg' => '18px',
         'xl' => '22px', '2xl' => '28px', '3xl' => '36px', '4xl' => '52px'
     ];
     foreach ($font_sizes as $size => $value) {
@@ -409,8 +432,9 @@ function generate_variables_css($config) {
     $css .= "\n";
 
     // Line heights - leer del theme.json o usar defaults
+    $line_height = $config['typography']['line_height'] ?? '1.5';
     $line_heights = $config['typography']['line_heights'] ?? [
-        'tight' => '1.2', 'normal' => '1.5', 'relaxed' => '1.8'
+        'tight' => '1.2', 'normal' => $line_height, 'relaxed' => '1.8'
     ];
     foreach ($line_heights as $height => $value) {
         $css .= "    --line-height-{$height}: {$value};\n";
@@ -734,22 +758,43 @@ function generate_theme_css_basic($config) {
     if ($config['components']['cards']['border']) {
         $css .= "    border: var(--border-width) solid var(--color-border);\n";
     }
+
+    // Border radius: siempre especificar (0 o lg)
     if ($config['components']['cards']['rounded']) {
         $css .= "    border-radius: var(--border-radius-lg);\n";
+    } else {
+        $css .= "    border-radius: 0;\n";
     }
+
     if ($config['components']['cards']['shadow'] && $config['components']['cards']['shadow'] !== 'none') {
         $css .= "    box-shadow: var(--shadow-md);\n";
     }
-    $css .= "    background: var(--color-bg);\n";
+
+    // Background: glassmorphism o sólido
+    if ($config['components']['cards']['glassmorphism'] ?? false) {
+        $css .= "    background: var(--glass-bg);\n";
+        $css .= "    backdrop-filter: blur(var(--blur-md));\n";
+        $css .= "    border: 1px solid var(--glass-border);\n";
+    } else {
+        $css .= "    background: var(--color-bg);\n";
+    }
+
     $css .= "    transition: var(--transition-base);\n";
     $css .= "}\n\n";
 
     // Card hover effect
     $hover_effect = $config['components']['cards']['hover_effect'] ?? 'glow';
+    $has_3d = $config['features']['transform_3d'] ?? false;
+    $has_glassmorphism = $config['components']['cards']['glassmorphism'] ?? false;
+
     $css .= ".product-card:hover {\n";
 
     if ($hover_effect === 'lift') {
-        $css .= "    transform: translateY(-8px);\n";
+        if ($has_3d) {
+            $css .= "    transform: var(--transform-3d-lift);\n";
+        } else {
+            $css .= "    transform: translateY(-8px);\n";
+        }
         if ($config['components']['cards']['shadow'] && $config['components']['cards']['shadow'] !== 'none') {
             $css .= "    box-shadow: var(--shadow-lg);\n";
         }
@@ -760,10 +805,19 @@ function generate_theme_css_basic($config) {
             $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);\n";
         }
     } elseif ($hover_effect === 'lift-3d') {
-        $css .= "    transform: translateY(-8px) scale(1.02);\n";
+        if ($has_3d) {
+            $css .= "    transform: var(--transform-3d-lift) scale(1.02);\n";
+        } else {
+            $css .= "    transform: translateY(-8px) scale(1.02);\n";
+        }
         if ($config['components']['cards']['shadow'] && $config['components']['cards']['shadow'] !== 'none') {
             $css .= "    box-shadow: var(--shadow-xl);\n";
         }
+    }
+
+    // Glassmorphism hover: intensificar efecto
+    if ($has_glassmorphism) {
+        $css .= "    background: var(--gradient-glass-hover, rgba(255, 255, 255, 0.85));\n";
     }
 
     $css .= "}\n\n";
@@ -859,10 +913,20 @@ function generate_theme_css_basic($config) {
     }
 
     // Estilos específicos según el tipo (solid/outline)
+    $has_gradient = $config['features']['gradient_effects'] ?? false;
+    $has_3d_transform = $config['components']['buttons']['transform'] ?? false;
+
     if ($btn_style === 'solid') {
         // Estilo sólido
         $css .= ".btn-primary, .btn-add-cart {\n";
-        $css .= "    background: var(--color-primary);\n";
+
+        // Background: gradient o color sólido
+        if ($has_gradient) {
+            $css .= "    background: var(--gradient-primary);\n";
+        } else {
+            $css .= "    background: var(--color-primary);\n";
+        }
+
         $css .= "    color: var(--color-white);\n";
         $css .= "    border: none;\n";
         if ($btn_shadow) {
@@ -873,24 +937,45 @@ function generate_theme_css_basic($config) {
         $css .= ".btn-primary:hover, .btn-add-cart:hover {\n";
         // Aplicar efecto hover según configuración
         if ($btn_hover === 'lift') {
-            $css .= "    transform: translateY(-2px);\n";
-            $css .= "    background: var(--color-primary-dark);\n";
+            // Transform: 3D si está activado, normal si no
+            if ($has_3d_transform) {
+                $css .= "    transform: var(--transform-3d-lift);\n";
+            } else {
+                $css .= "    transform: translateY(-2px);\n";
+            }
+
+            // Background: mantener gradient si está activo, sino oscurecer
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-primary-dark);\n";
+            }
+
             if ($btn_shadow) {
                 $css .= "    box-shadow: var(--shadow-lg);\n";
             }
         } elseif ($btn_hover === 'glow') {
-            $css .= "    background: var(--color-primary-dark);\n";
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-primary-dark);\n";
+            }
             $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.3);\n";
         } elseif ($btn_hover === 'darken') {
-            $css .= "    background: var(--color-primary-dark);\n";
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-primary-dark);\n";
+            }
             $css .= "    opacity: 0.9;\n";
         } elseif ($btn_hover === 'none') {
-            $css .= "    background: var(--color-primary);\n";
+            // No hacer nada
         }
         $css .= "}\n\n";
 
         $css .= ".btn-secondary {\n";
-        $css .= "    background: var(--color-secondary);\n";
+
+        // Background: gradient o color sólido
+        if ($has_gradient) {
+            $css .= "    background: var(--gradient-secondary);\n";
+        } else {
+            $css .= "    background: var(--color-secondary);\n";
+        }
+
         $css .= "    color: var(--color-white);\n";
         $css .= "    border: none;\n";
         if ($btn_shadow) {
@@ -901,19 +986,33 @@ function generate_theme_css_basic($config) {
         $css .= ".btn-secondary:hover {\n";
         // Aplicar efecto hover según configuración
         if ($btn_hover === 'lift') {
-            $css .= "    transform: translateY(-2px);\n";
-            $css .= "    background: var(--color-secondary-dark);\n";
+            // Transform: 3D si está activado, normal si no
+            if ($has_3d_transform) {
+                $css .= "    transform: var(--transform-3d-lift);\n";
+            } else {
+                $css .= "    transform: translateY(-2px);\n";
+            }
+
+            // Background: mantener gradient si está activo, sino oscurecer
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-secondary-dark);\n";
+            }
+
             if ($btn_shadow) {
                 $css .= "    box-shadow: var(--shadow-lg);\n";
             }
         } elseif ($btn_hover === 'glow') {
-            $css .= "    background: var(--color-secondary-dark);\n";
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-secondary-dark);\n";
+            }
             $css .= "    box-shadow: 0 0 0 3px rgba(var(--color-secondary-rgb), 0.3);\n";
         } elseif ($btn_hover === 'darken') {
-            $css .= "    background: var(--color-secondary-dark);\n";
+            if (!$has_gradient) {
+                $css .= "    background: var(--color-secondary-dark);\n";
+            }
             $css .= "    opacity: 0.9;\n";
         } elseif ($btn_hover === 'none') {
-            $css .= "    background: var(--color-secondary);\n";
+            // No hacer nada
         }
         $css .= "}\n\n";
     } elseif ($btn_style === 'outline') {
@@ -982,6 +1081,35 @@ function generate_theme_css_basic($config) {
         }
         $css .= "}\n\n";
     }
+
+    // === BADGES ===
+    $css .= "/* =================================\n";
+    $css .= "   BADGES\n";
+    $css .= "   ================================= */\n\n";
+
+    // Cart Badge Shape
+    $cart_badge_shape = $config['components']['badges']['cart_shape'] ?? 'round';
+    $cart_badge_radius = ($cart_badge_shape === 'round') ? '50%' : '4px';
+
+    $css .= ".cart-badge {\n";
+    $css .= "    border-radius: {$cart_badge_radius} !important;\n";
+    $css .= "}\n\n";
+
+    $css .= ".mobile-menu-badge {\n";
+    $css .= "    border-radius: {$cart_badge_radius} !important;\n";
+    $css .= "}\n\n";
+
+    // Favorite Button Shape
+    $favorite_shape = $config['components']['badges']['favorite_shape'] ?? 'round';
+    $favorite_radius = ($favorite_shape === 'round') ? '50%' : '8px';
+
+    $css .= ".favorite-heart-card {\n";
+    $css .= "    border-radius: {$favorite_radius} !important;\n";
+    $css .= "}\n\n";
+
+    $css .= ".favorite-heart {\n";
+    $css .= "    border-radius: {$favorite_radius} !important;\n";
+    $css .= "}\n\n";
 
     // === HEADER ===
     $css .= "/* =================================\n";
@@ -1737,17 +1865,63 @@ function generate_theme($data, $original_config = null) {
             isset($original_config['typography']['line_heights']) ? ['line_heights' => $original_config['typography']['line_heights']] : []
         ),
 
-        'spacing' => array_merge(
-            [
-                'base_unit' => $data['base_unit'] ?? '12px',
-                'scale' => $data['spacing_scale'] ?? 'proportional'
-            ],
-            // Preservar valores custom del original si existen
-            isset($original_config['spacing']['values']) ? ['values' => $original_config['spacing']['values']] : []
-        ),
+        'spacing' => (function() use ($data, $original_config) {
+            $new_base_unit = $data['base_unit'] ?? '12px';
+            $old_base_unit = $original_config['spacing']['base_unit'] ?? null;
+            $base_unit_changed = ($old_base_unit && $old_base_unit !== $new_base_unit);
 
-        // Preservar borders del original si existe
-        'borders' => $original_config['borders'] ?? [],
+            // Si cambió base_unit, regenerar spacing.values
+            if ($base_unit_changed || !isset($original_config['spacing']['values'])) {
+                $base_unit = (int)str_replace('px', '', $new_base_unit);
+                return [
+                    'base_unit' => $new_base_unit,
+                    'scale' => $data['spacing_scale'] ?? 'proportional',
+                    'values' => [
+                        'xs' => (int)($base_unit * 0.5) . 'px',
+                        'sm' => $base_unit . 'px',
+                        'md' => (int)($base_unit * 1.67) . 'px',
+                        'lg' => (int)($base_unit * 2.33) . 'px',
+                        'xl' => (int)($base_unit * 3) . 'px',
+                        '2xl' => (int)($base_unit * 4) . 'px',
+                        '3xl' => (int)($base_unit * 5.33) . 'px',
+                        '4xl' => (int)($base_unit * 6.67) . 'px'
+                    ]
+                ];
+            }
+
+            // Si NO cambió base_unit, preservar spacing.values del original
+            return [
+                'base_unit' => $new_base_unit,
+                'scale' => $data['spacing_scale'] ?? 'proportional',
+                'values' => $original_config['spacing']['values']
+            ];
+        })(),
+
+        // Generar borders basado en configuración actual de componentes
+        'borders' => [
+            'radius' => ($data['card_rounded'] || $data['button_rounded']) ? [
+                'none' => '0',
+                'sm' => '8px',
+                'md' => '12px',
+                'lg' => '16px',
+                'xl' => '24px',
+                '2xl' => '32px',
+                'full' => '9999px'
+            ] : [
+                'none' => '0',
+                'sm' => '0',
+                'md' => '0',
+                'lg' => '0',
+                'xl' => '0',
+                '2xl' => '0',
+                'full' => '0'
+            ],
+            'width' => $original_config['borders']['width'] ?? [
+                'default' => '1px',
+                'thick' => '2px',
+                'bold' => '3px'
+            ]
+        ],
 
         // Preservar effects del original si existe
         'effects' => $original_config['effects'] ?? [],
@@ -1789,6 +1963,10 @@ function generate_theme($data, $original_config = null) {
                 'border_style' => $data['form_border_style'] ?? 'solid',
                 'focus_ring' => $data['form_focus_ring'] ?? true,
                 'glow_effect' => $data['form_glow_effect'] ?? false
+            ],
+            'badges' => [
+                'cart_shape' => $data['badge_cart_shape'] ?? 'round',
+                'favorite_shape' => $data['badge_favorite_shape'] ?? 'round'
             ],
             // product_view: siempre incluir (permite editar desde generador)
             'product_view' => [
