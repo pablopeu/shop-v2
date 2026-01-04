@@ -1796,6 +1796,7 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
 
                                 <!-- Punto de entrega (si aplica) -->
                                 <input type="hidden" id="shipping_pickup_point_id" name="shipping_pickup_point_id">
+                                <input type="hidden" id="shipping_pickup_point_data" name="shipping_pickup_point_data">
                             </div>
                         </div>
                     </div>
@@ -2376,10 +2377,22 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
             } else if (method === 'pickup_point') {
                 deliveryMethodText = 'Envío a punto de entrega';
 
-                // Intentar obtener el nombre del punto de entrega si está disponible
-                const pickupPointId = document.getElementById('shipping_pickup_point_id')?.value;
-                if (pickupPointId) {
-                    deliveryDetailsHTML = `<p style="margin-top: 0.5rem;"><strong>Punto de entrega:</strong> ID ${pickupPointId}</p>`;
+                // Obtener datos completos del punto de entrega
+                const pickupPointDataStr = document.getElementById('shipping_pickup_point_data')?.value;
+                if (pickupPointDataStr) {
+                    try {
+                        const pointData = JSON.parse(pickupPointDataStr);
+                        const pointName = pointData.description || 'Punto de entrega';
+                        const street = pointData.location?.street || '';
+                        const streetNumber = pointData.location?.street_number || '';
+                        const city = pointData.location?.city || '';
+
+                        deliveryDetailsHTML = `<p style="margin-top: 0.5rem;"><strong>Punto de entrega:</strong> ${pointName}</p>`;
+                        deliveryDetailsHTML += `<p><strong>Dirección:</strong> ${street} ${streetNumber}, ${city}</p>`;
+                    } catch (e) {
+                        console.error('Error parseando datos del punto de entrega:', e);
+                        deliveryDetailsHTML = `<p style="margin-top: 0.5rem;">Punto de entrega seleccionado</p>`;
+                    }
                 }
             }
 

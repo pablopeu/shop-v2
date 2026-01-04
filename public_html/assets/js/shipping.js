@@ -508,10 +508,15 @@ console.log('📦 shipping.js: Archivo cargado');
             // Guardar el punto seleccionado cuando cambia el select
             pickupPointsSelect.addEventListener('change', function() {
                 const selectedPointId = this.value;
-                console.log('📍 Punto de entrega seleccionado:', selectedPointId);
+                const selectedOption = this.options[this.selectedIndex];
+                const pointData = selectedOption.dataset.pointData || '';
 
-                // Guardar en campo hidden
+                console.log('📍 Punto de entrega seleccionado:', selectedPointId);
+                console.log('📍 Datos del punto:', pointData);
+
+                // Guardar en campos hidden
                 setHiddenField('shipping_pickup_point_id', selectedPointId);
+                setHiddenField('shipping_pickup_point_data', pointData);
 
                 // Disparar evento para re-validar el paso 2 del checkout
                 document.dispatchEvent(new CustomEvent('pickupPointSelected', {
@@ -574,9 +579,10 @@ console.log('📦 shipping.js: Archivo cargado');
         // Tags
         setHiddenField('shipping_tags', JSON.stringify(quote.tags || []));
 
-        // Limpiar pickup_point_id si no es una opción de punto de entrega
+        // Limpiar pickup_point_id y datos si no es una opción de punto de entrega
         if (quote.service_type_code !== 'pickup_point') {
             setHiddenField('shipping_pickup_point_id', '');
+            setHiddenField('shipping_pickup_point_data', '');
         }
 
         // Update total
