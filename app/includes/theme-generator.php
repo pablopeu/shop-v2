@@ -1089,26 +1089,26 @@ function generate_theme_css_basic($config) {
 
     // Cart Badge Shape
     $cart_badge_shape = $config['components']['badges']['cart_shape'] ?? 'round';
-    $cart_badge_radius = ($cart_badge_shape === 'round') ? 'var(--border-radius-full)' : 'var(--border-radius-sm)';
+    $cart_badge_radius = ($cart_badge_shape === 'round') ? 'var(--border-radius-full)' : '4px';
 
     $css .= ".cart-badge {\n";
-    $css .= "    border-radius: {$cart_badge_radius};\n";
+    $css .= "    border-radius: {$cart_badge_radius} !important;\n";
     $css .= "}\n\n";
 
     $css .= ".mobile-menu-badge {\n";
-    $css .= "    border-radius: {$cart_badge_radius};\n";
+    $css .= "    border-radius: {$cart_badge_radius} !important;\n";
     $css .= "}\n\n";
 
     // Favorite Button Shape
     $favorite_shape = $config['components']['badges']['favorite_shape'] ?? 'round';
-    $favorite_radius = ($favorite_shape === 'round') ? '50%' : 'var(--border-radius-sm)';
+    $favorite_radius = ($favorite_shape === 'round') ? '50%' : '6px';
 
     $css .= ".favorite-heart-card {\n";
-    $css .= "    border-radius: {$favorite_radius};\n";
+    $css .= "    border-radius: {$favorite_radius} !important;\n";
     $css .= "}\n\n";
 
     $css .= ".favorite-heart {\n";
-    $css .= "    border-radius: {$favorite_radius};\n";
+    $css .= "    border-radius: {$favorite_radius} !important;\n";
     $css .= "}\n\n";
 
     // === HEADER ===
