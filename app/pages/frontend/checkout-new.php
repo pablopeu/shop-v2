@@ -879,17 +879,6 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
             color: white;
         }
 
-        .step-section.completed .step-number-circle::before {
-            content: '✓';
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            z-index: 1;
-        }
-
         .step-header-content {
             flex: 1;
         }
