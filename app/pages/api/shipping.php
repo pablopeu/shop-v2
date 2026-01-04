@@ -8,18 +8,10 @@ if (!defined('APP_ENTRY_POINT')) {
     die('Direct access not permitted');
 }
 
-// LOG: Archivo shipping.php está siendo ejecutado
-error_log('=== SHIPPING.PHP CALLED ===');
-error_log('REQUEST_METHOD: ' . ($_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN'));
-error_log('QUERY_STRING: ' . ($_SERVER['QUERY_STRING'] ?? 'NONE'));
-error_log('GET params: ' . json_encode($_GET));
-
 require_once APP_PATH . '/includes/carriers.php';
 
 // Helper to send JSON response
 function send_json_response($data, $status_code = 200) {
-    error_log('send_json_response called with status: ' . $status_code);
-    error_log('Response data: ' . json_encode($data));
     http_response_code($status_code);
     header('Content-Type: application/json');
     echo json_encode($data);
@@ -28,7 +20,6 @@ function send_json_response($data, $status_code = 200) {
 
 // Determine action based on query parameter
 $action = $_GET['action'] ?? '';
-error_log('Action determined: ' . ($action ?: 'EMPTY'));
 
 /**
  * GET /api/shipping?action=quotes
@@ -103,21 +94,15 @@ if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'GET') {
  * Get shipping quotes (POST version with full data)
  */
 if ($action === 'quotes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    error_log('=== POST QUOTES ENDPOINT MATCHED ===');
-
     // Apply rate limiting
     api_rate_limit(20, 60);
-    error_log('Rate limit passed');
 
     // Require JSON Content-Type
     require_json_content_type();
-    error_log('JSON content type validated');
 
     // Get POST data
     $input = file_get_contents('php://input');
-    error_log('Raw POST input: ' . $input);
     $data = json_decode($input, true);
-    error_log('Decoded data: ' . json_encode($data));
 
     // Validate input
     $validation = validate_api_input($data, [
