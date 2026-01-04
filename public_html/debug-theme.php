@@ -100,19 +100,37 @@ require_once APP_PATH . '/includes/theme-loader.php';
 $theme_config = read_json(APP_PATH . '/config/theme.json');
 $active_theme = $theme_config['active_theme'] ?? 'minimal';
 
-// Theme activo
-$theme_dir = PUBLIC_PATH . "/assets/themes/{$active_theme}";
-$theme_json_content = [];
-if (file_exists($theme_dir . '/theme.json')) {
-    $theme_json_content = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
+// Obtener lista de themes disponibles
+$themes_dir = PUBLIC_PATH . '/assets/themes';
+$available_themes = [];
+if (is_dir($themes_dir)) {
+    $dirs = scandir($themes_dir);
+    foreach ($dirs as $dir) {
+        if ($dir !== '.' && $dir !== '..' && $dir !== '_base' && is_dir($themes_dir . '/' . $dir)) {
+            $available_themes[] = $dir;
+        }
+    }
 }
+sort($available_themes);
 
-// Theme de referencia (modern-compact)
-$reference_theme = 'modern-compact';
+// Leer themes seleccionados desde GET o usar defaults
+$theme1 = $_GET['theme1'] ?? 'modern-compact';
+$theme2 = $_GET['theme2'] ?? $active_theme;
+
+// Theme 1 (columna izquierda - referencia)
+$reference_theme = $theme1;
 $reference_dir = PUBLIC_PATH . "/assets/themes/{$reference_theme}";
 $reference_json = [];
 if (file_exists($reference_dir . '/theme.json')) {
     $reference_json = json_decode(file_get_contents($reference_dir . '/theme.json'), true);
+}
+
+// Theme 2 (columna derecha - comparación)
+$active_theme = $theme2;
+$theme_dir = PUBLIC_PATH . "/assets/themes/{$active_theme}";
+$theme_json_content = [];
+if (file_exists($theme_dir . '/theme.json')) {
+    $theme_json_content = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
 }
 
 /**
@@ -351,6 +369,43 @@ $config_differences = array_filter($config_differences, function($diff) {
 <body>
     <h1>🔬 Theme Testing Tool</h1>
     <p class="subtitle">Herramienta de testing para el generador de themes</p>
+
+    <!-- Selector de Themes -->
+    <div class="info-box" style="background: linear-gradient(135deg, #005461 0%, #007a8a 100%); color: white; margin-bottom: 20px;">
+        <form method="GET" style="display: flex; gap: 20px; align-items: end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">
+                    Theme 1 (Referencia):
+                </label>
+                <select name="theme1" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: none; font-size: 14px;">
+                    <?php foreach ($available_themes as $theme): ?>
+                        <option value="<?php echo htmlspecialchars($theme); ?>" <?php echo $theme === $reference_theme ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($theme); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">
+                    Theme 2 (Comparación):
+                </label>
+                <select name="theme2" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: none; font-size: 14px;">
+                    <?php foreach ($available_themes as $theme): ?>
+                        <option value="<?php echo htmlspecialchars($theme); ?>" <?php echo $theme === $active_theme ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($theme); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div>
+                <button type="submit" style="padding: 10px 24px; background: white; color: #005461; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                    🔄 Comparar
+                </button>
+            </div>
+        </form>
+    </div>
 
     <?php if (isset($save_success)): ?>
         <div class="success-message">
