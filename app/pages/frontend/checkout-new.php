@@ -349,6 +349,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $address = sanitize_input($_POST['shipping_address'] ?? '');
         $document = sanitize_input($_POST['shipping_document'] ?? '');
         $city = sanitize_input($_POST['shipping_city'] ?? '');
+        $barrio = sanitize_input($_POST['shipping_barrio'] ?? ''); // Para CABA (CP 1000-1499)
         $postal_code = sanitize_input($_POST['shipping_postal_code'] ?? '');
         $state = sanitize_input($_POST['shipping_province'] ?? '');
         $country = sanitize_input($_POST['shipping_country'] ?? '');
@@ -384,6 +385,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 'address' => $address,
                 'document' => $document,
                 'city' => $city,
+                'barrio' => $barrio, // Barrio para CABA (CP 1000-1499)
                 'postal_code' => $postal_code,
                 'state' => $state,
                 'country' => $country,
@@ -1718,6 +1720,7 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                                 <input type="hidden" id="shipping_address" name="shipping_address" value="<?php echo htmlspecialchars($_POST['shipping_address'] ?? $saved_address); ?>">
                                 <input type="hidden" id="shipping_postal_code" name="shipping_postal_code" value="<?php echo htmlspecialchars($_POST['shipping_postal_code'] ?? $saved_postal_code); ?>">
                                 <input type="hidden" id="shipping_city" name="shipping_city" value="<?php echo htmlspecialchars($_POST['shipping_city'] ?? $saved_city); ?>">
+                                <input type="hidden" id="shipping_barrio" name="shipping_barrio" value="<?php echo htmlspecialchars($_POST['shipping_barrio'] ?? ''); ?>">
                                 <input type="hidden" id="shipping_province" name="shipping_province" value="<?php echo htmlspecialchars($_POST['shipping_province'] ?? $saved_state ?? ''); ?>">
                                 <input type="hidden" id="shipping_country" name="shipping_country" value="AR">
 

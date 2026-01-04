@@ -319,6 +319,7 @@
             updateHiddenField('shipping_address', direccionCompleta || place.formattedAddress, 'Dirección');
             updateHiddenField('shipping_postal_code', components.codigo_postal, 'Código Postal');
             updateHiddenField('shipping_city', components.localidad || components.ciudad, 'Ciudad/Localidad');
+            updateHiddenField('shipping_barrio', components.barrio, 'Barrio'); // Para CABA (CP 1000-1499)
             updateHiddenField('shipping_province', components.provincia, 'Provincia');
             updateHiddenField('shipping_country', components.pais || 'AR', 'País');
 
