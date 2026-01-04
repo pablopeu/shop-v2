@@ -90,6 +90,10 @@ if (!defined('CLI_MODE') && is_maintenance_mode() && !is_admin_area()) {
 
 // Run pseudo-cron for email queue processing (only in web mode)
 // Executes automatically every 60 seconds with minimal overhead
+// Can be disabled if using real cron job
 if (!defined('CLI_MODE')) {
-    run_pseudo_cron(60);
+    $email_config = read_json(APP_PATH . '/config/email.json');
+    if ($email_config['pseudo_cron_enabled'] ?? true) {
+        run_pseudo_cron(60);
+    }
 }

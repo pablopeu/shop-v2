@@ -4,6 +4,7 @@
     "from_email": "pablou@gmail.com",
     "from_name": "El Mercadito de PEU",
     "admin_email": "pablou@gmail.com",
+    "pseudo_cron_enabled": false,
     "notifications": {
         "customer": {
             "order_created": true,

@@ -21,6 +21,20 @@ $csrf_token = generate_csrf_token();
 $message = '';
 $error = '';
 
+// Toggle pseudo-cron
+if (isset($_POST['toggle_pseudo_cron'])) {
+    if (validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $email_config = read_json(APP_PATH . '/config/email.json');
+        $email_config['pseudo_cron_enabled'] = !($email_config['pseudo_cron_enabled'] ?? true);
+        write_json(APP_PATH . '/config/email.json', $email_config);
+        $status = $email_config['pseudo_cron_enabled'] ? 'activado' : 'desactivado';
+        $message = "Pseudo-cron {$status} correctamente";
+        log_admin_action('toggle_pseudo_cron', $_SESSION['username'], ['enabled' => $email_config['pseudo_cron_enabled']]);
+    } else {
+        $error = 'Token de seguridad inválido';
+    }
+}
+
 // Manual processing
 if (isset($_POST['process_now'])) {
     if (validate_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -42,8 +56,10 @@ if (isset($_POST['process_now'])) {
     }
 }
 
-// Get system info
+// Get system info and email config
 $system_info = get_email_queue_system_info();
+$email_config = read_json(APP_PATH . '/config/email.json');
+$pseudo_cron_enabled = $email_config['pseudo_cron_enabled'] ?? true;
 
 // Detect paths for cron command
 $site_url = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . url('/api/process-email-queue.php?secret=email_queue_cron_2024');
@@ -346,11 +362,33 @@ $user = get_logged_user();
             <h2>📧 Sistema de Cola de Emails</h2>
 
             <div class="info-box">
-                <h4>🚀 Modo Actual: Pseudo-Cron Automático</h4>
-                <p>
-                    El sistema procesa automáticamente la cola de emails cada vez que hay visitas al sitio (máximo 1 vez por minuto).
-                    No requiere configuración - funciona inmediatamente. ✅
-                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4>
+                        <?php if ($pseudo_cron_enabled): ?>
+                            🟢 Pseudo-Cron: <span style="color: #28a745;">ACTIVO</span>
+                        <?php else: ?>
+                            🔴 Pseudo-Cron: <span style="color: #dc3545;">DESACTIVADO</span>
+                        <?php endif; ?>
+                    </h4>
+                    <form method="POST" style="margin: 0;">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                        <button type="submit" name="toggle_pseudo_cron" class="btn-secondary" style="padding: 6px 12px; font-size: 13px;">
+                            <?php echo $pseudo_cron_enabled ? '⏸️ Desactivar' : '▶️ Activar'; ?>
+                        </button>
+                    </form>
+                </div>
+
+                <?php if ($pseudo_cron_enabled): ?>
+                    <p style="margin-bottom: 0;">
+                        El sistema procesa automáticamente la cola de emails cada vez que hay visitas al sitio (máximo 1 vez por minuto).
+                        No requiere configuración adicional.
+                    </p>
+                <?php else: ?>
+                    <p style="margin-bottom: 0; color: #856404; background: #fff3cd; padding: 10px; border-radius: 4px; border-left: 3px solid #ffc107;">
+                        <strong>⚠️ Importante:</strong> Asegurate de tener configurado un cron job real en el hosting para procesar la cola de emails.
+                        De lo contrario, los emails NO se enviarán automáticamente.
+                    </p>
+                <?php endif; ?>
             </div>
 
             <div class="stats-grid">
