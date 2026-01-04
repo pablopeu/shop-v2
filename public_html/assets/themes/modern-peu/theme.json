@@ -1,0 +1,184 @@
+{
+    "name": "Modern PEU",
+    "slug": "modern-peu",
+    "version": "1.0.0",
+    "description": "Theme moderno compacto con glassmorphism, gradientes vibrantes y animaciones fluidas. Tarjetas de producto minimalistas completamente clickeables sin botones. Efectos 3D y sombras profundas.",
+    "author": "Shop Team",
+    "preview_image": "/themes/modern-peu/preview.jpg",
+    "features": {
+        "dark_mode": false,
+        "animations": "fluid",
+        "border_style": "sharp",
+        "shadow_style": "deep",
+        "color_scheme": "vibrant",
+        "glassmorphism": true,
+        "gradient_effects": true,
+        "transform_3d": true
+    },
+    "colors": {
+        "primary": "#005461",
+        "primary_dark": "#003d47",
+        "primary_light": "#006b7b",
+        "secondary": "#018790",
+        "accent": "#00b7b5",
+        "success": "#00b7b5",
+        "warning": "#ffaa00",
+        "error": "#e63946",
+        "info": "#018790",
+        "text": "#2d3748",
+        "background": "#ffffff"
+    },
+    "typography": {
+        "font_family": "sans-serif",
+        "font_family_heading": "sans-serif",
+        "heading_weight": "700",
+        "base_size": "16px",
+        "line_height": "1.6",
+        "font_sizes": {
+            "xs": "12px",
+            "sm": "14px",
+            "base": "16px",
+            "lg": "18px",
+            "xl": "20px",
+            "2xl": "24px",
+            "3xl": "32px",
+            "4xl": "48px"
+        },
+        "font_weights": {
+            "normal": "400",
+            "medium": "500",
+            "semibold": "600",
+            "bold": "700",
+            "extrabold": "800"
+        },
+        "line_heights": {
+            "tight": "1.25",
+            "normal": "1.6",
+            "relaxed": "1.8"
+        }
+    },
+    "spacing": {
+        "base_unit": "8px",
+        "scale": "custom",
+        "values": {
+            "xs": "4px",
+            "sm": "8px",
+            "md": "16px",
+            "lg": "24px",
+            "xl": "32px",
+            "2xl": "48px",
+            "3xl": "64px",
+            "4xl": "96px"
+        }
+    },
+    "borders": {
+        "radius": {
+            "none": "0",
+            "sm": "0",
+            "md": "0",
+            "lg": "0",
+            "xl": "0",
+            "2xl": "0",
+            "full": "0"
+        },
+        "width": {
+            "default": "1px",
+            "thick": "2px",
+            "bold": "3px"
+        }
+    },
+    "effects": {
+        "blur": {
+            "sm": "8px",
+            "md": "16px",
+            "lg": "24px",
+            "xl": "32px"
+        },
+        "shadows": {
+            "xs": "0 1px 2px rgba(0, 84, 97, 0.05)",
+            "sm": "0 2px 8px rgba(0, 84, 97, 0.1)",
+            "md": "0 4px 16px rgba(0, 84, 97, 0.15)",
+            "lg": "0 8px 24px rgba(0, 84, 97, 0.2)",
+            "xl": "0 12px 32px rgba(0, 84, 97, 0.25)",
+            "2xl": "0 20px 48px rgba(0, 84, 97, 0.3)"
+        }
+    },
+    "components": {
+        "buttons": {
+            "style": "gradient",
+            "rounded": false,
+            "shadow": true,
+            "transform": true
+        },
+        "cards": {
+            "border": true,
+            "shadow": true,
+            "rounded": false,
+            "hover_effect": "lift-3d",
+            "glassmorphism": true,
+            "buttons": "hide",
+            "buttons_position": "center",
+            "buttons_spacing": "normal",
+            "buttons_vertical_spacing": "normal"
+        },
+        "forms": {
+            "style": "modern",
+            "border_style": "solid",
+            "focus_ring": true,
+            "glow_effect": true
+        },
+        "badges": {
+            "cart_shape": "round",
+            "favorite_shape": "round"
+        },
+        "product_view": {
+            "gallery_layout": "thumbnails-left",
+            "image_size": "large",
+            "thumbnail_size": "medium",
+            "show_breadcrumb": true,
+            "show_share": true,
+            "show_sku": true,
+            "show_stock": true,
+            "show_nav_buttons": true,
+            "show_image_counter": false
+        },
+        "product_gallery": {
+            "main_image_border_width": "2px",
+            "main_image_border_style": "glassmorphism",
+            "main_image_shadow": "deep",
+            "main_image_border_radius": "xl",
+            "thumbnail_border_width": "3px",
+            "thumbnail_border_radius": "md",
+            "thumbnail_hover_effect": "scale",
+            "thumbnail_opacity_inactive": "0.8"
+        }
+    },
+    "layout": {
+        "container_width": "1200px",
+        "grid_gap": "32px",
+        "sidebar_width": "300px"
+    },
+    "footer": {
+        "background_color": "#292c2f",
+        "text_color": "#ffffff"
+    },
+    "compatibility": {
+        "requires_php": "7.4",
+        "requires_css": "3",
+        "mobile_optimized": true,
+        "rtl_support": false,
+        "accessibility": "wcag-aa"
+    },
+    "tags": [
+        "modern",
+        "glassmorphism",
+        "gradient",
+        "vibrant",
+        "3d-effects",
+        "fluid-animations",
+        "rounded",
+        "innovative"
+    ],
+    "created_at": "2025-12-13",
+    "updated_at": "2026-01-04"
+}

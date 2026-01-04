@@ -216,22 +216,35 @@ try {
         error_log("API CreateShipment: Usando tariff_id: " . $quote_data['tariff_id']);
     }
 
-    // Determinar qué usar en 'city' según el código postal (CABA = 1000-1499)
-    $postal_code_raw = $shipping_address['postal_code'] ?? '';
-    $postal_code_numeric = (int)preg_replace('/[^0-9]/', '', $postal_code_raw);
-    $city_to_use = $shipping_address['city'] ?? '';
+    // CRÍTICO: Usar el mismo destination que se usó en la cotización (para consistencia)
+    // Prioridad: destination guardado en quote_data > calcular desde shipping_address
+    $destination_for_shipment = $quote_data['destination'] ?? null;
 
-    // Si es CABA (CP 1000-1499) y hay barrio disponible, usar barrio; sino usar localidad
-    if ($postal_code_numeric >= 1000 && $postal_code_numeric <= 1499) {
-        $barrio = $shipping_address['barrio'] ?? '';
-        if (!empty($barrio)) {
-            $city_to_use = $barrio;
-            error_log("API CreateShipment: CABA detectada (CP: $postal_code_numeric) - usando barrio: $barrio");
-        } else {
-            error_log("API CreateShipment: CABA detectada (CP: $postal_code_numeric) pero no hay barrio - usando city: $city_to_use");
-        }
+    if ($destination_for_shipment && !empty($destination_for_shipment['city'])) {
+        // Usar el destination exacto de la cotización
+        $city_to_use = $destination_for_shipment['city'];
+        $state_to_use = $destination_for_shipment['state'];
+        $zipcode_to_use = $destination_for_shipment['zipcode'];
+        error_log("API CreateShipment: Usando destination de quote_data - city: $city_to_use");
     } else {
-        error_log("API CreateShipment: Fuera de CABA (CP: $postal_code_numeric) - usando localidad: $city_to_use");
+        // Fallback para órdenes viejas: calcular según lógica CP 1000-1499
+        $postal_code_raw = $shipping_address['postal_code'] ?? '';
+        $postal_code_numeric = (int)preg_replace('/[^0-9]/', '', $postal_code_raw);
+        $city_to_use = $shipping_address['city'] ?? '';
+        $state_to_use = $shipping_address['province'] ?? $shipping_address['state'] ?? '';
+        $zipcode_to_use = $postal_code_raw;
+
+        if ($postal_code_numeric >= 1000 && $postal_code_numeric <= 1499) {
+            $barrio = $shipping_address['barrio'] ?? '';
+            if (!empty($barrio)) {
+                $city_to_use = $barrio;
+                error_log("API CreateShipment: FALLBACK - CABA detectada (CP: $postal_code_numeric) - usando barrio: $barrio");
+            } else {
+                error_log("API CreateShipment: FALLBACK - CABA detectada (CP: $postal_code_numeric) pero no hay barrio - usando city: $city_to_use");
+            }
+        } else {
+            error_log("API CreateShipment: FALLBACK - Fuera de CABA (CP: $postal_code_numeric) - usando localidad: $city_to_use");
+        }
     }
 
     // Preparar datos para crear envío en Zipnova (formato correcto según API)
@@ -257,9 +270,9 @@ try {
             'street' => $street,
             'street_number' => $street_number,
             'street_extras' => $shipping_address['notes'] ?? '', // Referencias: piso, depto, entre calles
-            'city' => $city_to_use, // Barrio para CABA (1000-1499), localidad para el resto
-            'state' => $shipping_address['province'] ?? $shipping_address['state'] ?? '',
-            'zipcode' => $shipping_address['postal_code'] ?? '',
+            'city' => $city_to_use, // Usa destination de quote_data o calcula según regla CABA
+            'state' => $state_to_use,
+            'zipcode' => $zipcode_to_use,
             'country' => $shipping_address['country'] ?? 'AR',
             'phone' => $shipping_address['phone'] ?? $order['customer_phone'] ?? '',
             'email' => $order['customer_email'] ?? '',

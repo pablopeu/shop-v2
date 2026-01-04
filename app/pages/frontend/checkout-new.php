@@ -503,7 +503,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 'tariff_id' => $shipping_tariff_id,
                 'rate_source' => $shipping_rate_source,
                 'tags' => $shipping_tags,
-                'pickup_point_id' => $shipping_pickup_point_id
+                'pickup_point_id' => $shipping_pickup_point_id,
+                // Guardar el destination que se usó en la cotización (CRÍTICO para consistencia)
+                'destination' => function() use ($shipping_address) {
+                    if (!$shipping_address) return null;
+
+                    // Aplicar la MISMA lógica que shipping.js: CP 1000-1499 usa barrio
+                    $postal_code_numeric = (int)preg_replace('/[^0-9]/', '', $shipping_address['postal_code'] ?? '');
+                    $city_for_quote = $shipping_address['city'] ?? '';
+
+                    if ($postal_code_numeric >= 1000 && $postal_code_numeric <= 1499) {
+                        $barrio = $shipping_address['barrio'] ?? '';
+                        if (!empty($barrio)) {
+                            $city_for_quote = $barrio;
+                        }
+                    }
+
+                    return [
+                        'city' => $city_for_quote,
+                        'state' => $shipping_address['state'] ?? $shipping_address['province'] ?? '',
+                        'zipcode' => preg_replace('/[^0-9]/', '', $shipping_address['postal_code'] ?? '')
+                    ];
+                }()
             ],
             'total' => $total_with_shipping,
             'payment_method' => $payment_method,
