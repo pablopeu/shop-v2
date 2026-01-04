@@ -1574,7 +1574,7 @@ $user = get_logged_user();
                     </div>
 
                     <!-- Componentes: Badges -->
-                    <div class="card card-full" style="margin-top: 20px;">
+                    <div class="card card-half">
                         <div class="card-title">
                             🏷️ Componentes: Badges e Iconos
                         </div>
@@ -1611,7 +1611,7 @@ $user = get_logged_user();
                     </div>
 
                     <!-- Componentes: Forms -->
-                    <div class="card card-full" style="margin-top: 20px;">
+                    <div class="card card-half">
                         <div class="card-title">
                             📝 Componentes: Formularios
                         </div>
@@ -2587,6 +2587,13 @@ $user = get_logged_user();
 
                     const formGlowEffect = document.querySelector('[name="form_glow_effect"]');
                     if (formGlowEffect) formGlowEffect.checked = config.components?.forms?.glow_effect || false;
+
+                    // Poblar badges
+                    const badgeCartShape = config.components?.badges?.cart_shape || 'round';
+                    document.querySelector(`[name="badge_cart_shape"][value="${badgeCartShape}"]`)?.click();
+
+                    const badgeFavoriteShape = config.components?.badges?.favorite_shape || 'round';
+                    document.querySelector(`[name="badge_favorite_shape"][value="${badgeFavoriteShape}"]`)?.click();
 
                     // Mostrar sección de actualizar paleta
                     const editPaletteSection = document.getElementById('edit-palette-section');
