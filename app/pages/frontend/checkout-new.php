@@ -409,6 +409,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     // If no errors, create order
     if (empty($errors)) {
 
+        // Calcular el destination que se usó en la cotización (para consistencia con etiqueta)
+        $quote_destination = null;
+        if ($shipping_address) {
+            $postal_code_numeric = (int)preg_replace('/[^0-9]/', '', $shipping_address['postal_code'] ?? '');
+            $city_for_quote = $shipping_address['city'] ?? '';
+
+            // Aplicar la MISMA lógica que shipping.js: CP 1000-1499 usa barrio
+            if ($postal_code_numeric >= 1000 && $postal_code_numeric <= 1499) {
+                $barrio = $shipping_address['barrio'] ?? '';
+                if (!empty($barrio)) {
+                    $city_for_quote = $barrio;
+                }
+            }
+
+            $quote_destination = [
+                'city' => $city_for_quote,
+                'state' => $shipping_address['state'] ?? '',
+                'zipcode' => preg_replace('/[^0-9]/', '', $shipping_address['postal_code'] ?? '')
+            ];
+        }
+
         // Get shipping data from form - datos completos de cotización
         $shipping_cost = floatval($_POST['shipping_cost'] ?? 0);
         $shipping_service_id = sanitize_input($_POST['shipping_service_id'] ?? '');
@@ -505,26 +526,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 'tags' => $shipping_tags,
                 'pickup_point_id' => $shipping_pickup_point_id,
                 // Guardar el destination que se usó en la cotización (CRÍTICO para consistencia)
-                'destination' => function() use ($shipping_address) {
-                    if (!$shipping_address) return null;
-
-                    // Aplicar la MISMA lógica que shipping.js: CP 1000-1499 usa barrio
-                    $postal_code_numeric = (int)preg_replace('/[^0-9]/', '', $shipping_address['postal_code'] ?? '');
-                    $city_for_quote = $shipping_address['city'] ?? '';
-
-                    if ($postal_code_numeric >= 1000 && $postal_code_numeric <= 1499) {
-                        $barrio = $shipping_address['barrio'] ?? '';
-                        if (!empty($barrio)) {
-                            $city_for_quote = $barrio;
-                        }
-                    }
-
-                    return [
-                        'city' => $city_for_quote,
-                        'state' => $shipping_address['state'] ?? $shipping_address['province'] ?? '',
-                        'zipcode' => preg_replace('/[^0-9]/', '', $shipping_address['postal_code'] ?? '')
-                    ];
-                }()
+                'destination' => $quote_destination
             ],
             'total' => $total_with_shipping,
             'payment_method' => $payment_method,
