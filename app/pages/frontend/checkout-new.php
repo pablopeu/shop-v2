@@ -2265,12 +2265,22 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
         document.addEventListener('shippingSelected', function(e) {
             shippingQuoteSelected = true;
             validateStep2(); // Re-validate to complete step
+
+            // Actualizar resumen si el paso 5 está disponible
+            if (typeof updateConfirmationSummary === 'function') {
+                updateConfirmationSummary();
+            }
         });
 
         // Listen for pickup point selection
         document.addEventListener('pickupPointSelected', function(e) {
             console.log('📍 Pickup point selected event received:', e.detail.pointId);
             validateStep2(); // Re-validate to complete step
+
+            // Actualizar resumen si el paso 5 está disponible
+            if (typeof updateConfirmationSummary === 'function') {
+                updateConfirmationSummary();
+            }
         });
 
         // Initial validation for delivery method (shows shipping fields if saved method is 'shipping')
