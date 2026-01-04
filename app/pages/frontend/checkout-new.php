@@ -1884,9 +1884,17 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                         </div>
                         <div class="step-content">
                             <div class="summary-box">
-                                <p><strong>Contacto:</strong> <span id="confirm-name"></span> • <span id="confirm-email"></span></p>
-                                <p><strong>Entrega:</strong> <span id="confirm-delivery"></span></p>
-                                <p><strong>Pago:</strong> <span id="confirm-payment"></span></p>
+                                <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--checkout-text-primary);">📋 Datos de contacto</h4>
+                                <p><strong>Nombre:</strong> <span id="confirm-name"></span></p>
+                                <p><strong>Email:</strong> <span id="confirm-email"></span></p>
+                                <p><strong>Teléfono:</strong> <span id="confirm-phone"></span></p>
+
+                                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--checkout-text-primary);">🚚 Datos de entrega</h4>
+                                <p><strong>Método:</strong> <span id="confirm-delivery-method"></span></p>
+                                <div id="confirm-delivery-details"></div>
+
+                                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--checkout-text-primary);">💳 Forma de pago</h4>
+                                <p id="confirm-payment"></p>
                             </div>
 
                             <!-- Botón para mobile al final del paso 5 -->
@@ -2333,15 +2341,55 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
         }
 
         function updateConfirmationSummary() {
+            // Datos de contacto
             document.getElementById('confirm-name').textContent = document.getElementById('customer_name').value;
             document.getElementById('confirm-email').textContent = document.getElementById('customer_email').value;
 
-            const method = document.querySelector('input[name="delivery_method"]:checked').value;
-            document.getElementById('confirm-delivery').textContent = method === 'pickup' ? 'Retiro en persona' : 'Envío a domicilio';
+            const countryCode = document.getElementById('country_code').value;
+            const phone = document.getElementById('customer_phone').value;
+            document.getElementById('confirm-phone').textContent = countryCode + ' ' + phone;
 
+            // Método de entrega
+            const method = document.querySelector('input[name="delivery_method"]:checked').value;
+            const deliveryDetailsDiv = document.getElementById('confirm-delivery-details');
+
+            let deliveryMethodText = '';
+            let deliveryDetailsHTML = '';
+
+            if (method === 'pickup') {
+                deliveryMethodText = 'Retiro en persona';
+            } else if (method === 'home_delivery') {
+                deliveryMethodText = 'Envío a domicilio';
+
+                // Construir dirección completa
+                const address = document.getElementById('shipping_address')?.value || '';
+                const city = document.getElementById('shipping_city')?.value || '';
+                const province = document.getElementById('shipping_province')?.value || '';
+                const postalCode = document.getElementById('shipping_postal_code')?.value || '';
+
+                deliveryDetailsHTML = `<p style="margin-top: 0.5rem;"><strong>Dirección:</strong> ${address}</p>`;
+                deliveryDetailsHTML += `<p><strong>Ciudad:</strong> ${city}</p>`;
+                deliveryDetailsHTML += `<p><strong>Provincia:</strong> ${province}</p>`;
+                if (postalCode) {
+                    deliveryDetailsHTML += `<p><strong>Código postal:</strong> ${postalCode}</p>`;
+                }
+            } else if (method === 'pickup_point') {
+                deliveryMethodText = 'Envío a punto de entrega';
+
+                // Intentar obtener el nombre del punto de entrega si está disponible
+                const pickupPointId = document.getElementById('shipping_pickup_point_id')?.value;
+                if (pickupPointId) {
+                    deliveryDetailsHTML = `<p style="margin-top: 0.5rem;"><strong>Punto de entrega:</strong> ID ${pickupPointId}</p>`;
+                }
+            }
+
+            document.getElementById('confirm-delivery-method').textContent = deliveryMethodText;
+            deliveryDetailsDiv.innerHTML = deliveryDetailsHTML;
+
+            // Forma de pago
             const payment = document.querySelector('input[name="payment_method"]:checked').value;
             let paymentText = '';
-            if (payment === 'arrangement') paymentText = 'Arreglo';
+            if (payment === 'arrangement') paymentText = 'Arreglo con el vendedor';
             else if (payment === 'pickup_payment') paymentText = 'Pago al retirar';
             else if (payment === 'mercadopago') paymentText = 'Mercadopago';
             document.getElementById('confirm-payment').textContent = paymentText;
