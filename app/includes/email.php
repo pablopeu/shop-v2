@@ -1051,11 +1051,9 @@ function process_email_queue($batch_size = 10) {
     foreach ($queue as $key => $email) {
         // Skip if already processed
         if ($email['status'] !== 'pending') {
-            if ($email['status'] === 'sent') {
-                $stats['sent']++;
-            } elseif ($email['status'] === 'failed') {
-                $stats['failed']++;
-            }
+            // Solo incrementar skipped (para log/debug)
+            // NO contar como enviados/fallidos en ESTA ejecución
+            // (ya fueron contados cuando se procesaron originalmente)
             $stats['skipped']++;
             continue;
         }

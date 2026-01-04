@@ -21,6 +21,27 @@ $csrf_token = generate_csrf_token();
 $message = '';
 $error = '';
 
+// Reset statistics
+if (isset($_POST['reset_stats'])) {
+    if (validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        $stats_file = APP_PATH . '/data/pseudo_cron_stats.json';
+        $reset_stats = [
+            'total_executions' => 0,
+            'total_sent' => 0,
+            'total_failed' => 0,
+            'last_execution' => null,
+            'executions_today' => 0,
+            'last_reset_date' => date('Y-m-d'),
+            'last_result' => null
+        ];
+        write_json($stats_file, $reset_stats);
+        $message = "Estadísticas reseteadas correctamente";
+        log_admin_action('reset_email_stats', $_SESSION['username'], []);
+    } else {
+        $error = 'Token de seguridad inválido';
+    }
+}
+
 // Toggle pseudo-cron
 if (isset($_POST['toggle_pseudo_cron'])) {
     if (validate_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -438,44 +459,37 @@ $user = get_logged_user();
             </form>
         </div>
 
-        <!-- Mejora Opcional: Cron Real -->
+        <!-- Configuración Cron Real -->
         <div class="card">
-            <div class="collapsible-section">
-                <div class="collapsible-header" data-action="toggleSection" data-target="cron-instructions">
-                    <div>
-                        <?php if ($pseudo_cron_enabled): ?>
-                            <h2 style="margin: 0;">💡 Mejora Opcional: Configurar Cron Real</h2>
-                            <p style="font-size: 13px; color: #6c757d; margin-top: 4px;">
-                                Para mejor rendimiento independiente del tráfico del sitio
-                            </p>
-                        <?php else: ?>
-                            <h2 style="margin: 0;">⚙️ Configuración Requerida: Cron Real del Hosting</h2>
-                            <p style="font-size: 13px; color: #dc3545; margin-top: 4px; font-weight: 600;">
-                                ⚠️ El pseudo-cron está desactivado - DEBES configurar el cron real para enviar emails
-                            </p>
-                        <?php endif; ?>
-                    </div>
-                    <span class="toggle-icon">▼</span>
-                </div>
+            <?php if ($pseudo_cron_enabled): ?>
+                <h2>💡 Mejora Opcional: Configurar Cron Real</h2>
+                <p style="font-size: 13px; color: #6c757d; margin-bottom: 20px;">
+                    Para mejor rendimiento independiente del tráfico del sitio
+                </p>
+            <?php else: ?>
+                <h2>⚙️ Configuración Requerida: Cron Real del Hosting</h2>
+                <p style="font-size: 13px; color: #dc3545; margin-bottom: 20px; font-weight: 600;">
+                    ⚠️ El pseudo-cron está desactivado - DEBES configurar el cron real para enviar emails
+                </p>
+            <?php endif; ?>
 
-                <div class="collapsible-content <?php echo !$pseudo_cron_enabled ? 'open' : ''; ?>" id="cron-instructions">
-                    <?php if ($pseudo_cron_enabled): ?>
-                        <div class="warning-box">
-                            <h4>💡 Esto es completamente opcional</h4>
-                            <p>
-                                El sistema ya funciona automáticamente con pseudo-cron. Solo configura esto si quieres
-                                que los emails se procesen incluso cuando no hay visitas al sitio.
-                            </p>
-                        </div>
-                    <?php else: ?>
-                        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-                            <h4 style="color: #856404; margin: 0 0 8px 0;">⚠️ Configuración Obligatoria</h4>
-                            <p style="color: #856404; margin: 0;">
-                                Como el pseudo-cron está desactivado, <strong>DEBES configurar un cron job real</strong>
-                                en tu hosting. Sin esto, los emails NO se enviarán automáticamente.
-                            </p>
-                        </div>
-                    <?php endif; ?>
+            <?php if ($pseudo_cron_enabled): ?>
+                <div class="warning-box">
+                    <h4>💡 Esto es completamente opcional</h4>
+                    <p>
+                        El sistema ya funciona automáticamente con pseudo-cron. Solo configura esto si quieres
+                        que los emails se procesen incluso cuando no hay visitas al sitio.
+                    </p>
+                </div>
+            <?php else: ?>
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                    <h4 style="color: #856404; margin: 0 0 8px 0;">⚠️ Configuración Obligatoria</h4>
+                    <p style="color: #856404; margin: 0;">
+                        Como el pseudo-cron está desactivado, <strong>DEBES configurar un cron job real</strong>
+                        en tu hosting. Sin esto, los emails NO se enviarán automáticamente.
+                    </p>
+                </div>
+            <?php endif; ?>
 
                     <h3>Instrucciones para cPanel:</h3>
 
@@ -527,14 +541,12 @@ $user = get_logged_user();
                         <li><strong>Log:</strong> <code><?php echo $log_path; ?></code></li>
                     </ul>
 
-                    <div class="info-box" style="margin-top: 20px;">
-                        <h4>💡 ¿Cómo saber si funciona?</h4>
-                        <p>
-                            Una vez configurado, el cron job creará el archivo de log. Puedes ver su contenido
-                            desde el File Manager de cPanel o contactar a tu hosting para verificar que se está ejecutando.
-                        </p>
-                    </div>
-                </div>
+            <div class="info-box" style="margin-top: 20px;">
+                <h4>💡 ¿Cómo saber si funciona?</h4>
+                <p>
+                    Una vez configurado, el cron job creará el archivo de log. Puedes ver su contenido
+                    desde el File Manager de cPanel o contactar a tu hosting para verificar que se está ejecutando.
+                </p>
             </div>
         </div>
 
