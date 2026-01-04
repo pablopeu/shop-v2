@@ -509,10 +509,15 @@ console.log('📦 shipping.js: Archivo cargado');
             pickupPointsSelect.addEventListener('change', function() {
                 const selectedPointId = this.value;
                 const selectedOption = this.options[this.selectedIndex];
-                const pointData = selectedOption.dataset.pointData || '';
 
                 console.log('📍 Punto de entrega seleccionado:', selectedPointId);
-                console.log('📍 Datos del punto:', pointData);
+                console.log('📍 selectedOption:', selectedOption);
+                console.log('📍 dataset completo:', selectedOption.dataset);
+                console.log('📍 pointData en dataset:', selectedOption.dataset.pointData);
+
+                const pointData = selectedOption.dataset.pointData || '';
+
+                console.log('📍 Datos del punto (final):', pointData);
 
                 // Guardar en campos hidden
                 setHiddenField('shipping_pickup_point_id', selectedPointId);
