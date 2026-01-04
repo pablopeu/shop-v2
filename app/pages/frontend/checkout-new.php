@@ -1887,6 +1887,7 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                             <div class="summary-box">
                                 <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--checkout-text-primary);">📋 Datos de contacto</h4>
                                 <p><strong>Nombre:</strong> <span id="confirm-name"></span></p>
+                                <div id="confirm-address"></div>
                                 <p><strong>Email:</strong> <span id="confirm-email"></span></p>
                                 <p><strong>Teléfono:</strong> <span id="confirm-phone"></span></p>
 
@@ -2372,32 +2373,43 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
 
             // Método de entrega
             const method = deliveryMethodRadio.value;
+            const addressDiv = document.getElementById('confirm-address');
             const deliveryDetailsDiv = document.getElementById('confirm-delivery-details');
 
+            let addressHTML = '';
             let deliveryMethodText = '';
             let deliveryDetailsHTML = '';
 
+            // Obtener datos de dirección (se usan tanto para mostrar en contacto como en entrega)
+            const address = document.getElementById('shipping_address')?.value || '';
+            const city = document.getElementById('shipping_city')?.value || '';
+            const province = document.getElementById('shipping_province')?.value || '';
+            const postalCode = document.getElementById('shipping_postal_code')?.value || '';
+
             if (method === 'pickup') {
                 deliveryMethodText = 'Retiro en persona';
+                // No mostrar dirección en contacto para retiro en persona
             } else if (method === 'home_delivery') {
                 deliveryMethodText = 'Envío a domicilio';
 
-                // Construir dirección completa
-                const address = document.getElementById('shipping_address')?.value || '';
-                const city = document.getElementById('shipping_city')?.value || '';
-                const province = document.getElementById('shipping_province')?.value || '';
-                const postalCode = document.getElementById('shipping_postal_code')?.value || '';
+                // Mostrar dirección del comprador en datos de contacto
+                if (address) {
+                    addressHTML = `<p>${address}, ${city}</p>`;
+                    addressHTML += `<p>${postalCode}, ${province}</p>`;
+                }
 
-                deliveryDetailsHTML = `<p style="margin-top: 0.5rem;"><strong>Dirección:</strong> ${address}</p>`;
-                deliveryDetailsHTML += `<p><strong>Ciudad:</strong> ${city}</p>`;
-                deliveryDetailsHTML += `<p><strong>Provincia:</strong> ${province}</p>`;
+                // Mostrar dirección completa en datos de entrega
+                deliveryDetailsHTML = `<p style="margin-top: 0.5rem;"><strong>Dirección de entrega:</strong> ${address}</p>`;
+                deliveryDetailsHTML += `<p>${city}, ${province}</p>`;
                 if (postalCode) {
                     deliveryDetailsHTML += `<p><strong>Código postal:</strong> ${postalCode}</p>`;
                 }
             } else if (method === 'pickup_point') {
                 deliveryMethodText = 'Envío a punto de entrega';
 
-                // Obtener datos completos del punto de entrega
+                // NO mostrar dirección del comprador en datos de contacto
+
+                // Mostrar datos del punto de entrega
                 const pickupPointDataStr = document.getElementById('shipping_pickup_point_data')?.value;
                 if (pickupPointDataStr) {
                     try {
@@ -2407,15 +2419,18 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                         const streetNumber = pointData.location?.street_number || '';
                         const city = pointData.location?.city || '';
 
-                        deliveryDetailsHTML = `<p style="margin-top: 0.5rem;"><strong>Punto de entrega:</strong> ${pointName}</p>`;
-                        deliveryDetailsHTML += `<p><strong>Dirección:</strong> ${street} ${streetNumber}, ${city}</p>`;
+                        deliveryDetailsHTML = `<p style="margin-top: 0.5rem;"><strong>${pointName}</strong></p>`;
+                        deliveryDetailsHTML += `<p>${street} ${streetNumber}, ${city}</p>`;
                     } catch (e) {
                         console.error('Error parseando datos del punto de entrega:', e);
                         deliveryDetailsHTML = `<p style="margin-top: 0.5rem;">Punto de entrega seleccionado</p>`;
                     }
+                } else {
+                    console.log('⚠️ No hay datos del punto de entrega en shipping_pickup_point_data');
                 }
             }
 
+            addressDiv.innerHTML = addressHTML;
             document.getElementById('confirm-delivery-method').textContent = deliveryMethodText;
             deliveryDetailsDiv.innerHTML = deliveryDetailsHTML;
 
