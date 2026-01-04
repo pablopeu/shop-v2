@@ -1082,6 +1082,35 @@ function generate_theme_css_basic($config) {
         $css .= "}\n\n";
     }
 
+    // === BADGES ===
+    $css .= "/* =================================\n";
+    $css .= "   BADGES\n";
+    $css .= "   ================================= */\n\n";
+
+    // Cart Badge Shape
+    $cart_badge_shape = $config['components']['badges']['cart_shape'] ?? 'round';
+    $cart_badge_radius = ($cart_badge_shape === 'round') ? 'var(--border-radius-full)' : 'var(--border-radius-sm)';
+
+    $css .= ".cart-badge {\n";
+    $css .= "    border-radius: {$cart_badge_radius};\n";
+    $css .= "}\n\n";
+
+    $css .= ".mobile-menu-badge {\n";
+    $css .= "    border-radius: {$cart_badge_radius};\n";
+    $css .= "}\n\n";
+
+    // Favorite Button Shape
+    $favorite_shape = $config['components']['badges']['favorite_shape'] ?? 'round';
+    $favorite_radius = ($favorite_shape === 'round') ? '50%' : 'var(--border-radius-sm)';
+
+    $css .= ".favorite-heart-card {\n";
+    $css .= "    border-radius: {$favorite_radius};\n";
+    $css .= "}\n\n";
+
+    $css .= ".favorite-heart {\n";
+    $css .= "    border-radius: {$favorite_radius};\n";
+    $css .= "}\n\n";
+
     // === HEADER ===
     $css .= "/* =================================\n";
     $css .= "   HEADER\n";
@@ -1934,6 +1963,10 @@ function generate_theme($data, $original_config = null) {
                 'border_style' => $data['form_border_style'] ?? 'solid',
                 'focus_ring' => $data['form_focus_ring'] ?? true,
                 'glow_effect' => $data['form_glow_effect'] ?? false
+            ],
+            'badges' => [
+                'cart_shape' => $data['badge_cart_shape'] ?? 'round',
+                'favorite_shape' => $data['badge_favorite_shape'] ?? 'round'
             ],
             // product_view: siempre incluir (permite editar desde generador)
             'product_view' => [

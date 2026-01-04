@@ -37,6 +37,8 @@ $form_values = [
     'button_width' => 'auto',
     'button_icon' => 'show',
     'button_hover' => 'lift',
+    'badge_cart_shape' => 'round',
+    'badge_favorite_shape' => 'round',
     'product_gallery_layout' => 'thumbnails-bottom',
     'product_image_size' => 'medium',
     'product_thumbnail_size' => 'medium',
@@ -131,6 +133,10 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
             'button_width' => $edit_config['components']['buttons']['width'] ?? 'auto',
             'button_icon' => $edit_config['components']['buttons']['icon'] ?? 'show',
             'button_hover' => $edit_config['components']['buttons']['hover'] ?? 'lift',
+
+            // Badges
+            'badge_cart_shape' => $edit_config['components']['badges']['cart_shape'] ?? 'round',
+            'badge_favorite_shape' => $edit_config['components']['badges']['favorite_shape'] ?? 'round',
 
             // Vista de Producto
             'product_gallery_layout' => $edit_config['components']['product_view']['gallery_layout'] ?? 'thumbnails-bottom',
@@ -240,6 +246,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_theme'])) {
             'button_width' => sanitize_input($_POST['button_width'] ?? 'auto'),
             'button_icon' => sanitize_input($_POST['button_icon'] ?? 'show'),
             'button_hover' => sanitize_input($_POST['button_hover'] ?? 'lift'),
+
+            // Componentes: Badges
+            'badge_cart_shape' => sanitize_input($_POST['badge_cart_shape'] ?? 'round'),
+            'badge_favorite_shape' => sanitize_input($_POST['badge_favorite_shape'] ?? 'round'),
 
             // Componentes: Vista Producto
             'product_gallery_layout' => sanitize_input($_POST['product_gallery_layout'] ?? 'thumbnails-bottom'),
@@ -1560,6 +1570,43 @@ $user = get_logged_user();
                                     Con sombra
                                 </label>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Componentes: Badges -->
+                    <div class="card card-full" style="margin-top: 20px;">
+                        <div class="card-title">
+                            🏷️ Componentes: Badges e Iconos
+                        </div>
+
+                        <div class="form-group">
+                            <label>Badge del Carrito (contador de items)</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="badge_cart_shape" value="round" <?php echo ($form_values['badge_cart_shape'] ?? 'round') === 'round' ? 'checked' : ''; ?>>
+                                    Redondo
+                                </label>
+                                <label>
+                                    <input type="radio" name="badge_cart_shape" value="square" <?php echo ($form_values['badge_cart_shape'] ?? 'round') === 'square' ? 'checked' : ''; ?>>
+                                    Cuadrado
+                                </label>
+                            </div>
+                            <small class="helper-text">Forma del badge que muestra el número de items en el carrito</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Botón de Favoritos (corazón)</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="badge_favorite_shape" value="round" <?php echo ($form_values['badge_favorite_shape'] ?? 'round') === 'round' ? 'checked' : ''; ?>>
+                                    Redondo
+                                </label>
+                                <label>
+                                    <input type="radio" name="badge_favorite_shape" value="square" <?php echo ($form_values['badge_favorite_shape'] ?? 'round') === 'square' ? 'checked' : ''; ?>>
+                                    Cuadrado
+                                </label>
+                            </div>
+                            <small class="helper-text">Forma del botón de favoritos en las cards de productos</small>
                         </div>
                     </div>
 
