@@ -1,6 +1,4 @@
 <?php
-error_log("=== INDEX.PHP START ===");
-
 /**
  * Main Entry Point
  * Este es el ÚNICO punto de entrada público para el frontend
@@ -9,38 +7,26 @@ error_log("=== INDEX.PHP START ===");
  * el acceso a los archivos del sistema.
  */
 
-error_log("INDEX.PHP - Line 10: About to define APP_ENTRY_POINT");
-
 // Define como punto de entrada autorizado
 define('APP_ENTRY_POINT', true);
 
-error_log("INDEX.PHP - Line 15: APP_ENTRY_POINT defined");
-
 // Bootstrap de la aplicación
 // Cargar configuración de ruta al bootstrap (generada por instalador)
-error_log("INDEX.PHP - Line 19: About to load bootstrap");
-
 $bootstrap_config = __DIR__ . '/bootstrap_path.php';
 if (file_exists($bootstrap_config)) {
     require_once $bootstrap_config;
     if (defined('BOOTSTRAP_PATH') && file_exists(BOOTSTRAP_PATH)) {
-        error_log("INDEX.PHP - Line 22: Loading bootstrap from: " . BOOTSTRAP_PATH);
         require_once BOOTSTRAP_PATH;
     } else {
         die('Bootstrap file not found. Please check your installation.');
     }
 } else {
     // Fallback para desarrollo (estructura relativa)
-    error_log("INDEX.PHP - Line 27: Using development fallback");
     require_once __DIR__ . '/../app/bootstrap.php';
 }
 
-error_log("INDEX.PHP - Line 30: Bootstrap loading complete");
-
 // Obtener la ruta desde REQUEST_URI (FallbackResource mode)
-error_log("INDEX.PHP - Line 41: About to parse REQUEST_URI");
 $request_uri = $_SERVER['REQUEST_URI'] ?? '/';
-error_log("INDEX.PHP - Line 43: REQUEST_URI = " . $request_uri);
 
 // Remove base_path prefix dynamically (set by installer)
 $base_path = $config['base_path'] ?? '';
@@ -50,28 +36,14 @@ $route = parse_url($request_uri, PHP_URL_PATH);
 if ($base_path && $base_path !== '/' && $base_path !== '') {
     $pattern = '#^' . preg_quote($base_path, '#') . '#';
     $route = preg_replace($pattern, '', $route);
-    error_log("INDEX.PHP - Line 47: After removing base_path '$base_path' prefix, route = " . ($route ?: 'EMPTY'));
-} else {
-    error_log("INDEX.PHP - Line 47: No base_path to remove (base_path = '$base_path'), route = " . ($route ?: 'EMPTY'));
 }
 
 $route = $route ?: '/';
-error_log("INDEX.PHP - Line 50: Final route = " . $route);
-
-// DEBUG: Log routing info (TEMPORAL)
-error_log("INDEX.PHP - REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'NOT SET'));
-error_log("INDEX.PHP - Calculated route: " . $route);
-error_log("INDEX.PHP - QUERY_STRING: " . ($_SERVER['QUERY_STRING'] ?? 'NOT SET'));
-
-error_log("INDEX.PHP - Line 57: About to create Router");
 
 // Router principal
 $router = new Router();
 
-error_log("INDEX.PHP - Line 62: Router created");
-
 // Definir rutas públicas
-error_log("INDEX.PHP - Line 67: Defining routes");
 $router->get('/', 'pages/frontend/home.php');
 $router->get('/producto/:slug', 'pages/frontend/producto.php');
 $router->get('/buscar', 'pages/frontend/buscar.php');
@@ -86,10 +58,6 @@ $router->get('/pedido', 'pages/frontend/pedido.php');
 $router->get('/gracias', 'pages/frontend/gracias.php');
 $router->get('/pendiente', 'pages/frontend/pendiente.php');
 $router->get('/preview', 'pages/frontend/preview.php');
-error_log("INDEX.PHP - Line 80: All routes defined");
 
 // Ejecutar router
-error_log("INDEX.PHP - Line 83: About to dispatch route: " . $route);
 $router->dispatch($route);
-error_log("INDEX.PHP - Line 85: Router dispatch completed");
-error_log("=== INDEX.PHP END ===");

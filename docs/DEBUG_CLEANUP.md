@@ -487,6 +487,23 @@ grep -r "// TODO\|// FIXME" app/ public_html/ --include="*.php" --include="*.js"
 
 ---
 
+## 🆕 DEBUGS AGREGADOS EN SESIÓN 2026-01-04 (22:00)
+
+### app/pages/api/create-shipment-from-order.php
+**Líneas**: 228, 241-246
+**Contexto**: Agregados durante fix de consistencia barrio/localidad
+
+```php
+error_log("API CreateShipment: Usando destination de quote_data - city: $city_to_use");
+error_log("API CreateShipment: FALLBACK - CABA detectada (CP: $postal_code_numeric) - usando barrio: $barrio");
+error_log("API CreateShipment: FALLBACK - CABA detectada (CP: $postal_code_numeric) pero no hay barrio - usando city: $city_to_use");
+error_log("API CreateShipment: FALLBACK - Fuera de CABA (CP: $postal_code_numeric) - usando localidad: $city_to_use");
+```
+
+**Recomendación**: MANTENER temporalmente para verificar que el fix funciona correctamente, luego ELIMINAR en próxima limpieza.
+
+---
+
 ## 📚 DOCUMENTOS RELACIONADOS
 
 - **CLAUDE.md**: Reglas del proyecto (RULE 7 sobre debugging local vs producción)
@@ -495,5 +512,5 @@ grep -r "// TODO\|// FIXME" app/ public_html/ --include="*.php" --include="*.js"
 
 ---
 
-**Última actualización**: 2026-01-04
+**Última actualización**: 2026-01-04 22:10
 **Generado por**: Claude Code análisis automático del repositorio

@@ -120,24 +120,11 @@ if (!isset($pages_map[$page])) {
 // Cargar la página
 $page_file = APP_PATH . '/' . $pages_map[$page];
 
-// Debug logs
-error_log("ADMIN ROUTER - Requested page: $page");
-error_log("ADMIN ROUTER - Page file: $page_file");
-error_log("ADMIN ROUTER - File exists: " . (file_exists($page_file) ? 'YES' : 'NO'));
-
 if (!file_exists($page_file)) {
     // Archivo no existe, redirigir al dashboard
-    error_log("ADMIN ROUTER - File not found, redirecting to dashboard");
     redirect(url('/admin/'));
     exit;
 }
 
-// Debug: agregar comentario HTML para verificar que se está cargando correctamente
-if (isset($_GET['debug'])) {
-    echo "<!-- DEBUG: Loading page: $page from file: $page_file -->\n";
-}
-
 // Incluir la página
-error_log("ADMIN ROUTER - About to require: $page_file");
 require $page_file;
-error_log("ADMIN ROUTER - Page required successfully");
