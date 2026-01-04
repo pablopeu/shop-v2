@@ -443,22 +443,39 @@ $user = get_logged_user();
             <div class="collapsible-section">
                 <div class="collapsible-header" data-action="toggleSection" data-target="cron-instructions">
                     <div>
-                        <h2 style="margin: 0;">💡 Mejora Opcional: Configurar Cron Real</h2>
-                        <p style="font-size: 13px; color: #6c757d; margin-top: 4px;">
-                            Para mejor rendimiento independiente del tráfico del sitio
-                        </p>
+                        <?php if ($pseudo_cron_enabled): ?>
+                            <h2 style="margin: 0;">💡 Mejora Opcional: Configurar Cron Real</h2>
+                            <p style="font-size: 13px; color: #6c757d; margin-top: 4px;">
+                                Para mejor rendimiento independiente del tráfico del sitio
+                            </p>
+                        <?php else: ?>
+                            <h2 style="margin: 0;">⚙️ Configuración Requerida: Cron Real del Hosting</h2>
+                            <p style="font-size: 13px; color: #dc3545; margin-top: 4px; font-weight: 600;">
+                                ⚠️ El pseudo-cron está desactivado - DEBES configurar el cron real para enviar emails
+                            </p>
+                        <?php endif; ?>
                     </div>
                     <span class="toggle-icon">▼</span>
                 </div>
 
-                <div class="collapsible-content" id="cron-instructions">
-                    <div class="warning-box">
-                        <h4>⚠️ Esto es completamente opcional</h4>
-                        <p>
-                            El sistema ya funciona automáticamente con pseudo-cron. Solo configura esto si quieres
-                            que los emails se procesen incluso cuando no hay visitas al sitio.
-                        </p>
-                    </div>
+                <div class="collapsible-content <?php echo !$pseudo_cron_enabled ? 'open' : ''; ?>" id="cron-instructions">
+                    <?php if ($pseudo_cron_enabled): ?>
+                        <div class="warning-box">
+                            <h4>💡 Esto es completamente opcional</h4>
+                            <p>
+                                El sistema ya funciona automáticamente con pseudo-cron. Solo configura esto si quieres
+                                que los emails se procesen incluso cuando no hay visitas al sitio.
+                            </p>
+                        </div>
+                    <?php else: ?>
+                        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                            <h4 style="color: #856404; margin: 0 0 8px 0;">⚠️ Configuración Obligatoria</h4>
+                            <p style="color: #856404; margin: 0;">
+                                Como el pseudo-cron está desactivado, <strong>DEBES configurar un cron job real</strong>
+                                en tu hosting. Sin esto, los emails NO se enviarán automáticamente.
+                            </p>
+                        </div>
+                    <?php endif; ?>
 
                     <h3>Instrucciones para cPanel:</h3>
 
