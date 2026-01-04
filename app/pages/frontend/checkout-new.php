@@ -2352,16 +2352,26 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
         }
 
         function updateConfirmationSummary() {
-            // Datos de contacto
-            document.getElementById('confirm-name').textContent = document.getElementById('customer_name').value;
-            document.getElementById('confirm-email').textContent = document.getElementById('customer_email').value;
+            // Validar que existan los elementos necesarios
+            const nameInput = document.getElementById('customer_name');
+            const emailInput = document.getElementById('customer_email');
+            const phoneInput = document.getElementById('customer_phone');
+            const countryCodeInput = document.getElementById('country_code');
+            const deliveryMethodRadio = document.querySelector('input[name="delivery_method"]:checked');
+            const paymentMethodRadio = document.querySelector('input[name="payment_method"]:checked');
 
-            const countryCode = document.getElementById('country_code').value;
-            const phone = document.getElementById('customer_phone').value;
-            document.getElementById('confirm-phone').textContent = countryCode + ' ' + phone;
+            if (!nameInput || !emailInput || !phoneInput || !countryCodeInput || !deliveryMethodRadio) {
+                console.log('⚠️ updateConfirmationSummary: Faltan campos requeridos, saltando actualización');
+                return;
+            }
+
+            // Datos de contacto
+            document.getElementById('confirm-name').textContent = nameInput.value;
+            document.getElementById('confirm-email').textContent = emailInput.value;
+            document.getElementById('confirm-phone').textContent = countryCodeInput.value + ' ' + phoneInput.value;
 
             // Método de entrega
-            const method = document.querySelector('input[name="delivery_method"]:checked').value;
+            const method = deliveryMethodRadio.value;
             const deliveryDetailsDiv = document.getElementById('confirm-delivery-details');
 
             let deliveryMethodText = '';
@@ -2409,13 +2419,15 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
             document.getElementById('confirm-delivery-method').textContent = deliveryMethodText;
             deliveryDetailsDiv.innerHTML = deliveryDetailsHTML;
 
-            // Forma de pago
-            const payment = document.querySelector('input[name="payment_method"]:checked').value;
-            let paymentText = '';
-            if (payment === 'arrangement') paymentText = 'Arreglo con el vendedor';
-            else if (payment === 'pickup_payment') paymentText = 'Pago al retirar';
-            else if (payment === 'mercadopago') paymentText = 'Mercadopago';
-            document.getElementById('confirm-payment').textContent = paymentText;
+            // Forma de pago (opcional - puede no estar seleccionado todavía)
+            if (paymentMethodRadio) {
+                const payment = paymentMethodRadio.value;
+                let paymentText = '';
+                if (payment === 'arrangement') paymentText = 'Arreglo con el vendedor';
+                else if (payment === 'pickup_payment') paymentText = 'Pago al retirar';
+                else if (payment === 'mercadopago') paymentText = 'Mercadopago';
+                document.getElementById('confirm-payment').textContent = paymentText;
+            }
 
             markStepCompleted(5);
         }
