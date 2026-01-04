@@ -20,7 +20,6 @@
         inlineMap = map;
         sessionToken = generateSessionToken();
 
-        console.log('🔑 Session token generado:', sessionToken);
 
         const inputElement = document.getElementById('address-autocomplete-input');
         const predictionsElement = document.getElementById('address-predictions');
@@ -30,7 +29,6 @@
             return;
         }
 
-        console.log('📍 Configurando autocomplete con Places API (New) REST...');
 
         // Escuchar input con debounce
         let debounceTimer;
@@ -55,13 +53,11 @@
             }
         });
 
-        console.log('✅ Autocomplete configurado con REST API');
 
         // Si el input ya tiene un valor (precargado desde cookies), buscar automáticamente
         setTimeout(() => {
             const preloadedValue = inputElement.value.trim();
             if (preloadedValue && preloadedValue.length >= 3) {
-                console.log('🔍 Dirección precargada detectada, buscando en Google Places:', preloadedValue);
                 getPlacePredictions(preloadedValue, predictionsElement);
             }
         }, 500);
@@ -69,7 +65,6 @@
 
     // Obtener predicciones usando REST API
     async function getPlacePredictions(query, predictionsElement) {
-        console.log('🔍 Buscando predicciones con REST API para:', query);
 
         const apiKey = window.googlePlacesConfig?.api_key;
         if (!apiKey) {
@@ -99,12 +94,10 @@
             }
 
             const data = await response.json();
-            console.log('✅ Predicciones recibidas:', data);
 
             if (data.suggestions && data.suggestions.length > 0) {
                 displayPredictions(data.suggestions, predictionsElement);
             } else {
-                console.log('⚠️ No se encontraron predicciones');
                 predictionsElement.style.display = 'none';
             }
 
@@ -137,7 +130,6 @@
             });
 
             item.addEventListener('click', function() {
-                console.log('🎯 Predicción seleccionada:', displayText);
                 selectPrediction(suggestion, predictionsElement, displayText);
             });
 
@@ -162,7 +154,6 @@
             return;
         }
 
-        console.log('📍 Obteniendo detalles del lugar con place_id:', placeId);
 
         const apiKey = window.googlePlacesConfig?.api_key;
         try {
@@ -183,11 +174,9 @@
             }
 
             const place = await response.json();
-            console.log('✅ Detalles del lugar obtenidos:', place);
 
             // Generar nuevo session token
             sessionToken = generateSessionToken();
-            console.log('🔑 Nuevo session token generado');
 
             // Procesar el lugar seleccionado
             processPlaceDetails(place);
@@ -199,7 +188,6 @@
 
     // Procesar detalles del lugar y actualizar mapa/formulario
     function processPlaceDetails(place) {
-        console.log('🔍 Procesando detalles del lugar');
 
         // Obtener ubicación
         if (!place.location || !place.location.latitude || !place.location.longitude) {
@@ -210,7 +198,6 @@
         const lat = place.location.latitude;
         const lng = place.location.longitude;
 
-        console.log('📍 Coordenadas obtenidas:', { lat, lng });
 
         // Centrar mapa
         inlineMap.setCenter({ lat, lng });
@@ -223,7 +210,6 @@
 
         // Crear nuevo marker
         const markerTitle = place.formattedAddress || place.displayName?.text || 'Dirección seleccionada';
-        console.log('📍 Creando marker:', markerTitle);
 
         inlineMarker = new google.maps.marker.AdvancedMarkerElement({
             map: inlineMap,
@@ -231,7 +217,6 @@
             title: markerTitle
         });
 
-        console.log('✅ Marker creado exitosamente');
 
         // Actualizar formulario
         updateFormWithPlaceDetails(place);
@@ -239,17 +224,14 @@
 
     // Actualizar formulario con detalles del lugar
     function updateFormWithPlaceDetails(place) {
-        console.log('📝 Actualizando formulario');
 
         // Actualizar dirección
         if (place.formattedAddress) {
             document.getElementById('address-autocomplete-input').value = place.formattedAddress;
-            console.log('✅ Dirección:', place.formattedAddress);
         }
 
         // Extraer componentes
         if (place.addressComponents && place.addressComponents.length > 0) {
-            console.log('📋 Extrayendo componentes...');
 
             const components = {};
 
@@ -296,7 +278,6 @@
                 }
             });
 
-            console.log('📋 Componentes extraídos:', components);
 
             // Construir dirección completa
             let direccionCompleta = '';
@@ -312,7 +293,6 @@
                 const field = document.getElementById(id);
                 if (field && value) {
                     field.value = value;
-                    console.log(`✅ ${label}:`, value);
                 }
             };
 
@@ -352,7 +332,6 @@
             // Guardar en window.addressData para que shipping.js pueda acceder
             window.addressData = normalizedData;
 
-            console.log('✅ Datos normalizados guardados para logística:', {
                 domicilio: direccionCompleta,
                 barrio: components.barrio,
                 localidad: components.localidad,
@@ -379,7 +358,6 @@
                 setTimeout(removeAnimation, 5000);
                 quoteBtn.addEventListener('click', removeAnimation, { once: true });
 
-                console.log('✅ Botón de cotización habilitado - dirección validada');
             }
 
             // Guardar dirección validada en cookies para futuro uso
@@ -407,12 +385,9 @@
             });
 
             if (response.ok) {
-                console.log('✅ Dirección guardada en cookies para futuro uso');
             } else {
-                console.warn('⚠️ No se pudieron guardar cookies de dirección');
             }
         } catch (error) {
-            console.warn('⚠️ Error al guardar cookies de dirección:', error);
         }
     }
 

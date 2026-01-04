@@ -26,12 +26,10 @@
      */
     window.initAddressValidator = function(config) {
         if (!config || !config.enabled) {
-            console.log('Google Places no está habilitado');
             return;
         }
 
         AddressValidator.config = config;
-        console.log('Address Validator inicializado');
     };
 
     /**
@@ -51,7 +49,6 @@
 
         // Crear callback global
         window.initGooglePlaces = function() {
-            console.log('Google Maps API cargada');
             if (callback) callback(true);
         };
 
@@ -277,14 +274,12 @@
                 AddressValidator.marker.map = AddressValidator.map;
                 AddressValidator.marker.title = 'Verificando dirección...';
 
-                console.log('📍 Dirección geocodificada:', result.formatted_address);
 
                 // Si tiene place_id, obtener detalles completos (incluyendo barrio)
                 if (result.place_id) {
                     getPlaceDetails(result.place_id);
                 }
             } else {
-                console.warn('No se pudo geocodificar la dirección inicial:', status);
             }
         });
     }
@@ -295,7 +290,6 @@
      */
     function getPlaceDetails(placeId) {
         if (!AddressValidator.config || !AddressValidator.config.api_key) {
-            console.warn('API key no disponible');
             return;
         }
 
@@ -317,11 +311,9 @@
             return response.json();
         })
         .then(data => {
-            console.log('✅ Detalles del lugar obtenidos (New API):', data);
 
             // Convertir formato de la nueva API al formato antiguo para compatibilidad
             const place = convertNewAPIToLegacyFormat(data);
-            console.log('🔄 Lugar convertido a formato legacy:', place);
 
             // Procesar automáticamente
             processPlace(place);
@@ -401,35 +393,25 @@
      * Procesar lugar seleccionado
      */
     function processPlace(place) {
-        console.log('🎯 processPlace() llamado con:', place);
 
         try {
             // Actualizar mapa
-            console.log('📍 Centrando mapa en:', place.geometry.location);
             AddressValidator.map.setCenter(place.geometry.location);
             AddressValidator.map.setZoom(17);
 
             // Actualizar marker (AdvancedMarkerElement API)
-            console.log('📌 Actualizando marker...');
             AddressValidator.marker.position = place.geometry.location;
             AddressValidator.marker.map = AddressValidator.map;
             AddressValidator.marker.title = 'Ubicación confirmada';
-            console.log('✅ Marker actualizado');
         } catch (error) {
             console.error('❌ Error al actualizar mapa/marker:', error);
         }
 
         try {
             // Extraer componentes de dirección
-            console.log('📋 Extrayendo componentes de dirección...');
             const components = extractAddressComponents(place.address_components);
-            console.log('✅ Componentes extraídos:', components);
 
             // Guardar dirección normalizada
-            console.log('💾 Guardando dirección normalizada...');
-            console.log('📍 Location object:', place.geometry.location);
-            console.log('📍 Location type:', typeof place.geometry.location);
-            console.log('📍 Location constructor:', place.geometry.location?.constructor?.name);
 
             AddressValidator.normalizedAddress = {
                 formatted_address: place.formatted_address,
@@ -438,24 +420,18 @@
                 longitude: place.geometry.location.lng(),
                 components: components
             };
-            console.log('✅ Dirección guardada:', AddressValidator.normalizedAddress);
 
             // Mostrar dirección normalizada
-            console.log('🎨 Mostrando dirección normalizada...');
             displayNormalizedAddress(AddressValidator.normalizedAddress);
 
             // Habilitar botón de confirmar
-            console.log('🔘 Habilitando botón de confirmar...');
             const confirmBtn = document.getElementById('confirmAddressBtn');
             if (confirmBtn) {
                 confirmBtn.disabled = false;
-                console.log('✅ Botón habilitado');
             } else {
-                console.warn('⚠️ Botón de confirmar no encontrado');
             }
 
             AddressValidator.isAddressValidated = true;
-            console.log('✅ processPlace() completado exitosamente');
         } catch (error) {
             console.error('❌ Error en processPlace():', error);
         }

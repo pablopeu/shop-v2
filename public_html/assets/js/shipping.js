@@ -3,12 +3,10 @@
  * Handles shipping quote requests and selection
  */
 
-console.log('📦 shipping.js: Archivo cargado');
 
 (function() {
     'use strict';
 
-    console.log('📦 shipping.js: IIFE ejecutándose');
 
     // State
     let selectedShippingService = null;
@@ -17,7 +15,6 @@ console.log('📦 shipping.js: Archivo cargado');
 
     // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🔧 Shipping module: DOMContentLoaded event fired');
         initShippingHandlers();
     });
 
@@ -25,17 +22,12 @@ console.log('📦 shipping.js: Archivo cargado');
      * Initialize event handlers
      */
     function initShippingHandlers() {
-        console.log('🔧 initShippingHandlers() called');
-        console.log('🔧 window.BASE_PATH:', window.BASE_PATH);
 
         // Get quote button
         const getQuoteBtn = document.getElementById('get-shipping-quote');
-        console.log('🔧 Button element:', getQuoteBtn);
 
         if (getQuoteBtn) {
-            console.log('✅ Button found! Adding event listener...');
             getQuoteBtn.addEventListener('click', handleGetQuote);
-            console.log('✅ Event listener added successfully');
         } else {
             console.error('❌ Button with id="get-shipping-quote" NOT FOUND!');
         }
@@ -57,7 +49,6 @@ console.log('📦 shipping.js: Archivo cargado');
         const shippingFields = document.getElementById('shipping-fields');
         const deliveryMethod = event.target.value;
 
-        console.log('🔄 Método de entrega cambiado a:', deliveryMethod);
 
         if (deliveryMethod === 'home_delivery' || deliveryMethod === 'pickup_point') {
             // Mostrar campos de dirección
@@ -89,7 +80,6 @@ console.log('📦 shipping.js: Archivo cargado');
      * Handle get quote button click
      */
     async function handleGetQuote() {
-        console.log('🚀 handleGetQuote() llamado');
 
         // Validate required fields
         const postalCode = document.getElementById('shipping_postal_code').value.trim();
@@ -105,16 +95,12 @@ console.log('📦 shipping.js: Archivo cargado');
             // Para CABA, usar el barrio si está disponible
             if (window.addressData && window.addressData.barrio) {
                 city = window.addressData.barrio;
-                console.log('📍 CABA detectada - usando barrio:', city);
             } else {
-                console.warn('⚠️ CABA detectada pero no hay barrio en addressData');
             }
         } else {
             // Para el resto del país, usar la localidad
-            console.log('📍 Fuera de CABA - usando localidad:', city);
         }
 
-        console.log('📍 Datos de envío:', { postalCode, city, province, country });
 
         if (!postalCode || !city || !province) {
             showError('Por favor completá todos los campos de dirección');
@@ -149,9 +135,6 @@ console.log('📦 shipping.js: Archivo cargado');
         };
 
         try {
-            console.log('📦 Items construidos:', items);
-            console.log('💰 Valor declarado:', declaredValue);
-            console.log('🌐 Llamando a API:', window.BASE_PATH + '/api/?endpoint=shipping&action=quotes');
 
             // Call API
             const response = await fetch(window.BASE_PATH + '/api/?endpoint=shipping&action=quotes', {
@@ -166,13 +149,10 @@ console.log('📦 shipping.js: Archivo cargado');
                 })
             });
 
-            console.log('📡 Response status:', response.status);
             const result = await response.json();
-            console.log('📄 Response data:', result);
 
             if (result.success && result.data && result.data.quotes) {
                 shippingQuotes = result.data.quotes;
-                console.log('✅ Cotizaciones recibidas:', shippingQuotes.length);
                 displayQuotes(shippingQuotes);
 
                 // Cambiar texto del botón con el costo separado por tipo
@@ -232,7 +212,6 @@ console.log('📦 shipping.js: Archivo cargado');
 
         // Filtrar según el método de entrega elegido
         const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked')?.value || 'home_delivery';
-        console.log('🔍 Método de entrega seleccionado:', deliveryMethod);
 
         const filteredQuotes = quotes.filter(quote => {
             if (deliveryMethod === 'pickup_point') {
@@ -247,7 +226,6 @@ console.log('📦 shipping.js: Archivo cargado');
             }
         });
 
-        console.log('✅ Cotizaciones filtradas:', filteredQuotes.length, 'de', quotes.length);
 
         if (filteredQuotes.length === 0) {
             const errorMsg = deliveryMethod === 'pickup_point'
@@ -299,12 +277,10 @@ console.log('📦 shipping.js: Archivo cargado');
 
         // Show quotes container
         quotesWrapper.classList.remove('hidden');
-        console.log('✅ Contenedor de cotizaciones mostrado (hidden class removed)');
 
         // Scroll to quotes so user sees them
         setTimeout(() => {
             quotesWrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            console.log('📍 Scroll to quotes container');
         }, 100);
 
         // Auto-select cheapest or first option
@@ -323,14 +299,12 @@ console.log('📦 shipping.js: Archivo cargado');
                 const radioIndex = quotes.indexOf(cheapestQuote);
                 const allRadios = quotesContainer.querySelectorAll('input[type="radio"]');
                 autoSelectedRadio = allRadios[radioIndex];
-                console.log('💰 Auto-seleccionando la opción más barata:', cheapestQuote.service_name);
             }
         }
 
         if (autoSelectedQuote && autoSelectedRadio) {
             autoSelectedRadio.checked = true;
             handleQuoteSelection(autoSelectedQuote);
-            console.log('✅ Opción auto-seleccionada:', autoSelectedQuote.service_name);
 
             // Si es pickup_point, mostrar el contenedor de puntos de entrega
             if (autoSelectedQuote.service_type_code === 'pickup_point') {
@@ -343,11 +317,9 @@ console.log('📦 shipping.js: Archivo cargado');
                 const container = autoSelectedRadio.closest('label').querySelector('.pickup-points-container');
                 if (container) {
                     container.classList.remove('hidden');
-                    console.log('✅ Contenedor de pickup points mostrado automáticamente');
                 }
             }
         } else {
-            console.log('⚠️ No se auto-seleccionó ninguna opción - usuario debe elegir manualmente');
         }
     }
 
@@ -450,13 +422,8 @@ console.log('📦 shipping.js: Archivo cargado');
         contentDiv.appendChild(cost);
 
         // Si es una opción de punto de entrega, mostrar los puntos disponibles
-        console.log('📍 Verificando pickup points para quote:', quote.service_name);
-        console.log('   - service_type_code:', quote.service_type_code);
-        console.log('   - pickup_points:', quote.pickup_points);
-        console.log('   - length:', quote.pickup_points ? quote.pickup_points.length : 'N/A');
 
         if (quote.service_type_code === 'pickup_point' && quote.pickup_points && quote.pickup_points.length > 0) {
-            console.log('✅ Creando contenedor de pickup points con', quote.pickup_points.length, 'puntos');
             const pickupPointsContainer = document.createElement('div');
             pickupPointsContainer.className = 'pickup-points-container hidden';
             pickupPointsContainer.dataset.serviceId = quote.service_id;
@@ -510,14 +477,9 @@ console.log('📦 shipping.js: Archivo cargado');
                 const selectedPointId = this.value;
                 const selectedOption = this.options[this.selectedIndex];
 
-                console.log('📍 Punto de entrega seleccionado:', selectedPointId);
-                console.log('📍 selectedOption:', selectedOption);
-                console.log('📍 dataset completo:', selectedOption.dataset);
-                console.log('📍 pointData en dataset:', selectedOption.dataset.pointData);
 
                 const pointData = selectedOption.dataset.pointData || '';
 
-                console.log('📍 Datos del punto (final):', pointData);
 
                 // Guardar en campos hidden
                 setHiddenField('shipping_pickup_point_id', selectedPointId);
@@ -540,9 +502,6 @@ console.log('📦 shipping.js: Archivo cargado');
      * Handle quote selection
      */
     function handleQuoteSelection(quote) {
-        console.log('🚢 handleQuoteSelection called with quote:', quote);
-        console.log('🔑 rate_id en quote:', quote.rate_id);
-        console.log('🔑 tariff_id en quote:', quote.tariff_id);
         selectedShippingService = quote.service_id;
         shippingCost = parseFloat(quote.cost) || 0;
 
@@ -552,7 +511,6 @@ console.log('📦 shipping.js: Archivo cargado');
         setHiddenField('shipping_estimated_days', quote.estimated_days || '');
         setHiddenField('shipping_service_name', quote.service_name || '');
 
-        console.log('✅ Campos básicos llenados - service_id:', selectedShippingService, 'cost:', shippingCost);
 
         // IDs de servicio
         setHiddenField('shipping_service_type_id', quote.service_type_id || '');
@@ -611,7 +569,6 @@ console.log('📦 shipping.js: Archivo cargado');
         const field = document.getElementById(id);
         if (field) {
             field.value = value;
-            console.log(`✅ Campo ${id} seteado a:`, value);
         } else {
             console.error(`❌ Campo ${id} NO ENCONTRADO en el DOM`);
         }
@@ -672,7 +629,6 @@ console.log('📦 shipping.js: Archivo cargado');
     function buildPackagesFromCart() {
         // checkoutCartData está definido en checkout-new.php
         if (typeof checkoutCartData === 'undefined' || !Array.isArray(checkoutCartData)) {
-            console.warn('⚠️ checkoutCartData no disponible, usando valores por defecto');
             return [{
                 sku: 'CART-ITEM',
                 weight: 500,
@@ -699,7 +655,6 @@ console.log('📦 shipping.js: Archivo cargado');
             });
         });
 
-        console.log('📦 Construidos ' + items.length + ' items desde checkoutCartData (backend los agrupará en package)');
         return items;
     }
 

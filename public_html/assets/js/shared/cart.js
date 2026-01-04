@@ -23,29 +23,24 @@ ShopCart.addToCart = function(productId, event) {
         event.stopPropagation();
     }
 
-    console.log('[ShopCart.addToCart] Adding product:', productId);
 
     // Get current cart from localStorage
     let cart = ShopCart.getCart();
-    console.log('[ShopCart.addToCart] Current cart before adding:', cart);
 
     // Check if product already exists (support both formats)
     const existingItem = cart.find(item => (item.product_id || item.id) === productId);
 
     if (existingItem) {
         existingItem.quantity += 1;
-        console.log('[ShopCart.addToCart] Updated existing item quantity to:', existingItem.quantity);
     } else {
         cart.push({
             product_id: productId,
             quantity: 1
         });
-        console.log('[ShopCart.addToCart] Added new item to cart');
     }
 
     // Save to localStorage with timestamp
     ShopUtils.saveCart(cart);
-    console.log('[ShopCart.addToCart] Cart saved to localStorage:', cart);
 
     // Update UI
     ShopCart.updateCartBadge();
@@ -83,14 +78,12 @@ ShopCart.updateCartBadge = function() {
  * @param {number} change - Change in quantity (+1 or -1)
  */
 ShopCart.updateQuantity = function(productId, change) {
-    console.log('[ShopCart.updateQuantity] CALLED - product:', productId, 'change:', change);
     let cart = ShopCart.getCart();
     const item = cart.find(i => i.product_id === productId);
 
     if (item) {
         item.quantity += change;
         if (item.quantity <= 0) {
-            console.log('[ShopCart.updateQuantity] REMOVING item (qty=0)');
             cart = cart.filter(i => i.product_id !== productId);
         }
     }
@@ -114,7 +107,6 @@ ShopCart.updateQuantity = function(productId, change) {
  * @param {string} productId - Product ID to remove
  */
 ShopCart.removeFromCart = function(productId) {
-    console.log('[ShopCart.removeFromCart] CALLED - product:', productId);
     let cart = ShopCart.getCart();
     cart = cart.filter(i => i.product_id !== productId);
     ShopUtils.saveCart(cart);
@@ -143,18 +135,15 @@ ShopCart.renderCartPanel = async function(products, options = {}) {
     const totalEl = document.getElementById('cart-total');
 
     if (!body) {
-        console.warn('Cart panel body not found');
         return;
     }
 
-    console.log('Cart from localStorage:', cart);
 
     // Use global products if not provided
     if (!products && typeof window.products !== 'undefined') {
         products = window.products;
     }
 
-    console.log('Products array:', products);
 
     if (cart.length === 0) {
         body.innerHTML = '<div class="cart-empty">Tu carrito está vacío</div>';
@@ -194,15 +183,12 @@ ShopCart.renderCartPanel = async function(products, options = {}) {
 
     cart.forEach(item => {
         if (!products) {
-            console.warn('Products array not available');
             return;
         }
 
         const product = products.find(p => p.id === item.product_id);
-        console.log('Looking for product:', item.product_id, 'Found:', product);
 
         if (!product) {
-            console.warn('Product not found:', item.product_id);
             return;
         }
 
@@ -289,7 +275,6 @@ ShopCart.renderCartPanel = async function(products, options = {}) {
 
     // Clean invalid items from localStorage
     if (validCart.length !== cart.length) {
-        console.warn('Cleaning invalid items from cart');
         localStorage.setItem('cart', JSON.stringify(validCart));
         ShopCart.updateCartBadge();
     }
@@ -346,12 +331,9 @@ ShopCart.closeCartPanel = function() {
  */
 ShopCart.goToCheckout = async function(syncCartUrl, checkoutUrl) {
     try {
-        console.log('[ShopCart.goToCheckout] Reading cart from localStorage...');
         const cart = ShopCart.getCart();
-        console.log('[ShopCart.goToCheckout] Cart contents:', cart);
 
         if (cart.length === 0) {
-            console.warn('[ShopCart.goToCheckout] Cart is empty!');
             if (typeof ShopUtils.showToast === 'function') {
                 ShopUtils.showToast('El carrito está vacío', 'error');
             }

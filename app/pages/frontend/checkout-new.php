@@ -218,23 +218,17 @@ $selected_currency = $checkout_currency;
 // Get coupon from session or query parameter (from cart)
 if (!empty($_GET['coupon'])) {
     $_SESSION['applied_coupon'] = sanitize_input($_GET['coupon']);
-    error_log("Checkout: Cupón recibido desde carrito: " . $_SESSION['applied_coupon']);
 }
 
 // Apply coupon if exists
 $coupon_code = $_SESSION['applied_coupon'] ?? null;
-error_log("Checkout: Cupón code: " . ($coupon_code ?? 'NULL'));
 $coupon_discount_ars = 0;
 $coupon_discount_usd = 0;
 $coupon_discount = 0;
 
 if ($coupon_code) {
-    error_log("Checkout: Aplicando cupón. Subtotal sin promoción ARS: $subtotal_without_promotion_ars, USD: $subtotal_without_promotion_usd");
-
     // Apply coupon ONLY to items without promotion
     $result = apply_coupon_to_order($coupon_code, $subtotal_without_promotion_ars, $subtotal_without_promotion_usd, $cart_items);
-
-    error_log("Checkout: Resultado de cupón - Valid: " . ($result['valid'] ? 'SI' : 'NO') . ", Descuento ARS: " . $result['discount_ars'] . ", USD: " . $result['discount_usd']);
 
     if ($result['valid']) {
         $coupon_discount_ars = $result['discount_ars'];
@@ -243,21 +237,16 @@ if ($coupon_code) {
 
         // Calculate per-item coupon discount for display
         $coupon_data = $result['coupon'];
-        error_log("Checkout: Procesando " . count($cart_items) . " items para aplicar cupón tipo: " . $coupon_data['type']);
 
         foreach ($cart_items as $idx => $item) {
             // Only apply coupon to items without promotion
             if (!$item['promotion']) {
-                error_log("Checkout: Item " . $item['product_id'] . " SIN promoción - aplicando cupón");
-
                 if ($coupon_data['type'] === 'percentage') {
                     // Apply percentage discount
                     $item_coupon_discount_ars = $item['price_ars'] * ($coupon_data['value'] / 100);
                     $item_coupon_discount_usd = $item['price_usd'] * ($coupon_data['value'] / 100);
                     $cart_items[$idx]['coupon_price_ars'] = $item['price_ars'] - $item_coupon_discount_ars;
                     $cart_items[$idx]['coupon_price_usd'] = $item['price_usd'] - $item_coupon_discount_usd;
-
-                    error_log("Checkout: Cupón porcentual - Precio original ARS: {$item['price_ars']}, Precio con cupón: {$cart_items[$idx]['coupon_price_ars']}");
                 } else {
                     // Fixed discount - distribute proportionally
                     if ($subtotal_without_promotion_ars > 0) {
@@ -268,13 +257,9 @@ if ($coupon_code) {
                         $per_unit_discount_usd = $item_coupon_discount_usd / $item['quantity'];
                         $cart_items[$idx]['coupon_price_ars'] = $item['price_ars'] - $per_unit_discount_ars;
                         $cart_items[$idx]['coupon_price_usd'] = $item['price_usd'] - $per_unit_discount_usd;
-
-                        error_log("Checkout: Cupón fijo - Precio original ARS: {$item['price_ars']}, Precio con cupón: {$cart_items[$idx]['coupon_price_ars']}");
                     }
                 }
                 $cart_items[$idx]['has_coupon'] = true;
-            } else {
-                error_log("Checkout: Item " . $item['product_id'] . " CON promoción - no se aplica cupón");
             }
         }
     }
@@ -470,12 +455,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         // Punto de entrega (si aplica)
         $shipping_pickup_point_id = sanitize_input($_POST['shipping_pickup_point_id'] ?? '');
 
-        // DEBUG: Log shipping data received
-        error_log("DEBUG Checkout POST - shipping_service_id: " . ($shipping_service_id ?: 'EMPTY'));
-        error_log("DEBUG Checkout POST - shipping_rate_id: " . ($shipping_rate_id ?: 'EMPTY'));
-        error_log("DEBUG Checkout POST - shipping_carrier_name: " . ($shipping_carrier_name ?: 'EMPTY'));
-        error_log("DEBUG Checkout POST - delivery_method: " . $delivery_method);
-
         // Calculate final total including shipping
         $total_with_shipping = $total + $shipping_cost;
 
@@ -594,9 +573,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             if ($payment_method !== 'mercadopago') {
                 queue_email('admin_new_order', ['order' => $order], 'high');
                 send_telegram_new_order($order);
-
-                // Log the redirect for debugging
-                error_log("Redirecting to gracias page for order: {$order['id']}, method: {$payment_method}");
 
                 // Ensure no output before redirect
                 if (ob_get_level()) {

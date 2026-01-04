@@ -229,7 +229,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
                     localStorage.removeItem('cart');
                     localStorage.removeItem('cart_timestamp');
                     localStorage.removeItem('applied_coupon');
-                    console.log('Cart expired and cleared after 4 hours of inactivity');
                     return true;
                 }
             }
@@ -292,7 +291,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
             const cart = JSON.parse(localStorage.getItem('cart') || '[]');
             const coupon = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
 
-            console.log('Cart loaded from localStorage:', cart);
 
             cartData.items = cart;
             cartData.coupon = coupon;
@@ -333,7 +331,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
         async function fetchCartProducts() {
             const productIds = cartData.items.map(item => item.product_id || item.id);
 
-            console.log('Fetching products for IDs:', productIds);
 
             try {
                 const response = await fetch('<?php echo url('/api/?endpoint=get-products'); ?>', {
@@ -344,14 +341,12 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
                     body: JSON.stringify({ product_ids: productIds })
                 });
 
-                console.log('API Response status:', response.status);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const products = await response.json();
-                console.log('Products received from API:', products);
 
                 // Store products globally for reuse
                 currentProducts = products;
@@ -428,7 +423,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
             // Store products globally for validation
             currentProducts = products;
 
-            console.log('Rendering cart with products:', products);
 
             // Determine currency based on cart contents
             const allUSD = areAllProductsUSD(products, cartData.items);
@@ -470,13 +464,11 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
                 const product = products.find(p => p.id === productId);
 
                 if (!product) {
-                    console.warn('Product not found:', productId);
                     return; // Skip invalid products
                 }
 
                 validItems.push(item);
 
-                console.log('Product:', product.name, 'Thumbnail:', product.thumbnail, 'Images:', product.images);
 
                 // Use displayCurrency for showing prices (user's preference)
                 const price = getProductPrice(product, displayCurrency);
@@ -618,7 +610,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
 
             // Clean invalid items from localStorage
             if (validItems.length !== cartData.items.length) {
-                console.warn('Cleaning invalid items from cart');
                 cartData.items = validItems;
                 ShopUtils.saveCart(cartData.items);
             }
@@ -969,7 +960,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
 
         // Show applied coupon
         function showAppliedCoupon(coupon) {
-            console.log('Showing applied coupon:', coupon);
 
             const couponAppliedDiv = document.getElementById('couponApplied');
             const couponInputDiv = document.querySelector('.coupon-input');
@@ -1042,7 +1032,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
 
         // Remove coupon (manual removal by user)
         function removeCoupon() {
-            console.log('Removing coupon');
 
             const removedCoupon = cartData.coupon;
             cartData.coupon = null;
@@ -1076,7 +1065,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
 
         // Auto-remove coupon when no eligible items (system removal)
         function autoRemoveCoupon(couponCode) {
-            console.log('Auto-removing coupon:', couponCode);
 
             const removedCoupon = cartData.coupon;
             cartData.coupon = null;
@@ -1130,40 +1118,32 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
 
         // Switch display currency without reloading page
         function switchDisplayCurrency(currency) {
-            console.log('[switchDisplayCurrency] Called with currency:', currency);
             displayCurrency = currency;
 
             // Update button states
             updateCurrencyButtons(currency);
 
             // Re-render cart to update all prices (products, subtotal, discount, total)
-            console.log('[switchDisplayCurrency] currentProducts:', currentProducts);
             if (currentProducts && currentProducts.length > 0) {
-                console.log('[switchDisplayCurrency] Rendering cart with currentProducts');
                 renderCart(currentProducts);
             } else {
                 // Fetch products if not loaded yet
-                console.log('[switchDisplayCurrency] Fetching products first');
                 fetchCartProducts();
             }
         }
 
         // Go to checkout
         async function goToCheckout() {
-            console.log('[goToCheckout] Function called');
 
             // Sync cart to PHP session first
             try {
                 const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-                console.log('[goToCheckout] Cart from localStorage:', cart);
 
                 if (cart.length === 0) {
-                    console.warn('[goToCheckout] Cart is empty, showing toast');
                     ShopUtils.showToast('El carrito está vacío', 'error');
                     return;
                 }
 
-                console.log('[goToCheckout] Cart has', cart.length, 'items, proceeding to sync');
 
                 // Prepare cart data for API
                 const syncData = {
@@ -1248,10 +1228,6 @@ if (isset($_GET['msg']) && $_GET['msg'] === 'checkout_expired') {
 
             const _goToCheckout = goToCheckout;
             window.goToCheckout = function(event, element, params) {
-                console.log('[Wrapper] goToCheckout wrapper called');
-                console.log('[Wrapper] Event:', event);
-                console.log('[Wrapper] Element:', element);
-                console.log('[Wrapper] Params:', params);
                 return _goToCheckout();
             };
 

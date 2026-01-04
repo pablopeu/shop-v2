@@ -14,14 +14,12 @@
     }
 
     function initCarouselV2() {
-        console.log('[CAROUSEL V2] Initializing infinite loop slider...');
 
         const wrapper = document.querySelector('.carousel-v2-wrapper');
         const container = document.querySelector('.carousel-v2-container');
         const track = document.getElementById('carousel-track');
 
         if (!wrapper || !container || !track) {
-            console.log('[CAROUSEL V2] No carousel found');
             return;
         }
 
@@ -29,10 +27,8 @@
         const slides = carouselData.slides || [];
         const originalSlidesCount = slides.length;
 
-        console.log('[CAROUSEL V2] Original slides:', originalSlidesCount);
 
         if (originalSlidesCount === 0) {
-            console.log('[CAROUSEL V2] No slides found');
             return;
         }
 
@@ -153,7 +149,6 @@
                     }
                 });
 
-                console.log('[CAROUSEL V2] Slide:', currentIndex, 'Original:', originalIndex + 1, '/', originalSlidesCount, 'offset:', offset);
             }
 
             /**
@@ -183,7 +178,6 @@
              */
             function pause() {
                 isPaused = true;
-                console.log('[CAROUSEL V2] Paused');
             }
 
             /**
@@ -191,7 +185,6 @@
              */
             function resume() {
                 isPaused = false;
-                console.log('[CAROUSEL V2] Resumed');
             }
 
             // Pause on hover
@@ -220,7 +213,6 @@
             updateCarousel();
             startAutoAdvance();
 
-            console.log('[CAROUSEL V2] Infinite loop slider initialized with', originalSlidesCount, 'original slides, auto-advance every', autoAdvanceTime, 'ms');
         }
     }
 })();
