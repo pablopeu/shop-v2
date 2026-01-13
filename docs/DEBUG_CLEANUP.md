@@ -431,10 +431,9 @@ error_log("ENVIOS-ARCHIVO-SIMPLE - PROBLEMATIC ORDERS FOUND:");
 ---
 
 ### Fase 4: Limpieza final (Semana 4)
-- [ ] Resolver TODOs pendientes
 - [ ] Eliminar comentarios DEBUG
-- [ ] Evaluar debug-theme.php
-- [ ] Evaluar envios-archivo-simple.php
+- [ ] Evaluar debug-theme.php - Consultar antes de modificar
+- [ ] Evaluar envios-archivo-simple.php - Consultar antes de modificar
 - [ ] Verificar rotación de mp_debug.log
 
 **Impacto**: Código limpio y profesional

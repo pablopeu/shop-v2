@@ -20,6 +20,7 @@ require_once APP_PATH . '/includes/telegram.php';
 require_once APP_PATH . '/includes/coupons.php';
 require_once APP_PATH . '/includes/promotions.php';
 require_once APP_PATH . '/includes/google-places.php';
+require_once APP_PATH . '/includes/carriers.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -102,6 +103,17 @@ $promotion_discount_ars = 0;
 $promotion_discount_usd = 0;
 $has_pickup_only = false;
 $pickup_only_products = [];
+
+// Verificar si hay carriers habilitados
+$all_carriers = get_all_carriers();
+$has_carriers_enabled = false;
+foreach ($all_carriers as $carrier_tag => $carrier_config) {
+    if (isset($carrier_config['enabled']) && $carrier_config['enabled'] === true) {
+        $has_carriers_enabled = true;
+        break;
+    }
+}
+$no_shipping_available = !$has_carriers_enabled;
 
 foreach ($cart as $key => $value) {
     // Handle both cart formats
@@ -1645,6 +1657,12 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                             </div>
                             <?php endif; ?>
 
+                            <?php if ($no_shipping_available): ?>
+                            <div class="alert-box">
+                                <strong>⚠️ No hay carriers de logística habilitados. Solo está disponible retiro en persona.</strong>
+                            </div>
+                            <?php endif; ?>
+
                             <div class="form-group">
                                 <label>Método de entrega *</label>
                                 <div class="radio-group">
@@ -1656,25 +1674,30 @@ $saved_notes = $_COOKIE['checkout_notes'] ?? '';
                                             <p class="option-description">Coordinaremos lugar y horario</p>
                                         </div>
                                     </label>
-                                    <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
+                                    <?php
+                                    // Ocultar opciones de envío si no hay carriers habilitados O si hay productos pickup_only
+                                    $disable_shipping = $has_pickup_only || $no_shipping_available;
+                                    $shipping_disabled_reason = $has_pickup_only ? 'No disponible para estos productos' : 'No hay carriers habilitados';
+                                    ?>
+                                    <label class="radio-option <?php echo $disable_shipping ? 'disabled' : ''; ?>">
                                         <input type="radio" name="delivery_method" value="home_delivery"
-                                               <?php echo ($saved_delivery_method === 'home_delivery' || (empty($saved_delivery_method) && !$has_pickup_only)) ? 'checked' : ''; ?>
-                                               <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
+                                               <?php echo ($saved_delivery_method === 'home_delivery' || (empty($saved_delivery_method) && !$disable_shipping)) ? 'checked' : ''; ?>
+                                               <?php echo $disable_shipping ? 'disabled' : ''; ?> required>
                                         <div>
                                             <strong>🏠 Envío a domicilio</strong>
                                             <p class="option-description">
-                                                <?php echo $has_pickup_only ? 'No disponible para estos productos' : 'El paquete llega a tu dirección'; ?>
+                                                <?php echo $disable_shipping ? $shipping_disabled_reason : 'El paquete llega a tu dirección'; ?>
                                             </p>
                                         </div>
                                     </label>
-                                    <label class="radio-option <?php echo $has_pickup_only ? 'disabled' : ''; ?>">
+                                    <label class="radio-option <?php echo $disable_shipping ? 'disabled' : ''; ?>">
                                         <input type="radio" name="delivery_method" value="pickup_point"
                                                <?php echo $saved_delivery_method === 'pickup_point' ? 'checked' : ''; ?>
-                                               <?php echo $has_pickup_only ? 'disabled' : ''; ?> required>
+                                               <?php echo $disable_shipping ? 'disabled' : ''; ?> required>
                                         <div>
                                             <strong>📍 Punto de entrega</strong>
                                             <p class="option-description">
-                                                <?php echo $has_pickup_only ? 'No disponible para estos productos' : 'Retirás en un punto cercano'; ?>
+                                                <?php echo $disable_shipping ? $shipping_disabled_reason : 'Retirás en un punto cercano'; ?>
                                             </p>
                                         </div>
                                     </label>
